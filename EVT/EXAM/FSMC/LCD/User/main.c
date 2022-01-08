@@ -1,0 +1,127 @@
+/********************************** (C) COPYRIGHT *******************************
+* File Name          : main.c
+* Author             : WCH
+* Version            : V1.0.0
+* Date               : 2020/04/30
+* Description        : Main program body.
+*******************************************************************************/
+
+/*
+ *@Note
+   FSMC²Ù×÷TFTLCDÀý³Ì£º
+  LCD¡ª¡ªPIN£º
+    PD11¡ª¡ªFSMC_A16
+    PD12¡ª¡ªFSMC_A17
+    PD5 ¡ª¡ªFSMC_NEW
+    PD4 ¡ª¡ªFSMC_NOE
+    PA15¡ª¡ªLCDRST#
+    PD14¡ª¡ªFSMC_D0
+    PD15¡ª¡ªFSMC_D1
+    PD0 ¡ª¡ªFSMC_D2
+    PD1 ¡ª¡ªFSMC_D3
+    PE7 ¡ª¡ªFSMC_D4
+    PE8 ¡ª¡ªFSMC_D5
+    PE9 ¡ª¡ªFSMC_D6
+    PE10¡ª¡ªFSMC_D7
+    PE11¡ª¡ªFSMC_D8
+    PE12¡ª¡ªFSMC_D9
+    PE13¡ª¡ªFSMC_D10
+    PE14¡ª¡ªFSMC_D11
+    PE15¡ª¡ªFSMC_D12
+    PD8 ¡ª¡ªFSMC_D13
+    PD9 ¡ª¡ªFSMC_D14
+    PD10¡ª¡ªFSMC_D15
+    PB14¡ª¡ªIO_BLCTR
+    PA8 ¡ª¡ªIO_MISO_NC
+    PB3 ¡ª¡ªIO_MOSI_SDA
+    PB15¡ª¡ªIO_TKINT
+    PC13¡ª¡ªIO_BUSY_NC
+    PC0 ¡ª¡ªIO_TKRST#
+    PB4 ¡ª¡ªIO_CLK
+*/
+
+#include "debug.h"
+#include "lcd.h"
+
+/*********************************************************************
+ * @fn      LCD_Reset_GPIO_Init
+ *
+ * @brief   Init LCD reset GPIO.
+ *
+ * @return  none
+ */
+void LCD_Reset_GPIO_Init(void)
+{
+    GPIO_InitTypeDef  GPIO_InitStructure={0};
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_SetBits(GPIOA,GPIO_Pin_15);
+}
+
+/*********************************************************************
+ * @fn      main
+ *
+ * @brief   Main program.
+ *
+ * @return  none
+ */
+int main(void)
+{
+ 	u8 x=0;
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+	Delay_Init();
+	USART_Printf_Init(115200);
+	printf("SystemClk:%d\r\n",SystemCoreClock);
+
+	LCD_Reset_GPIO_Init();
+	//LCD reset
+	GPIO_ResetBits(GPIOA,GPIO_Pin_15);
+	Delay_Ms(100);
+	GPIO_SetBits(GPIOA,GPIO_Pin_15);
+
+    LCD_Init();
+	POINT_COLOR=RED;		
+	 
+    while(1) 
+	{		 
+		switch(x)
+		{
+			case 0:LCD_Clear(WHITE);break;
+			case 1:LCD_Clear(BLACK);break;
+			case 2:LCD_Clear(BLUE);break;
+			case 3:LCD_Clear(RED);break;
+			case 4:LCD_Clear(MAGENTA);break;
+			case 5:LCD_Clear(GREEN);break;
+			case 6:LCD_Clear(CYAN);break;
+
+			case 7:LCD_Clear(YELLOW);break;
+			case 8:LCD_Clear(BRRED);break;
+			case 9:LCD_Clear(GRAY);break;
+			case 10:LCD_Clear(LGRAY);break;
+			case 11:LCD_Clear(BROWN);break;
+		}
+		POINT_COLOR=RED;	  
+		LCD_ShowString(30,40,210,24,24,"CH32V307");
+		LCD_ShowString(30,70,200,16,16,"TFTLCD TEST");
+		LCD_ShowString(30,90,200,16,16,"WCH");
+	    x++;
+		if(x==12)x=0;			   		 
+		Delay_Ms(1000);	
+
+	} 
+
+}
+
+
+
+
+
+
+

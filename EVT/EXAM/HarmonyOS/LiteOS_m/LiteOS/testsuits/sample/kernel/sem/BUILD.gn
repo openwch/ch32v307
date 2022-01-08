@@ -1,0 +1,53 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+
+static_library("test_sem") {
+
+    sources = [
+        "It_los_sem_001.c",
+        "It_los_sem_002.c",
+        "It_los_sem_003.c",
+        "It_los_sem_004.c",
+        "It_los_sem_005.c",
+        "It_los_sem_006.c",
+        "It_los_sem_007.c",
+        "It_los_sem_008.c",
+        "It_los_sem_009.c",
+        "It_los_sem_010.c",
+        "It_los_sem_011.c",
+        "It_los_sem_012.c",
+        "It_los_sem_013.c",
+        "It_los_sem_014.c",
+        "It_los_sem_015.c",
+        "It_los_sem_016.c",
+        "It_los_sem_017.c",
+        "It_los_sem_018.c",
+        "It_los_sem_019.c",
+        "It_los_sem_020.c",
+        "It_los_sem_021.c",
+        "It_los_sem_022.c",
+        "It_los_sem_023.c",
+        "It_los_sem_024.c",
+        "It_los_sem_025.c",
+        "It_los_sem_026.c",
+        "It_los_sem_027.c",
+        "It_los_sem_028.c",
+        "It_los_sem_029.c",
+        "It_los_sem_030.c",
+        "It_los_sem_031.c",
+        "It_los_sem_032.c",
+        "It_los_sem_033.c",
+        "It_los_sem_034.c",
+        "It_los_sem_035.c",
+        "It_los_sem_036.c",
+        "It_los_sem_037.c",
+        "It_los_sem_038.c",
+        "It_los_sem_039.c",
+        "It_los_sem_040.c",
+        "it_los_sem_041.c",
+        "it_los_sem_042.c",
+        "it_los_sem_043.c",
+        "It_los_sem.c",
+    ]
+
+    configs += [ "//kernel/liteos_m/testsuits:include" ]
+}

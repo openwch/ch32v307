@@ -1,0 +1,52 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+
+static_library("test_event") {
+
+    sources = [
+        "It_los_event_001.c",
+        "It_los_event_002.c",
+        "It_los_event_003.c",
+        "It_los_event_004.c",
+        "It_los_event_005.c",
+        "It_los_event_006.c",
+        "It_los_event_007.c",
+        "It_los_event_008.c",
+        "It_los_event_009.c",
+        "It_los_event_010.c",
+        "It_los_event_011.c",
+        "It_los_event_012.c",
+        "It_los_event_013.c",
+        "It_los_event_014.c",
+        "It_los_event_015.c",
+        "It_los_event_016.c",
+        "It_los_event_017.c",
+        "It_los_event_018.c",
+        "It_los_event_019.c",
+        "It_los_event_020.c",
+        "It_los_event_021.c",
+        "It_los_event_022.c",
+        "It_los_event_023.c",
+        "It_los_event_024.c",
+        "It_los_event_026.c",
+        "It_los_event_027.c",
+        "It_los_event_028.c",
+        "It_los_event_029.c",
+        "It_los_event_030.c",
+        "It_los_event_031.c",
+        "It_los_event_032.c",
+        "It_los_event_033.c",
+        "It_los_event_034.c",
+        "It_los_event_035.c",
+        "It_los_event_036.c",
+        "It_los_event_037.c",
+        "It_los_event_038.c",
+        "It_los_event_039.c",
+        "It_los_event_040.c",
+        "It_los_event_041.c",
+        "It_los_event_042.c",
+        "It_los_event_043.c",
+        "It_los_event.c",
+    ]
+
+    configs += [ "//kernel/liteos_m/testsuits:include" ]
+}

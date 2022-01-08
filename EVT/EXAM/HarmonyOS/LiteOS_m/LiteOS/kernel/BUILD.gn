@@ -1,0 +1,70 @@
+# Copyright (c) 2013-2019 Huawei Technologies Co., Ltd. All rights reserved.
+# Copyright (c) 2020-2021 Huawei Device Co., Ltd. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other materials
+#    provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors may be used
+#    to endorse or promote products derived from this software without specific prior written
+#    permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+static_library("kernel") {
+  sources = [
+    "src/los_event.c",
+    "src/los_init.c",
+    "src/los_mux.c",
+    "src/los_queue.c",
+    "src/los_sem.c",
+    "src/los_swtmr.c",
+    "src/los_task.c",
+    "src/los_tick.c",
+    "src/los_sched.c",
+    "src/los_sortlink.c",
+    "src/mm/los_membox.c",
+    "src/mm/los_memory.c",
+  ]
+
+  include_dirs = [
+    "include",
+    "arch/include",
+    "../components/cpup",
+    "../components/exchook",
+    "../components/backtrace",
+    "../components/power",
+    "../utils",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  if ("$board_cpu" == "cortex-m3") {
+    deps = [ "arch/arm/cortex-m3/gcc/:arch" ]
+  } else if ("$board_cpu" == "cortex-m4") {
+    deps = [ "arch/arm/cortex-m4/gcc/:arch" ]
+  } else if ("$board_cpu" == "cortex-m7") {
+    deps = [ "arch/arm/cortex-m7/gcc/:arch" ]
+  } else if ("$board_cpu" == "cortex-m33") {
+    deps = [ "arch/arm/cortex-m33/gcc/:arch" ]
+  } else if ("$board_cpu" == "") {
+    if ("$board_arch" == "rv32imac" || "$board_arch" == "rv32imafdc") {
+      deps = [ "arch/risc-v/riscv32/gcc:arch" ]
+    }
+  }
+}

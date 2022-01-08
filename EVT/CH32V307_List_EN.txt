@@ -1,0 +1,143 @@
+
+Nanjing Qinheng Microelectronics Co., Ltd. 2021.06
+
+http://wch-ic.com
+
+
+Directory
+  |
+  |-- CH32V307£ºRISC-V MCU
+  |      |-- EVT: CH32V307EVT Evaluation Board and CH32V307 related software routines
+  |      |      |-- PUB: 
+  |      |      |      |-- CH32V307EVT Evaluation Board Manual.pdf£ºCH32V307EVT evaluation board instruction and project creation description
+  |      |      |      |-- CH32V307SCH.pdf£ºSchematic of CH32V307EVT evaluation board
+  |      |      |-- EXAM: 
+  |      |      |      |-- SRC  
+  |      |      |      |      |-- Core£ºkernal system header file
+  |      |      |      |      |-- Debug£ºdelay fuction¡¢UART debugging source file and header file
+  |      |      |      |      |-- Ld£ºld file  
+  |      |      |      |      |-- Peripheral£ºbasic peripheral driver source file and header file
+  |      |      |      |      |-- Startup£ºstartup file 
+  |      |      |      |      |      |-- CH32V30x_D8£ºapplied to the CH32V303
+  |      |      |      |      |      |-- CH32V30x_D8C£ºapplied to the CH32V307 and the CH32V305  
+  |      |      |      |-- ADC
+  |      |      |      |      |-- ADC_DMA£ºADC uses DMA sampling routines
+  |      |      |      |      |-- AnalogWatchdog£ºanalog watchdog routine
+  |      |      |      |      |-- Auto_Injection£ºautomatic injection mode routine
+  |      |      |      |      |-- Discontinuous_mode£ºdiscontinuous mode routine
+  |      |      |      |      |-- DualADC_AlternateTrigger£ºdual ADC alternate trigger sampling routine  
+  |      |      |      |      |-- DualADC_Combined_RegInjectionSimul£ºdual ADC combined regular + injection + simultaneous sampling routine
+  |      |      |      |      |-- DualADC_FastInterleaved£ºdual ADC fast interleaved sampling routine
+  |      |      |      |      |-- DualADC_InjectionSimul£ºdual ADC injection simultaneous sampling routine
+  |      |      |      |      |-- DualADC_RegSimul£ºdual ADC regular simultaneous sampling routine
+  |      |      |      |      |-- DualADC_SlowInterleaved£ºdual ADC slow interleaved sampling routine  
+  |      |      |      |      |-- ExtLines_Trigger£ºexternal lines trigger ADC conversion routine
+  |      |      |      |      |-- Internal_Temperature£ºinternal temperature sensor routine 
+  |      |      |      |-- BKP£ºBKP routine
+  |      |      |      |-- CAN
+  |      |      |      |      |-- Networking£ºCAN routine: normal mode, standard frame and extended frame data transceiver
+  |      |      |      |      |-- TestMode£ºtest mode, including silent mode, loopback mode and loopback silent mode
+  |      |      |      |      |-- Time-triggered£ºtime triggered communication mode   
+  |      |      |      |-- CRC£ºCRC routine
+  |      |      |      |-- DAC 
+  |      |      |      |      |-- DAC_DMA£ºDAC uses DMA conversion routines
+  |      |      |      |      |-- DAC_Exit_9_Trig£ºexternal trigger DAC conversion routine
+  |      |      |      |      |-- DAC_Noise_Generation£ºnoise waveform generation routine
+  |      |      |      |      |-- DAC_Normal_OUT£ºnormal output routine
+  |      |      |      |      |-- DAC_Timer_Trig£ºtimer triggers DAC conversion routine
+  |      |      |      |      |-- DAC_Triangle_Generation£ºtriangular waveform generation routine
+  |      |      |      |      |-- DualDAC_SineWave£ºdual DAC output sine wave routine
+  |      |      |      |      |-- DualDAC_Triangle£ºdual DAC output triangular wave routine 
+  |      |      |      |-- DMA
+  |      |      |      |      |-- DMA_MEM2MEM£ºmemory to memory mode routine
+  |      |      |      |      |-- DMA_MEM2PERIP£ºsee each peripheral subroutine for memory to peripheral mode and peripheral to memory mode routines
+  |      |      |      |-- DVP
+  |      |      |      |      |-- DVP_TFTLCD£ºDVP operation ov2640 camera video mode display image routine on LCD
+  |      |      |      |      |-- DVP_UART£ºDVP operation ov2640 camera JPEG mode routine
+  |      |      |      |-- ETH  
+  |      |      |      |      |-- ETH_internal_10BASE-T_PHY£ºdemonstration routine of sending and receiving Ethernet frames using internal integrated 10M physical layer
+  |      |      |      |      |-- ETH_MII_RMII£ºdemonstration routine of sending and receiving Ethernet frames using external MII / RMII interface physical layer
+  |      |      |      |      |-- ETH_RGMII£ºdemonstration routine of sending and receiving Ethernet frames using external RGMII interface physical layer 
+  |      |      |      |-- EXTI£ºexternal interrupt line routine
+  |      |      |      |-- FLASH£ºFLASH erase / read / write, and fast programming
+  |      |      |      |-- FPU£ºFPU hardware floating point operation routine
+  |      |      |      |-- FreeRTOS£ºFreeRTOS migration routine 
+  |      |      |      |-- FSMC  
+  |      |      |      |      |-- LCD£ºFSMC operation TFTLCD routine
+  |      |      |      |      |-- NANDFLASH£ºFSMC operation NANDFLASH routine
+  |      |      |      |      |-- SRAM£ºFSMC operation NOR_ SRAM routine 
+  |      |      |      |-- GPIO£ºGPIO routine
+  |      |      |      |-- HarmonyOS£ºHarmonyOS migration routine  
+  |      |      |      |-- I2C
+  |      |      |      |      |-- I2C_7bit_Mode£º7-bit address mode, master / slave mode, transceiver routine
+  |      |      |      |      |-- I2C_10bit_Mode£º10 bit address mode, master / slave mode transceiver routine
+  |      |      |      |      |-- I2C_DMA£ºI2C uses DMA, master / slave mode transceiver routine
+  |      |      |      |      |-- I2C_EEPROM£ºI2C interface operation EEPROM peripheral routine
+  |      |      |      |      |-- I2C_PEC£ºuse PEC error check and master / slave mode transceiver routine
+  |      |      |      |-- I2S 
+  |      |      |      |      |-- HostRx_SlaveTx£ºI2S master receiver slave transmitter routine
+  |      |      |      |      |-- I2S_DMA£º I2S master slave DMA routine
+  |      |      |      |      |-- I2S_Interupt£ºI2S master slave interrupt routine
+  |      |      |      |-- INT
+  |      |      |      |      |-- Interrupt_Nest£ºinterrupt nested routine
+  |      |      |      |      |-- Interrupt_VTF£ºIRQ interrupt routine using VTF  
+  |      |      |      |-- IWDG£ºindependent watchdog routine
+  |      |      |      |-- OPA£ºOPA4 as voltage follower output routine
+  |      |      |      |-- PWR
+  |      |      |      |      |-- Sleep_Mode£ºlow power consumption, sleep mode routine
+  |      |      |      |      |-- Standby_Mode£ºlow power consumption, standby mode routine
+  |      |      |      |      |-- Stop_Mode£ºlow power consumption, shutdown mode routine
+  |      |      |      |      |-- Standby_RAM_LV_Mode£ºwhen LV is enabled in standby mode, RAM 2k and 30K low-power data holding routines
+  |      |      |      |      |-- Standby_RAM_Mode£ºwhen LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
+  |      |      |      |-- RCC
+  |      |      |      |      |-- MCO£ºMCO pin clock output routine
+  |      |      |      |      |-- HSI_PLL_Source£ºHSI or HSI/2 as PLL input clock routine
+  |      |      |      |-- RTC£ºcalendar routine
+  |      |      |      |-- RT-Thread£ºRT thread migration routine 
+  |      |      |      |-- SDIO£ºSDIO operation SD card routine
+  |      |      |      |-- SPI
+  |      |      |      |      |-- 1Lines_half-duplex£ºsingle wire half duplex mode, master / slave mode, data transceiver
+  |      |      |      |      |-- 2Lines_FullDuplex£ºtwo-wire full duplex mode, master / slave mode, data transceiver
+  |      |      |      |      |-- FullDuplex_HardNSS£ºHardware NSS mode, master / slave mode, data transceiver
+  |      |      |      |      |-- SPI_CRC£ºuse CRC error check and master / slave mode transceiver routine
+  |      |      |      |      |-- SPI_DMA£ºSPI uses DMA, master / slave mode transceiver routine
+  |      |      |      |      |-- SPI_FLASH£ºSPI interface operation flash peripheral routine
+  |      |      |      |-- TencentOS£ºTencentOS migration routine     
+  |      |      |      |-- TIM
+  |      |      |      |      |-- Clock_Select£ºclock source selection routine
+  |      |      |      |      |-- ComplementaryOutput_DeadTime£ºcomplementary output and deadband insertion mode routines
+  |      |      |      |      |-- ExtTrigger_Start_Two_Timer£ºexternal trigger starts two timer routines synchronously
+  |      |      |      |      |-- Input_Capture£ºinput capture routine
+  |      |      |      |      |-- One_Pulse£ºsingle pulse output routine
+  |      |      |      |      |-- Output_Compare_Mode£ºoutput comparison mode routine
+  |      |      |      |      |-- PWM_Output£ºPWM output routine
+  |      |      |      |      |-- Synchro_ExtTrigger£ºslave mode routine, including reset mode, gating mode and trigger mode
+  |      |      |      |      |-- Synchro_Timer£ºtimer synchronization mode
+  |      |      |      |      |-- TIM_DMA£ºthe timer uses DMA routines
+  |      |      |      |-- TOUCHKEY£ºtouchkey detection routine
+  |      |      |      |-- RNG£ºrandom number generator routine
+  |      |      |      |-- USART
+  |      |      |      |      |-- USART_DMA£ºUSART uses DMA, master / slave mode transceiver routine
+  |      |      |      |      |-- USART_HalfDuplex£ºsingle wire half duplex mode, master / slave mode transceiver routine
+  |      |      |      |      |-- USART_HardwareFlowControl£ºhardware flow control mode, master / slave mode, transceiver routine
+  |      |      |      |      |-- USART_Interrupt£ºUSART interrupt routine, master / slave mode transceiver routine
+  |      |      |      |      |-- USART_MultiProcessorCommunication£ºmultiprocessor communication mode routine
+  |      |      |      |      |-- USART_Polling£ºpolling transceiver mode, master / slave transceiver routine
+  |      |      |      |      |-- USART_Printf£ºUSART Print debugging routine
+  |      |      |      |      |-- USART_SynchronousMode£ºsynchronous mode, master / slave mode, transceiver routine
+  |      |      |      |-- USB
+  |      |      |      |      |-- USBFS
+  |      |      |      |      |      |-- DEVICE
+  |      |      |      |      |      |      |--CH372Device£ºsimulate custom USB device (CH372 device) routine
+  |      |      |      |      |      |      |--HIDKeyboardDevice£ºsimulates a keyboard routine 
+  |      |      |      |      |      |-- HOST£ºa simple enumeration procedure routine for USB Full Speed devices    
+  |      |      |      |      |-- USBHS   
+  |      |      |      |      |      |-- DEVICE
+  |      |      |      |      |      |      |--CH372Device£ºsimulate custom USB device (CH372 device) routine
+  |      |      |      |      |      |      |--HIDKeyboardDevice£ºsimulates a keyboard routine  
+  |      |      |      |      |      |-- HOST£ºa simple enumeration procedure routine for USB Full Speed devices
+  |      |      |      |      |      |-- HOST_Udisk£ºC Programming Language exam, read/write file in bytes, including creating file, deleting file, modifying file attribute, and modifying file name
+  |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file    
+  |      |      |      |-- VoiceRcgExam£ºindividual term voice recognition exam 
+  |      |      |      |-- WWDG£ºwindow watchdog routine
+

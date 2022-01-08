@@ -1,0 +1,43 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+
+static_library("test_mem") {
+
+    sources = [
+        "It_los_mem_001.c",
+        "It_los_mem_002.c",
+        "It_los_mem_003.c",
+        "It_los_mem_004.c",
+        "It_los_mem_005.c",
+        "It_los_mem_006.c",
+        "It_los_mem_007.c",
+        "It_los_mem_008.c",
+        "It_los_mem_009.c",
+        "It_los_mem_010.c",
+        "It_los_mem_011.c",
+        "It_los_mem_012.c",
+        "It_los_mem_013.c",
+        "It_los_mem_014.c",
+        "It_los_mem_015.c",
+        "It_los_mem_016.c",
+        "It_los_mem_017.c",
+        "It_los_mem_018.c",
+        "It_los_mem_019.c",
+        "It_los_mem_020.c",
+        "It_los_mem_035.c",
+        "It_los_mem_036.c",
+        "It_los_mem_037.c",
+        "It_los_mem_038.c",
+        "It_los_mem_040.c",
+        "It_los_mem_045.c",
+        "it_los_mem.c",
+        "It_los_tick_001.c",
+    ]
+
+    configs += [ "//kernel/liteos_m/testsuits:include" ]
+
+    defines = [
+        "LOS_RECORD_LR_CNT=3",
+        "LOS_DLNK_NODE_HEAD_SIZE=0",
+        "MIN_DLNK_POOL_SIZE=0"
+    ]
+}

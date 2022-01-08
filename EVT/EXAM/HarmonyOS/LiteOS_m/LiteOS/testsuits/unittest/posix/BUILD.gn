@@ -1,0 +1,71 @@
+# Copyright (c) 2013-2019 Huawei Technologies Co., Ltd. All rights reserved.
+# Copyright (c) 2020-2021 Huawei Device Co., Ltd. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other materials
+#    provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors may be used
+#    to endorse or promote products derived from this software without specific prior written
+#    permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+import("//test/xts/tools/lite/build/suite_lite.gni")
+
+hctest_suite("PosixTest") {
+  suite_name = "acts"
+  sources = [
+    "src/mqueue/mqueue_func_test.c",
+    "src/pthread/pthread_cond_func_test.c",
+    "src/semaphore/semaphore_func_test.c",
+    "src/ctype/isdigit_test.c",
+    "src/ctype/islower_test.c",
+    "src/ctype/isxdigit_test.c",
+    "src/ctype/ctype_func_test.c",
+    "src/ctype/tolower_test.c",
+    "src/ctype/toupper_test.c",
+    "src/math/math_func_test.c",
+    "src/regex/regex_func_test.c",
+    "src/stdarg/stdarg_func_test.c",
+    "src/stdlib/atoi_test.c",
+    "src/stdlib/atoll_test.c",
+    "src/stdlib/atol_test.c",
+    "src/stdlib/strtol_test.c",
+    "src/stdlib/strtoull_test.c",
+    "src/stdlib/strtoul_test.c",
+    "src/string/memory_func_test.c",
+    "src/string/string_func_test_01.c",
+    "src/string/string_func_test_02.c",
+    "src/string/strchr_test.c",
+    "src/string/strstr_test.c",
+    "src/time/time_func_test_01.c",
+    "src/fs/posix_fs_func_test.c",
+    "src/string/string_func_test_03.c",
+    "src/errno/strerror_test.c",
+  ]
+
+  include_dirs = [
+    "//test/xts/tools/hctest/include",
+    "//third_party/unity/src",
+    "src",
+  ]
+  cflags = [ "-Wno-error" ]
+  deps = [ "//kernel/liteos_m/kal/posix" ]
+}

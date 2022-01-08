@@ -1,0 +1,45 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+
+static_library("test_hwi") {
+
+    sources = [
+        "it_los_hwi_001.c",
+        "it_los_hwi_002.c",
+        "it_los_hwi_003.c",
+        "it_los_hwi_004.c",
+        "it_los_hwi_005.c",
+        "it_los_hwi_006.c",
+        "it_los_hwi_007.c",
+        "it_los_hwi_008.c",
+        "it_los_hwi_009.c",
+        "it_los_hwi_010.c",
+        "it_los_hwi_011.c",
+        "it_los_hwi_012.c",
+        "it_los_hwi_013.c",
+        "it_los_hwi_014.c",
+        "it_los_hwi_015.c",
+        "it_los_hwi_016.c",
+        "it_los_hwi_017.c",
+        "it_los_hwi_018.c",
+        "it_los_hwi_019.c",
+        "it_los_hwi_020.c",
+        "it_los_hwi_021.c",
+        "it_los_hwi_022.c",
+        "it_los_hwi_023.c",
+        "it_los_hwi_024.c",
+        "it_los_hwi_025.c",
+        "it_los_hwi_026.c",
+        "it_los_hwi_027.c",
+        "it_los_hwi_028.c",
+        "it_los_hwi_029.c",
+        "it_los_hwi_030.c",
+        "it_los_hwi_031.c",
+        "it_los_hwi_032.c",
+        "it_los_hwi_033.c",
+        "it_los_hwi_034.c",
+        "It_los_hwi.c",
+        "llt_los_hwi_035.c",
+    ]
+
+    configs += [ "//kernel/liteos_m/testsuits:include" ]
+}
