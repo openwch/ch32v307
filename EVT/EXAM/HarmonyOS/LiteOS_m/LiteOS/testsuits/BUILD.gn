@@ -1,0 +1,36 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+import("//build/lite/config/component/lite_component.gni")
+
+config("include") {
+    include_dirs = [
+        "include",
+        "//kernel/liteos_m/kernel/include",
+        "//kernel/liteos_m/kernel/arch/include",
+        "//kernel/liteos_m/components/cpup",
+    ]
+}
+
+static_library("test_init") {
+
+    sources = [
+        "src/osTest.c",
+        "src/iCunit.c",
+    ]
+
+    configs += [ ":include" ]
+}
+
+lite_component("test") {
+    features = [
+        ":test_init",
+        "sample/kernel/event:test_event",
+        "sample/kernel/hwi:test_hwi",
+        "sample/kernel/mem:test_mem",
+        "sample/kernel/mux:test_mux",
+        "sample/kernel/queue:test_queue",
+        "sample/kernel/sem:test_sem",
+        "sample/kernel/swtmr:test_swtmr",
+        "sample/kernel/task:test_task",
+        #"sample/kernel/tickless:test_tickless",
+    ]
+}

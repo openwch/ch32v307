@@ -1,0 +1,42 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020. All rights reserved.
+
+static_library("test_mux") {
+
+    sources = [
+        "It_los_mutex_001.c",
+        "It_los_mutex_002.c",
+        "It_los_mutex_003.c",
+        "It_los_mutex_004.c",
+        "It_los_mutex_005.c",
+        "It_los_mutex_006.c",
+        "It_los_mutex_007.c",
+        "It_los_mutex_008.c",
+        "It_los_mutex_009.c",
+        "It_los_mutex_010.c",
+        "It_los_mutex_011.c",
+        "It_los_mutex_012.c",
+        "It_los_mutex_013.c",
+        "It_los_mutex_014.c",
+        "It_los_mutex_015.c",
+        "It_los_mutex_016.c",
+        "It_los_mutex_017.c",
+        "It_los_mutex_018.c",
+        "It_los_mutex_019.c",
+        "It_los_mutex_020.c",
+        "It_los_mutex_021.c",
+        "It_los_mutex_022.c",
+        "It_los_mutex_023.c",
+        "It_los_mutex_024.c",
+        "It_los_mutex_025.c",
+        "It_los_mutex_026.c",
+        "It_los_mutex_027.c",
+        "It_los_mutex_029.c",
+        "It_los_mutex_030.c",
+        "It_los_mutex_031.c",
+        "It_los_mutex_033.c",
+        "It_los_mutex_034.c",
+        "It_los_mux.c",
+    ]
+
+    configs += [ "//kernel/liteos_m/testsuits:include" ]
+}

@@ -1,0 +1,13 @@
+
+Vendor=WCH
+Link=WCH-Link
+Toolchain=
+Series=
+Description=
+Mcu Type=CH32V30x
+Address=0x08000000
+Target Path=obj\ETH_MII_RMII.bin
+Erase All=true
+Program=true
+Verify=true
+Reset=true

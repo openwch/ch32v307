@@ -1,0 +1,101 @@
+#
+# Copyright (c) 2020 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+if (defined(ohos_lite)) {
+  import("//build/lite/config/component/lite_component.gni")
+  import("//build/lite/ndk/ndk.gni")
+} else {
+  import("//build/ohos.gni")
+}
+
+config("libsec_public_config") {
+  include_dirs = [ "include" ]
+}
+
+libsec_sources = [
+  "src/fscanf_s.c",
+  "src/fwscanf_s.c",
+  "src/gets_s.c",
+  "src/memcpy_s.c",
+  "src/memmove_s.c",
+  "src/memset_s.c",
+  "src/scanf_s.c",
+  "src/securecutil.c",
+  "src/secureinput_a.c",
+  "src/secureinput_w.c",
+  "src/secureprintoutput_a.c",
+  "src/secureprintoutput_w.c",
+  "src/snprintf_s.c",
+  "src/sprintf_s.c",
+  "src/sscanf_s.c",
+  "src/strcat_s.c",
+  "src/strcpy_s.c",
+  "src/strncat_s.c",
+  "src/strncpy_s.c",
+  "src/strtok_s.c",
+  "src/swprintf_s.c",
+  "src/swscanf_s.c",
+  "src/vfscanf_s.c",
+  "src/vfwscanf_s.c",
+  "src/vscanf_s.c",
+  "src/vsnprintf_s.c",
+  "src/vsprintf_s.c",
+  "src/vsscanf_s.c",
+  "src/vswprintf_s.c",
+  "src/vswscanf_s.c",
+  "src/vwscanf_s.c",
+  "src/wcscat_s.c",
+  "src/wcscpy_s.c",
+  "src/wcsncat_s.c",
+  "src/wcsncpy_s.c",
+  "src/wcstok_s.c",
+  "src/wmemcpy_s.c",
+  "src/wmemmove_s.c",
+  "src/wscanf_s.c",
+]
+
+if (defined(ohos_lite)) {
+  lite_library("libsec_static") {
+    target_type = "static_library"
+    sources = libsec_sources
+    public_configs = [ ":libsec_public_config" ]
+  }
+  lite_library("libsec_shared") {
+    target_type = "shared_library"
+    sources = libsec_sources
+    public_configs = [ ":libsec_public_config" ]
+  }
+  group("sec_shared") {
+    deps = [ ":libsec_shared" ]
+  }
+  ndk_lib("libsec_ndk") {
+    lib_extension = ".so"
+    deps = [ ":sec_shared" ]
+    head_files = [ "include" ]
+  }
+} else {
+  ohos_static_library("libsec_static") {
+    sources = libsec_sources
+    public_configs = [ ":libsec_public_config" ]
+    cflags = [
+      "-D_INC_STRING_S",
+      "-D_INC_WCHAR_S",
+      "-D_SECIMP=//",
+      "-D_STDIO_S_DEFINED",
+      "-D_INC_STDIO_S",
+      "-D_INC_STDLIB_S",
+      "-D_INC_MEMORY_S",
+    ]
+  }
+}

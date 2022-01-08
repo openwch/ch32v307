@@ -1,0 +1,13 @@
+Toolchain=
+Series=
+Description=
+Mcu Type=CH32V30x
+Address=0x08000000
+Target Path=obj\HOST_Udisk.hex
+Erase All=true
+Program=true
+Verify=true
+Reset=true
+
+Vendor=WCH
+Link=WCH-Link
