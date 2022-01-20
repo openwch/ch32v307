@@ -6,4 +6,3 @@ Based on the powerful peripherals of eight UART interfaces and 10M Ethernet, eig
 
 * RT-Thread/uart_server_rtt is the 8 uarts server demo developed based on RT_Thread,LwIP.
 * bart_metal/8_uart_server is the 8 uarts server demo developed based on WCH_NET_lib with no-os.
-* 
