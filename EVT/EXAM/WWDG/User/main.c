@@ -4,8 +4,9 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
-
 
 /*
  *@Note
@@ -17,7 +18,7 @@
 #include "debug.h"
 
 /* Global define */
-#define WWDG_CNT	0X7F
+#define WWDG_CNT    0X7F
 
 /* Global Variable */
 
@@ -30,12 +31,12 @@
  */
 static void WWDG_NVIC_Config(void)
 {
-  NVIC_InitTypeDef NVIC_InitStructure={0};
-  NVIC_InitStructure.NVIC_IRQChannel = WWDG_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitTypeDef NVIC_InitStructure = {0};
+    NVIC_InitStructure.NVIC_IRQChannel = WWDG_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 /*********************************************************************
@@ -55,15 +56,15 @@ static void WWDG_NVIC_Config(void)
  */
 void WWDG_Config(uint8_t tr, uint8_t wr, uint32_t prv)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
 
-	WWDG_SetCounter( tr );
-	WWDG_SetPrescaler( prv );
-	WWDG_SetWindowValue( wr );
-  WWDG_Enable(WWDG_CNT);
-	WWDG_ClearFlag();
-	WWDG_NVIC_Config();
-	WWDG_EnableIT();
+    WWDG_SetCounter(tr);
+    WWDG_SetPrescaler(prv);
+    WWDG_SetWindowValue(wr);
+    WWDG_Enable(WWDG_CNT);
+    WWDG_ClearFlag();
+    WWDG_NVIC_Config();
+    WWDG_EnableIT();
 }
 
 /*********************************************************************
@@ -75,7 +76,7 @@ void WWDG_Config(uint8_t tr, uint8_t wr, uint32_t prv)
  */
 void WWDG_Feed(void)
 {
-	WWDG_SetCounter( WWDG_CNT );
+    WWDG_SetCounter(WWDG_CNT);
 }
 
 /*********************************************************************
@@ -87,27 +88,26 @@ void WWDG_Feed(void)
  */
 int main(void)
 {
-	u8 wwdg_tr,wwdg_wr;
+    u8 wwdg_tr, wwdg_wr;
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n", SystemCoreClock);
 
-	printf("WWDG Test\r\n");
-	WWDG_Config(0x7f,0x5f,WWDG_Prescaler_8);      /* 36M/8/4096 */
-  wwdg_wr=WWDG->CFGR & 0x7F;
-	while(1)
-  {
-    Delay_Ms(50);
+    printf("WWDG Test\r\n");
+    WWDG_Config(0x7f, 0x5f, WWDG_Prescaler_8); /* 36M/8/4096 */
+    wwdg_wr = WWDG->CFGR & 0x7F;
+    while(1)
+    {
+        Delay_Ms(50);
 
-	  printf("**********\r\n");
-    wwdg_tr=WWDG->CTLR & 0x7F;
-		if(wwdg_tr<wwdg_wr)
-		{
-		  WWDG_Feed();
-		}
-		printf("##########\r\n");
-	}
+        printf("**********\r\n");
+        wwdg_tr = WWDG->CTLR & 0x7F;
+        if(wwdg_tr < wwdg_wr)
+        {
+            WWDG_Feed();
+        }
+        printf("##########\r\n");
+    }
 }
-

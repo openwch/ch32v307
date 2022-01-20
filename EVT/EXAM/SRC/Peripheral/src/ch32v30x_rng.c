@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the RNG firmware functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 ********************************************************************************/
 #include "ch32v30x_rng.h"
 #include "ch32v30x_rcc.h"
@@ -19,14 +21,14 @@
  */
 void RNG_Cmd(FunctionalState NewState)
 {
-  if (NewState != DISABLE)
-  {
-    RNG->CR |= RNG_CR_RNGEN;
-  }
-  else
-  {
-    RNG->CR &= ~RNG_CR_RNGEN;
-  }
+    if(NewState != DISABLE)
+    {
+        RNG->CR |= RNG_CR_RNGEN;
+    }
+    else
+    {
+        RNG->CR &= ~RNG_CR_RNGEN;
+    }
 }
 
 /*********************************************************************
@@ -38,7 +40,7 @@ void RNG_Cmd(FunctionalState NewState)
  */
 uint32_t RNG_GetRandomNumber(void)
 {
-  return RNG->DR;
+    return RNG->DR;
 }
 
 /*********************************************************************
@@ -52,14 +54,14 @@ uint32_t RNG_GetRandomNumber(void)
  */
 void RNG_ITConfig(FunctionalState NewState)
 {
-  if (NewState != DISABLE)
-  {
-    RNG->CR |= RNG_CR_IE;
-  }
-  else
-  {
-    RNG->CR &= ~RNG_CR_IE;
-  }
+    if(NewState != DISABLE)
+    {
+        RNG->CR |= RNG_CR_IE;
+    }
+    else
+    {
+        RNG->CR &= ~RNG_CR_IE;
+    }
 }
 
 /*********************************************************************
@@ -76,18 +78,18 @@ void RNG_ITConfig(FunctionalState NewState)
  */
 FlagStatus RNG_GetFlagStatus(uint8_t RNG_FLAG)
 {
-  FlagStatus bitstatus = RESET;
+    FlagStatus bitstatus = RESET;
 
-  if ((RNG->SR & RNG_FLAG) != (uint8_t)RESET)
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
+    if((RNG->SR & RNG_FLAG) != (uint8_t)RESET)
+    {
+        bitstatus = SET;
+    }
+    else
+    {
+        bitstatus = RESET;
+    }
 
-  return  bitstatus;
+    return bitstatus;
 }
 
 /*********************************************************************
@@ -103,7 +105,7 @@ FlagStatus RNG_GetFlagStatus(uint8_t RNG_FLAG)
  */
 void RNG_ClearFlag(uint8_t RNG_FLAG)
 {
-  RNG->SR = ~(uint32_t)(((uint32_t)RNG_FLAG) << 4);
+    RNG->SR = ~(uint32_t)(((uint32_t)RNG_FLAG) << 4);
 }
 
 /*********************************************************************
@@ -119,18 +121,18 @@ void RNG_ClearFlag(uint8_t RNG_FLAG)
  */
 ITStatus RNG_GetITStatus(uint8_t RNG_IT)
 {
-  ITStatus bitstatus = RESET;
+    ITStatus bitstatus = RESET;
 
-  if ((RNG->SR & RNG_IT) != (uint8_t)RESET)
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
+    if((RNG->SR & RNG_IT) != (uint8_t)RESET)
+    {
+        bitstatus = SET;
+    }
+    else
+    {
+        bitstatus = RESET;
+    }
 
-  return bitstatus;
+    return bitstatus;
 }
 
 /*********************************************************************
@@ -146,6 +148,5 @@ ITStatus RNG_GetITStatus(uint8_t RNG_IT)
  */
 void RNG_ClearITPendingBit(uint8_t RNG_IT)
 {
-  RNG->SR = (uint8_t)~RNG_IT;
+    RNG->SR = (uint8_t)~RNG_IT;
 }
-

@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -11,24 +13,27 @@
  硬件流控制模式例程：
  USART1_Tx(PA9)、USART1_Rx(PA10)、USART1_CTS(PA11)、USART1_RTS(PA12)
  本例程演示 UART1 硬件流控制数据收发，将UART1 Tx和Rx引脚分别连接串口工具，
- 通过上位机工具查看，CTS连接VCC，无法发送数据，接GND，可正常发送数据 
+ 通过上位机工具查看，CTS连接VCC，无法发送数据，接GND，可正常发送数据
 
 */
 
 #include "debug.h"
 
-
 /* Global typedef */
-typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
+typedef enum
+{
+    FAILED = 0,
+    PASSED = !FAILED
+} TestStatus;
 
 /* Global define */
-#define TxSize   (size(TxBuffer))
-#define size(a)   (sizeof(a) / sizeof(*(a)))
+#define TxSize     (size(TxBuffer))
+#define size(a)    (sizeof(a) / sizeof(*(a)))
 
 /* Global Variable */
 u8 TxBuffer[] = "USART1 Hardware Flow Control Example: USART1-\
 Hyperterminal communication using hardware flow control\n\r";
-u8 RxBuffer[TxSize]={0};
+u8 RxBuffer[TxSize] = {0};
 u8 TxCnt = 0, RxCnt = 0;
 
 /*********************************************************************
@@ -42,18 +47,18 @@ u8 TxCnt = 0, RxCnt = 0;
  * @return  PASSED - Buf1 identical to Buf
  *          FAILED - Buf1 differs from Buf2
  */
-TestStatus Buffercmp(uint8_t* Buf1, uint8_t* Buf2, uint16_t BufLength)
+TestStatus Buffercmp(uint8_t *Buf1, uint8_t *Buf2, uint16_t BufLength)
 {
-  while(BufLength--)
-  {
-    if(*Buf1 != *Buf2)
+    while(BufLength--)
     {
-      return FAILED;
+        if(*Buf1 != *Buf2)
+        {
+            return FAILED;
+        }
+        Buf1++;
+        Buf2++;
     }
-    Buf1++;
-    Buf2++;
-  }
-  return PASSED;
+    return PASSED;
 }
 
 /*********************************************************************
@@ -65,35 +70,34 @@ TestStatus Buffercmp(uint8_t* Buf1, uint8_t* Buf2, uint16_t BufLength)
  */
 void USART1_ReCFG(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStructure={0};
-	USART_InitTypeDef USART_InitStructure={0};
+    GPIO_InitTypeDef  GPIO_InitStructure = {0};
+    USART_InitTypeDef USART_InitStructure = {0};
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA |RCC_APB2Periph_USART1 , ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1, ENABLE);
 
-  /* USART1 TX-->A.9   RX-->A.10 */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 ;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;                  /* RTS-->A.12 */
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* USART1 TX-->A.9   RX-->A.10 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; /* RTS-->A.12 */
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 ;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_11;                 /* CTS-->A.11 */
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11; /* CTS-->A.11 */
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
+    USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 
-  USART_Init(USART1, &USART_InitStructure);
-	USART_Cmd(USART1, ENABLE);
-
+    USART_Init(USART1, &USART_InitStructure);
+    USART_Cmd(USART1, ENABLE);
 }
 
 /*********************************************************************
@@ -105,31 +109,28 @@ void USART1_ReCFG(void)
  */
 int main(void)
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  Delay_Init();
-	USART1_ReCFG();
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    Delay_Init();
+    USART1_ReCFG();
 
-	printf("USART1 Hardware Flow Control TEST\r\n");
+    printf("USART1 Hardware Flow Control TEST\r\n");
 
-	while(TxCnt<TxSize)
-	{
-	  USART_SendData(USART1, TxBuffer[TxCnt++]);
-    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
-	}
-	do
-	{
-	  if((USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)&&(RxCnt < TxSize))
+    while(TxCnt < TxSize)
     {
-       RxBuffer[RxCnt] = USART_ReceiveData(USART1);
-       USART_SendData(USART1, RxBuffer[RxCnt++]);              /* send it when receive a byte */
+        USART_SendData(USART1, TxBuffer[TxCnt++]);
+        while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
+            ;
     }
-	}
-  while((RxBuffer[RxCnt - 1] != '\r')&&(RxCnt != TxSize));
+    do
+    {
+        if((USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET) && (RxCnt < TxSize))
+        {
+            RxBuffer[RxCnt] = USART_ReceiveData(USART1);
+            USART_SendData(USART1, RxBuffer[RxCnt++]); /* send it when receive a byte */
+        }
+    } while((RxBuffer[RxCnt - 1] != '\r') && (RxCnt != TxSize));
 
-
-	while(1)
-  {
-	}
+    while(1)
+    {
+    }
 }
-
-

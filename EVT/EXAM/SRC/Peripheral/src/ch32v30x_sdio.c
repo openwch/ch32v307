@@ -4,28 +4,28 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the SDIO firmware functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #include "ch32v30x_sdio.h"
 #include "ch32v30x_rcc.h"
 
-
-#define SDIO_OFFSET              (SDIO_BASE - PERIPH_BASE)
+#define SDIO_OFFSET         (SDIO_BASE - PERIPH_BASE)
 
 /* CLKCR register clear mask */
-#define CLKCR_CLEAR_MASK         ((uint32_t)0xFFFF8100) 
+#define CLKCR_CLEAR_MASK    ((uint32_t)0xFFFF8100)
 
 /* SDIO PWRCTRL Mask */
-#define PWR_PWRCTRL_MASK         ((uint32_t)0xFFFFFFFC)
+#define PWR_PWRCTRL_MASK    ((uint32_t)0xFFFFFFFC)
 
 /* SDIO DCTRL Clear Mask */
-#define DCTRL_CLEAR_MASK         ((uint32_t)0xFFFFFF08)
+#define DCTRL_CLEAR_MASK    ((uint32_t)0xFFFFFF08)
 
 /* CMD Register clear mask */
-#define CMD_CLEAR_MASK           ((uint32_t)0xFFFFF800)
+#define CMD_CLEAR_MASK      ((uint32_t)0xFFFFF800)
 
 /* SDIO RESP Registers Address */
-#define SDIO_RESP_ADDR           ((uint32_t)(SDIO_BASE + 0x14))
-
+#define SDIO_RESP_ADDR      ((uint32_t)(SDIO_BASE + 0x14))
 
 /*********************************************************************
  * @fn      SDIO_DeInit
@@ -37,15 +37,15 @@
  */
 void SDIO_DeInit(void)
 {
-  SDIO->POWER = 0x00000000;
-  SDIO->CLKCR = 0x00000000;
-  SDIO->ARG = 0x00000000;
-  SDIO->CMD = 0x00000000;
-  SDIO->DTIMER = 0x00000000;
-  SDIO->DLEN = 0x00000000;
-  SDIO->DCTRL = 0x00000000;
-  SDIO->ICR = 0x00C007FF;
-  SDIO->MASK = 0x00000000;
+    SDIO->POWER = 0x00000000;
+    SDIO->CLKCR = 0x00000000;
+    SDIO->ARG = 0x00000000;
+    SDIO->CMD = 0x00000000;
+    SDIO->DTIMER = 0x00000000;
+    SDIO->DLEN = 0x00000000;
+    SDIO->DCTRL = 0x00000000;
+    SDIO->ICR = 0x00C007FF;
+    SDIO->MASK = 0x00000000;
 }
 
 /*********************************************************************
@@ -59,17 +59,17 @@ void SDIO_DeInit(void)
  *
  * @return  None
  */
-void SDIO_Init(SDIO_InitTypeDef* SDIO_InitStruct)
+void SDIO_Init(SDIO_InitTypeDef *SDIO_InitStruct)
 {
-  uint32_t tmpreg = 0;
-   
-  tmpreg = SDIO->CLKCR;
-  tmpreg &= CLKCR_CLEAR_MASK;
-  tmpreg |= (SDIO_InitStruct->SDIO_ClockDiv  | SDIO_InitStruct->SDIO_ClockPowerSave |
-             SDIO_InitStruct->SDIO_ClockBypass | SDIO_InitStruct->SDIO_BusWide |
-             SDIO_InitStruct->SDIO_ClockEdge | SDIO_InitStruct->SDIO_HardwareFlowControl); 
+    uint32_t tmpreg = 0;
 
-  SDIO->CLKCR = tmpreg;
+    tmpreg = SDIO->CLKCR;
+    tmpreg &= CLKCR_CLEAR_MASK;
+    tmpreg |= (SDIO_InitStruct->SDIO_ClockDiv | SDIO_InitStruct->SDIO_ClockPowerSave |
+               SDIO_InitStruct->SDIO_ClockBypass | SDIO_InitStruct->SDIO_BusWide |
+               SDIO_InitStruct->SDIO_ClockEdge | SDIO_InitStruct->SDIO_HardwareFlowControl);
+
+    SDIO->CLKCR = tmpreg;
 }
 
 /*********************************************************************
@@ -82,14 +82,14 @@ void SDIO_Init(SDIO_InitTypeDef* SDIO_InitStruct)
  *
  * @return  none
  */
-void SDIO_StructInit(SDIO_InitTypeDef* SDIO_InitStruct)
+void SDIO_StructInit(SDIO_InitTypeDef *SDIO_InitStruct)
 {
-  SDIO_InitStruct->SDIO_ClockDiv = 0x00;
-  SDIO_InitStruct->SDIO_ClockEdge = SDIO_ClockEdge_Rising;
-  SDIO_InitStruct->SDIO_ClockBypass = SDIO_ClockBypass_Disable;
-  SDIO_InitStruct->SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
-  SDIO_InitStruct->SDIO_BusWide = SDIO_BusWide_1b;
-  SDIO_InitStruct->SDIO_HardwareFlowControl = SDIO_HardwareFlowControl_Disable;
+    SDIO_InitStruct->SDIO_ClockDiv = 0x00;
+    SDIO_InitStruct->SDIO_ClockEdge = SDIO_ClockEdge_Rising;
+    SDIO_InitStruct->SDIO_ClockBypass = SDIO_ClockBypass_Disable;
+    SDIO_InitStruct->SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
+    SDIO_InitStruct->SDIO_BusWide = SDIO_BusWide_1b;
+    SDIO_InitStruct->SDIO_HardwareFlowControl = SDIO_HardwareFlowControl_Disable;
 }
 
 /*********************************************************************
@@ -104,8 +104,10 @@ void SDIO_StructInit(SDIO_InitTypeDef* SDIO_InitStruct)
  */
 void SDIO_ClockCmd(FunctionalState NewState)
 {
-  if(NewState) SDIO->CLKCR |= (1<<8);
-  else SDIO->CLKCR &= ~(1<<8);
+    if(NewState)
+        SDIO->CLKCR |= (1 << 8);
+    else
+        SDIO->CLKCR &= ~(1 << 8);
 }
 
 /*********************************************************************
@@ -121,9 +123,8 @@ void SDIO_ClockCmd(FunctionalState NewState)
  */
 void SDIO_SetPowerState(uint32_t SDIO_PowerState)
 {
-  
-  SDIO->POWER &= PWR_PWRCTRL_MASK;
-  SDIO->POWER |= SDIO_PowerState;
+    SDIO->POWER &= PWR_PWRCTRL_MASK;
+    SDIO->POWER |= SDIO_PowerState;
 }
 
 /*********************************************************************
@@ -140,7 +141,7 @@ void SDIO_SetPowerState(uint32_t SDIO_PowerState)
  */
 uint32_t SDIO_GetPowerState(void)
 {
-  return (SDIO->POWER & (~PWR_PWRCTRL_MASK));
+    return (SDIO->POWER & (~PWR_PWRCTRL_MASK));
 }
 
 /*********************************************************************
@@ -179,14 +180,14 @@ uint32_t SDIO_GetPowerState(void)
  */
 void SDIO_ITConfig(uint32_t SDIO_IT, FunctionalState NewState)
 {
-  if (NewState != DISABLE)
-  {
-    SDIO->MASK |= SDIO_IT;
-  }
-  else
-  {
-    SDIO->MASK &= ~SDIO_IT;
-  } 
+    if(NewState != DISABLE)
+    {
+        SDIO->MASK |= SDIO_IT;
+    }
+    else
+    {
+        SDIO->MASK &= ~SDIO_IT;
+    }
 }
 
 /*********************************************************************
@@ -200,8 +201,10 @@ void SDIO_ITConfig(uint32_t SDIO_IT, FunctionalState NewState)
  */
 void SDIO_DMACmd(FunctionalState NewState)
 {
-  if(NewState) SDIO->DCTRL |= (1<<3);
-  else SDIO->DCTRL &= ~(1<<3);
+    if(NewState)
+        SDIO->DCTRL |= (1 << 3);
+    else
+        SDIO->DCTRL &= ~(1 << 3);
 }
 
 /*********************************************************************
@@ -217,16 +220,15 @@ void SDIO_DMACmd(FunctionalState NewState)
  */
 void SDIO_SendCommand(SDIO_CmdInitTypeDef *SDIO_CmdInitStruct)
 {
-  uint32_t tmpreg = 0;
+    uint32_t tmpreg = 0;
 
-  SDIO->ARG = SDIO_CmdInitStruct->SDIO_Argument;
-  
-  tmpreg = SDIO->CMD;
-  tmpreg &= CMD_CLEAR_MASK;
-  tmpreg |= (uint32_t)SDIO_CmdInitStruct->SDIO_CmdIndex | SDIO_CmdInitStruct->SDIO_Response
-           | SDIO_CmdInitStruct->SDIO_Wait | SDIO_CmdInitStruct->SDIO_CPSM;
-  
-  SDIO->CMD = tmpreg;
+    SDIO->ARG = SDIO_CmdInitStruct->SDIO_Argument;
+
+    tmpreg = SDIO->CMD;
+    tmpreg &= CMD_CLEAR_MASK;
+    tmpreg |= (uint32_t)SDIO_CmdInitStruct->SDIO_CmdIndex | SDIO_CmdInitStruct->SDIO_Response | SDIO_CmdInitStruct->SDIO_Wait | SDIO_CmdInitStruct->SDIO_CPSM;
+
+    SDIO->CMD = tmpreg;
 }
 
 /*********************************************************************
@@ -239,13 +241,13 @@ void SDIO_SendCommand(SDIO_CmdInitTypeDef *SDIO_CmdInitStruct)
  *
  * @return  none
  */
-void SDIO_CmdStructInit(SDIO_CmdInitTypeDef* SDIO_CmdInitStruct)
+void SDIO_CmdStructInit(SDIO_CmdInitTypeDef *SDIO_CmdInitStruct)
 {
-  SDIO_CmdInitStruct->SDIO_Argument = 0x00;
-  SDIO_CmdInitStruct->SDIO_CmdIndex = 0x00;
-  SDIO_CmdInitStruct->SDIO_Response = SDIO_Response_No;
-  SDIO_CmdInitStruct->SDIO_Wait = SDIO_Wait_No;
-  SDIO_CmdInitStruct->SDIO_CPSM = SDIO_CPSM_Disable;
+    SDIO_CmdInitStruct->SDIO_Argument = 0x00;
+    SDIO_CmdInitStruct->SDIO_CmdIndex = 0x00;
+    SDIO_CmdInitStruct->SDIO_Response = SDIO_Response_No;
+    SDIO_CmdInitStruct->SDIO_Wait = SDIO_Wait_No;
+    SDIO_CmdInitStruct->SDIO_CPSM = SDIO_CPSM_Disable;
 }
 
 /*********************************************************************
@@ -257,7 +259,7 @@ void SDIO_CmdStructInit(SDIO_CmdInitTypeDef* SDIO_CmdInitStruct)
  */
 uint8_t SDIO_GetCommandResponse(void)
 {
-  return (uint8_t)(SDIO->RESPCMD);
+    return (uint8_t)(SDIO->RESPCMD);
 }
 
 /*********************************************************************
@@ -275,11 +277,11 @@ uint8_t SDIO_GetCommandResponse(void)
  */
 uint32_t SDIO_GetResponse(uint32_t SDIO_RESP)
 {
-  __IO uint32_t tmp = 0;
+    __IO uint32_t tmp = 0;
 
-  tmp = SDIO_RESP_ADDR + SDIO_RESP;
-  
-  return (*(__IO uint32_t *) tmp); 
+    tmp = SDIO_RESP_ADDR + SDIO_RESP;
+
+    return (*(__IO uint32_t *)tmp);
 }
 
 /*********************************************************************
@@ -292,18 +294,17 @@ uint32_t SDIO_GetResponse(uint32_t SDIO_RESP)
  *
  * @return  none
  */
-void SDIO_DataConfig(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
+void SDIO_DataConfig(SDIO_DataInitTypeDef *SDIO_DataInitStruct)
 {
-  uint32_t tmpreg = 0;
+    uint32_t tmpreg = 0;
 
-  SDIO->DTIMER = SDIO_DataInitStruct->SDIO_DataTimeOut;
-  SDIO->DLEN = SDIO_DataInitStruct->SDIO_DataLength;
-  tmpreg = SDIO->DCTRL;
-  tmpreg &= DCTRL_CLEAR_MASK;
-  tmpreg |= (uint32_t)SDIO_DataInitStruct->SDIO_DataBlockSize | SDIO_DataInitStruct->SDIO_TransferDir
-           | SDIO_DataInitStruct->SDIO_TransferMode | SDIO_DataInitStruct->SDIO_DPSM;
+    SDIO->DTIMER = SDIO_DataInitStruct->SDIO_DataTimeOut;
+    SDIO->DLEN = SDIO_DataInitStruct->SDIO_DataLength;
+    tmpreg = SDIO->DCTRL;
+    tmpreg &= DCTRL_CLEAR_MASK;
+    tmpreg |= (uint32_t)SDIO_DataInitStruct->SDIO_DataBlockSize | SDIO_DataInitStruct->SDIO_TransferDir | SDIO_DataInitStruct->SDIO_TransferMode | SDIO_DataInitStruct->SDIO_DPSM;
 
-  SDIO->DCTRL = tmpreg;
+    SDIO->DCTRL = tmpreg;
 }
 
 /*********************************************************************
@@ -316,14 +317,14 @@ void SDIO_DataConfig(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
  *
  * @return  RTC counter value
  */
-void SDIO_DataStructInit(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
+void SDIO_DataStructInit(SDIO_DataInitTypeDef *SDIO_DataInitStruct)
 {
-  SDIO_DataInitStruct->SDIO_DataTimeOut = 0xFFFFFFFF;
-  SDIO_DataInitStruct->SDIO_DataLength = 0x00;
-  SDIO_DataInitStruct->SDIO_DataBlockSize = SDIO_DataBlockSize_1b;
-  SDIO_DataInitStruct->SDIO_TransferDir = SDIO_TransferDir_ToCard;
-  SDIO_DataInitStruct->SDIO_TransferMode = SDIO_TransferMode_Block;  
-  SDIO_DataInitStruct->SDIO_DPSM = SDIO_DPSM_Disable;
+    SDIO_DataInitStruct->SDIO_DataTimeOut = 0xFFFFFFFF;
+    SDIO_DataInitStruct->SDIO_DataLength = 0x00;
+    SDIO_DataInitStruct->SDIO_DataBlockSize = SDIO_DataBlockSize_1b;
+    SDIO_DataInitStruct->SDIO_TransferDir = SDIO_TransferDir_ToCard;
+    SDIO_DataInitStruct->SDIO_TransferMode = SDIO_TransferMode_Block;
+    SDIO_DataInitStruct->SDIO_DPSM = SDIO_DPSM_Disable;
 }
 
 /*********************************************************************
@@ -334,8 +335,8 @@ void SDIO_DataStructInit(SDIO_DataInitTypeDef* SDIO_DataInitStruct)
  * @return  Number of remaining data bytes to be transferred
  */
 uint32_t SDIO_GetDataCounter(void)
-{ 
-  return SDIO->DCOUNT;
+{
+    return SDIO->DCOUNT;
 }
 
 /*********************************************************************
@@ -346,8 +347,8 @@ uint32_t SDIO_GetDataCounter(void)
  * @return  Data received
  */
 uint32_t SDIO_ReadData(void)
-{ 
-  return SDIO->FIFO;
+{
+    return SDIO->FIFO;
 }
 
 /*********************************************************************
@@ -360,8 +361,8 @@ uint32_t SDIO_ReadData(void)
  * @return  RTC counter value
  */
 void SDIO_WriteData(uint32_t Data)
-{ 
-  SDIO->FIFO = Data;
+{
+    SDIO->FIFO = Data;
 }
 
 /*********************************************************************
@@ -372,8 +373,8 @@ void SDIO_WriteData(uint32_t Data)
  * @return  Remaining number of words.
  */
 uint32_t SDIO_GetFIFOCount(void)
-{ 
-  return SDIO->FIFOCNT;
+{
+    return SDIO->FIFOCNT;
 }
 
 /*********************************************************************
@@ -386,9 +387,11 @@ uint32_t SDIO_GetFIFOCount(void)
  * @return  none
  */
 void SDIO_StartSDIOReadWait(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->DCTRL |= (1<<8);
-  else SDIO->DCTRL &= ~(1<<8);
+{
+    if(NewState)
+        SDIO->DCTRL |= (1 << 8);
+    else
+        SDIO->DCTRL &= ~(1 << 8);
 }
 
 /*********************************************************************
@@ -401,10 +404,11 @@ void SDIO_StartSDIOReadWait(FunctionalState NewState)
  * @return  none
  */
 void SDIO_StopSDIOReadWait(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->DCTRL |= (1<<9);
-  else SDIO->DCTRL &= ~(1<<9);
-
+{
+    if(NewState)
+        SDIO->DCTRL |= (1 << 9);
+    else
+        SDIO->DCTRL &= ~(1 << 9);
 }
 
 /*********************************************************************
@@ -420,8 +424,10 @@ void SDIO_StopSDIOReadWait(FunctionalState NewState)
  */
 void SDIO_SetSDIOReadWaitMode(uint32_t SDIO_ReadWaitMode)
 {
-  if(SDIO_ReadWaitMode) SDIO->DCTRL |= (1<<10);
-  else SDIO->DCTRL &= ~(1<<10);
+    if(SDIO_ReadWaitMode)
+        SDIO->DCTRL |= (1 << 10);
+    else
+        SDIO->DCTRL &= ~(1 << 10);
 }
 
 /*********************************************************************
@@ -434,9 +440,11 @@ void SDIO_SetSDIOReadWaitMode(uint32_t SDIO_ReadWaitMode)
  * @return  none
  */
 void SDIO_SetSDIOOperation(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->DCTRL |= (1<<11);
-  else SDIO->DCTRL &= ~(1<<11);
+{
+    if(NewState)
+        SDIO->DCTRL |= (1 << 11);
+    else
+        SDIO->DCTRL &= ~(1 << 11);
 }
 
 /*********************************************************************
@@ -449,9 +457,11 @@ void SDIO_SetSDIOOperation(FunctionalState NewState)
  * @return  none
  */
 void SDIO_SendSDIOSuspendCmd(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->CMD |= (1<<11);
-  else SDIO->CMD &= ~(1<<11);
+{
+    if(NewState)
+        SDIO->CMD |= (1 << 11);
+    else
+        SDIO->CMD &= ~(1 << 11);
 }
 
 /*********************************************************************
@@ -464,9 +474,11 @@ void SDIO_SendSDIOSuspendCmd(FunctionalState NewState)
  * @return  none
  */
 void SDIO_CommandCompletionCmd(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->CMD |= (1<<12);
-  else SDIO->CMD &= ~(1<<12);
+{
+    if(NewState)
+        SDIO->CMD |= (1 << 12);
+    else
+        SDIO->CMD &= ~(1 << 12);
 }
 
 /*********************************************************************
@@ -479,9 +491,11 @@ void SDIO_CommandCompletionCmd(FunctionalState NewState)
  * @return  none
  */
 void SDIO_CEATAITCmd(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->CMD |= (1<<13);
-  else SDIO->CMD &= ~(1<<13);
+{
+    if(NewState)
+        SDIO->CMD |= (1 << 13);
+    else
+        SDIO->CMD &= ~(1 << 13);
 }
 
 /*********************************************************************
@@ -494,9 +508,11 @@ void SDIO_CEATAITCmd(FunctionalState NewState)
  * @return  RTC counter value
  */
 void SDIO_SendCEATACmd(FunctionalState NewState)
-{ 
-  if(NewState) SDIO->CMD |= (1<<14);
-  else SDIO->CMD &= ~(1<<14);
+{
+    if(NewState)
+        SDIO->CMD |= (1 << 14);
+    else
+        SDIO->CMD &= ~(1 << 14);
 }
 
 /*********************************************************************
@@ -535,18 +551,18 @@ void SDIO_SendCEATACmd(FunctionalState NewState)
  * @return  ITStatus - SET or RESET
  */
 FlagStatus SDIO_GetFlagStatus(uint32_t SDIO_FLAG)
-{ 
-  FlagStatus bitstatus = RESET;
-  
-  if ((SDIO->STA & SDIO_FLAG) != (uint32_t)RESET)
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
-  return bitstatus;
+{
+    FlagStatus bitstatus = RESET;
+
+    if((SDIO->STA & SDIO_FLAG) != (uint32_t)RESET)
+    {
+        bitstatus = SET;
+    }
+    else
+    {
+        bitstatus = RESET;
+    }
+    return bitstatus;
 }
 
 /*********************************************************************
@@ -574,7 +590,7 @@ FlagStatus SDIO_GetFlagStatus(uint32_t SDIO_FLAG)
  */
 void SDIO_ClearFlag(uint32_t SDIO_FLAG)
 {
-  SDIO->ICR = SDIO_FLAG;
+    SDIO->ICR = SDIO_FLAG;
 }
 
 /*********************************************************************
@@ -612,18 +628,18 @@ void SDIO_ClearFlag(uint32_t SDIO_FLAG)
  * @return  ITStatus£ºSET or RESET
  */
 ITStatus SDIO_GetITStatus(uint32_t SDIO_IT)
-{ 
-  ITStatus bitstatus = RESET;
-  
-  if ((SDIO->STA & SDIO_IT) != (uint32_t)RESET)  
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
-  return bitstatus;
+{
+    ITStatus bitstatus = RESET;
+
+    if((SDIO->STA & SDIO_IT) != (uint32_t)RESET)
+    {
+        bitstatus = SET;
+    }
+    else
+    {
+        bitstatus = RESET;
+    }
+    return bitstatus;
 }
 
 /*********************************************************************
@@ -650,5 +666,5 @@ ITStatus SDIO_GetITStatus(uint32_t SDIO_IT)
  */
 void SDIO_ClearITPendingBit(uint32_t SDIO_IT)
 {
-  SDIO->ICR = SDIO_IT;
+    SDIO->ICR = SDIO_IT;
 }

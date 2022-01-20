@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main Interrupt Service Routines.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #include "ch32v30x_it.h"
 
@@ -31,9 +33,9 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-  while (1)
-  {
-  }
+    while(1)
+    {
+    }
 }
 
 /*********************************************************************
@@ -45,19 +47,14 @@ void HardFault_Handler(void)
  */
 void TAMPER_IRQHandler(void)
 {
-  if( BKP_GetITStatus() == SET )
-	{
-		printf("TAMPER_IRQHandler\r\n");
-		printf( "BKP_DR1:%08x\r\n", BKP->DATAR1 );
-	  printf( "BKP_DR2:%08x\r\n", BKP->DATAR2 );
-	  printf( "BKP_DR3:%08x\r\n", BKP->DATAR3 );
-    printf( "BKP_DR4:%08x\r\n", BKP->DATAR4 );
-	}
+    if(BKP_GetITStatus() == SET)
+    {
+        printf("TAMPER_IRQHandler\r\n");
+        printf("BKP_DR1:%08x\r\n", BKP->DATAR1);
+        printf("BKP_DR2:%08x\r\n", BKP->DATAR2);
+        printf("BKP_DR3:%08x\r\n", BKP->DATAR3);
+        printf("BKP_DR4:%08x\r\n", BKP->DATAR4);
+    }
 
-	BKP_ClearITPendingBit();
+    BKP_ClearITPendingBit();
 }
-
-
-
-
-

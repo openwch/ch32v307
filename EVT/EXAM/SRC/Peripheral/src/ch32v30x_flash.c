@@ -4,54 +4,56 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the FLASH firmware functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 ***************************************************************************************/
 #include "ch32v30x_flash.h"
 
 /* Flash Control Register bits */
-#define CR_PG_Set                ((uint32_t)0x00000001)
-#define CR_PG_Reset              ((uint32_t)0x00001FFE) 
-#define CR_PER_Set               ((uint32_t)0x00000002)
-#define CR_PER_Reset             ((uint32_t)0x00001FFD)
-#define CR_MER_Set               ((uint32_t)0x00000004)
-#define CR_MER_Reset             ((uint32_t)0x00001FFB)
-#define CR_OPTPG_Set             ((uint32_t)0x00000010)
-#define CR_OPTPG_Reset           ((uint32_t)0x00001FEF)
-#define CR_OPTER_Set             ((uint32_t)0x00000020)
-#define CR_OPTER_Reset           ((uint32_t)0x00001FDF)
-#define CR_STRT_Set              ((uint32_t)0x00000040)
-#define CR_LOCK_Set              ((uint32_t)0x00000080)
-#define CR_FAST_LOCK_Set         ((uint32_t)0x00008000)
-#define CR_PAGE_PG 	             ((uint32_t)0x00010000)
-#define CR_PAGE_ER				 ((uint32_t)0x00020000)
-#define CR_BER32 	             ((uint32_t)0x00040000)
-#define CR_BER64 			     ((uint32_t)0x00080000)
-#define CR_PG_STRT               ((uint32_t)0x00200000)
+#define CR_PG_Set                  ((uint32_t)0x00000001)
+#define CR_PG_Reset                ((uint32_t)0x00001FFE)
+#define CR_PER_Set                 ((uint32_t)0x00000002)
+#define CR_PER_Reset               ((uint32_t)0x00001FFD)
+#define CR_MER_Set                 ((uint32_t)0x00000004)
+#define CR_MER_Reset               ((uint32_t)0x00001FFB)
+#define CR_OPTPG_Set               ((uint32_t)0x00000010)
+#define CR_OPTPG_Reset             ((uint32_t)0x00001FEF)
+#define CR_OPTER_Set               ((uint32_t)0x00000020)
+#define CR_OPTER_Reset             ((uint32_t)0x00001FDF)
+#define CR_STRT_Set                ((uint32_t)0x00000040)
+#define CR_LOCK_Set                ((uint32_t)0x00000080)
+#define CR_FAST_LOCK_Set           ((uint32_t)0x00008000)
+#define CR_PAGE_PG                 ((uint32_t)0x00010000)
+#define CR_PAGE_ER                 ((uint32_t)0x00020000)
+#define CR_BER32                   ((uint32_t)0x00040000)
+#define CR_BER64                   ((uint32_t)0x00080000)
+#define CR_PG_STRT                 ((uint32_t)0x00200000)
 
 /* FLASH Status Register bits */
-#define SR_BSY 					 ((uint32_t)0x00000001)
-#define SR_WR_BSY 			     ((uint32_t)0x00000002)
-#define SR_WRPRTERR 		     ((uint32_t)0x00000010)
-#define SR_EOP 					 ((uint32_t)0x00000020)
+#define SR_BSY                     ((uint32_t)0x00000001)
+#define SR_WR_BSY                  ((uint32_t)0x00000002)
+#define SR_WRPRTERR                ((uint32_t)0x00000010)
+#define SR_EOP                     ((uint32_t)0x00000020)
 
 /* FLASH Mask */
-#define RDPRT_Mask               ((uint32_t)0x00000002)
-#define WRP0_Mask                ((uint32_t)0x000000FF)
-#define WRP1_Mask                ((uint32_t)0x0000FF00)
-#define WRP2_Mask                ((uint32_t)0x00FF0000)
-#define WRP3_Mask                ((uint32_t)0xFF000000)
-#define OB_USER_BFB2             ((uint16_t)0x0008)
+#define RDPRT_Mask                 ((uint32_t)0x00000002)
+#define WRP0_Mask                  ((uint32_t)0x000000FF)
+#define WRP1_Mask                  ((uint32_t)0x0000FF00)
+#define WRP2_Mask                  ((uint32_t)0x00FF0000)
+#define WRP3_Mask                  ((uint32_t)0xFF000000)
+#define OB_USER_BFB2               ((uint16_t)0x0008)
 
 /* FLASH Keys */
-#define RDP_Key                  ((uint16_t)0x00A5)
-#define FLASH_KEY1               ((uint32_t)0x45670123)
-#define FLASH_KEY2               ((uint32_t)0xCDEF89AB)
+#define RDP_Key                    ((uint16_t)0x00A5)
+#define FLASH_KEY1                 ((uint32_t)0x45670123)
+#define FLASH_KEY2                 ((uint32_t)0xCDEF89AB)
 
 /* FLASH BANK address */
-#define FLASH_BANK1_END_ADDRESS  ((uint32_t)0x807FFFF)
+#define FLASH_BANK1_END_ADDRESS    ((uint32_t)0x807FFFF)
 
-/* Delay definition */   
-#define EraseTimeout             ((uint32_t)0x000B0000)
-#define ProgramTimeout           ((uint32_t)0x00005000)
+/* Delay definition */
+#define EraseTimeout               ((uint32_t)0x000B0000)
+#define ProgramTimeout             ((uint32_t)0x00005000)
 
 /*********************************************************************
  * @fn      FLASH_Unlock
@@ -62,9 +64,9 @@
  */
 void FLASH_Unlock(void)
 {
-  /* Authorize the FPEC of Bank1 Access */
-  FLASH->KEYR = FLASH_KEY1;
-  FLASH->KEYR = FLASH_KEY2;
+    /* Authorize the FPEC of Bank1 Access */
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
 }
 
 /*********************************************************************
@@ -77,8 +79,8 @@ void FLASH_Unlock(void)
  */
 void FLASH_UnlockBank1(void)
 {
-  FLASH->KEYR = FLASH_KEY1;
-  FLASH->KEYR = FLASH_KEY2;
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
 }
 
 /*********************************************************************
@@ -90,7 +92,7 @@ void FLASH_UnlockBank1(void)
  */
 void FLASH_Lock(void)
 {
-  FLASH->CTLR |= CR_LOCK_Set;
+    FLASH->CTLR |= CR_LOCK_Set;
 }
 
 /*********************************************************************
@@ -102,7 +104,7 @@ void FLASH_Lock(void)
  */
 void FLASH_LockBank1(void)
 {
-  FLASH->CTLR |= CR_LOCK_Set;
+    FLASH->CTLR |= CR_LOCK_Set;
 }
 
 /*********************************************************************
@@ -117,22 +119,22 @@ void FLASH_LockBank1(void)
  */
 FLASH_Status FLASH_ErasePage(uint32_t Page_Address)
 {
-  FLASH_Status status = FLASH_COMPLETE;
+    FLASH_Status status = FLASH_COMPLETE;
 
-  status = FLASH_WaitForLastOperation(EraseTimeout);
-  
-  if(status == FLASH_COMPLETE)
-  { 
-    FLASH->CTLR|= CR_PER_Set;
-    FLASH->ADDR = Page_Address; 
-    FLASH->CTLR|= CR_STRT_Set;
- 
-	status = FLASH_WaitForLastOperation(EraseTimeout);
-    
-    FLASH->CTLR &= CR_PER_Reset;
-  }
-	
-  return status;
+    status = FLASH_WaitForLastOperation(EraseTimeout);
+
+    if(status == FLASH_COMPLETE)
+    {
+        FLASH->CTLR |= CR_PER_Set;
+        FLASH->ADDR = Page_Address;
+        FLASH->CTLR |= CR_STRT_Set;
+
+        status = FLASH_WaitForLastOperation(EraseTimeout);
+
+        FLASH->CTLR &= CR_PER_Reset;
+    }
+
+    return status;
 }
 
 /*********************************************************************
@@ -145,20 +147,20 @@ FLASH_Status FLASH_ErasePage(uint32_t Page_Address)
  */
 FLASH_Status FLASH_EraseAllPages(void)
 {
-  FLASH_Status status = FLASH_COMPLETE;
+    FLASH_Status status = FLASH_COMPLETE;
 
-  status = FLASH_WaitForLastOperation(EraseTimeout);
-  if(status == FLASH_COMPLETE)
-  {
-     FLASH->CTLR |= CR_MER_Set;
-     FLASH->CTLR |= CR_STRT_Set;
-    
     status = FLASH_WaitForLastOperation(EraseTimeout);
+    if(status == FLASH_COMPLETE)
+    {
+        FLASH->CTLR |= CR_MER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
 
-    FLASH->CTLR &= CR_MER_Reset;
-  }
+        status = FLASH_WaitForLastOperation(EraseTimeout);
 
-  return status;
+        FLASH->CTLR &= CR_MER_Reset;
+    }
+
+    return status;
 }
 
 /*********************************************************************
@@ -171,19 +173,19 @@ FLASH_Status FLASH_EraseAllPages(void)
  */
 FLASH_Status FLASH_EraseAllBank1Pages(void)
 {
-  FLASH_Status status = FLASH_COMPLETE;
-  status = FLASH_WaitForLastBank1Operation(EraseTimeout);
-  
-  if(status == FLASH_COMPLETE)
-  {
-     FLASH->CTLR |= CR_MER_Set;
-     FLASH->CTLR |= CR_STRT_Set;
-
+    FLASH_Status status = FLASH_COMPLETE;
     status = FLASH_WaitForLastBank1Operation(EraseTimeout);
-    
-    FLASH->CTLR &= CR_MER_Reset;
-  }    
-  return status;
+
+    if(status == FLASH_COMPLETE)
+    {
+        FLASH->CTLR |= CR_MER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
+
+        status = FLASH_WaitForLastBank1Operation(EraseTimeout);
+
+        FLASH->CTLR &= CR_MER_Reset;
+    }
+    return status;
 }
 
 /*********************************************************************
@@ -196,56 +198,56 @@ FLASH_Status FLASH_EraseAllBank1Pages(void)
  */
 FLASH_Status FLASH_EraseOptionBytes(void)
 {
-    uint16_t rdptmp = RDP_Key;
-      uint32_t Address = 0x1FFFF800;
-      __IO uint8_t i;
+    uint16_t     rdptmp = RDP_Key;
+    uint32_t     Address = 0x1FFFF800;
+    __IO uint8_t i;
 
     FLASH_Status status = FLASH_COMPLETE;
     if(FLASH_GetReadOutProtectionStatus() != RESET)
     {
-      rdptmp = 0x00;
+        rdptmp = 0x00;
     }
     status = FLASH_WaitForLastOperation(EraseTimeout);
     if(status == FLASH_COMPLETE)
     {
-      FLASH->OBKEYR = FLASH_KEY1;
-      FLASH->OBKEYR = FLASH_KEY2;
+        FLASH->OBKEYR = FLASH_KEY1;
+        FLASH->OBKEYR = FLASH_KEY2;
 
-      FLASH->CTLR |= CR_OPTER_Set;
-      FLASH->CTLR |= CR_STRT_Set;
-      status = FLASH_WaitForLastOperation(EraseTimeout);
+        FLASH->CTLR |= CR_OPTER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
+        status = FLASH_WaitForLastOperation(EraseTimeout);
 
-      if(status == FLASH_COMPLETE)
-      {
-        FLASH->CTLR &= CR_OPTER_Reset;
+        if(status == FLASH_COMPLETE)
+        {
+            FLASH->CTLR &= CR_OPTER_Reset;
+            FLASH->CTLR |= CR_OPTPG_Set;
+            OB->RDPR = (uint16_t)rdptmp;
+            status = FLASH_WaitForLastOperation(ProgramTimeout);
+
+            if(status != FLASH_TIMEOUT)
+            {
+                FLASH->CTLR &= CR_OPTPG_Reset;
+            }
+        }
+        else
+        {
+            if(status != FLASH_TIMEOUT)
+            {
+                FLASH->CTLR &= CR_OPTPG_Reset;
+            }
+        }
+
+        /* Write 0xFF */
         FLASH->CTLR |= CR_OPTPG_Set;
-        OB->RDPR = (uint16_t)rdptmp;
-        status = FLASH_WaitForLastOperation(ProgramTimeout);
 
-        if(status != FLASH_TIMEOUT)
+        for(i = 0; i < 8; i++)
         {
-          FLASH->CTLR &= CR_OPTPG_Reset;
+            *(uint16_t *)(Address + 2 * i) = 0x00FF;
+            while(FLASH->STATR & SR_BSY)
+                ;
         }
-      }
-      else
-      {
-        if (status != FLASH_TIMEOUT)
-        {
-          FLASH->CTLR &= CR_OPTPG_Reset;
-        }
-      }
 
-      /* Write 0xFF */
-          FLASH->CTLR |= CR_OPTPG_Set;
-
-          for(i=0; i<8; i++){
-              *(uint16_t*)(Address + 2*i) = 0x00FF;
-              while(FLASH->STATR & SR_BSY);
-          }
-
-          FLASH->CTLR &= ~CR_OPTPG_Set;
-
-
+        FLASH->CTLR &= ~CR_OPTPG_Set;
     }
     return status;
 }
@@ -263,32 +265,32 @@ FLASH_Status FLASH_EraseOptionBytes(void)
  */
 FLASH_Status FLASH_ProgramWord(uint32_t Address, uint32_t Data)
 {
-  FLASH_Status status = FLASH_COMPLETE;
-  __IO uint32_t tmp = 0;
+    FLASH_Status  status = FLASH_COMPLETE;
+    __IO uint32_t tmp = 0;
 
-  status = FLASH_WaitForLastOperation(ProgramTimeout);
-  
-  if(status == FLASH_COMPLETE)
-  {
-    FLASH->CTLR |= CR_PG_Set;
-  
-    *(__IO uint16_t*)Address = (uint16_t)Data;
     status = FLASH_WaitForLastOperation(ProgramTimeout);
- 
+
     if(status == FLASH_COMPLETE)
     {
-      tmp = Address + 2;
-      *(__IO uint16_t*) tmp = Data >> 16;
-      status = FLASH_WaitForLastOperation(ProgramTimeout);
-      FLASH->CTLR &= CR_PG_Reset;
+        FLASH->CTLR |= CR_PG_Set;
+
+        *(__IO uint16_t *)Address = (uint16_t)Data;
+        status = FLASH_WaitForLastOperation(ProgramTimeout);
+
+        if(status == FLASH_COMPLETE)
+        {
+            tmp = Address + 2;
+            *(__IO uint16_t *)tmp = Data >> 16;
+            status = FLASH_WaitForLastOperation(ProgramTimeout);
+            FLASH->CTLR &= CR_PG_Reset;
+        }
+        else
+        {
+            FLASH->CTLR &= CR_PG_Reset;
+        }
     }
-    else
-    {
-      FLASH->CTLR &= CR_PG_Reset;
-    }
-  }   
-	
-  return status;
+
+    return status;
 }
 
 /*********************************************************************
@@ -304,19 +306,19 @@ FLASH_Status FLASH_ProgramWord(uint32_t Address, uint32_t Data)
  */
 FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
 {
-  FLASH_Status status = FLASH_COMPLETE;
+    FLASH_Status status = FLASH_COMPLETE;
 
-  status = FLASH_WaitForLastOperation(ProgramTimeout);
-
-  if(status == FLASH_COMPLETE)
-  {
-    FLASH->CTLR |= CR_PG_Set;
-    *(__IO uint16_t*)Address = Data;
     status = FLASH_WaitForLastOperation(ProgramTimeout);
-    FLASH->CTLR &= CR_PG_Reset;
-  } 
 
-  return status;
+    if(status == FLASH_COMPLETE)
+    {
+        FLASH->CTLR |= CR_PG_Set;
+        *(__IO uint16_t *)Address = Data;
+        status = FLASH_WaitForLastOperation(ProgramTimeout);
+        FLASH->CTLR &= CR_PG_Reset;
+    }
+
+    return status;
 }
 
 /*********************************************************************
@@ -333,41 +335,45 @@ FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
 FLASH_Status FLASH_ProgramOptionByteData(uint32_t Address, uint8_t Data)
 {
     FLASH_Status status = FLASH_COMPLETE;
-    uint32_t Addr = 0x1FFFF800;
+    uint32_t     Addr = 0x1FFFF800;
     __IO uint8_t i;
-    uint16_t pbuf[8];
+    uint16_t     pbuf[8];
 
-  status = FLASH_WaitForLastOperation(ProgramTimeout);
-  if(status == FLASH_COMPLETE)
-  {
-    FLASH->OBKEYR = FLASH_KEY1;
-    FLASH->OBKEYR = FLASH_KEY2;
+    status = FLASH_WaitForLastOperation(ProgramTimeout);
+    if(status == FLASH_COMPLETE)
+    {
+        FLASH->OBKEYR = FLASH_KEY1;
+        FLASH->OBKEYR = FLASH_KEY2;
 
         /* Read optionbytes */
-        for(i=0; i<8; i++){
-            pbuf[i] = *(uint16_t*)(Addr + 2*i);
+        for(i = 0; i < 8; i++)
+        {
+            pbuf[i] = *(uint16_t *)(Addr + 2 * i);
         }
 
         /* Erase optionbytes */
         FLASH->CTLR |= CR_OPTER_Set;
-    FLASH->CTLR |= CR_STRT_Set;
-        while(FLASH->STATR & SR_BSY);
+        FLASH->CTLR |= CR_STRT_Set;
+        while(FLASH->STATR & SR_BSY)
+            ;
         FLASH->CTLR &= ~CR_OPTER_Set;
 
         /* Write optionbytes */
-        pbuf[((Address-0x1FFFF800)/2)] = ((((uint16_t)~(Data))<<8)|((uint16_t)Data));
+        pbuf[((Address - 0x1FFFF800) / 2)] = ((((uint16_t) ~(Data)) << 8) | ((uint16_t)Data));
 
         FLASH->CTLR |= CR_OPTPG_Set;
 
-        for(i=0; i<8; i++){
-            *(uint16_t*)(Addr + 2*i) = pbuf[i];
-            while(FLASH->STATR & SR_BSY);
+        for(i = 0; i < 8; i++)
+        {
+            *(uint16_t *)(Addr + 2 * i) = pbuf[i];
+            while(FLASH->STATR & SR_BSY)
+                ;
         }
 
         FLASH->CTLR &= ~CR_OPTPG_Set;
-  }
+    }
 
-  return status;
+    return status;
 }
 
 /*********************************************************************
@@ -382,11 +388,11 @@ FLASH_Status FLASH_ProgramOptionByteData(uint32_t Address, uint8_t Data)
  */
 FLASH_Status FLASH_EnableWriteProtection(uint32_t FLASH_Sectors)
 {
-    uint16_t WRP0_Data = 0xFFFF, WRP1_Data = 0xFFFF, WRP2_Data = 0xFFFF, WRP3_Data = 0xFFFF;
+    uint16_t     WRP0_Data = 0xFFFF, WRP1_Data = 0xFFFF, WRP2_Data = 0xFFFF, WRP3_Data = 0xFFFF;
     FLASH_Status status = FLASH_COMPLETE;
-      uint32_t Addr = 0x1FFFF800;
-      __IO uint8_t i;
-      uint16_t pbuf[8];
+    uint32_t     Addr = 0x1FFFF800;
+    __IO uint8_t i;
+    uint16_t     pbuf[8];
 
     FLASH_Sectors = (uint32_t)(~FLASH_Sectors);
     WRP0_Data = (uint16_t)(FLASH_Sectors & WRP0_Mask);
@@ -395,32 +401,39 @@ FLASH_Status FLASH_EnableWriteProtection(uint32_t FLASH_Sectors)
     WRP3_Data = (uint16_t)((FLASH_Sectors & WRP3_Mask) >> 24);
 
     status = FLASH_WaitForLastOperation(ProgramTimeout);
-    
+
     if(status == FLASH_COMPLETE)
     {
-      FLASH->OBKEYR = FLASH_KEY1;
-      FLASH->OBKEYR = FLASH_KEY2;
+        FLASH->OBKEYR = FLASH_KEY1;
+        FLASH->OBKEYR = FLASH_KEY2;
 
-          /* Read optionbytes */
-          for(i=0; i<8; i++){
-              pbuf[i] = *(uint16_t*)(Addr + 2*i);
-          }
+        /* Read optionbytes */
+        for(i = 0; i < 8; i++)
+        {
+            pbuf[i] = *(uint16_t *)(Addr + 2 * i);
+        }
 
-          /* Erase optionbytes */
-          FLASH->CTLR |= CR_OPTER_Set;
-      FLASH->CTLR |= CR_STRT_Set;
-          while(FLASH->STATR & SR_BSY);
-          FLASH->CTLR &= ~CR_OPTER_Set;
-          
-          /* Write optionbytes */
-      pbuf[4] = WRP0_Data;pbuf[5] = WRP1_Data;pbuf[6] = WRP2_Data;pbuf[7] = WRP3_Data;
+        /* Erase optionbytes */
+        FLASH->CTLR |= CR_OPTER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
+        while(FLASH->STATR & SR_BSY)
+            ;
+        FLASH->CTLR &= ~CR_OPTER_Set;
 
-          FLASH->CTLR |= CR_OPTPG_Set;
-          for(i=0; i<8; i++){
-              *(uint16_t*)(Addr + 2*i) = pbuf[i];
-              while(FLASH->STATR & SR_BSY);
-          }
-          FLASH->CTLR &= ~CR_OPTPG_Set;
+        /* Write optionbytes */
+        pbuf[4] = WRP0_Data;
+        pbuf[5] = WRP1_Data;
+        pbuf[6] = WRP2_Data;
+        pbuf[7] = WRP3_Data;
+
+        FLASH->CTLR |= CR_OPTPG_Set;
+        for(i = 0; i < 8; i++)
+        {
+            *(uint16_t *)(Addr + 2 * i) = pbuf[i];
+            while(FLASH->STATR & SR_BSY)
+                ;
+        }
+        FLASH->CTLR &= ~CR_OPTPG_Set;
     }
     return status;
 }
@@ -438,38 +451,43 @@ FLASH_Status FLASH_EnableWriteProtection(uint32_t FLASH_Sectors)
 FLASH_Status FLASH_ReadOutProtection(FunctionalState NewState)
 {
     FLASH_Status status = FLASH_COMPLETE;
-      uint32_t Addr = 0x1FFFF800;
-      __IO uint8_t i;
-      uint16_t pbuf[8];
+    uint32_t     Addr = 0x1FFFF800;
+    __IO uint8_t i;
+    uint16_t     pbuf[8];
 
     status = FLASH_WaitForLastOperation(EraseTimeout);
     if(status == FLASH_COMPLETE)
     {
-      FLASH->OBKEYR = FLASH_KEY1;
-      FLASH->OBKEYR = FLASH_KEY2;
+        FLASH->OBKEYR = FLASH_KEY1;
+        FLASH->OBKEYR = FLASH_KEY2;
 
-          /* Read optionbytes */
-          for(i=0; i<8; i++){
-              pbuf[i] = *(uint16_t*)(Addr + 2*i);
-          }
+        /* Read optionbytes */
+        for(i = 0; i < 8; i++)
+        {
+            pbuf[i] = *(uint16_t *)(Addr + 2 * i);
+        }
 
-          /* Erase optionbytes */
-          FLASH->CTLR |= CR_OPTER_Set;
-      FLASH->CTLR |= CR_STRT_Set;
-          while(FLASH->STATR & SR_BSY);
-          FLASH->CTLR &= ~CR_OPTER_Set;
+        /* Erase optionbytes */
+        FLASH->CTLR |= CR_OPTER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
+        while(FLASH->STATR & SR_BSY)
+            ;
+        FLASH->CTLR &= ~CR_OPTER_Set;
 
-          /* Write optionbytes */
-      if(NewState == DISABLE) pbuf[0] = 0x5AA5;
-          else pbuf[0] = 0x00FF;
+        /* Write optionbytes */
+        if(NewState == DISABLE)
+            pbuf[0] = 0x5AA5;
+        else
+            pbuf[0] = 0x00FF;
 
-          FLASH->CTLR |= CR_OPTPG_Set;
-          for(i=0; i<8; i++){
-              *(uint16_t*)(Addr + 2*i) = pbuf[i];
-              while(FLASH->STATR & SR_BSY);
-          }
-          FLASH->CTLR &= ~CR_OPTPG_Set;
-
+        FLASH->CTLR |= CR_OPTPG_Set;
+        for(i = 0; i < 8; i++)
+        {
+            *(uint16_t *)(Addr + 2 * i) = pbuf[i];
+            while(FLASH->STATR & SR_BSY)
+                ;
+        }
+        FLASH->CTLR &= ~CR_OPTPG_Set;
     }
     return status;
 }
@@ -495,9 +513,9 @@ FLASH_Status FLASH_ReadOutProtection(FunctionalState NewState)
 FLASH_Status FLASH_UserOptionByteConfig(uint16_t OB_IWDG, uint16_t OB_STOP, uint16_t OB_STDBY)
 {
     FLASH_Status status = FLASH_COMPLETE;
-      uint32_t Addr = 0x1FFFF800;
-      __IO uint8_t i;
-      uint16_t pbuf[8];
+    uint32_t     Addr = 0x1FFFF800;
+    __IO uint8_t i;
+    uint16_t     pbuf[8];
 
     FLASH->OBKEYR = FLASH_KEY1;
     FLASH->OBKEYR = FLASH_KEY2;
@@ -505,26 +523,30 @@ FLASH_Status FLASH_UserOptionByteConfig(uint16_t OB_IWDG, uint16_t OB_STOP, uint
 
     if(status == FLASH_COMPLETE)
     {
-          /* Read optionbytes */
-          for(i=0; i<8; i++){
-              pbuf[i] = *(uint16_t*)(Addr + 2*i);
-          }
+        /* Read optionbytes */
+        for(i = 0; i < 8; i++)
+        {
+            pbuf[i] = *(uint16_t *)(Addr + 2 * i);
+        }
 
-          /* Erase optionbytes */
-          FLASH->CTLR |= CR_OPTER_Set;
-      FLASH->CTLR |= CR_STRT_Set;
-          while(FLASH->STATR & SR_BSY);
-          FLASH->CTLR &= ~CR_OPTER_Set;
+        /* Erase optionbytes */
+        FLASH->CTLR |= CR_OPTER_Set;
+        FLASH->CTLR |= CR_STRT_Set;
+        while(FLASH->STATR & SR_BSY)
+            ;
+        FLASH->CTLR &= ~CR_OPTER_Set;
 
-          /* Write optionbytes */
-          pbuf[1] = OB_IWDG | (uint16_t)(OB_STOP | (uint16_t)(OB_STDBY | ((uint16_t)0xF8)));
+        /* Write optionbytes */
+        pbuf[1] = OB_IWDG | (uint16_t)(OB_STOP | (uint16_t)(OB_STDBY | ((uint16_t)0xF8)));
 
-          FLASH->CTLR |= CR_OPTPG_Set;
-          for(i=0; i<8; i++){
-              *(uint16_t*)(Addr + 2*i) = pbuf[i];
-              while(FLASH->STATR & SR_BSY);
-          }
-          FLASH->CTLR &= ~CR_OPTPG_Set;
+        FLASH->CTLR |= CR_OPTPG_Set;
+        for(i = 0; i < 8; i++)
+        {
+            *(uint16_t *)(Addr + 2 * i) = pbuf[i];
+            while(FLASH->STATR & SR_BSY)
+                ;
+        }
+        FLASH->CTLR &= ~CR_OPTPG_Set;
     }
     return status;
 }
@@ -539,7 +561,7 @@ FLASH_Status FLASH_UserOptionByteConfig(uint16_t OB_IWDG, uint16_t OB_STOP, uint
  */
 uint32_t FLASH_GetUserOptionByte(void)
 {
-  return (uint32_t)(FLASH->OBR >> 2);
+    return (uint32_t)(FLASH->OBR >> 2);
 }
 
 /*********************************************************************
@@ -551,7 +573,7 @@ uint32_t FLASH_GetUserOptionByte(void)
  */
 uint32_t FLASH_GetWriteProtectionOptionByte(void)
 {
-  return (uint32_t)(FLASH->WPR);
+    return (uint32_t)(FLASH->WPR);
 }
 
 /*********************************************************************
@@ -563,16 +585,16 @@ uint32_t FLASH_GetWriteProtectionOptionByte(void)
  */
 FlagStatus FLASH_GetReadOutProtectionStatus(void)
 {
-  FlagStatus readoutstatus = RESET;
-  if ((FLASH->OBR & RDPRT_Mask) != (uint32_t)RESET)
-  {
-    readoutstatus = SET;
-  }
-  else
-  {
-    readoutstatus = RESET;
-  }
-  return readoutstatus;
+    FlagStatus readoutstatus = RESET;
+    if((FLASH->OBR & RDPRT_Mask) != (uint32_t)RESET)
+    {
+        readoutstatus = SET;
+    }
+    else
+    {
+        readoutstatus = RESET;
+    }
+    return readoutstatus;
 }
 
 /*********************************************************************
@@ -589,14 +611,14 @@ FlagStatus FLASH_GetReadOutProtectionStatus(void)
  */
 void FLASH_ITConfig(uint32_t FLASH_IT, FunctionalState NewState)
 {
-  if(NewState != DISABLE)
-  {
-    FLASH->CTLR |= FLASH_IT;
-  }
-  else
-  {
-    FLASH->CTLR &= ~(uint32_t)FLASH_IT;
-  }
+    if(NewState != DISABLE)
+    {
+        FLASH->CTLR |= FLASH_IT;
+    }
+    else
+    {
+        FLASH->CTLR &= ~(uint32_t)FLASH_IT;
+    }
 }
 
 /*********************************************************************
@@ -615,31 +637,31 @@ void FLASH_ITConfig(uint32_t FLASH_IT, FunctionalState NewState)
  */
 FlagStatus FLASH_GetFlagStatus(uint32_t FLASH_FLAG)
 {
-  FlagStatus bitstatus = RESET;
+    FlagStatus bitstatus = RESET;
 
-  if(FLASH_FLAG == FLASH_FLAG_OPTERR) 
-  {
-    if((FLASH->OBR & FLASH_FLAG_OPTERR) != (uint32_t)RESET)
+    if(FLASH_FLAG == FLASH_FLAG_OPTERR)
     {
-      bitstatus = SET;
+        if((FLASH->OBR & FLASH_FLAG_OPTERR) != (uint32_t)RESET)
+        {
+            bitstatus = SET;
+        }
+        else
+        {
+            bitstatus = RESET;
+        }
     }
     else
     {
-      bitstatus = RESET;
+        if((FLASH->STATR & FLASH_FLAG) != (uint32_t)RESET)
+        {
+            bitstatus = SET;
+        }
+        else
+        {
+            bitstatus = RESET;
+        }
     }
-  }
-  else
-  {
-   if((FLASH->STATR & FLASH_FLAG) != (uint32_t)RESET)
-    {
-      bitstatus = SET;
-    }
-    else
-    {
-      bitstatus = RESET;
-    }
-  }
-  return bitstatus;
+    return bitstatus;
 }
 
 /*********************************************************************
@@ -656,9 +678,7 @@ FlagStatus FLASH_GetFlagStatus(uint32_t FLASH_FLAG)
  */
 void FLASH_ClearFlag(uint32_t FLASH_FLAG)
 {
-
-  FLASH->STATR = FLASH_FLAG;
-
+    FLASH->STATR = FLASH_FLAG;
 }
 
 /*********************************************************************
@@ -671,31 +691,31 @@ void FLASH_ClearFlag(uint32_t FLASH_FLAG)
  */
 FLASH_Status FLASH_GetStatus(void)
 {
-  FLASH_Status flashstatus = FLASH_COMPLETE;
-  
-  if((FLASH->STATR & FLASH_FLAG_BSY) == FLASH_FLAG_BSY) 
-  {
-    flashstatus = FLASH_BUSY;
-  }
-  else 
-  {  
-    if((FLASH->STATR & FLASH_FLAG_PGERR) != 0)
-    { 
-      flashstatus = FLASH_ERROR_PG;
-    }
-    else 
+    FLASH_Status flashstatus = FLASH_COMPLETE;
+
+    if((FLASH->STATR & FLASH_FLAG_BSY) == FLASH_FLAG_BSY)
     {
-      if((FLASH->STATR & FLASH_FLAG_WRPRTERR) != 0 )
-      {
-        flashstatus = FLASH_ERROR_WRP;
-      }
-      else
-      {
-        flashstatus = FLASH_COMPLETE;
-      }
+        flashstatus = FLASH_BUSY;
     }
-  }
-  return flashstatus;
+    else
+    {
+        if((FLASH->STATR & FLASH_FLAG_PGERR) != 0)
+        {
+            flashstatus = FLASH_ERROR_PG;
+        }
+        else
+        {
+            if((FLASH->STATR & FLASH_FLAG_WRPRTERR) != 0)
+            {
+                flashstatus = FLASH_ERROR_WRP;
+            }
+            else
+            {
+                flashstatus = FLASH_COMPLETE;
+            }
+        }
+    }
+    return flashstatus;
 }
 
 /*********************************************************************
@@ -708,31 +728,31 @@ FLASH_Status FLASH_GetStatus(void)
  */
 FLASH_Status FLASH_GetBank1Status(void)
 {
-  FLASH_Status flashstatus = FLASH_COMPLETE;
-  
-  if((FLASH->STATR & FLASH_FLAG_BANK1_BSY) == FLASH_FLAG_BSY) 
-  {
-    flashstatus = FLASH_BUSY;
-  }
-  else 
-  {  
-    if((FLASH->STATR & FLASH_FLAG_BANK1_PGERR) != 0)
-    { 
-      flashstatus = FLASH_ERROR_PG;
-    }
-    else 
+    FLASH_Status flashstatus = FLASH_COMPLETE;
+
+    if((FLASH->STATR & FLASH_FLAG_BANK1_BSY) == FLASH_FLAG_BSY)
     {
-      if((FLASH->STATR & FLASH_FLAG_BANK1_WRPRTERR) != 0 )
-      {
-        flashstatus = FLASH_ERROR_WRP;
-      }
-      else
-      {
-        flashstatus = FLASH_COMPLETE;
-      }
+        flashstatus = FLASH_BUSY;
     }
-  }
-  return flashstatus;
+    else
+    {
+        if((FLASH->STATR & FLASH_FLAG_BANK1_PGERR) != 0)
+        {
+            flashstatus = FLASH_ERROR_PG;
+        }
+        else
+        {
+            if((FLASH->STATR & FLASH_FLAG_BANK1_WRPRTERR) != 0)
+            {
+                flashstatus = FLASH_ERROR_WRP;
+            }
+            else
+            {
+                flashstatus = FLASH_COMPLETE;
+            }
+        }
+    }
+    return flashstatus;
 }
 
 /*********************************************************************
@@ -746,20 +766,20 @@ FLASH_Status FLASH_GetBank1Status(void)
  *        FLASH_ERROR_WRP or FLASH_COMPLETE.
  */
 FLASH_Status FLASH_WaitForLastOperation(uint32_t Timeout)
-{ 
-  FLASH_Status status = FLASH_COMPLETE;
-   
-  status = FLASH_GetBank1Status();
-  while((status == FLASH_BUSY) && (Timeout != 0x00))
-  {
+{
+    FLASH_Status status = FLASH_COMPLETE;
+
     status = FLASH_GetBank1Status();
-    Timeout--;
-  }
-  if(Timeout == 0x00 )
-  {
-    status = FLASH_TIMEOUT;
-  }
-  return status;
+    while((status == FLASH_BUSY) && (Timeout != 0x00))
+    {
+        status = FLASH_GetBank1Status();
+        Timeout--;
+    }
+    if(Timeout == 0x00)
+    {
+        status = FLASH_TIMEOUT;
+    }
+    return status;
 }
 
 /*********************************************************************
@@ -773,20 +793,20 @@ FLASH_Status FLASH_WaitForLastOperation(uint32_t Timeout)
  *        FLASH_ERROR_WRP or FLASH_COMPLETE.
  */
 FLASH_Status FLASH_WaitForLastBank1Operation(uint32_t Timeout)
-{ 
-  FLASH_Status status = FLASH_COMPLETE;
-   
-  status = FLASH_GetBank1Status();
-  while((status == FLASH_FLAG_BANK1_BSY) && (Timeout != 0x00))
-  {
+{
+    FLASH_Status status = FLASH_COMPLETE;
+
     status = FLASH_GetBank1Status();
-    Timeout--;
-  }
-  if(Timeout == 0x00 )
-  {
-    status = FLASH_TIMEOUT;
-  }
-  return status;
+    while((status == FLASH_FLAG_BANK1_BSY) && (Timeout != 0x00))
+    {
+        status = FLASH_GetBank1Status();
+        Timeout--;
+    }
+    if(Timeout == 0x00)
+    {
+        status = FLASH_TIMEOUT;
+    }
+    return status;
 }
 
 /*********************************************************************
@@ -798,10 +818,10 @@ FLASH_Status FLASH_WaitForLastBank1Operation(uint32_t Timeout)
  */
 void FLASH_Unlock_Fast(void)
 {
-  /* Authorize the FPEC of Bank1 Access */
-  FLASH->KEYR = FLASH_KEY1;
-  FLASH->KEYR = FLASH_KEY2;
-	
+    /* Authorize the FPEC of Bank1 Access */
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
+
     /* Fast program mode unlock */
     FLASH->MODEKEYR = FLASH_KEY1;
     FLASH->MODEKEYR = FLASH_KEY2;
@@ -816,7 +836,7 @@ void FLASH_Unlock_Fast(void)
  */
 void FLASH_Lock_Fast(void)
 {
-  FLASH->CTLR |= CR_LOCK_Set;
+    FLASH->CTLR |= CR_LOCK_Set;
 }
 
 /*********************************************************************
@@ -835,7 +855,8 @@ void FLASH_ErasePage_Fast(uint32_t Page_Address)
     FLASH->CTLR |= CR_PAGE_ER;
     FLASH->ADDR = Page_Address;
     FLASH->CTLR |= CR_STRT_Set;
-    while(FLASH->STATR & SR_BSY);
+    while(FLASH->STATR & SR_BSY)
+        ;
     FLASH->CTLR &= ~CR_PAGE_ER;
 }
 
@@ -855,7 +876,8 @@ void FLASH_EraseBlock_32K_Fast(uint32_t Block_Address)
     FLASH->CTLR |= CR_BER32;
     FLASH->ADDR = Block_Address;
     FLASH->CTLR |= CR_STRT_Set;
-    while(FLASH->STATR & SR_BSY);
+    while(FLASH->STATR & SR_BSY)
+        ;
     FLASH->CTLR &= ~CR_BER32;
 }
 
@@ -875,7 +897,8 @@ void FLASH_EraseBlock_64K_Fast(uint32_t Block_Address)
     FLASH->CTLR |= CR_BER64;
     FLASH->ADDR = Block_Address;
     FLASH->CTLR |= CR_STRT_Set;
-    while(FLASH->STATR & SR_BSY);
+    while(FLASH->STATR & SR_BSY)
+        ;
     FLASH->CTLR &= ~CR_BER64;
 }
 
@@ -888,27 +911,31 @@ void FLASH_EraseBlock_64K_Fast(uint32_t Block_Address)
  *
  * @return  none
  */
-void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t*pbuf)
+void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t *pbuf)
 {
-    uint8_t size=64;
+    uint8_t size = 64;
 
     Page_Address &= 0xFFFFFF00;
 
     FLASH->CTLR |= CR_PAGE_PG;
-    while(FLASH->STATR & SR_BSY);
-    while(FLASH->STATR & SR_WR_BSY);
+    while(FLASH->STATR & SR_BSY)
+        ;
+    while(FLASH->STATR & SR_WR_BSY)
+        ;
 
     while(size)
     {
-        *(uint32_t*)Page_Address = *(uint32_t*)pbuf;
+        *(uint32_t *)Page_Address = *(uint32_t *)pbuf;
         Page_Address += 4;
         pbuf += 1;
         size -= 1;
-        while (FLASH->STATR & SR_WR_BSY);
+        while(FLASH->STATR & SR_WR_BSY)
+            ;
     }
 
     FLASH->CTLR |= CR_PG_STRT;
-    while(FLASH->STATR & SR_BSY);
+    while(FLASH->STATR & SR_BSY)
+        ;
     FLASH->CTLR &= ~CR_PAGE_PG;
 }
 
@@ -926,15 +953,16 @@ void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t*pbuf)
  */
 void FLASH_Enhance_Mode(uint32_t FLASH_Enhance_CLK, FunctionalState NewState)
 {
-	FLASH->CTLR &= ~(1<<25);
-	FLASH->CTLR |= FLASH_Enhance_CLK;
-	
-	if(NewState){
-		FLASH->CTLR |= (1<<24);
-	}
-	else{
-		FLASH->CTLR &= ~(1<<24);
-		FLASH->CTLR |= (1<<22);
-	}	
-}
+    FLASH->CTLR &= ~(1 << 25);
+    FLASH->CTLR |= FLASH_Enhance_CLK;
 
+    if(NewState)
+    {
+        FLASH->CTLR |= (1 << 24);
+    }
+    else
+    {
+        FLASH->CTLR &= ~(1 << 24);
+        FLASH->CTLR |= (1 << 22);
+    }
+}

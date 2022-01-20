@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -100,15 +102,14 @@ void voice_record(void)
 #endif
 }
 
-
-
 /*********************************************************************
  * @fn      save_chara_para_mdl
  *
  * @brief   save mfcc characteristic parameters
  *
  * @param   v_dat-source data buffer
- *          addr -start address of parameter
+ *          addr-start address of parameter
+ *
  * @return  error code
  */
 uint8_t save_chara_para_mdl(uint16_t *v_dat, uint32_t addr)

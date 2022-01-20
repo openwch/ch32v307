@@ -3,10 +3,11 @@
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2021/06/06
-* Description        : This file provides all the CRC firmware functions. 
-*******************************************************************************/ 
+* Description        : This file provides all the CRC firmware functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "ch32v30x_crc.h"
-
 
 /*********************************************************************
  * @fn      CRC_ResetDR
@@ -17,7 +18,7 @@
  */
 void CRC_ResetDR(void)
 {
-  CRC->CTLR = CRC_CTLR_RESET;
+    CRC->CTLR = CRC_CTLR_RESET;
 }
 
 /*********************************************************************
@@ -31,9 +32,9 @@ void CRC_ResetDR(void)
  */
 uint32_t CRC_CalcCRC(uint32_t Data)
 {
-  CRC->DATAR = Data;
-  
-  return (CRC->DATAR);
+    CRC->DATAR = Data;
+
+    return (CRC->DATAR);
 }
 
 /*********************************************************************
@@ -48,14 +49,14 @@ uint32_t CRC_CalcCRC(uint32_t Data)
  */
 uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength)
 {
-  uint32_t index = 0;
-  
-  for(index = 0; index < BufferLength; index++)
-  {
-    CRC->DATAR = pBuffer[index];
-  }
-	
-  return (CRC->DATAR);
+    uint32_t index = 0;
+
+    for(index = 0; index < BufferLength; index++)
+    {
+        CRC->DATAR = pBuffer[index];
+    }
+
+    return (CRC->DATAR);
 }
 
 /*********************************************************************
@@ -67,7 +68,7 @@ uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength)
  */
 uint32_t CRC_GetCRC(void)
 {
-  return (CRC->IDATAR);
+    return (CRC->IDATAR);
 }
 
 /*********************************************************************
@@ -81,7 +82,7 @@ uint32_t CRC_GetCRC(void)
  */
 void CRC_SetIDRegister(uint8_t IDValue)
 {
-  CRC->IDATAR = IDValue;
+    CRC->IDATAR = IDValue;
 }
 
 /*********************************************************************
@@ -93,13 +94,5 @@ void CRC_SetIDRegister(uint8_t IDValue)
  */
 uint8_t CRC_GetIDRegister(void)
 {
-  return (CRC->IDATAR);
+    return (CRC->IDATAR);
 }
-
-
-
-
-
-
-
-

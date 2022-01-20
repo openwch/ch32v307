@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -197,7 +199,7 @@ int main(void)
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 
 #if (SPI_MODE == SLAVE_MODE)
-  printf("Slave Mode\r\n");
+    printf("Slave Mode\r\n");
 	Delay_Ms(1000);
 
 #endif

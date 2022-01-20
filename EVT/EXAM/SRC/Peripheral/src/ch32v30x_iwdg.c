@@ -4,13 +4,14 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the IWDG firmware functions.
-*******************************************************************************/ 
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "ch32v30x_iwdg.h"
-  
+
 /* CTLR register bit mask */
 #define CTLR_KEY_Reload    ((uint16_t)0xAAAA)
 #define CTLR_KEY_Enable    ((uint16_t)0xCCCC)
-
 
 /*********************************************************************
  * @fn      IWDG_WriteAccessCmd
@@ -28,7 +29,7 @@
  */
 void IWDG_WriteAccessCmd(uint16_t IWDG_WriteAccess)
 {
-  IWDG->CTLR = IWDG_WriteAccess;
+    IWDG->CTLR = IWDG_WriteAccess;
 }
 
 /*********************************************************************
@@ -49,7 +50,7 @@ void IWDG_WriteAccessCmd(uint16_t IWDG_WriteAccess)
  */
 void IWDG_SetPrescaler(uint8_t IWDG_Prescaler)
 {
-  IWDG->PSCR = IWDG_Prescaler;
+    IWDG->PSCR = IWDG_Prescaler;
 }
 
 /*********************************************************************
@@ -64,7 +65,7 @@ void IWDG_SetPrescaler(uint8_t IWDG_Prescaler)
  */
 void IWDG_SetReload(uint16_t Reload)
 {
-  IWDG->RLDR = Reload;
+    IWDG->RLDR = Reload;
 }
 
 /*********************************************************************
@@ -76,7 +77,7 @@ void IWDG_SetReload(uint16_t Reload)
  */
 void IWDG_ReloadCounter(void)
 {
-  IWDG->CTLR = CTLR_KEY_Reload;
+    IWDG->CTLR = CTLR_KEY_Reload;
 }
 
 /*********************************************************************
@@ -88,7 +89,7 @@ void IWDG_ReloadCounter(void)
  */
 void IWDG_Enable(void)
 {
-  IWDG->CTLR = CTLR_KEY_Enable;
+    IWDG->CTLR = CTLR_KEY_Enable;
 }
 
 /*********************************************************************
@@ -104,21 +105,16 @@ void IWDG_Enable(void)
  */
 FlagStatus IWDG_GetFlagStatus(uint16_t IWDG_FLAG)
 {
-  FlagStatus bitstatus = RESET;
+    FlagStatus bitstatus = RESET;
 
-  if ((IWDG->STATR & IWDG_FLAG) != (uint32_t)RESET)
-  {
-    bitstatus = SET;
-  }
-  else
-  {
-    bitstatus = RESET;
-  }
+    if((IWDG->STATR & IWDG_FLAG) != (uint32_t)RESET)
+    {
+        bitstatus = SET;
+    }
+    else
+    {
+        bitstatus = RESET;
+    }
 
-  return bitstatus;
+    return bitstatus;
 }
-
-
-
-
-

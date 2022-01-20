@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : USBOTG full speed host header file
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #ifndef __CH32V30X_USBOTG_HOST_H__
 #define __CH32V30X_USBOTG_HOST_H__
@@ -965,7 +967,7 @@ typedef struct  USB_STATUS
     UINT8   DeviceEndp0Size;        // USB0设备的端点0的最大包尺寸
     UINT8   DeviceCongValue;        // 设备配置值
 
-}USBHS_HOST,*PUSBHS_HOST;
+}USBFS_HOST,*PUSBFS_HOST;
 
 #define ERR_SUCCESS          0x00
 #define ERR_USB_CONNECT      0x15
@@ -1006,8 +1008,8 @@ extern void  OTG_RCC_Init(void);
 extern void  USBOTG_HostInit(FunctionalState stus);
 extern void  DisableRootHubPort(void);
 extern UINT8 AnalyzeRootHub(void);
-extern void  SetHostUsbAddr( PUSBHS_HOST pdev, UINT8 addr );
-extern void  SetUsbSpeed(UINT8 FullSpeed);
+extern void  SetHostUsbAddr( UINT8 addr );
+extern void  SetUsbSpeed( UINT8 FullSpeed );
 extern void  ResetRootHubPort(void);
 extern UINT8 EnableRootHubPort(void);
 extern UINT8 WaitUSB_Interrupt(void);
@@ -1015,16 +1017,16 @@ extern UINT8 USBHostTransact(UINT8 endp_pid, UINT8 tog, UINT32 timeout);
 extern UINT8 HostCtrlTransfer(PUINT8 DataBuf, PUINT8 RetLen);
 extern void  CopySetupReqPkg( const UINT8 *pReqPkt);
 extern UINT8 CtrlGetDeviceDescr(PUINT8 DataBuf);
-extern UINT8 CtrlGetConfigDescr(PUSBHS_HOST pdev, PUINT8 DataBuf );
-extern UINT8 CtrlSetUsbAddress( PUSBHS_HOST pdev,UINT8 addr );
+extern UINT8 CtrlGetConfigDescr( PUINT8 DataBuf );
+extern UINT8 CtrlSetUsbAddress( UINT8 addr );
 extern UINT8 CtrlSetUsbConfig(UINT8 cfg);
 extern UINT8 CtrlClearEndpStall(UINT8 endp);
 extern UINT8 CtrlSetUsbIntercace(UINT8 cfg);
-extern UINT8 USBOTG_HostEnum(PUSBHS_HOST pdev);
+extern UINT8 USBOTG_HostEnum( UINT8 *buf );
 extern UINT8 HubGetPortStatus(UINT8 HubPortIndex);
 extern UINT8 HubSetPortFeature(UINT8 HubPortIndex, UINT8 FeatureSelt);
-extern UINT8 HubClearPortFeature(UINT8 HubPortIndex, UINT8 FeatureSelt);
-extern void  Analysis_Descr(PUSBHS_HOST pusbdev,PUINT8 pdesc, UINT16 l);
+extern UINT8 HubClearPortFeature( UINT8 HubPortIndex, UINT8 FeatureSelt );
+extern void  Analysis_Descr( PUSBFS_HOST pusbdev,PUINT8 pdesc, UINT16 l );
 
 #endif
 

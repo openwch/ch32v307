@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -91,7 +93,6 @@ void GPIO_Config( void )
  * @return  0 - no key press
  *          1 - key press down
  */
-
 UINT8 Basic_Key_Handle( void )
 {
     UINT8 keyval = 0;

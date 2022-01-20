@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -65,7 +67,7 @@ void TIM1_Dead_Time_Init( u16 arr, u16 psc, u16 ccp )
 	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
 	TIM_OC1Init( TIM1, &TIM_OCInitStructure );
 
-  TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Disable;
+    TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Disable;
 	TIM_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Disable;
 	TIM_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_OFF;
 	TIM_BDTRInitStructure.TIM_DeadTime = 0xFF;

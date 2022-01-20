@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file contains the headers of the ETH Driver.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #ifndef __MY_ETH_DRIVER__
 #define __MY_ETH_DRIVER__
@@ -16,9 +18,9 @@
 #define ETH_TXBUFNB        2
 
 #if 0
-#define USE_LOOP_STRUCT  1
+#define USE_LOOP_STRUCT    1
 #else
-#define USE_CHAIN_STRUCT  1
+#define USE_CHAIN_STRUCT   1
 #endif
 
 typedef struct

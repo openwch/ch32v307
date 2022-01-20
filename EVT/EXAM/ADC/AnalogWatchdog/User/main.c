@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -30,7 +32,7 @@ void ADC_Function_Init(void)
 	NVIC_InitTypeDef NVIC_InitStructure={0};
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
@@ -48,7 +50,7 @@ void ADC_Function_Init(void)
 
 	ADC_RegularChannelConfig(ADC1,ADC_Channel_2, 1, ADC_SampleTime_239Cycles5 );
 
-/* Higher Threshold:3500, Lower Threshold:2000 */
+    /* Higher Threshold:3500, Lower Threshold:2000 */
 	ADC_AnalogWatchdogThresholdsConfig(ADC1, 3500, 2000);
 	ADC_AnalogWatchdogSingleChannelConfig( ADC1, ADC_Channel_2);
 	ADC_AnalogWatchdogCmd( ADC1, ADC_AnalogWatchdog_SingleRegEnable);
@@ -59,7 +61,7 @@ void ADC_Function_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-  ADC_ITConfig( ADC1, ADC_IT_AWD, ENABLE);
+    ADC_ITConfig( ADC1, ADC_IT_AWD, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
 
     ADC_BufferCmd(ADC1, DISABLE);   //disable buffer
@@ -99,7 +101,7 @@ void ADC_Function_Init(void)
  */
 u16 Get_ADC_Val(u8 ch)
 {
-  u16 val;
+    u16 val;
 
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 

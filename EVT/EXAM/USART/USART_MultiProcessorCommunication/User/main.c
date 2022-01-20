@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -11,24 +13,22 @@
  多处理器通信模式例程：
  Master：USART2_Tx(PA2)、USART2_Rx(PA3)。
  Slave：USART3_Tx(PB10)、USART3_Rx(PB11)。
- 
+
  本例程演示 USART2 作主机，USART3 作从机，USART2发送地址 0x02，使 USART3退出
  静默模式，完成后续通信。
  注：
      硬件连线：PA2 —— PB11
-	           PA3 —— PB10
+               PA3 —— PB10
 
 */
 
 #include "debug.h"
-
 
 /* Global typedef */
 
 /* Global define */
 
 /* Global Variable */
-
 
 /*********************************************************************
  * @fn      USARTx_CFG
@@ -39,45 +39,45 @@
  */
 void USARTx_CFG(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStructure={0};
-	USART_InitTypeDef USART_InitStructure={0};
+    GPIO_InitTypeDef  GPIO_InitStructure = {0};
+    USART_InitTypeDef USART_InitStructure = {0};
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2|RCC_APB1Periph_USART3, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA |RCC_APB2Periph_GPIOB , ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2 | RCC_APB1Periph_USART3, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
 
-  /* USART2 TX-->A.2   RX-->A.3 */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-  /* USART3 TX-->B.10  RX-->B.11 */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+    /* USART2 TX-->A.2   RX-->A.3 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* USART3 TX-->B.10  RX-->B.11 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 
-  USART_Init(USART2, &USART_InitStructure);
-	USART_Init(USART3, &USART_InitStructure);
+    USART_Init(USART2, &USART_InitStructure);
+    USART_Init(USART3, &USART_InitStructure);
 
-  USART_Cmd(USART2, ENABLE);
-	USART_Cmd(USART3, ENABLE);
-  USART_SetAddress(USART2, 0x1);
-  USART_SetAddress(USART3, 0x2);
-  USART_WakeUpConfig(USART3, USART_WakeUp_AddressMark);
-	USART_ReceiverWakeUpCmd(USART3,ENABLE);                       /* USART3 Into Silence */
+    USART_Cmd(USART2, ENABLE);
+    USART_Cmd(USART3, ENABLE);
+    USART_SetAddress(USART2, 0x1);
+    USART_SetAddress(USART3, 0x2);
+    USART_WakeUpConfig(USART3, USART_WakeUp_AddressMark);
+    USART_ReceiverWakeUpCmd(USART3, ENABLE); /* USART3 Into Silence */
 }
 
 /*********************************************************************
@@ -89,33 +89,31 @@ void USARTx_CFG(void)
  */
 int main(void)
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n", SystemCoreClock);
 
-	printf("USART MultiProcessor TEST\r\n");
-  USARTx_CFG();                                                 /* USART2 & USART3 Initializes */
+    printf("USART MultiProcessor TEST\r\n");
+    USARTx_CFG(); /* USART2 & USART3 Initializes */
 
-	while(1)
-  {
-  	USART_SendData(USART2, 0x102);                              /* Send USART3’s addr */
-		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) /* waiting for sending finish */
-		{
-		}
-		USART_SendData(USART2, 0xAA);
-    while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) /* waiting for sending finish */
-		{
-		}
-		if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET)
+    while(1)
     {
-      if(USART_ReceiveData(USART3) == 0xAA)
-      {
-        printf("USART3 Receive Data\r\n");
-				Delay_Ms(1000);
-      }
+        USART_SendData(USART2, 0x102);                              /* Send USART3’s addr */
+        while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) /* waiting for sending finish */
+        {
+        }
+        USART_SendData(USART2, 0xAA);
+        while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET) /* waiting for sending finish */
+        {
+        }
+        if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET)
+        {
+            if(USART_ReceiveData(USART3) == 0xAA)
+            {
+                printf("USART3 Receive Data\r\n");
+                Delay_Ms(1000);
+            }
+        }
     }
-
-	}
 }
-

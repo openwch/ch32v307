@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -166,15 +168,15 @@ int main(void)
 	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 
-  ADC_Function_Init();
-  printf("CalibrattionValue:%d\n", Calibrattion_Val);
+    ADC_Function_Init();
+    printf("CalibrattionValue:%d\n", Calibrattion_Val);
   
 	DMA_Tx_Init( DMA1_Channel1, (u32)&ADC1->RDATAR, (u32)TxBuf, 1024 );
 	DMA_Cmd( DMA1_Channel1, ENABLE );
 
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_239Cycles5 );
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-  Delay_Ms(50);
+    Delay_Ms(50);
 	ADC_SoftwareStartConvCmd(ADC1, DISABLE);
 
 	for(i=0; i<1024; i++)

@@ -3,10 +3,11 @@
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2021/06/06
-* Description        : This file provides all the DVP firmware functions. 
-*******************************************************************************/ 
+* Description        : This file provides all the DVP firmware functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "ch32v30x_dvp.h"
-
 
 /*********************************************************************
  * @fn      DVP_INTCfg
@@ -25,12 +26,14 @@
  *
  * @return  none
  */
-void DVP_INTCfg( uint8_t s,  uint8_t i )
+void DVP_INTCfg(uint8_t s, uint8_t i)
 {
-    if(s){
+    if(s)
+    {
         DVP->IER |= i;
     }
-    else{
+    else
+    {
         DVP->IER &= ~i;
     }
 }
@@ -50,21 +53,25 @@ void DVP_INTCfg( uint8_t s,  uint8_t i )
  *
  * @return  none
  */
-void DVP_Mode( uint8_t s,  DVP_Data_ModeTypeDef i)
+void DVP_Mode(uint8_t s, DVP_Data_ModeTypeDef i)
 {
     DVP->CR0 &= ~RB_DVP_MSK_DAT_MOD;
 
-    if(s){
+    if(s)
+    {
         DVP->CR0 |= s;
     }
-    else{
-        DVP->CR0 &= ~(3<<4);
+    else
+    {
+        DVP->CR0 &= ~(3 << 4);
     }
 
-    if(i){
+    if(i)
+    {
         DVP->CR0 |= RB_DVP_JPEG;
     }
-    else{
+    else
+    {
         DVP->CR0 &= ~RB_DVP_JPEG;
     }
 }
@@ -86,9 +93,9 @@ void DVP_Mode( uint8_t s,  DVP_Data_ModeTypeDef i)
  *
  * @return  none
  */
-void DVP_Cfg( DVP_DMATypeDef s,  DVP_FLAG_FIFO_RESETTypeDef i, DVP_RX_RESETTypeDef j)
+void DVP_Cfg(DVP_DMATypeDef s, DVP_FLAG_FIFO_RESETTypeDef i, DVP_RX_RESETTypeDef j)
 {
-    switch( s )
+    switch(s)
     {
         case DVP_DMA_Enable:
             DVP->CR1 |= RB_DVP_DMA_EN;
@@ -100,7 +107,7 @@ void DVP_Cfg( DVP_DMATypeDef s,  DVP_FLAG_FIFO_RESETTypeDef i, DVP_RX_RESETTypeD
             break;
     }
 
-    switch( i )
+    switch(i)
     {
         case DVP_RX_RESET_Enable:
             DVP->CR1 |= RB_DVP_ALL_CLR;
@@ -112,7 +119,7 @@ void DVP_Cfg( DVP_DMATypeDef s,  DVP_FLAG_FIFO_RESETTypeDef i, DVP_RX_RESETTypeD
             break;
     }
 
-    switch( j )
+    switch(j)
     {
         case DVP_RX_RESET_Enable:
             DVP->CR1 |= RB_DVP_RCV_CLR;
@@ -123,5 +130,4 @@ void DVP_Cfg( DVP_DMATypeDef s,  DVP_FLAG_FIFO_RESETTypeDef i, DVP_RX_RESETTypeD
         default:
             break;
     }
-
 }

@@ -4,19 +4,20 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
  *@Note
  TouchKey检测例程：
    本例程演示 通道2(PA2)，做 Touchkey 应用。
- 
+
 */
 
 #include "debug.h"
 
 /* Global define */
-
 
 /*********************************************************************
  * @fn      Touch_Key_Init
@@ -27,16 +28,16 @@
  */
 void Touch_Key_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure={0};
-	ADC_InitTypeDef ADC_InitStructure={0};
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    ADC_InitTypeDef  ADC_InitStructure = {0};
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
     RCC_ADCCLKConfig(RCC_PCLK2_Div4);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode = DISABLE;
@@ -46,8 +47,8 @@ void Touch_Key_Init(void)
     ADC_InitStructure.ADC_NbrOfChannel = 1;
     ADC_Init(ADC1, &ADC_InitStructure);
 
-	ADC_Cmd(ADC1, ENABLE);
-	TKey1->CTLR1 |= (1<<26)|(1<<24);     // Enable TouchKey and Buffer
+    ADC_Cmd(ADC1, ENABLE);
+    TKey1->CTLR1 |= (1 << 26) | (1 << 24); // Enable TouchKey and Buffer
 }
 
 /*********************************************************************
@@ -79,12 +80,12 @@ void Touch_Key_Init(void)
  */
 u16 Touch_Key_Adc(u8 ch)
 {
-  ADC_RegularChannelConfig(ADC1, ch, 1, ADC_SampleTime_7Cycles5 );
-  TKey1->IDATAR1 =0x1c;  //Charging Time
-  TKey1->RDATAR =0x8;   //Discharging Time
-  while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));
-  return (uint16_t) TKey1->RDATAR;
-
+    ADC_RegularChannelConfig(ADC1, ch, 1, ADC_SampleTime_7Cycles5);
+    TKey1->IDATAR1 = 0x1c; //Charging Time
+    TKey1->RDATAR = 0x8;   //Discharging Time
+    while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
+        ;
+    return (uint16_t)TKey1->RDATAR;
 }
 
 /*********************************************************************
@@ -96,17 +97,17 @@ u16 Touch_Key_Adc(u8 ch)
  */
 int main(void)
 {
-	u16 ADC_val;
+    u16 ADC_val;
 
-	Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n", SystemCoreClock);
 
-	Touch_Key_Init();
-	while(1)
-	{
-	    ADC_val = Touch_Key_Adc(ADC_Channel_2);
-	    printf("TouckKey Value:%d\r\n",ADC_val);
-	    Delay_Ms(500);
-	}
+    Touch_Key_Init();
+    while(1)
+    {
+        ADC_val = Touch_Key_Adc(ADC_Channel_2);
+        printf("TouckKey Value:%d\r\n", ADC_val);
+        Delay_Ms(500);
+    }
 }
