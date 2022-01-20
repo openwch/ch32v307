@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -83,7 +85,7 @@ int main(void)
 	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 
-  Input_Capture_Init( 0xFFFF, 48000-1 );
+    Input_Capture_Init( 0xFFFF, 48000-1 );
 
 	while(1);
 }

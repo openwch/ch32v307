@@ -5,6 +5,8 @@
 * Date               : 2021/06/06
 * Description        : This file contains all the functions prototypes for the 
 *                      CAN firmware library.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/ 
 #ifndef __CH32V30x_CAN_H
 #define __CH32V30x_CAN_H

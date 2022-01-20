@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/10/26
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 /*
  *@Note
@@ -16,9 +18,6 @@
 #include <ch32vf30x_usbfs_host.h>
 #include "debug.h"
 
-extern PUSBHS_HOST pOTGHost;
-extern USBHS_HOST ThisUsbDev;
-__attribute__ ((aligned(4))) UINT8 ComParebuff[sizeof(USBHS_HOST)];
 
 /*********************************************************************
  * @fn      main
@@ -30,11 +29,10 @@ __attribute__ ((aligned(4))) UINT8 ComParebuff[sizeof(USBHS_HOST)];
 int main(void)
 {
     UINT8 s;
-    USART_Printf_Init(921600);
+    USART_Printf_Init(115200);
     Delay_Init();
     printf("SystemClk:%d\r\n",SystemCoreClock);
     USBOTG_HostInit(ENABLE);
-    pOTGHost = &ThisUsbDev;
 
     while(1)
     {
@@ -59,7 +57,7 @@ int main(void)
         {
             FoundNewDev = 0;
             Delay_Ms( 200 );
-            s = USBOTG_HostEnum( pOTGHost );
+            s = USBOTG_HostEnum( endpRXbuff );
             if ( s == ERR_SUCCESS )
             {
                 printf( "Enum Succeed\r\n" );

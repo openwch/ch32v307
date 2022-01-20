@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : USB2.0高速设备操作相关头文件
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #ifndef __CH32V30X_USBHS_DEVICE_H__
 #define __CH32V30X_USBHS_DEVICE_H__

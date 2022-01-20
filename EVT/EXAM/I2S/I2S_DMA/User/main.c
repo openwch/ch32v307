@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2020/04/30
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*

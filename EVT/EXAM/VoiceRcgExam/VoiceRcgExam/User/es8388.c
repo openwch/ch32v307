@@ -1,3 +1,12 @@
+/********************************** (C) COPYRIGHT *******************************
+* File Name          : es8388.c
+* Author             : WCH
+* Version            : V1.0.0
+* Date               : 2021/06/06
+* Description        :
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "debug.h"
 #include "es8388.h"
 
@@ -7,7 +16,10 @@
  *
  * @brief   Initializes the IIC peripheral.
  *
- * @return  none
+ * @param   bound
+ *          address
+ *
+ * @return  error code
  */
 void IIC_Init( u32 bound , u16 address )
 {
@@ -40,13 +52,12 @@ void IIC_Init( u32 bound , u16 address )
     I2C_AcknowledgeConfig( I2C2, ENABLE );
 }
 
-
-/**
- * @brief	控制I2S的SD数据方向。
+/*********************************************************************
+ * @fn      ES8388_Contrl_Init
  *
- * @param   void
+ * @brief   控制I2S的SD数据方向
  *
- * @return  void
+ * @return  none
  */
 void ES8388_Contrl_Init(void)
 {
@@ -59,13 +70,13 @@ void ES8388_Contrl_Init(void)
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
-
-/**
- * @brief	ES8388初始化
+/*********************************************************************
+ * @fn      ES8388_Init
  *
- * @param   void
+ * @brief   Initializes the ES8388.
  *
- * @return  u8		0,初始化正常，其他,错误代码
+ * @return  0 - success
+ *          1 - fail
  */
 u8 ES8388_Init(void)
 {
@@ -104,16 +115,16 @@ u8 ES8388_Init(void)
     return 0;
 }
 
-
-
-
-/**
- * @brief	写数据到ES8388寄存器
+/*********************************************************************
+ * @fn      ES8388_Write_Reg
  *
- * @param   reg		寄存器地址
- * @param   val		要写入寄存器的值
+ * @brief   写数据到ES8388寄存器
  *
- * @return  u8		0,成功，其他,错误代码
+ * @param   reg - 寄存器地址
+ *          val - 要写入寄存器的值
+ *
+ * @return  0 - success
+ *          other - fail
  */
 u8 ES8388_Write_Reg(u8 reg, u8 val)
 {
@@ -139,12 +150,14 @@ u8 ES8388_Write_Reg(u8 reg, u8 val)
     return 0;
 }
 
-/**
- * @brief	从指定地址读出一个数据
+/*********************************************************************
+ * @fn      ES8388_Read_Reg
  *
- * @param   reg		寄存器地址
+ * @brief   从指定地址读出一个数据
  *
- * @return  u8		读到的数据
+ * @param   reg - 寄存器地址
+ *
+ * @return  read data
  */
 u8 ES8388_Read_Reg(u8 reg)
 {
@@ -176,13 +189,19 @@ u8 ES8388_Read_Reg(u8 reg)
     return temp;
 }
 
-/**
- * @brief	设置I2S工作模式
+/*********************************************************************
+ * @fn      ES8388_I2S_Cfg
  *
- * @param   fmt		0,飞利浦标准I2S;1,MSB(左对齐);2,LSB(右对齐);3,PCM/DSP
- * @param   len		0,24bit;1,20bit;2,18bit;3,16bit;4,32bit
+ * @brief   设置I2S工作模式
  *
- * @return 	void
+ * @param   fmt - I2S mode
+ *            0 - 飞利浦标准I2S
+ *            1 - MSB
+ *            2 - LSB
+ *            3 - PCM/DSP
+ *          address
+ *
+ * @return  none
  */
 void ES8388_I2S_Cfg(u8 fmt, u8 len)
 {
@@ -191,20 +210,21 @@ void ES8388_I2S_Cfg(u8 fmt, u8 len)
     ES8388_Write_Reg(23, (fmt << 1) | (len << 3));	//R23,ES8388工作模式设置
 }
 
-/**
- * @brief	设置音量大小，音量慢慢增加到最大
+/*********************************************************************
+ * @fn      ES8388_Set_Volume
  *
- * @param   volume		音量大小(0-33)
- * 						0 – -30dB
- * 						1 – -29dB
- * 						2 – -28dB
- * 						…
- * 						30 – 0dB
- * 						31 – 1dB
- * 						…
- * 						33 – 3dB
+ * @brief   设置音量大小，音量慢慢增加到最大
  *
- * @return 	void
+ * @param   volume - 音量大小(0-33)
+ *                      0 – -30dB
+ *                      1 – -29dB
+ *                      2 – -28dB
+ *                      …
+ *                      30 – 0dB
+ *                      31 – 1dB
+ *                      …
+ *                      33 – 3dB
+ * @return  none
  */
 void ES8388_Set_Volume(u8 volume)
 {
@@ -215,13 +235,19 @@ void ES8388_Set_Volume(u8 volume)
     }
 }
 
-/**
- * @brief	ES8388 DAC/ADC配置
+/*********************************************************************
+ * @fn      ES8388_ADDA_Cfg
  *
- * @param   dacen	dac使能(0)/关闭(1)
- * @param   adcen	adc使能(0)/关闭(1)
+ * @brief   ES8388 DAC/ADC配置
  *
- * @return 	void
+ * @param   dacen -
+ *            0 - dac enable
+ *            1 - dac disable
+ *          adcen -
+ *            0 - adc enable
+ *            1 - adc enable
+ *
+ * @return  none
  */
 void ES8388_ADDA_Cfg(u8 dacen,u8 adcen)
 {
@@ -235,25 +261,32 @@ void ES8388_ADDA_Cfg(u8 dacen,u8 adcen)
 	ES8388_Write_Reg(0x02, res);
 }
 
-/**
- * @brief	ES8388 DAC输出通道配置
+/*********************************************************************
+ * @fn      ES8388_Output_Cfg
  *
-* @param   out		0:通道2输出，1:通道1输出
+ * @brief   Initializes the IIC peripheral.
  *
- * @return 	void
+ * @param   out -
+ *            0 - 通道2输出
+ *            1 - 通道1输出
+ *
+ * @return  none
  */
 void ES8388_Output_Cfg(u8 out)
 {
 	ES8388_Write_Reg(0x04, 3<<(out*2+2));
 }
 
-
-/**
- * @brief	ES8388 ADC输出通道配置
+/*********************************************************************
+ * @fn      ES8388_Input_Cfg
  *
- * @param   in		0:通道1输入，1:通道2输入
+ * @brief   ES8388 ADC输出通道配置
  *
- * @return 	void
+ * @param   in -
+ *            0-通道1输入
+ *            1-通道2输入
+ *
+ * @return  none
  */
 void ES8388_Input_Cfg(u8 in)
 {

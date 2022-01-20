@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -30,7 +32,7 @@ void ADC_Function_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure={0};
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
@@ -54,14 +56,14 @@ void ADC_Function_Init(void)
 	ADC_InitStructure.ADC_NbrOfChannel = 3;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
-  ADC_InjectedSequencerLengthConfig(ADC1, 3);
+    ADC_InjectedSequencerLengthConfig(ADC1, 3);
 	ADC_InjectedChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_239Cycles5);
 	ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, 2, ADC_SampleTime_239Cycles5);
 	ADC_InjectedChannelConfig(ADC1, ADC_Channel_4, 3, ADC_SampleTime_239Cycles5);
 
-  ADC_DiscModeChannelCountConfig( ADC1, 1);
+    ADC_DiscModeChannelCountConfig( ADC1, 1);
 	ADC_InjectedDiscModeCmd(ADC1 , ENABLE);
-  ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
+    ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
 
     ADC_BufferCmd(ADC1, DISABLE);   //disable buffer

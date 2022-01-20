@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -62,25 +64,25 @@ void Dac_Init(void)
  */
 void DAC1_DMA_Init(void)
 {
-  DMA_InitTypeDef DMA_InitStructure={0};
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+    DMA_InitTypeDef DMA_InitStructure={0};
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 
-  DMA_StructInit( &DMA_InitStructure);
-  /* Note:DAC1--->DMA1.CH3   DAC2--->DMA1.CH4 */
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&(DAC->R12BDHR1);
-  DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&dacbuff16bit;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-  DMA_InitStructure.DMA_BufferSize = 8;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
-  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    DMA_StructInit( &DMA_InitStructure);
+    /* Note:DAC1--->DMA1.CH3   DAC2--->DMA1.CH4 */
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&(DAC->R12BDHR1);
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&dacbuff16bit;
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    DMA_InitStructure.DMA_BufferSize = 8;
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 
-  DMA_Init(DMA2_Channel3, &DMA_InitStructure);
-  DMA_Cmd(DMA2_Channel3, ENABLE);
+    DMA_Init(DMA2_Channel3, &DMA_InitStructure);
+    DMA_Cmd(DMA2_Channel3, ENABLE);
 }
 
 /*********************************************************************
@@ -130,8 +132,8 @@ int main(void)
 	TIM8_Init(0x7,48000-1);
 
 	while(1)
-  {
-    Delay_Ms(1000);
+    {
+        Delay_Ms(1000);
 
 		printf("run\r\n");
 		printf("DAC->R12BDHR1:0x%04x\r\n",DAC->R12BDHR1);

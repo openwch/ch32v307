@@ -1,3 +1,12 @@
+/********************************** (C) COPYRIGHT *******************************
+* File Name          : Get_Data.c
+* Author             : WCH
+* Version            : V1.0.0
+* Date               : 2021/06/06
+* Description        :
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "Get_Data.h"
 #include "VoiceRcg.h"
 
@@ -108,7 +117,13 @@ void voice_init(void)
     printf("init es8388\r\n");
 }
 
-
+/*********************************************************************
+ * @fn      DMA1_Channel4_IRQHandler
+ *
+ * @brief   This function DMA1 Channel4 exception.
+ *
+ * @return  none
+ */
 void DMA1_Channel4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel4_IRQHandler(void)
 {
@@ -129,7 +144,13 @@ void DMA1_Channel4_IRQHandler(void)
    }
 }
 
-
+/*********************************************************************
+ * @fn      DMA1_Channel5_IRQHandler
+ *
+ * @brief   This function DMA1 Channel5 exception.
+ *
+ * @return  none
+ */
 void DMA1_Channel5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel5_IRQHandler(void)
 {
@@ -218,7 +239,13 @@ void voice_init(void)
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 }
 
-
+/*********************************************************************
+ * @fn      DMA1_Channel1_IRQHandler
+ *
+ * @brief   This function DMA1 Channel1 exception.
+ *
+ * @return  none
+ */
 void DMA1_Channel1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel1_IRQHandler(void)
 {

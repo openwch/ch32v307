@@ -183,22 +183,8 @@ void rt_hw_context_switch_interrupt(rt_ubase_t from, rt_ubase_t to)
     sw_setpend();
 }
 
-/*
- * @brief Do rt-thread context switch in task context
- *
- * @param from thread sp of from thread
- * @param to thread sp of to thread
- */
-void rt_hw_context_switch(rt_ubase_t from, rt_ubase_t to)
-{
-    rt_interrupt_from_thread = from;
-    rt_interrupt_to_thread = to;
-    /* switch just in sw_handler */
-    sw_setpend();
-}
-
 /* shutdown CPU */
-void rt_hw_cpu_shutdown()
+void rt_hw_cpu_shutdown(void)
 {
     rt_uint32_t level;
     rt_kprintf("shutdown...\n");

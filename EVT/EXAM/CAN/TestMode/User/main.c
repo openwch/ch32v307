@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -190,11 +192,11 @@ int main(void)
 /* Bps = 500Kbps */	
 #if (TEST_MODE == SILENT_MODE)	
 	CAN_Test_Mode_Init( CAN_SJW_1tq, CAN_BS2_5tq, CAN_BS1_6tq, 12, CAN_Mode_Silent );		
-  printf("Slient Mode\r\n");
+    printf("Slient Mode\r\n");
 	
 #elif (TEST_MODE == LOOPBACK_MODE)
 	CAN_Test_Mode_Init( CAN_SJW_1tq, CAN_BS2_5tq, CAN_BS1_6tq, 12, CAN_Mode_LoopBack );	
-  printf("LoopBack Mode\r\n");	
+    printf("LoopBack Mode\r\n");
 	
 #elif (TEST_MODE == SILENT_LOOPBACK_MODE)
 	CAN_Test_Mode_Init( CAN_SJW_1tq, CAN_BS2_5tq, CAN_BS1_6tq, 12, CAN_Mode_Silent_LoopBack );

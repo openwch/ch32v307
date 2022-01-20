@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
 /*
@@ -242,7 +244,7 @@ int main(void)
 	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf("OPA Test\r\n");
-	 printf("CalibrattionValue:%d\n", Calibrattion_Val);
+	printf("CalibrattionValue:%d\n", Calibrattion_Val);
 	Dac_Channel1_Init();
 	OPA4_Init();
 	ADC_Channel0_Init();

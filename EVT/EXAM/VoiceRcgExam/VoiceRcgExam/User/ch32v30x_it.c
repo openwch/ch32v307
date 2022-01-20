@@ -4,6 +4,8 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main Interrupt Service Routines.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #include "ch32v30x_it.h"
 
@@ -30,12 +32,6 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-
-
-//  printf("mepc:%08x\r\n",__get_MEPC());
-//  printf("mcause:%08x\r\n",__get_MCAUSE());
-//  printf("mtval:%08x\r\n",__get_MTVAL());
-
   while (1)
   {
   }
