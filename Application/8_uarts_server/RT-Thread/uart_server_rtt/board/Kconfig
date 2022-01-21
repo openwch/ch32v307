@@ -1,0 +1,349 @@
+menu "Hardware Drivers Config"
+
+menu "Onboard Peripheral Drivers"
+
+endmenu
+
+menu "On-chip Peripheral Drivers"
+    menuconfig BSP_USING_UART
+        bool "Enable UART"
+        if BSP_USING_UART
+            config BSP_USING_UART1
+                bool "Enable UART1"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART1
+                config BSP_UART1_FIFO_SIZE
+                    int "BSP_UART1_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART2
+                bool "Enable UART2"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART2
+                config BSP_UART2_FIFO_SIZE
+                    int "BSP_UART2_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART3
+                bool "Enable UART3"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART3
+                config BSP_UART3_FIFO_SIZE
+                    int "BSP_UART3_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART4
+                bool "Enable UART4"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART4
+                config BSP_UART4_FIFO_SIZE
+                    int "BSP_UART4_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART5
+                bool "Enable UART5"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART5
+                config BSP_UART5_FIFO_SIZE
+                    int "BSP_UART5_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART6
+                bool "Enable UART6"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART6
+                config BSP_UART6_FIFO_SIZE
+                    int "BSP_UART6_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART7
+                bool "Enable UART7"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART7
+                config BSP_UART7_FIFO_SIZE
+                    int "BSP_UART7_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif
+
+            config BSP_USING_UART8
+                bool "Enable UART8"
+                select RT_USING_SERIAL
+                default n
+            if BSP_USING_UART8
+                config BSP_UART8_FIFO_SIZE
+                    int "BSP_UART8_FIFO_SIZE"
+                    range 5 255
+                    default 10
+            endif                                                                        
+        endif
+
+    menuconfig BSP_USING_PWM
+        bool "Enable PWM"
+        default n
+        select RT_USING_PWM
+        if BSP_USING_PWM
+        menuconfig BSP_USING_T1_PWM
+            bool "Enable Timer1 PWM"
+            default n
+            if BSP_USING_T1_PWM
+                config BSP_USING_T1_PWM0
+                    bool "Enable Timer1 PWM0 (PA8)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T2_PWM
+            bool "Enable Timer2 PWM"
+            default n
+            if BSP_USING_T2_PWM
+                config BSP_USING_T2_PWM0
+                    bool "Enable Timer2 PWM0 (PA0)"
+                    default n
+            endif
+
+                
+        menuconfig BSP_USING_T3_PWM
+            bool "Enable Timer3 PWM"
+            default n
+            if BSP_USING_T3_PWM
+                config BSP_USING_T3_PWM0
+                    bool "Enable Timer3 PWM0 (PA6)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T4_PWM
+            bool "Enable Timer4 PWM"
+            default n
+            if BSP_USING_T4_PWM
+                config BSP_USING_T4_PWM0
+                    bool "Enable Timer4 PWM0 (PB6)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T5_PWM
+            bool "Enable Timer5 PWM"
+            default n
+            if BSP_USING_T5_PWM
+                config BSP_USING_T5_PWM0
+                    bool "Enable Timer5 PWM0 (PA0)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T8_PWM
+            bool "Enable Timer8 PWM"
+            default n
+            if BSP_USING_T8_PWM
+                config BSP_USING_T8_PWM0
+                    bool "Enable Timer8 PWM0 (PC6)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T9_PWM
+            bool "Enable Timer9 PWM"
+            default n
+            if BSP_USING_T9_PWM
+                config BSP_USING_T9_PWM0
+                    bool "Enable Timer9 PWM0 (PA2)"
+                    default n
+            endif
+
+        menuconfig BSP_USING_T10_PWM
+            bool "Enable Timer10 PWM"
+            default n
+            if BSP_USING_T10_PWM
+                config BSP_USING_T10_PWM0
+                    bool "Enable Timer10 PWM0 (PB8)"
+                    default n
+            endif                        
+        endif
+
+    config BSP_USING_WDT
+        bool "Enable Watchdog Timer"
+        select RT_USING_WDT
+        default n
+
+    menuconfig BSP_USING_TIM
+        bool "Enable timer"
+        default n
+        select RT_USING_HWTIMER
+        if BSP_USING_TIM
+            config BSP_USING_TIM1
+                bool "Enable TIM1"
+                default n
+
+            config BSP_USING_TIM2
+                bool "Enable TIM2"
+                default n
+
+            config BSP_USING_TIM3
+                bool "Enable TIM3"
+                default n
+
+            config BSP_USING_TIM4
+                bool "Enable TIM4"
+                default n
+                
+            config BSP_USING_TIM5
+                bool "Enable TIM5"
+                default n
+                
+            config BSP_USING_TIM6
+                bool "Enable TIM6"
+                default n
+                
+            config BSP_USING_TIM7
+                bool "Enable TIM7"
+                default n
+                
+            config BSP_USING_TIM8
+                bool "Enable TIM8"
+                default n
+                
+            config BSP_USING_TIM9
+                bool "Enable TIM9"
+                default n
+                
+            config BSP_USING_TIM10
+                bool "Enable TIM10"
+                default n                                                                                
+        endif
+
+    menuconfig BSP_USING_ONCHIP_RTC
+        bool "Enable RTC"
+        select RT_USING_RTC
+        select RT_USING_LIBC
+        default n
+        if BSP_USING_ONCHIP_RTC
+            config RTC_USING_INTERNAL_CLK
+                bool "Using internal clock RTC"
+                default y
+            config RTC_USING_1S_INT
+                bool "Using 1 second interrupt"
+                depends on RT_USING_ALARM
+                default n
+        endif
+
+    menuconfig BSP_USING_ADC
+        bool "Enable ADC"
+        default n
+        select RT_USING_ADC
+        if BSP_USING_ADC
+            config BSP_USING_ADC1
+                bool "Enable ADC1"
+                default y
+            config BSP_USING_ADC2
+                bool "Enable ADC2"
+                default n
+        endif
+
+    menuconfig BSP_USING_DAC
+        bool "Enable DAC"
+        default n
+        select RT_USING_DAC
+        if BSP_USING_DAC
+            config BSP_USING_DAC_CHANNEL1
+                bool "Enable DAC CHANNEL1"
+                default y
+            config BSP_USING_DAC_CHANNEL2
+                bool "Enable DAC CHANNEL2"
+                default n
+        endif
+         
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C"
+        if BSP_USING_I2C
+            config BSP_USING_I2C1
+                bool "Enable I2C1"
+                select RT_USING_I2C
+                default n
+            if BSP_USING_I2C1
+                config BSP_I2C1_SCL_PIN
+                    int "I2C1_SCL_PIN"
+                    range 1 27
+                    default 22
+                config BSP_I2C1_SDA_PIN
+                    int "I2C1_SDA_PIN"
+                    range 1 27
+                    default 23                    
+            endif
+
+            config BSP_USING_I2C2
+                bool "Enable I2C2"
+                select RT_USING_I2C
+                default n
+            if BSP_USING_I2C2
+                config BSP_I2C2_SCL_PIN
+                    int "I2C2_SCL_PIN"
+                    range 1 27
+                    default 26
+                config BSP_I2C2_SDA_PIN
+                    int "I2C2_SDA_PIN"
+                    range 1 27
+                    default 27               
+            endif         
+		endif
+		                
+    menuconfig BSP_USING_ETH
+        bool "Enable ETH"
+        default n       
+
+    menuconfig BSP_USING_SPI
+        bool "Enable SPI"
+        if BSP_USING_SPI
+            config BSP_USING_SPI1
+                bool "Enable SPI1"
+                default n
+            config BSP_USING_SPI2
+                bool "Enable SPI2"
+                default n
+            config BSP_USING_SPI3
+                bool "Enable SPI3"
+                default n
+                
+            if  BSP_USING_SPI3
+                config BSP_USING_SPI_FLASH
+                bool "Enable SPI Flash"
+                default y
+            endif                      
+		endif
+    menuconfig BSP_USING_SDIO
+        bool "Enable SDIO"
+        select RT_USING_SDIO
+        default n         
+          
+    menuconfig BSP_USING_LCD
+        bool "Enable LCD"
+        default n                              
+
+        
+    menuconfig BSP_USING_ES8388
+        bool "Enable ES8388"
+        select BSP_USING_I2C
+        select BSP_USING_I2C2
+        default n		
+		
+endmenu
+
+menu "Board extended module Drivers"
+endmenu
+
+endmenu
