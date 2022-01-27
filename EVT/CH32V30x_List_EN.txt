@@ -51,10 +51,10 @@ Directory
   |      |      |      |-- DMA
   |      |      |      |      |-- DMA_MEM2MEM£ºmemory to memory mode routine
   |      |      |      |      |-- DMA_MEM2PERIP£ºsee each peripheral subroutine for memory to peripheral mode and peripheral to memory mode routines
-  |      |      |      |-- DVP
+  |      |      |      |-- DVP ¡ª¡ªonly for CH32V30x_D8C
   |      |      |      |      |-- DVP_TFTLCD£ºDVP operation ov2640 camera video mode display image routine on LCD
   |      |      |      |      |-- DVP_UART£ºDVP operation ov2640 camera JPEG mode routine
-  |      |      |      |-- ETH
+  |      |      |      |-- ETH ¡ª¡ªonly for CH32V30x_D8C
   |      |      |      |      |-- 8_UART_Server£ºdemonstration routine of 8 UART network server   
   |      |      |      |      |-- DHCP£ºdemonstration routine of the DHCP automatically obtains IP 
   |      |      |      |      |-- DNS£ºdemonstration routine of the DHCP automatically obtains IP and requests domain name resolution
@@ -139,7 +139,7 @@ Directory
   |      |      |      |      |      |      |--CH372Device£ºsimulate custom USB device (CH372 device) routine
   |      |      |      |      |      |      |--HIDKeyboardDevice£ºsimulates a keyboard routine 
   |      |      |      |      |      |-- HOST£ºa simple enumeration procedure routine for USB Full Speed devices    
-  |      |      |      |      |-- USBHS   
+  |      |      |      |      |-- USBHS ¡ª¡ªonly for CH32V30x_D8C  
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |--CH372Device£ºsimulate custom USB device (CH372 device) routine
   |      |      |      |      |      |      |--HIDKeyboardDevice£ºsimulates a keyboard routine  

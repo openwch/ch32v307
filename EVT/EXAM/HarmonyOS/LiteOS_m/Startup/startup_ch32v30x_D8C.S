@@ -338,6 +338,7 @@ DMA2_Channel11_IRQHandler:  1:  j 1b
 handle_reset:
 .option push 
 .option	norelax 
+    csrw mepc, t0
 	la gp, __global_pointer$
 .option	pop 
 1:
@@ -369,6 +370,7 @@ handle_reset:
 
     /* Enable nested and hardware stack */
 	li t0, 0x1f
+#	csrw 0x804, zero
 	csrw 0x804, t0
 
     /* Enable floating point and interrupt */

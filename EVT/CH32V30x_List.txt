@@ -51,10 +51,10 @@ http://wch.cn
   |      |      |      |-- DMA
   |      |      |      |      |-- DMA_MEM2MEM：储存器到储存器模式例程
   |      |      |      |      |-- DMA_MEM2PERIP：储存器到外设模式、外设到储存器模式例程见各外设子例程
-  |      |      |      |-- DVP
+  |      |      |      |-- DVP ——仅适用于CH32V30x_D8C
   |      |      |      |      |-- DVP_TFTLCD：DVP操作OV2640摄像头视频模式在LCD显示图像例程
   |      |      |      |      |-- DVP_UART：DVP操作OV2640摄像头JPEG模式例程
-  |      |      |      |-- ETH 
+  |      |      |      |-- ETH ——仅适用于CH32V30x_D8C
   |      |      |      |      |-- 8_UART_Server：8串口网络服务器演示例程   
   |      |      |      |      |-- DHCP：DHCP自动获取ip功能演示例程  
   |      |      |      |      |-- DNS：DHCP自动获取ip后，再请求域名解析演示例程  
@@ -139,7 +139,7 @@ http://wch.cn
   |      |      |      |      |      |      |--CH372Device：模拟自定义USB设备（CH372设备）例程 
   |      |      |      |      |      |      |--HIDKeyboardDevice：模拟Keyboard例程  
   |      |      |      |      |      |-- HOST：USBFS设备的简易枚举过程例程  
-  |      |      |      |      |-- USBHS   
+  |      |      |      |      |-- USBHS ——仅适用于CH32V30x_D8C  
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |--CH372Device：模拟自定义USB设备（CH372设备）例程 
   |      |      |      |      |      |      |--HIDKeyboardDevice：模拟Keyboard例程  
