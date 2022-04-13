@@ -14,7 +14,7 @@
  WKUP(PA0)
  本例程演示 WFI 进入待机模式，WKUP(PA0)引脚上升沿，退出待机模式，
  唤醒后程序复位。
- 注：为尽可能的降低功耗，建议将不用的GPIO设置成上拉、下拉、模拟输入或设置成输出模式。
+ 注：为尽可能的降低功耗，建议将不用的GPIO设置成下拉模式。
 
 */
 
@@ -35,16 +35,17 @@ int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    /* 为降低功耗，需将不用的GPIO设置成上拉或下拉输入 */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |
-                               RCC_APB2Periph_GPIOC,
-                           ENABLE);
+    /* 为降低功耗，需将不用的GPIO设置成下拉输入 */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|
+             RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     GPIO_Init(GPIOB, &GPIO_InitStructure);
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     Delay_Init();

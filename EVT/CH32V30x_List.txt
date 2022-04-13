@@ -143,7 +143,7 @@ http://wch.cn
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |--CH372Device：模拟自定义USB设备（CH372设备）例程 
   |      |      |      |      |      |      |--HIDKeyboardDevice：模拟Keyboard例程  
-  |      |      |      |      |      |-- HOST：USBFS设备的简易枚举过程例程
+  |      |      |      |      |      |-- HOST：USBHS设备的简易枚举过程例程
   |      |      |      |      |      |-- HOST_Udisk：C示例源程序,以字节为单位读写文件，包括文件创建、删除、修改文件属性,修改文件名
   |      |      |      |      |      |-- Udisk_Lib：U盘文件系统库文件 
   |      |      |      |-- VoiceRcgExam：独立词语音识别例程 

@@ -172,8 +172,9 @@ void ADC1_2_IRQHandler()
         printf("\r\nADC2 ch2=%d\r\n",Get_ConversionVal2(Adc_Val[1]));
 
 #endif
+        ADC_ClearITPendingBit( ADC1, ADC_IT_EOC);
+        ADC_ClearITPendingBit( ADC2, ADC_IT_EOC);
     }
-    ADC_ClearITPendingBit( ADC1, ADC_IT_EOC);
 }
 
 
