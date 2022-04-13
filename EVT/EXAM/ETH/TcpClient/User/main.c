@@ -297,12 +297,12 @@ void WCHNET_HandleGlobalInt(void)
        if(i&PHY_Linked_Status)
        printf("PHY Link Success\r\n");
    }
-   if(initstat & GINT_STAT_SOCKET)                                              /* SocketÖÐ¶Ï */
+   if(initstat & GINT_STAT_SOCKET)
    {
        for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i ++)
        {
-           socketinit = WCHNET_GetSocketInt(i);                               /* ¶ÁsocketÖÐ¶Ï²¢ÇåÁã */
-           if(socketinit)WCHNET_HandleSockInt(i,socketinit);                  /* Èç¹ûÓÐÖÐ¶ÏÔòÇåÁã */
+           socketinit = WCHNET_GetSocketInt(i);
+           if(socketinit)WCHNET_HandleSockInt(i,socketinit);
        }
    }
 }

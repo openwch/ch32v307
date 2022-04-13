@@ -100,15 +100,17 @@ int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure={0};
 
-    /* Configure unused GPIO as IPU or IPD to reduce power consumption */
+    /* Configure unused GPIO as IPD to reduce power consumption */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|
-             RCC_APB2Periph_GPIOC, ENABLE);
+             RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     GPIO_Init(GPIOB, &GPIO_InitStructure);
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     Delay_Init();

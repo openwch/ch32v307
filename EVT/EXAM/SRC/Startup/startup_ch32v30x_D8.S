@@ -3,7 +3,7 @@
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2021/06/06
-* Description        : CH32V303 vector table for eclipse toolchain.
+* Description        : CH32V303x vector table for eclipse toolchain.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
@@ -358,6 +358,14 @@ handle_reset:
  	la t0, _vector_base
     ori t0, t0, 3
 	csrw mtvec, t0
+
+    lui a0, 0x1ffff
+    li a1, 0x300
+    sh a1, 0x1b0(a0)
+1:  lui s2, 0x40022
+    lw a0, 0xc(s2)
+    andi a0, a0, 1
+    bnez a0, 1b
 
     jal  SystemInit
 	la t0, main
