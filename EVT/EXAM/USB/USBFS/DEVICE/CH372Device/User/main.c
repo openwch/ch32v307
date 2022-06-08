@@ -10,11 +10,10 @@
 
 /*
  *@Note
- 模拟自定义USB设备（CH372设备）例程：
+  模拟自定义USB设备（CH372设备）例程：
  OTG_FS_DM(PA11)、OTG_FS_DP(PA12)
- 本例程演示使用 USBHS 模拟自定义设备 CH372，和上位机通信。
- 注：本例程需与上位机软件配合演示。
- 
+  本例程演示使用 USBOTG-FS模拟自定义设备 CH372，端点1~7可自由上下传，下传数据将复制到上传，批量设备，最大包长64，
+  可使用Bushund或其它上位机软件对设备进行操作。
 */
 
 #include "debug.h"
@@ -34,7 +33,7 @@ int main(void)
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 
     /* USBOTG_FS device init */
-	printf( "CH372Device Running On USBOTG_FS Controller\n" );
+	printf( "CH372Device Running On USBOTG-FS Controller\n" );
 	Delay_Ms(10);
 	USBOTG_Init( );
 

@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include "ch32v30x_it.h"
+#include "eth_driver.h"
 #include "WCHNET.H"
 #include "bsp_uart.h"
 
@@ -16,6 +17,7 @@ void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void)  __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -37,7 +39,12 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-	while(1);
+    printf("HardFault_Handler\r\n");
+
+    printf("mepc  :%08x\r\n", __get_MEPC());
+    printf("mcause:%08x\r\n", __get_MCAUSE());
+    printf("mtval :%08x\r\n", __get_MTVAL());
+    while(1);
 }
 
 /*********************************************************************
@@ -50,6 +57,19 @@ void HardFault_Handler(void)
 void ETH_IRQHandler(void)
 {
     WCHNET_ETHIsr();
+}
+
+/*********************************************************************
+ * @fn      EXTI9_5_IRQHandler
+ *
+ * @brief   This function handles GPIO exception.
+ *
+ * @return  none
+ */
+void EXTI9_5_IRQHandler(void)
+{
+    ETH_PHYLink( );
+    EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
 /*********************************************************************

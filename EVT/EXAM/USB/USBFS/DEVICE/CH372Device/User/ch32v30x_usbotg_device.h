@@ -687,9 +687,6 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
 #define USBHS_PLL_SRC_PRE_DIV5 (4<<24)
 #define USBHS_PLL_SRC_PRE_DIV6 (5<<24)
 #define USBHS_PLL_SRC_PRE_DIV7 (6<<24)
-
-/* 端点大小定义 */
-#define DEF_USB_FS_EP_SIZE      64
 #endif
 
 /*使用sysclk时钟的情况下，需要用到这些宏定义 */
@@ -697,6 +694,32 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
 #define RCC_USBFS_CLK_DIV_2   (1<<22)
 #define RCC_USBFS_CLK_DIV_3   (2<<22)
 #define RCC_USBFS_CLK_SRC     (1<<31)
+
+/******************************************************************************/
+/* 设备速度相关宏定义 */
+#define DEF_USBD_SPEED_FULL    1
+#define DEF_USBD_SPEED_LOW     2
+
+#define DEF_USBD_SPEED         DEF_USBD_SPEED_FULL
+/******************************************************************************/
+/* 端点大小相关宏定义 */
+#if DEF_USBD_SPEED == DEF_USBD_SPEED_FULL
+#define DEF_USBD_UEP0_SIZE     64
+#define DEF_USBD_MAX_PACK_SIZE 64
+#define DEF_USBD_BLK_PACK_SIZE 64
+#define DEF_USBD_INT_PACK_SIZE 64
+#define DEF_USBD_SYC_PACK_SIZE 1023
+#elif DEF_USBD_SPEED == DEF_USBD_SPEED_LOW
+#define DEF_USBD_UEP0_SIZE     8
+#define DEF_USBD_MAX_PACK_SIZE 8
+#define DEF_USBD_BLK_PACK_SIZE 0
+#define DEF_USBD_INT_PACK_SIZE 8
+#define DEF_USBD_SYC_PACK_SIZE 0
+#endif
+
+/* 端点大小定义 */
+#define DEF_USB_LS_EP_SIZE     8                                               /* 端点全速模式大小 */
+#define DEF_USB_FS_EP_SIZE     64                                              /* 端点全速模式大小 */
 
 /******************************************************************************/
 /* 变量外扩 */

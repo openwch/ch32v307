@@ -94,9 +94,9 @@ typedef enum
 #define FLASH_FLAG_BANK1_PGERR               FLASH_FLAG_PGERR     /* FLASH BANK1 Program error flag */
 #define FLASH_FLAG_BANK1_WRPRTERR            FLASH_FLAG_WRPRTERR  /* FLASH BANK1 Write protected error flag */
 
-/* FLASH_Enhance_CLK */
-#define FLASH_Enhance_SYSTEM_HALF      ((uint32_t)0x00000000)   /* FLASH Enhance Clock = SYSTEM */
-#define FLASH_Enhance_SYSTEM           ((uint32_t)0x02000000)   /* Enhance_CLK = SYSTEM/2 */ 
+/* FLASH_Access_CLK */
+#define FLASH_Access_SYSTEM_HALF      ((uint32_t)0x00000000)   /* FLASH Access Clock = SYSTEM/2 */
+#define FLASH_Access_SYSTEM           ((uint32_t)0x02000000)   /* FLASH Access Clock = SYSTEM */
  
  
 /*Functions used for all devices*/
@@ -125,7 +125,8 @@ void FLASH_ErasePage_Fast(uint32_t Page_Address);
 void FLASH_EraseBlock_32K_Fast(uint32_t Block_Address);
 void FLASH_EraseBlock_64K_Fast(uint32_t Block_Address);
 void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t* pbuf);
-void FLASH_Enhance_Mode(uint32_t FLASH_Enhance_CLK, FunctionalState NewState);
+void FLASH_Access_Clock_Cfg(uint32_t FLASH_Access_CLK);
+void FLASH_Enhance_Mode(FunctionalState NewState);
 
 /* New function used for all devices */
 void FLASH_UnlockBank1(void);
