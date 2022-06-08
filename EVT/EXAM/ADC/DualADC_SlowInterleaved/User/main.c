@@ -108,7 +108,7 @@ void  ADC_Function_Init(void)
 u16 Get_ConversionVal1(s16 val)
 {
 	if((val+Calibrattion_Val1)<0) return 0;
-	if((Calibrattion_Val1+val)>4095) return 4095;
+	if((Calibrattion_Val1+val)>4095||val==4095) return 4095;
 	return (val+Calibrattion_Val1);
 }
 
@@ -124,7 +124,7 @@ u16 Get_ConversionVal1(s16 val)
 u16 Get_ConversionVal2(s16 val)
 {
     if((val+Calibrattion_Val2)<0) return 0;
-    if((Calibrattion_Val2+val)>4095) return 4095;
+    if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
     return (val+Calibrattion_Val2);
 }
 
@@ -170,9 +170,8 @@ void ADC1_2_IRQHandler()
         printf("\r\nADC1 ch2=%d\r\n",Get_ConversionVal1(Adc_Val[0]));
         printf("\r\nADC2 ch2=%d\r\n",Get_ConversionVal2(Adc_Val[1]));
 #endif
-        ADC_ClearITPendingBit( ADC1, ADC_IT_EOC);
-        ADC_ClearITPendingBit( ADC2, ADC_IT_EOC);
     }
+    ADC_ClearITPendingBit( ADC1, ADC_IT_EOC);
 }
 
 

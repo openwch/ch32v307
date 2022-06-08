@@ -32,13 +32,13 @@ static void GPIOA_CLK_ENABLE(void)
 
 static void GPIOB_CLK_ENABLE(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 }
 
 #if (CH32V30X_PIN_NUMBERS >36)
 static void GPIOC_CLK_ENABLE(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 }
 #endif
 
@@ -61,7 +61,7 @@ static void GPIOE_CLK_ENABLE(void)
 
 
 
-/* STM32 GPIO driver */
+/* CH32 GPIO driver */
 struct pin_index
 {
     int index;
@@ -431,7 +431,6 @@ void ch32_pin_mode(rt_device_t dev, rt_base_t pin, rt_base_t mode)
     {
         return;
     }
-    rt_kprintf("get pin index\r\n");
     /* GPIO Periph clock enable */
     index->rcc();
     /* Configure GPIO_InitStructure */
@@ -445,39 +444,39 @@ void ch32_pin_mode(rt_device_t dev, rt_base_t pin, rt_base_t mode)
     }
     else if (mode == PIN_MODE_INPUT_AIN)
     {
-        /* input setting: not pull. */
+        /* input setting: analog input. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AIN;
     }
     else if (mode == PIN_MODE_INPUT)
     {
-        /* input setting: pull up. */
+        /* input setting: float input. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     }
     else if (mode == PIN_MODE_INPUT_PULLDOWN)
     {
         /* input setting: pull down. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;
-//        GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     }
     else if (mode == PIN_MODE_INPUT_PULLUP)
     {
-        /* output setting: od. */
+        /* input setting: pull up. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-//        GPIO_InitStruct.Pull = GPIO_NOPULL;
     }
     else if (mode == PIN_MODE_OUTPUT_OD)
     {
+        /* output setting: od. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_OD;
     }
     else if (mode == PIN_MODE_OUTPUT_AF_OD)
     {
+        /* output setting: af od. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_OD;
     }
     else if (mode == PIN_MODE_OUTPUT_AF_PP)
     {
+        /* output setting: af pp. */
         GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
     }
-
     GPIO_Init(index->gpio, &GPIO_InitStruct);
 }
 
@@ -578,6 +577,7 @@ rt_err_t ch32_pin_irq_enable(struct rt_device *device, rt_base_t pin,
     const struct pin_irq_map *irqmap;
     rt_base_t level;
     rt_int32_t irqindex = -1;
+    rt_uint8_t gpio_port_souce=0;
     GPIO_InitTypeDef GPIO_InitStruct;
     EXTI_InitTypeDef EXTI_InitStructure;
 
@@ -608,7 +608,7 @@ rt_err_t ch32_pin_irq_enable(struct rt_device *device, rt_base_t pin,
         GPIO_InitStruct.GPIO_Pin = index->pin;
         GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 
-        EXTI_InitStructure.EXTI_Line=index->pin;/* 外部中断线和引脚号对应 */
+        EXTI_InitStructure.EXTI_Line=index->pin;
         EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
         EXTI_InitStructure.EXTI_LineCmd = ENABLE;
         switch (pin_irq_hdr_tab[irqindex].mode)
@@ -628,6 +628,14 @@ rt_err_t ch32_pin_irq_enable(struct rt_device *device, rt_base_t pin,
         }
 
         GPIO_Init(index->gpio, &GPIO_InitStruct);
+
+        if(index->gpio==GPIOA) gpio_port_souce=GPIO_PortSourceGPIOA;
+        if(index->gpio==GPIOB) gpio_port_souce=GPIO_PortSourceGPIOB;
+        if(index->gpio==GPIOC) gpio_port_souce=GPIO_PortSourceGPIOC;
+        if(index->gpio==GPIOD) gpio_port_souce=GPIO_PortSourceGPIOD;
+        if(index->gpio==GPIOE) gpio_port_souce=GPIO_PortSourceGPIOE;
+        GPIO_EXTILineConfig(gpio_port_souce,(rt_uint8_t)irqindex);
+
         EXTI_Init(&EXTI_InitStructure);
         NVIC_SetPriority(irqmap->irqno,5<<4);
         NVIC_EnableIRQ( irqmap->irqno );
@@ -684,9 +692,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void EXTI0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI9_5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI15_10_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 void EXTI0_IRQHandler(void)
 {
@@ -776,4 +786,26 @@ void EXTI9_5_IRQHandler(void)
     FREE_INT_SP();
 }
 
+void EXTI15_10_IRQHandler(void)
+{
+    GET_INT_SP();
+    rt_interrupt_enter();
+    if( (EXTI_GetITStatus(EXTI_Line10)!=RESET)|| \
+        (EXTI_GetITStatus(EXTI_Line11)!=RESET)|| \
+        (EXTI_GetITStatus(EXTI_Line12)!=RESET)|| \
+        (EXTI_GetITStatus(EXTI_Line13)!=RESET)|| \
+        (EXTI_GetITStatus(EXTI_Line14)!=RESET)|| \
+        (EXTI_GetITStatus(EXTI_Line15)!=RESET))
+    {
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_10);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_11);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_12);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_13);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_14);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin_15);
+    EXTI_ClearITPendingBit(EXTI_Line10|EXTI_Line11|EXTI_Line12|EXTI_Line13|EXTI_Line14|EXTI_Line15);
+    }
+    rt_interrupt_leave();
+    FREE_INT_SP();
+}
 #endif

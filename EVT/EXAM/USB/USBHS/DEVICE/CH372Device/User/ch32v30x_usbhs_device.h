@@ -388,15 +388,6 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
 } UDISK_BOC_CSW, *PXUDISK_BOC_CSW;
 
 
-/* Global define */
-#define IF_FULL_SPEED       0
-
-#define USBHS_UEP0_SIZE     64
-#if IF_FULL_SPEED
-#define USBHS_MAX_PACK_SIZE 64
-#else
-#define USBHS_MAX_PACK_SIZE 512
-#endif
 /******************************************************************************/
 /* USB设备配置相关宏定义 */
 // USB CONTROL
@@ -701,11 +692,36 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
 #define USBHS_PLL_SRC_PRE_DIV8 (7<<24)
 
 /******************************************************************************/
+/* 设备速度相关宏定义 */
+#define DEF_USBD_SPEED_HIGH    0
+#define DEF_USBD_SPEED_FULL    1
+#define DEF_USBD_SPEED_LOW     2
+
+#define DEF_USBD_SPEED         DEF_USBD_SPEED_HIGH
+/******************************************************************************/
 /* 端点大小相关宏定义 */
+#if DEF_USBD_SPEED == DEF_USBD_SPEED_HIGH
+#define DEF_USBD_UEP0_SIZE     64
+#define DEF_USBD_MAX_PACK_SIZE 512
+#define DEF_USBD_BLK_PACK_SIZE 512
+#define DEF_USBD_INT_PACK_SIZE 512
+#define DEF_USBD_SYC_PACK_SIZE 1024
+#elif DEF_USBD_SPEED == DEF_USBD_SPEED_FULL
+#define DEF_USBD_UEP0_SIZE     64
+#define DEF_USBD_MAX_PACK_SIZE 64
+#define DEF_USBD_BLK_PACK_SIZE 64
+#define DEF_USBD_INT_PACK_SIZE 64
+#define DEF_USBD_SYC_PACK_SIZE 1023
+#elif DEF_USBD_SPEED == DEF_USBD_SPEED_LOW
+#define DEF_USBD_UEP0_SIZE     8
+#define DEF_USBD_MAX_PACK_SIZE 8
+#define DEF_USBD_BLK_PACK_SIZE 0
+#define DEF_USBD_INT_PACK_SIZE 8
+#define DEF_USBD_SYC_PACK_SIZE 0
+#endif
+
 #define DEF_USB_EP0_SIZE           64                                           /* 端点0大小 */
-#define DEF_USB_EP1_SIZE           64                                           /* 端点1大小 */
-#define DEF_USB_FS_EP2_SIZE        64                                           /* 端点2全速模式大小 */
-#define DEF_USB_HS_EP2_SIZE        512                                          /* 端点2高速模式大小 */
+#define DEF_USB_LS_EP_SIZE         8                                            /* 端点全速模式大小 */
 #define DEF_USB_FS_EP_SIZE         64                                           /* 端点全速模式大小 */
 #define DEF_USB_HS_EP_SIZE         512                                          /* 端点高速模式大小 */
 
@@ -715,11 +731,11 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
 #define DEF_IC_PRG_VER2            0x00
 /******************************************************************************/
 /* 变量外扩 */
-extern __attribute__ ((aligned(16))) UINT8 EP0_Databuf[ USBHS_UEP0_SIZE ];        /*端点0数据收发缓冲区*/
-extern __attribute__ ((aligned(16))) UINT8 EP1_Rx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点1数据接收缓冲区 */
-extern __attribute__ ((aligned(16))) UINT8 EP1_Tx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点1数据发送缓冲区 */
-extern __attribute__ ((aligned(16))) UINT8 EP2_Rx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点2数据接收缓冲区 */
-extern __attribute__ ((aligned(16))) UINT8 EP2_Tx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点2数据发送缓冲区 */
+extern __attribute__ ((aligned(16))) UINT8 EP0_Databuf[ DEF_USBD_UEP0_SIZE ];        /*端点0数据收发缓冲区*/
+extern __attribute__ ((aligned(16))) UINT8 EP1_Rx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点1数据接收缓冲区 */
+extern __attribute__ ((aligned(16))) UINT8 EP1_Tx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点1数据发送缓冲区 */
+extern __attribute__ ((aligned(16))) UINT8 EP2_Rx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点2数据接收缓冲区 */
+extern __attribute__ ((aligned(16))) UINT8 EP2_Tx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点2数据发送缓冲区 */
 
 extern const UINT8 *pDescr;
 extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USB2.0高速设备Setup包命令码 */

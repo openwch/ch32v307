@@ -32,6 +32,7 @@ int main(void)
     USART_Printf_Init(115200);
     Delay_Init();
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf("USBFS HOST Test\r\n");
     USBOTG_HostInit(ENABLE);
 
     while(1)

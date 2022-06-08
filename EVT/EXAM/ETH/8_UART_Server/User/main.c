@@ -18,13 +18,13 @@
  *
  * 该例程中，CH32V307 的RAM配置为128KB，Flash配置为192KB（使用WCHISPTool工具进行配置）
  *
- * 可在Tool Settings -> GNU RISC_V Cross Compiler -> Perprocessor 中添加 CH32V307_DEBUG 宏定义，打开调试开关（默认为串口1）
+ * 可在Tool Settings -> GNU RISC_V Cross Compiler -> Preprocessor 中添加 CH32V307_DEBUG 宏定义，打开调试开关（默认为串口1）
  * */
-
+#include "string.h"
 #include "debug.h"
-#include "WCHNET.H"
+#include "WCHNET.h"
+#include "eth_driver.h"
 #include "bsp_uart.h"
-
 
 #ifdef  CH32V307_DEBUG
 #define PRINT(X...) printf(X)
@@ -32,163 +32,36 @@
 #define PRINT(X...)
 #endif
 
-/* Global Variable */
- __attribute__((__aligned__(4)))ETH_DMADESCTypeDef DMARxDscrTab[ETH_RXBUFNB];  /* send descriptor table */
- __attribute__((__aligned__(4)))ETH_DMADESCTypeDef DMATxDscrTab[ETH_TXBUFNB];  /* receive descriptor table */
- __attribute__((__aligned__(4)))uint8_t  MACRxBuf[ETH_RXBUFNB*ETH_MAX_PACKET_SIZE];
- __attribute__((__aligned__(4)))uint8_t  MACTxBuf[ETH_TXBUFNB*ETH_MAX_PACKET_SIZE];
-
-
-
-__attribute__((__aligned__(4))) SOCK_INF SocketInf[WCHNET_MAX_SOCKET_NUM];     /* Socket table，4 byte alignment */
-const uint16_t MemNum[8] = {WCHNET_NUM_IPRAW,
-                         WCHNET_NUM_UDP,
-                         WCHNET_NUM_TCP,
-                         WCHNET_NUM_TCP_LISTEN,
-                         WCHNET_NUM_TCP_SEG,
-                         WCHNET_NUM_IP_REASSDATA,
-                         WCHNET_NUM_PBUF,
-                         WCHNET_NUM_POOL_BUF
-                         };
-const uint16_t MemSize[8] = {  WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_UDP_PCB),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB_LISTEN),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_SEG),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IP_REASSDATA),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(0),
-                          WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_POOL_BUF)
-                         };
- __attribute__((__aligned__(4)))uint8_t Memp_Memory[WCHNET_MEMP_SIZE];
- __attribute__((__aligned__(4)))uint8_t Mem_Heap_Memory[WCHNET_RAM_HEAP_SIZE];
- __attribute__((__aligned__(4)))uint8_t Mem_ArpTable[WCHNET_RAM_ARP_TABLE_SIZE];
-
-
-#define RECE_BUF_LEN      3200
-
 #define SOCKET_NUM  8
 uint8_t SocketId[SOCKET_NUM];
 uint8_t SocketRecvBuf[WCHNET_NUM_TCP][RECE_BUF_LEN];
 
-uint8_t MACAddr[6] = {0x02,0x03,0x04,0x05,0x06,0x17};
-uint8_t IPAddr[4] = {192,168,1,10};
+uint8_t MACAddr[6]  = {0x02,0x03,0x04,0x05,0x06,0x17};
+uint8_t IPAddr[4]   = {192,168,1,10};
 uint8_t GWIPAddr[4] = {192,168,1,1};
-uint8_t IPMask[4] = {255,255,255,0};
-uint8_t DESIP[4] = {192,168,1,100};
+uint8_t IPMask[4]   = {255,255,255,0};
+uint8_t DESIP[4]    = {192,168,1,100};
 
-uint16_t desport=5000;
-uint16_t srcport=1000;
+uint16_t desport = 5000;
+uint16_t srcport = 1000;
 
 volatile uint8_t tcp_connect_num = 0;
 
-
 /*********************************************************************
- * @fn      Ethernet_LED_Configuration
+ * @fn      mStopIfError
  *
- * @brief   set eth data and link led pin
+ * @brief   check if error.
  *
  * @return  none
  */
-void Ethernet_LED_Configuration(void)
+void mStopIfError(u8 iError)
 {
-    GPIO_InitTypeDef  GPIO={0};
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-    GPIO.GPIO_Pin = GPIO_Pin_8|GPIO_Pin_9;
-    GPIO.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB,&GPIO);
-    Ethernet_LED_LINKSET(1);
-    Ethernet_LED_DATASET(1);
-}
-
-
-/*********************************************************************
- * @fn      Ethernet_LED_LINKSET
- *
- * @brief   set eth link led,setbit 0 or 1,the link led turn on or turn off
- *
- * @return  none
- */
-void Ethernet_LED_LINKSET(uint8_t setbit)
-{
-     if(setbit){
-         GPIO_SetBits(GPIOB, GPIO_Pin_8);
-     }
-     else {
-         GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-    }
-}
-
-
-/*********************************************************************
- * @fn      Ethernet_LED_DATASET
- *
- * @brief   set eth data led,setbit 0 or 1,the data led turn on or turn off
- *
- * @return  none
- */
-void Ethernet_LED_DATASET(uint8_t setbit)
-{
-     if(setbit){
-         GPIO_SetBits(GPIOB, GPIO_Pin_9);
-     }
-     else {
-         GPIO_ResetBits(GPIOB, GPIO_Pin_9);
-    }
+    if (iError == WCHNET_ERR_SUCCESS) return;                                   /* 操作成功 */
+    printf("Error: %02X\r\n", (u16)iError);                                     /* 显示错误 */
 }
 
 /*********************************************************************
- * @fn      WCHNET_LibInit
- *
- * @brief   WCH NET_Lib init.
- *
- * @return  none
- */
-uint8_t WCHNET_LibInit(const uint8_t *ip,const uint8_t *gwip,const uint8_t *mask,const uint8_t *macaddr)
-{
-	uint8_t i;
-	struct _WCH_CFG  cfg;
-
-	cfg.RxBufSize = RX_BUF_SIZE;
-	cfg.TCPMss   = WCHNET_TCP_MSS;
-	cfg.HeapSize = WCH_MEM_HEAP_SIZE;
-	cfg.ARPTableNum = WCHNET_NUM_ARP_TABLE;
-	cfg.MiscConfig0 = WCHNET_MISC_CONFIG0;
-	WCHNET_ConfigLIB(&cfg);
-	i = WCHNET_Init(ip,gwip,mask,macaddr);
-	#ifdef  KEEPLIVE_ENABLE
-		net_initkeeplive( );
-	#endif
-	return (i);
-}
-
-/*********************************************************************
- * @fn      SET_MCO
- *
- * @brief   Set MCO wave output.
- *
- * @return  none
- */
-void SET_MCO(void)
-{
-    RCC_PLL3Cmd(DISABLE);
-    RCC_PREDIV2Config(RCC_PREDIV2_Div2);
-    RCC_PLL3Config(RCC_PLL3Mul_15);
-    RCC_MCOConfig(RCC_MCO_PLL3CLK);
-    RCC_PLL3Cmd(ENABLE);
-    Delay_Ms(100);
-    while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY))
-    {
-    	PRINT("Wait for PLL3 ready.\n");
-        Delay_Ms(500);
-    }
-    RCC_AHBPeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
-}
-
-
-/*********************************************************************
- * @fn      TIM1_Init
+ * @fn      TIM2_Init
  *
  * @brief   Ethernet send counter.
  *
@@ -200,8 +73,8 @@ void TIM2_Init( void )
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-	TIM_TimeBaseStructure.TIM_Period = 100-1;
-	TIM_TimeBaseStructure.TIM_Prescaler =7200-1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -209,14 +82,13 @@ void TIM2_Init( void )
 
 	TIM_Cmd(TIM2, ENABLE);
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update );
-	NVIC_SetPriority(TIM2_IRQn, 0x80);
 	NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 /*********************************************************************
  * @fn      WCHNET_CreatTcpSocket
  *
- * @brief   creat TCP socket, and connect
+ * @brief   create TCP socket, and connect
  *
  * @return  none
  */
@@ -229,15 +101,14 @@ void WCHNET_CreatTcpSocket(uint8_t *socket_revbuf)
 	memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
 	memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);                                 /* set the destination IP  */
 	TmpSocketInf.DesPort  = desport;                                             /* set the destination port */
-	TmpSocketInf.ProtoType = PROTO_TYPE_TCP;                                     /* set socekt type */
-	TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;                                     /* set receive buf length */
+	TmpSocketInf.ProtoType = PROTO_TYPE_TCP;                                     /* set socket type */
+	TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;                                     /* set receive buff length */
 
 	for(uint8_t i=0;i<8;i++)
 	{
 	    TmpSocketInf.SourPort = srcport++;                                       /* set source port */
-	    TmpSocketInf.RecvStartPoint = (uint32_t)&socket_revbuf[i];               /* set receive buf address */
-	    //PRINT("add =%08x \n",socket_revbuf[i]);
-	    temp = WCHNET_SocketCreat(&SocketId[tcp_connect_num],&TmpSocketInf);     /* creat socket */
+	    TmpSocketInf.RecvStartPoint = (uint32_t)&socket_revbuf[i*RECE_BUF_LEN];  /* set receive buff address */
+	    temp = WCHNET_SocketCreat(&SocketId[tcp_connect_num],&TmpSocketInf);     /* create socket */
 	    //PRINT("WCHNET_SocketCreat  %x\r\n",SocketId) ;
 		WCHNET_SocketConnect(SocketId[tcp_connect_num]);                         /* TCP connect */
 	}
@@ -251,7 +122,7 @@ void WCHNET_CreatTcpSocket(uint8_t *socket_revbuf)
  *
  * @return  none
  */
-void WCHNET_HandleSockInt(uint8_t sockeid,uint8_t initstat)
+void WCHNET_HandleSockInt(uint8_t socketid,uint8_t initstat)
 {
     uint32_t len;
     uint8_t write_buf = 0;
@@ -259,22 +130,22 @@ void WCHNET_HandleSockInt(uint8_t sockeid,uint8_t initstat)
 
     if(initstat & SINT_STAT_RECV)                                               /* socket receive */
     {
-        len = WCHNET_SocketRecvLen(sockeid,NULL);                               /* query length */
-        if( (uart_data_t[sockeid].tx_write - uart_data_t[sockeid].tx_read) < UART_TX_BUF_NUM )
+        len = WCHNET_SocketRecvLen(socketid,NULL);                               /* query length */
+        if( (uart_data_t[socketid].tx_write - uart_data_t[socketid].tx_read) < UART_TX_BUF_NUM )
         {
-        	write_buf = (uart_data_t[sockeid].tx_write)%UART_TX_BUF_NUM;
+        	write_buf = (uart_data_t[socketid].tx_write)%UART_TX_BUF_NUM;
         	/* socket receive */
-        	receive_state = WCHNET_SocketRecv(sockeid,uart_data_t[sockeid].TX_buffer[write_buf],&len);
+        	receive_state = WCHNET_SocketRecv(socketid,uart_data_t[socketid].TX_buffer[write_buf],&len);
         	if(receive_state == 0)
         	{
-        		uart_data_t[sockeid].TX_data_length[write_buf] = len;
+        		uart_data_t[socketid].TX_data_length[write_buf] = len;
 
-        		uart_data_t[sockeid].tx_write++;
+        		uart_data_t[socketid].tx_write++;
         	}
         }
         else
         {
-        	PRINT("eth %d receive buf busy\n",sockeid);
+        	PRINT("eth %d receive buff busy\n",socketid);
 		}
     }
     if(initstat & SINT_STAT_CONNECT)                         /* TCP connect */
@@ -285,13 +156,10 @@ void WCHNET_HandleSockInt(uint8_t sockeid,uint8_t initstat)
     if(initstat & SINT_STAT_DISCONNECT)                      /* TCP disconnect  */
     {
 		PRINT("TCP Disconnect\r\n");
-
     }
     if(initstat & SINT_STAT_TIM_OUT)                         /* TCP time out */
     {
-		Delay_Ms(200);
-
-		PRINT("TCP Timout\r\n");
+		PRINT("TCP Timeout\r\n");
     }
 }
 
@@ -307,9 +175,9 @@ void WCHNET_HandleGlobalInt(void)
 	uint8_t initstat;
 	uint16_t i;
 	uint8_t socketinit;
-	initstat = WCHNET_GetGlobalInt();                         /* get golbal interrupt, and clear */
+	initstat = WCHNET_GetGlobalInt();                         /* get global interrupt, and clear */
 
-	if(initstat & GINT_STAT_UNREACH)                          /* unreach */
+	if(initstat & GINT_STAT_UNREACH)                          /* unreachable */
 	{
 		PRINT("GINT_STAT_UNREACH\r\n");
 	}
@@ -445,7 +313,7 @@ void uart_tx(void)
 /*********************************************************************
  * @fn      uart_tx
  *
- * @brief   uart receive datas, and send these datas to eth
+ * @brief   uart receive data, and send these data to eth
  *
  * @return  none
  */
@@ -508,6 +376,8 @@ void uart_rx(void)
 		/* uart rx dma CNTR not equal to last, indicating that data is received*/
 		if(temp!=uart_data_t[i].last_RX_DMA_length)
 		{
+
+
 			/* calculate the length of the received data */
 			uart_data_t[i].rx_write += (uart_data_t[i].last_RX_DMA_length - temp) & (UART_RX_DMA_SIZE - 1);
 
@@ -524,6 +394,7 @@ void uart_rx(void)
 				len = 0;
 				uart_data_t[i].rx_read = 0;
 				uart_data_t[i].rx_write = 0;
+				uart_data_t[i].last_RX_DMA_length = 0;
 			}
 
 			/* send data starting from rx_read to RX_buffer end */
@@ -568,38 +439,32 @@ int main(void)
 	uint32_t len;
 	uint8_t *name="ch32v307";
 
+
 	Delay_Init();
 
 #ifdef CH32V307_DEBUG
 	USART_Printf_Init(256000);
 #endif
 
+	PRINT("SystemClk:%d\r\n",SystemCoreClock);
+
 	RCC_GetClocksFreq(&RCC_ClocksStatus);
-	SET_MCO();
-	TIM2_Init();
-
-	PRINT("mac:");
-	WCH_GetMac(MACAddr);
-	for(i=0;i<6;i++)
-	{
-		PRINT(" %02x",MACAddr[i]);
-	}
-	PRINT("\r\n");
-
-	BSP_Uart_Init(); /*uart init*/
-
-	WCHNET_SetHostname(name);
-	i=WCHNET_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);
-	if(i != WCHNET_ERR_SUCCESS)
-	{
-		PRINT("WCH NET LIB INIT ERROR\n");
-		while(1);
-	}
-	while(!(WCHNET_GetPHYStatus()&PHY_LINK_SUCCESS))   /*wait PHY connect success*/
-	{
-		Delay_Ms(100);
-	}
-
+	PRINT("SystemClk:%d\r\n",SystemCoreClock);
+	PRINT("net version:%x\n",WCHNET_GetVer());
+    if( WCHNET_LIB_VER != WCHNET_GetVer() )
+    {
+        PRINT("version error.\n");
+    }
+    WCHNET_GetMacAddr(MACAddr);                          /*获取芯片Mac地址*/
+    PRINT("mac addr:");
+    for(int i=0;i<6;i++) PRINT("%x ",MACAddr[i]);
+    PRINT("\n");
+    TIM2_Init();
+    BSP_Uart_Init(); /*uart init*/
+    WCHNET_DHCPSetHostname(name);                        /*设置DHCP主机名称*/
+    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);     /*以太网库初始化*/
+    mStopIfError(i);
+    if(i == WCHNET_ERR_SUCCESS) PRINT("WCHNET_LibInit Success\r\n");
 	WCHNET_CreatTcpSocket(&SocketRecvBuf[0]);
 
 	while(1)

@@ -11,7 +11,7 @@
 /*
  *@Note
  自动注入模式例程：
- ADC通道2(PA2)-规则组通道，通道3(PA3)-注入组通道
+ ADC通道1(PA1)-规则组通道，通道3(PA3)-注入组通道
 
 */
 
@@ -35,7 +35,7 @@ void ADC_Function_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -52,7 +52,7 @@ void ADC_Function_Init(void)
 	ADC_InitStructure.ADC_NbrOfChannel = 1;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_239Cycles5 );
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_239Cycles5 );
 	ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, 1, ADC_SampleTime_239Cycles5 );
 	ADC_AutoInjectedConvCmd(ADC1, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
@@ -119,7 +119,7 @@ u16 Get_ADC_Val(u8 ch)
 u16 Get_ConversionVal(s16 val)
 {
 	if((val+Calibrattion_Val)<0) return 0;
-	if((Calibrattion_Val+val)>4095) return 4095;
+	if((Calibrattion_Val+val)>4095||val==4095) return 4095;
 	return (val+Calibrattion_Val);
 }
 

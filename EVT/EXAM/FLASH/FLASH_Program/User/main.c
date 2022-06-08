@@ -13,12 +13,16 @@
  FLASH的擦/读/写例程：
    包括标准擦除和编程、快速擦除和编程。
 
-   注意：擦除成功部分读非0xFF：
+   注意：
+   a-擦除成功部分读非0xFF：
               字读——0xe339e339
               半字读——0xe339
               字节读——0x39
               偶地址字节读——0x39
               奇地址字节读——0xe3
+   b-在主频超过100MHz时，操作FLASH时需注意：
+             在进行非零等待区域FLASH和零等待区域FLASH、用户字读写以及厂商配置字和Boot区域读时，需做以下操作，
+             首先将HCLK进行2分频，FLASH操作完成后再恢复，保证FLASH操作是频率低于100Mhz。
 */
 
 #include "debug.h"
@@ -59,6 +63,9 @@ volatile TestStatus MemoryEraseStatus = PASSED;
 void Flash_Test(void)
 {
     printf("FLASH Test\n");
+
+    RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
+    __disable_irq();
 
     FLASH_Unlock();
 
@@ -107,6 +114,9 @@ void Flash_Test(void)
     }
 
     FLASH_Lock();
+
+    RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
+    __enable_irq();
 }
 
 /*********************************************************************
@@ -127,6 +137,10 @@ void Flash_Test_Fast(void)
     }
 
     printf("FLASH Fast Mode Test\n");
+
+    RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
+    __disable_irq();
+
     FLASH_Unlock_Fast();
 
     FLASH_EraseBlock_64K_Fast(FAST_FLASH_PROGRAM_START_ADDR);
@@ -141,16 +155,16 @@ void Flash_Test_Fast(void)
 
     for(i = 0; i < 256; i++)
     {
-        for(j = 0; j < 256; j++)
+        for(j = 0; j < 64; j++)
         {
             if(*(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 256 * i + 4 * j) != i)
             {
-                flag = 1;
+                flag = 0;
                 break;
             }
             else
             {
-                flag = 0;
+                flag = 1;
             }
         }
     }
@@ -203,6 +217,9 @@ void Flash_Test_Fast(void)
     printf("\n");
 
     FLASH_Lock_Fast();
+
+    RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
+    __enable_irq();
 }
 
 /*********************************************************************

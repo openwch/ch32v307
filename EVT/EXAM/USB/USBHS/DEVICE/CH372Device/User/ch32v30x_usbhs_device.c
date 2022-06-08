@@ -16,13 +16,18 @@
 void USBHS_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /* USB缓冲区定义 */
-__attribute__ ((aligned(4))) UINT8 EP0_Databuf[ USBHS_UEP0_SIZE ]; /* 端点0数据收发缓冲区 */
-__attribute__ ((aligned(4))) UINT8 EP1_Rx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点1数据接收缓冲区 */
-__attribute__ ((aligned(4))) UINT8 EP1_Tx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点1数据发送缓冲区 */
-__attribute__ ((aligned(4))) UINT8 EP2_Rx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点2数据接收缓冲区 */
-__attribute__ ((aligned(4))) UINT8 EP2_Tx_Databuf[ USBHS_MAX_PACK_SIZE ]; /* 端点2数据发送缓冲区 */
+__attribute__ ((aligned(4))) UINT8 EP0_Databuf[ DEF_USBD_UEP0_SIZE ]; /* 端点0数据收发缓冲区 */
+__attribute__ ((aligned(4))) UINT8 EP1_Rx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点1数据接收缓冲区 */
+__attribute__ ((aligned(4))) UINT8 EP1_Tx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点1数据发送缓冲区 */
+__attribute__ ((aligned(4))) UINT8 EP2_Rx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点2数据接收缓冲区 */
+__attribute__ ((aligned(4))) UINT8 EP2_Tx_Databuf[ DEF_USBD_MAX_PACK_SIZE ]; /* 端点2数据发送缓冲区 */
 
 #define pMySetupReqPak        ((PUSB_SETUP_REQ)EP0_Databuf)
+#if DEF_USBD_SPEED == DEF_USBD_SPEED_LOW
+#define RepDataLoadLen        8
+#else
+#define RepDataLoadLen        64
+#endif
 const UINT8 *pDescr;
 volatile UINT8  USBHS_Dev_SetupReqCode = 0xFF;                                  /* USB2.0高速设备Setup包命令码 */
 volatile UINT16 USBHS_Dev_SetupReqLen = 0x00;                                   /* USB2.0高速设备Setup包长度 */
@@ -141,9 +146,26 @@ UINT8 TAB_USB_HS_OSC_DESC[ sizeof( MyCfgDescr_FS ) ] =
  */
 void USBHS_RCC_Init( void )
 {
-    RCC->CFGR2 = USBHS_PLL_SRC_HSE | USBHS_PLL_SRC_PRE_DIV2 | USBHS_PLL_CKREF_4M; /* PLL REF = HSE/2 = 4MHz */
-    RCC->CFGR2 |= USB_48M_CLK_SRC_PHY | USBHS_PLL_ALIVE;
-    RCC->AHBPCENR |= ( (uint32_t)( 1 << 11 ) );
+    uint32_t regtemp;
+    regtemp = RCC->CFGR2;
+    /* USBHD PHY时钟源，选择外部晶振HSE */
+    regtemp &= ~USBHS_PLL_SRC_MASK;
+    regtemp |= USBHS_PLL_SRC_HSE;
+    /* USBHD PHY时钟参考源分频选择，选择2分频，HSE = 8Mhz， DIV = 2，USBHS_PLL_CKREF_4M = HSE_CLK_8MHz/USBHS_PLL_SRC_PRE_DIV_2 */
+    regtemp &= ~USBHS_PLL_SRC_PRE_MASK;
+    regtemp |= USBHS_PLL_SRC_PRE_DIV2;
+    /* USBHD PHY时钟参考源频率选择， 选择4M */
+    regtemp &= ~USBHS_PLL_CKREF_MASK;
+    regtemp |= USBHS_PLL_CKREF_4M;
+    /* USBHD PHY 内部PLL控制位，1：USB PHY 内部 PLL 使能  */
+    regtemp |= USBHS_PLL_ALIVE;
+    /* USBOTG FS HD 48M 时钟源， 选择USBHD PHY */
+    regtemp &= ~USB_48M_CLK_SRC_MASK;
+    regtemp |= USB_48M_CLK_SRC_PHY;
+    /* 参数写回 */
+    RCC->CFGR2 = regtemp;
+    /* 开启USBHS时钟 */
+    RCC->AHBPCENR |= RCC_AHBPeriph_USBHS;
     Delay_Us( 200 );
 }
 
@@ -195,65 +217,13 @@ void USBHS_Device_Endp_Init ( void )
     USBHSD->UEP0_TX_CTRL = USBHS_EP_T_RES_NAK;
     USBHSD->UEP0_RX_CTRL = USBHS_EP_R_RES_ACK;
 
-    USBHSD->UEP1_TX_LEN  = 0;
-    USBHSD->UEP1_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
+    USBHSD->UEP1_TX_LEN  = 512;
+    USBHSD->UEP1_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_ACK;
     USBHSD->UEP1_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
 
-    USBHSD->UEP2_TX_LEN  = 0;
-    USBHSD->UEP2_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
+    USBHSD->UEP2_TX_LEN  = 512;
+    USBHSD->UEP2_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_ACK;
     USBHSD->UEP2_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP3_TX_LEN  = 0;
-    USBHSD->UEP3_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP3_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP4_TX_LEN  = 0;
-    USBHSD->UEP4_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP4_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP5_TX_LEN  = 0;
-    USBHSD->UEP5_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP5_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP6_TX_LEN  = 0;
-    USBHSD->UEP6_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP6_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP7_TX_LEN  = 0;
-    USBHSD->UEP7_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP7_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP8_TX_LEN  = 0;
-    USBHSD->UEP8_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP8_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP9_TX_LEN  = 0;
-    USBHSD->UEP9_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP9_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP10_TX_LEN  = 0;
-    USBHSD->UEP10_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP10_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP11_TX_LEN  = 0;
-    USBHSD->UEP11_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP11_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP12_TX_LEN  = 0;
-    USBHSD->UEP12_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP12_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP13_TX_LEN  = 0;
-    USBHSD->UEP13_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP13_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP14_TX_LEN  = 0;
-    USBHSD->UEP14_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP14_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
-
-    USBHSD->UEP15_TX_LEN  = 0;
-    USBHSD->UEP15_TX_CTRL = USBHS_EP_T_AUTOTOG | USBHS_EP_T_RES_NAK;
-    USBHSD->UEP15_RX_CTRL = USBHS_EP_R_AUTOTOG | USBHS_EP_R_RES_ACK;
 }
 
 /*********************************************************************
@@ -343,7 +313,7 @@ void USBHS_IRQHandler( void )
                 switch( USBHS_Dev_SetupReqCode )
                 {
                     case USB_GET_DESCRIPTOR:
-                        len = USBHS_Dev_SetupReqLen >= USBHS_UEP0_SIZE ? USBHS_UEP0_SIZE : USBHS_Dev_SetupReqLen;
+                        len = USBHS_Dev_SetupReqLen >= DEF_USBD_UEP0_SIZE ? DEF_USBD_UEP0_SIZE : USBHS_Dev_SetupReqLen;
                         memcpy( EP0_Databuf, pDescr, len );
                         USBHS_Dev_SetupReqLen -= len;
                         pDescr += len;
@@ -450,7 +420,7 @@ void USBHS_IRQHandler( void )
                 {
                     USBHS_Dev_SetupReqLen = len;
                 }
-                len = ( USBHS_Dev_SetupReqLen >= USBHS_UEP0_SIZE ) ? USBHS_UEP0_SIZE : USBHS_Dev_SetupReqLen;
+                len = ( USBHS_Dev_SetupReqLen >= DEF_USBD_UEP0_SIZE ) ? DEF_USBD_UEP0_SIZE : USBHS_Dev_SetupReqLen;
                 memcpy( EP0_Databuf, pDescr, len );
                 pDescr += len;
             }
@@ -555,7 +525,7 @@ void USBHS_IRQHandler( void )
                         {
                             USBHS_Dev_SetupReqLen = len;
                         }
-                        len = ( USBHS_Dev_SetupReqLen >= USBHS_UEP0_SIZE ) ? USBHS_UEP0_SIZE : USBHS_Dev_SetupReqLen;
+                        len = ( USBHS_Dev_SetupReqLen >= DEF_USBD_UEP0_SIZE ) ? DEF_USBD_UEP0_SIZE : USBHS_Dev_SetupReqLen;
                         memcpy( EP0_Databuf, pDescr, len );
                         pDescr += len;
                     }
@@ -769,7 +739,7 @@ void USBHS_IRQHandler( void )
             /* DATA stage (IN -DATA1-ACK) */
             if( chtype & 0x80 )
             {
-                len = ( USBHS_Dev_SetupReqLen> USBHS_UEP0_SIZE ) ? USBHS_UEP0_SIZE : USBHS_Dev_SetupReqLen;
+                len = ( USBHS_Dev_SetupReqLen> DEF_USBD_UEP0_SIZE ) ? DEF_USBD_UEP0_SIZE : USBHS_Dev_SetupReqLen;
                 USBHS_Dev_SetupReqLen -= len;
             }
             else

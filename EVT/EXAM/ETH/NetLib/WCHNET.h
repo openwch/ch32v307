@@ -1,430 +1,598 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : WCHNET.H
-* Author             : WCH
-* Version            : V1.0.0
-* Date               : 2022/01/13
-* Description        : 以太网协议栈库头文件
+* File Name        : WCHNET.H
+* Author           : WCH
+* Version          : V1.30
+* Date             : 2022/06/01
+* Description      : This file contains the headers of 
+*                    the Ethernet protocol stack library.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #ifndef __WCHNET_H__
 #define __WCHNET_H__
-#include "ch32v30x_eth.h"
 
+#include "stdint.h"
+#ifndef NET_LIB
+#include "net_config.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef TRUE
-  #define TRUE     1
-  #define FALSE    0
-#endif
-#ifndef NULL
-  #define NULL    0
-#endif
+#define WCHNET_LIB_VER                  0x13              //the library version number
+#define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
-#define WCHNET_LIB_VER    0x10
+/* LED state @LED_STAT */
+#define  LED_ON                         0
+#define  LED_OFF                        1
 
-#ifndef WCHNET_MAX_SOCKET_NUM
-  #define WCHNET_MAX_SOCKET_NUM    8  /* Socket的个数，用户可以配置，默认为4个Socket,最大为32 */
-#endif
+/* PHY state @PHY_STAT */
+#define PHY_LINK_SUCCESS                (1 << 2)          //PHY connection success
+#define PHY_AUTO_SUCCESS                (1 << 5)          //PHY auto negotiation completed
 
-#define ETH_RXBUFNB    10                          /* MAC接收描述符个数 */
-#define ETH_TXBUFNB    2   /* MAC发送描述符个数 */ /* #ifndef RX_QUEUE_ENTRIES */
+/* Library initialization state @CFG_INIT_STAT */
+#define  INIT_OK                        0x00
+#define  INIT_ERR_RX_BUF_SIZE           0x01
+#define  INIT_ERR_TCP_MSS               0x02
+#define  INIT_ERR_HEAP_SIZE             0x03
+#define  INIT_ERR_ARP_TABLE_NEM         0x04
+#define  INIT_ERR_MISC_CONFIG0          0x05
+#define  INIT_ERR_MISC_CONFIG1          0x06
+#define  INIT_ERR_FUNC_SEND             0x09
+#define  INIT_ERR_CHECK_VALID           0xFF
 
-#ifndef RX_BUF_SIZE
-  #define RX_BUF_SIZE    1520  /* MAC接收每个缓冲区长度，为4的整数倍 */
-#endif
+/* Socket protocol type */
+#define PROTO_TYPE_IP_RAW               0                 //IP layer raw data
+#define PROTO_TYPE_UDP                  2                 //UDP protocol
+#define PROTO_TYPE_TCP                  3                 //TCP protocol
 
-#ifndef WCHNET_PING_ENABLE
-  #define WCHNET_PING_ENABLE    TRUE  /* 默认PING开启 */
-#endif                                /* PING使能 */
+/* interrupt status */
+/* The following are the states 
+ * that GLOB_INT will generate */
+#define GINT_STAT_UNREACH               (1 << 0)          //unreachable interrupt
+#define GINT_STAT_IP_CONFLI             (1 << 1)          //IP conflict interrupt
+#define GINT_STAT_PHY_CHANGE            (1 << 2)          //PHY state change interrupt
+#define GINT_STAT_SOCKET                (1 << 4)          //socket related interrupt
 
-#ifndef TCP_RETRY_COUNT
-  #define TCP_RETRY_COUNT    20  /* TCP重试次数，位宽为5位*/
-#endif
+/* The following are the states 
+ * that Sn_INT will generate*/
+#define SINT_STAT_RECV                  (1 << 2)          //the socket receives data or the receive buffer is not empty
+#define SINT_STAT_CONNECT               (1 << 3)          //connect successfully,generated in TCP mode
+#define SINT_STAT_DISCONNECT            (1 << 4)          //disconnect,generated in TCP mode
+#define SINT_STAT_TIM_OUT               (1 << 6)          //timeout disconnect,generated in TCP mode
 
-#ifndef TCP_RETRY_PERIOD
-  #define TCP_RETRY_PERIOD    10  /* TCP重试周期，单位为MS， */
-#endif
 
-#ifndef WCHNETTIMERPERIOD
-  #define WCHNETTIMERPERIOD    10  /* 定时器周期，单位Ms,不得大于500 */
-#endif
+/* Definitions for error constants. @ERR_T */
+#define ERR_T
+#define WCHNET_ERR_SUCCESS              0x00              //No error, everything OK
+#define WCHNET_ERR_BUSY                 0x10              //busy
+#define WCHNET_ERR_MEM                  0x11              //Out of memory error
+#define WCHNET_ERR_BUF                  0x12              //Buffer error
+#define WCHNET_ERR_TIMEOUT              0x13              //Timeout
+#define WCHNET_ERR_RTE                  0x14              //Routing problem
+#define WCHNET_ERR_ABRT                 0x15              //Connection aborted
+#define WCHNET_ERR_RST                  0x16              //Connection reset
+#define WCHNET_ERR_CLSD                 0x17              //Connection closed
+#define WCHNET_ERR_CONN                 0x18              //Not connected
+#define WCHNET_ERR_VAL                  0x19              //Illegal value
+#define WCHNET_ERR_ARG                  0x1a              //Illegal argument
+#define WCHNET_ERR_USE                  0x1b              //Address in use
+#define WCHNET_ERR_IF                   0x1c              //Low-level netif error 
+#define WCHNET_ERR_ISCONN               0x1d              //Already connected
+#define WCHNET_ERR_INPROGRESS           0x1e              //Operation in progress
+#define WCHNET_ERR_SOCKET_MEM           0X20              //Socket information error
+#define WCHNET_ERR_UNSUPPORT_PROTO      0X21              //unsupported protocol type
+#define WCHNET_RET_ABORT                0x5F              //command process fail
+#define WCHNET_ERR_UNKNOW               0xFA              //unknow
 
-#ifndef SOCKET_SEND_RETRY
-  #define SOCKET_SEND_RETRY    1  /* 默认发送重试 */
-#endif
+/* unreachable condition related codes */
+#define UNREACH_CODE_HOST               0                 //host unreachable
+#define UNREACH_CODE_NET                1                 //network unreachable
+#define UNREACH_CODE_PROTOCOL           2                 //protocol unreachable
+#define UNREACH_CODE_PROT               3                 //port unreachable
+/*For other values, please refer to the RFC792 document*/
 
-#define LIB_CFG_VALUE    ((SOCKET_SEND_RETRY << 25) | \
-                       (1 << 24) |                    \
-                       (TCP_RETRY_PERIOD << 19) |     \
-                       (TCP_RETRY_COUNT << 14) |      \
-                       (WCHNET_PING_ENABLE << 13) |   \
-                       (ETH_TXBUFNB << 9) |           \
-                       (ETH_RXBUFNB << 5) |           \
-                       (WCHNET_MAX_SOCKET_NUM))
-#ifndef MISCE_CFG0_TCP_SEND_COPY
-  #define MISCE_CFG0_TCP_SEND_COPY    1  /* TCP发送缓冲区复制 */
-#endif
+/* TCP disconnect related codes */
+#define TCP_CLOSE_NORMAL                0                 //normal disconnect,a four-way handshake
+#define TCP_CLOSE_RST                   1                 //reset the connection and close
+#define TCP_CLOSE_ABANDON               2                 //drop connection, and no termination message is sent
 
-#ifndef CFG0_TCP_RECV_COPY
-  #define CFG0_TCP_RECV_COPY    1  /* TCP接收复制优化，内部调试使用 */
-#endif
+/* socket state code */
+#define SOCK_STAT_CLOSED                0X00              //socket close
+#define SOCK_STAT_OPEN                  0X05              //socket open 
 
-#ifndef MISCE_CFG0_TCP_OLD_DELETE
-  #define MISCE_CFG0_TCP_OLD_DELETE    0  /* 删除最早的TCP连接 */
-#endif
+/* TCP state code */
+#define TCP_CLOSED                      0                 //TCP close
+#define TCP_LISTEN                      1                 //TCP listening
+#define TCP_SYN_SENT                    2                 //SYN send, connect request
+#define TCP_SYN_RCVD                    3                 //SYN received, connection request received
+#define TCP_ESTABLISHED                 4                 //TCP connection establishment
+#define TCP_FIN_WAIT_1                  5                 //WAIT_1 state
+#define TCP_FIN_WAIT_2                  6                 //WAIT_2 state
+#define TCP_CLOSE_WAIT                  7                 //wait to close
+#define TCP_CLOSING                     8                 //closing
+#define TCP_LAST_ACK                    9                 //LAST_ACK
+#define TCP_TIME_WAIT                   10                //2MSL wait
 
-/*关于内存分配 */
-#ifndef WCHNET_NUM_IPRAW
-  #define WCHNET_NUM_IPRAW    4  /* IPRAW连接的个数 */
-#endif
+/* The following values are fixed and cannot be changed */
+#define WCHNET_MEM_ALIGN_SIZE(size)    (((size) + WCHNET_MEM_ALIGNMENT - 1) & ~(WCHNET_MEM_ALIGNMENT - 1))
+#define WCHNET_SIZE_IPRAW_PCB          0x1C               //IPRAW PCB size
+#define WCHNET_SIZE_UDP_PCB            0x20               //UDP PCB size
+#define WCHNET_SIZE_TCP_PCB            0xB4               //TCP PCB size
+#define WCHNET_SIZE_TCP_PCB_LISTEN     0x24               //TCP LISTEN PCB size
+#define WCHNET_SIZE_IP_REASSDATA       0x10               //IP reassembled Management
+#define WCHNET_SIZE_PBUF               0x10               //Packet Buf
+#define WCHNET_SIZE_TCP_SEG            0x14               //TCP SEG structure
+#define WCHNET_SIZE_MEM                0x08               //sizeof(struct mem)
+#define WCHNET_SIZE_ARP_TABLE          0x18               //sizeof ARP table
 
-#ifndef WCHNET_NUM_UDP
-  #define WCHNET_NUM_UDP    8  /* UDP连接的个数 */
-#endif
+#define WCHNET_SIZE_POOL_BUF           WCHNET_MEM_ALIGN_SIZE(WCHNET_TCP_MSS + 40 + 14)          //pbuf size
+#define WCHNET_MEMP_SIZE               ((WCHNET_MEM_ALIGNMENT - 1) +                                    \
+                          (WCHNET_NUM_IPRAW * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB)) +           \
+                          (WCHNET_NUM_UDP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_UDP_PCB)) +               \
+                          (WCHNET_NUM_TCP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB)) +               \
+                          (WCHNET_NUM_TCP_LISTEN * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB_LISTEN)) + \
+                          (WCHNET_NUM_TCP_SEG * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_SEG)) +           \
+                          (WCHNET_NUM_IP_REASSDATA * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IP_REASSDATA)) + \
+                          (WCHNET_NUM_PBUF * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF)) +                 \
+                          (WCHNET_NUM_POOL_BUF * (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_POOL_BUF))))
 
-#ifndef WCHNET_NUM_TCP
-  #define WCHNET_NUM_TCP    8  /* TCP连接的个数 */
-#endif
+#define HEAP_MEM_ALIGN_SIZE          (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_MEM))
+#define WCHNET_RAM_HEAP_SIZE         (WCHNET_MEM_ALIGN_SIZE(WCHNET_MEM_HEAP_SIZE) + (2 * HEAP_MEM_ALIGN_SIZE) )
+#define WCHNET_RAM_ARP_TABLE_SIZE    (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_ARP_TABLE) * WCHNET_NUM_ARP_TABLE)
 
-#ifndef WCHNET_NUM_TCP_LISTEN
-  #define WCHNET_NUM_TCP_LISTEN    8  /* TCP监听的个数 */
-#endif
+typedef struct
+{
+    uint32_t length;
+    uint32_t buffer;
+}ETHFrameType;
 
-#ifndef WCHNET_NUM_PBUF
-  #define WCHNET_NUM_PBUF    5  /* PBUF结构的个数 */
-#endif
+/* LED callback type */
+typedef void (*led_callback)( uint8_t setbit );
 
-#ifndef WCHNET_NUM_POOL_BUF
-  #define WCHNET_NUM_POOL_BUF    6  /* POOL BUF的个数 */
-#endif
+/* net send callback type */
+typedef uint32_t (*eth_tx_set )( uint16_t len, uint32_t *pBuff );
 
-#ifndef WCHNET_NUM_TCP_SEG
-  #define WCHNET_NUM_TCP_SEG    10  /* tcp段的个数*/
-#endif
+/* net receive callback type */
+typedef uint32_t (*eth_rx_set )( ETHFrameType *pkt );
 
-#ifndef WCHNET_NUM_IP_REASSDATA
-  #define WCHNET_NUM_IP_REASSDATA    5  /* IP分段的长度 */
-#endif
+/* DNS callback type */
+typedef void (*dns_callback)( const char *name, uint8_t *ipaddr, void *callback_arg );
 
-#ifndef WCHNET_TCP_MSS
-  #define WCHNET_TCP_MSS    800  /* tcp MSS的大小*/
-#endif
+/* DHCP callback type */
+typedef uint8_t (*dhcp_callback)( uint8_t status, void * );
 
-#ifndef WCH_MEM_HEAP_SIZE
-  #define WCH_MEM_HEAP_SIZE    4600  /* 内存堆大小 */
-#endif
-
-#ifndef WCHNET_NUM_ARP_TABLE
-  #define WCHNET_NUM_ARP_TABLE    10  /* ARP列表个数 */
-#endif
-
-#ifndef WCHNET_MEM_ALIGNMENT
-  #define WCHNET_MEM_ALIGNMENT    4  /* 4字节对齐 */
-#endif
-
-#ifndef WCHNET_IP_REASS_PBUFS
-  #if(WCHNET_NUM_POOL_BUF < 32)
-    #define WCHNET_IP_REASS_PBUFS    (WCHNET_NUM_POOL_BUF - 1) /* IP分片的PBUF个数，最大为31 */
-  #else
-    #define WCHNET_IP_REASS_PBUFS    31
-  #endif
-#endif
-
-#define WCHNET_MISC_CONFIG0    ((MISCE_CFG0_TCP_SEND_COPY << 0) | \
-                             (CFG0_TCP_RECV_COPY << 1) |          \
-                             (MISCE_CFG0_TCP_OLD_DELETE << 2) |   \
-                             (WCHNET_IP_REASS_PBUFS) << 3)
-/* PHY 状态 */
-#define PHY_LINK_SUCCESS              (1 << 2) /*PHY建立连接*/
-#define PHY_AUTO_SUCCESS              (1 << 5) /* PHY自动协商完成*/
-
-/* Socket 工作模式定义,协议类型 */
-#define PROTO_TYPE_IP_RAW             0     /* IP层原始数据 */
-#define PROTO_TYPE_UDP                2     /* UDP协议类型 */
-#define PROTO_TYPE_TCP                3     /* TCP协议类型 */
-
-/* 中断状态 */
-/* 以下为GLOB_INT会产生的状态 */
-#define GINT_STAT_UNREACH             (1 << 0) /* 不可达中断*/
-#define GINT_STAT_IP_CONFLI           (1 << 1) /* IP冲突*/
-#define GINT_STAT_PHY_CHANGE          (1 << 2) /* PHY状态改变 */
-#define GINT_STAT_SOCKET              (1 << 4) /* scoket 产生中断 */
-
-/*以下为Sn_INT会产生的状态*/
-#define SINT_STAT_RECV                (1 << 2) /* socket端口接收到数据或者接收缓冲区不为空 */
-#define SINT_STAT_CONNECT             (1 << 3) /* 连接成功,TCP模式下产生此中断 */
-#define SINT_STAT_DISCONNECT          (1 << 4) /* 连接断开,TCP模式下产生此中断 */
-#define SINT_STAT_TIM_OUT             (1 << 6) /* ARP和TCP模式下会发生此中断 */
-
-/* 错误码 */
-#define WCHNET_ERR_SUCCESS            0x00  /* 命令操作成功 */
-#define WCHNET_RET_ABORT              0x5F  /* 命令操作失败 */
-#define WCHNET_ERR_BUSY               0x10  /* 忙状态，表示当前正在执行命令 */
-#define WCHNET_ERR_MEM                0x11  /* 内存错误 */
-#define WCHNET_ERR_BUF                0x12  /* 缓冲区错误 */
-#define WCHNET_ERR_TIMEOUT            0x13  /* 超时 */
-#define WCHNET_ERR_RTE                0x14  /* 路由错误*/
-#define WCHNET_ERR_ABRT               0x15  /* 连接停止*/
-#define WCHNET_ERR_RST                0x16  /* 连接复位 */
-#define WCHNET_ERR_CLSD               0x17  /* 连接关闭/socket 在关闭状态*/
-#define WCHNET_ERR_CONN               0x18  /* 无连接 */
-#define WCHNET_ERR_VAL                0x19  /* 错误的值 */
-#define WCHNET_ERR_ARG                0x1a  /* 错误的参数 */
-#define WCHNET_ERR_USE                0x1b  /* 已经被使用 */
-#define WCHNET_ERR_IF                 0x1c  /* MAC错误  */
-#define WCHNET_ERR_ISCONN             0x1d  /* 已连接 */
-#define WCHNET_ERR_SOCKET_MEM         0X20  /* Socket信息列表已满或者错误 */
-#define WCHNET_ERR_UNSUPPORT_PROTO    0X21  /* 不支持的协议类型 */
-#define WCHNET_ERR_UNKNOW             0xFA  /* 未知错误 */
-
-/* 不可达代码 */
-#define UNREACH_CODE_HOST             0     /* 主机不可达 */
-#define UNREACH_CODE_NET              1     /* 网络不可达 */
-#define UNREACH_CODE_PROTOCOL         2     /* 协议不可达 */
-#define UNREACH_CODE_PROT             3     /* 端口不可达 */
-/*其他值请参考RFC792文档*/
-
-/* TCP关闭参数 */
-#define TCP_CLOSE_NORMAL              0     /* 正常关闭，进行4此握手 */
-#define TCP_CLOSE_RST                 1     /* 复位连接，并关闭  */
-#define TCP_CLOSE_ABANDON             2     /* 内部丢弃连接，不会发送任何终止报文 */
-
-/* socket状态 */
-#define SOCK_STAT_CLOSED              0X00  /* socket关闭 */
-#define SOCK_STAT_OPEN                0X05  /* socket打开 */
-
-/* TCP状态 */
-#define TCP_CLOSED                    0     /* TCP连接 */
-#define TCP_LISTEN                    1     /* TCP关闭 */
-#define TCP_SYN_SENT                  2     /* SYN发送，连接请求 */
-#define TCP_SYN_RCVD                  3     /* SYN接收，接收到连接请求 */
-#define TCP_ESTABLISHED               4     /* TCP连接建立 */
-#define TCP_FIN_WAIT_1                5     /* WAIT_1状态 */
-#define TCP_FIN_WAIT_2                6     /* WAIT_2状态 */
-#define TCP_CLOSE_WAIT                7     /* 等待关闭 */
-#define TCP_CLOSING                   8     /* 正在关闭 */
-#define TCP_LAST_ACK                  9     /* LAST_ACK*/
-#define TCP_TIME_WAIT                 10    /* 2MSL等待 */
+/* socket receive callback type */
+struct _SCOK_INF;
+typedef void (*pSockRecv)( struct _SCOK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
 
 /* sokcet信息表 */
-
 typedef struct _SCOK_INF
 {
-    u32   IntStatus;                                              /* 中断状态 */
-    u32   SockIndex;                                              /* Socket索引值 */
-    u32   RecvStartPoint;                                         /* 接收缓冲区的开始指针 */
-    u32   RecvBufLen;                                             /* 接收缓冲区长度 */
-    u32   RecvCurPoint;                                           /* 接收缓冲区的当前指针 */
-    u32   RecvReadPoint;                                          /* 接收缓冲区的读指针 */
-    u32   RecvRemLen;                                             /* 接收缓冲区的剩余长度 */
-    u32   ProtoType;                                              /* 协议类型 */
-    u32   ScokStatus;                                             /* 低字节Socket状态，次低字节为TCP状态，仅TCP模式下有意义 */
-    u32   DesPort;                                                /* 目的端口 */
-    u32   SourPort;                                               /* 源端口在IPRAW模式下为协议类型 */
-    u8    IPAddr[4];                                              /* Socket目标IP地址 32bit*/
-    void *Resv1;                                                  /* 保留，内部使用，用于保存各个PCB */
-    void *Resv2;                                                  /* 保留，内部使用，TCP Server使用 */
-    void (*AppCallBack)(struct _SCOK_INF *, u32, u16, u8 *, u32); /* 接收回调函数*/
-
+    uint32_t IntStatus;                       //interrupt state
+    uint32_t SockIndex;                       //Socket index value
+    uint32_t RecvStartPoint;                  //Start pointer of the receive buffer
+    uint32_t RecvBufLen;                      //Receive buffer length
+    uint32_t RecvCurPoint;                    //current pointer to receive buffer
+    uint32_t RecvReadPoint;                   //The read pointer of the receive buffer
+    uint32_t RecvRemLen;                      //Remaining length of receive buffer
+    uint32_t ProtoType;                       //protocol type
+    uint32_t ScokStatus;                      //Low byte Socket state, the next low byte is TCP state, only meaningful in TCP mode
+    uint32_t DesPort;                         //destination port
+    uint32_t SourPort;                        //Source port, protocol type in IPRAW mode
+    uint8_t  IPAddr[4];                       //Socket destination IP address
+    void *Resv1;                              //Reserved, for internal use, for saving individual PCBs
+    void *Resv2;                              //Reserved, used internally, used by TCP Server
+    pSockRecv AppCallBack;                    //receive callback function
 } SOCK_INF;
 
 struct _WCH_CFG
 {
-    u32 RxBufSize;   /* MAC接收缓冲区大小 */
-    u32 TCPMss;      /* TCP MSS大小 */
-    u32 HeapSize;    /* 堆分配内存大小 */
-    u32 ARPTableNum; /* ARP列表个数 */
-    u32 MiscConfig0; /* 杂项配置 */
+  uint32_t TxBufSize;                         //MAC send buffer size, reserved for use
+  uint32_t TCPMss;                            //TCP MSS size
+  uint32_t HeapSize;                          //heap memory size
+  uint32_t ARPTableNum;                       //Number of ARP lists
+  uint32_t MiscConfig0;                       //Miscellaneous Configuration 0
+  /* Bit 0 TCP send buffer copy 1: copy, 0: not copy */
+  /* Bit 1 TCP receive replication optimization, used for internal debugging */
+  /* bit 2 delete oldest TCP connection 1: enable, 0: disable */
+  /* Bits 3-7 Number of PBUFs of IP segments  */
+  uint32_t MiscConfig1;                       //Miscellaneous Configuration 1
+  /* Bits 0-7 Number of Sockets*/
+  /* Bits 8-12 Reserved */
+  /* Bit 13 PING enable, 1: On 0: Off  */
+  /* Bits 14-18 TCP retransmission times  */
+  /* Bits 19-23 TCP retransmission period, in 50 milliseconds  */
+  /* bit 25 send failed retry, 1: enable, 0: disable */
+  /* Bits 26-31 Reserved */
+  led_callback led_link;                      //PHY Link Status Indicator
+  led_callback led_data;                      //Ethernet communication indicator
+  eth_tx_set net_send;                        //Ethernet send
+  eth_rx_set net_recv;                        //Ethernet receive
+  uint32_t   CheckValid;                      //Configuration value valid flag, fixed value @WCHNET_CFG_VALID
 };
 
 struct _NET_SYS
 {
-    u8  IPAddr[4];        /* IP地址 32bit */
-    u8  GWIPAddr[4];      /* 网关地址 32bit */
-    u8  MASKAddr[4];      /* 子网掩码 32bit */
-    u8  MacAddr[8];       /* MAC地址 48bit */
-    u8  UnreachIPAddr[4]; /* 不可到达IP */
-    u32 RetranCount;      /* 重试次数 默认为10次 */
-    u32 RetranPeriod;     /* 重试周期,单位MS,默认200MS */
-    u32 PHYStat;          /* PHY状态码 8bit */
-    u32 NetStat;          /* 以太网的状态 ，包含是否打开等 */
-    u32 MackFilt;         /*  MAC过滤，默认为接收广播，接收本机MAC 8bit */
-    u32 GlobIntStatus;    /* 全局中断 */
-    u32 UnreachCode;      /* 不可达 */
-    u32 UnreachProto;     /* 不可达协议 */
-    u32 UnreachPort;      /* 不可到达端口 */
-    u32 SendFlag;
-    u32 Flags;
+  uint8_t  IPAddr[4];                         //IP address 
+  uint8_t  GWIPAddr[4];                       //Gateway IP address
+  uint8_t  MASKAddr[4];                       //subnet mask
+  uint8_t  MacAddr[8];                        //MAC address
+  uint8_t  UnreachIPAddr[4];                  //Unreachable IP address
+  uint32_t RetranCount;                       //number of retries,default is 10 times
+  uint32_t RetranPeriod;                      //Retry period, unit MS, default 500MS
+  uint32_t PHYStat;                           //PHY state code
+  uint32_t NetStat;                           //The status of the Ethernet, including whether it is open, etc.
+  uint32_t MackFilt;                          //MAC filtering, the default is to receive broadcasts, receive local MAC
+  uint32_t GlobIntStatus;                     //global interrupt
+  uint32_t UnreachCode;                       //unreachable code
+  uint32_t UnreachProto;                      //unreachable protocol
+  uint32_t UnreachPort;                       //unreachable port
+  uint32_t SendFlag;
+  uint32_t Flags;
 };
 
-/* KEEP LIVE配置结构体 */
-#ifndef ST_KEEP_CFG
-  #define ST_KEEP_CFG
+/* KEEP LIVE configuration structure */
 struct _KEEP_CFG
 {
-    u32 KLIdle;  /* KEEPLIVE空闲时间 */
-    u32 KLIntvl; /* KEEPLIVE周期 */
-    u32 KLCount; /* KEEPLIVE次数 */
+  uint32_t KLIdle;                            //KEEPLIVE idle time, in ms
+  uint32_t KLIntvl;                           //KEEPLIVE period, in ms
+  uint32_t KLCount;                           //KEEPLIVE times
 };
-#endif
 
-/* 以下值为固定值不可以更改 */
-#define WCHNET_MEM_ALIGN_SIZE(size)    (((size) + WCHNET_MEM_ALIGNMENT - 1) & ~(WCHNET_MEM_ALIGNMENT - 1))
-#define WCHNET_SIZE_IPRAW_PCB          0xFF                   /* IPRAW PCB大小 */
-#define WCHNET_SIZE_UDP_PCB            0x30                   /* UDP PCB大小 */
-#define WCHNET_SIZE_TCP_PCB            0xFF                   /* TCP PCB大小 */
-#define WCHNET_SIZE_TCP_PCB_LISTEN     0x40                   /* TCP LISTEN PCB大小 */
-#define WCHNET_SIZE_IP_REASSDATA       0x40                   /* IP分片管理  */
-#define WCHNET_SIZE_PBUF               0x40                   /* Packet Buf */
-#define WCHNET_SIZE_TCP_SEG            0x60                   /* TCP SEG结构 */
-#define WCHNET_SIZE_MEM                0x0c                   /* sizeof(struct mem) */
-#define WCHNET_SIZE_ARP_TABLE          0x20                   /* sizeof arp table */
+/**
+ * @brief   Library initialization .
+ *
+ * @param   ip - IP address pointer 
+ * @param   gwip - Gateway address pointer 
+ * @param   mask - Subnet mask pointer 
+ * @param   macaddr - MAC address pointer
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_Init(const uint8_t *ip, const uint8_t *gwip, const uint8_t *mask, const uint8_t *macaddr);
 
-#define WCHNET_SIZE_POOL_BUF           WCHNET_MEM_ALIGN_SIZE(WCHNET_TCP_MSS + 40 + 14) /* pbuf池大小 */
-#define WCHNET_MEMP_SIZE               ((WCHNET_MEM_ALIGNMENT - 1) +                                                 \
-                          (WCHNET_NUM_IPRAW * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB)) +                        \
-                          (WCHNET_NUM_UDP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_UDP_PCB)) +                            \
-                          (WCHNET_NUM_TCP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB)) +                            \
-                          (WCHNET_NUM_TCP_LISTEN * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_PCB_LISTEN)) +              \
-                          (WCHNET_NUM_TCP_SEG * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_TCP_SEG)) +                        \
-                          (WCHNET_NUM_IP_REASSDATA * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IP_REASSDATA)) +              \
-                          (WCHNET_NUM_PBUF * (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(0))) + \
-                          (WCHNET_NUM_POOL_BUF * (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_POOL_BUF))))
+/**
+ * @brief   get library version
+ *
+ * @param   None
+ *
+ * @return  library version
+ */
+uint8_t WCHNET_GetVer(void);
 
-#define HEAP_MEM_ALIGN_SIZE          (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_MEM))
-#define WCHNET_RAM_HEAP_SIZE         (WCH_MEM_HEAP_SIZE + (2 * HEAP_MEM_ALIGN_SIZE) + WCHNET_MEM_ALIGNMENT)
-#define WCHNET_RAM_ARP_TABLE_SIZE    (WCHNET_SIZE_ARP_TABLE * WCHNET_NUM_ARP_TABLE)
-/* DNS结构体回调 */
-typedef void (*dns_callback)(const char *name, u8 *ipaddr, void *callback_arg);
+/**
+ * @brief   Get MAC address. 
+ *
+ * @param(in)   macaddr - MAC address
+ *
+ * @param(out)  MAC address
+ *
+ * @return  None
+ */
+void WCHNET_GetMacAddr(uint8_t *macaddr);
 
-/* 检查配置 */
-/* 检查WCHNET_NUM_IPRAW是否不小于1 */
-#if(WCHNET_NUM_IPRAW < 1)
-  #error "WCHNET_NUM_IPRAW Error,Please Config WCHNET_NUM_IPRAW >= 1"
-#endif
-/* 检查WCHNET_SIZE_UDP_PCB是否不小于1 */
-#if(WCHNET_SIZE_UDP_PCB < 1)
-  #error "WCHNET_SIZE_UDP_PCB Error,Please Config WCHNET_SIZE_UDP_PCB >= 1"
-#endif
-/* 检查WCHNET_NUM_TCP是否不小于1 */
-#if(WCHNET_NUM_TCP < 1)
-  #error "WCHNET_NUM_TCP Error,Please Config WCHNET_NUM_TCP >= 1"
-#endif
-/* 检查WCHNET_NUM_TCP_LISTEN是否不小于1 */
-#if(WCHNET_NUM_TCP_LISTEN < 1)
-  #error "WCHNET_NUM_TCP_LISTEN Error,Please Config WCHNET_NUM_TCP_LISTEN >= 1"
-#endif
-/* 检查字节对齐必须为4的整数倍 */
-#if((WCHNET_MEM_ALIGNMENT % 4) || (WCHNET_MEM_ALIGNMENT == 0))
-  #error "WCHNET_MEM_ALIGNMENT Error,Please Config WCHNET_MEM_ALIGNMENT = 4 * N, N >=1"
-#endif
-/* TCP最大报文段长度 */
-#if((WCHNET_TCP_MSS > 1460) || (WCHNET_TCP_MSS < 60))
-  #error "WCHNET_TCP_MSS Error,Please Config WCHNET_TCP_MSS >= 60 && WCHNET_TCP_MSS <= 1460"
-#endif
-/* ARP缓存表个数 */
-#if((WCHNET_NUM_ARP_TABLE > 0X7F) || (WCHNET_NUM_ARP_TABLE < 1))
-  #error "WCHNET_NUM_ARP_TABLE Error,Please Config WCHNET_NUM_ARP_TABLE >= 1 && WCHNET_NUM_ARP_TABLE <= 0X7F"
-#endif
-/* 检查POOL BUF配置 */
-#if(WCHNET_NUM_POOL_BUF < 1)
-  #error "WCHNET_NUM_POOL_BUF Error,Please Config WCHNET_NUM_POOL_BUF >= 1"
-#endif
-/* 检查PBUF结构配置 */
-#if(WCHNET_NUM_PBUF < 1)
-  #error "WCHNET_NUM_PBUF Error,Please Config WCHNET_NUM_PBUF >= 1"
-#endif
-/* 检查IP分配配置 */
-#if((WCHNET_NUM_IP_REASSDATA > 10) || (WCHNET_NUM_IP_REASSDATA < 1))
-  #error "WCHNET_NUM_IP_REASSDATA Error,Please Config WCHNET_NUM_IP_REASSDATA < 10 && WCHNET_NUM_IP_REASSDATA >= 1 "
-#endif
-/* 检查IP分片大小 */
-#if(WCHNET_IP_REASS_PBUFS > WCHNET_NUM_POOL_BUF)
-  #error "WCHNET_IP_REASS_PBUFS Error,Please Config WCHNET_IP_REASS_PBUFS < WCHNET_NUM_POOL_BUF"
-#endif
+/**
+ * @brief   Library parameter configuration.
+ *
+ * @param   cfg - Configuration parameter  @_WCH_CFG
+ *
+ * @return  Library configuration initialization state @CFG_INIT_STAT
+ */
+uint8_t WCHNET_ConfigLIB(struct _WCH_CFG *cfg);
 
-extern ETH_DMADESCTypeDef /* 发送描述符表 */ DMARxDscrTab[ETH_RXBUFNB];
-extern ETH_DMADESCTypeDef /* 接收描述符表 */ DMATxDscrTab[ETH_TXBUFNB];
-extern u8                                    MACRxBuf[ETH_RXBUFNB * ETH_MAX_PACKET_SIZE];
-extern u8                                    MACTxBuf[ETH_TXBUFNB * ETH_MAX_PACKET_SIZE];
+/**
+ * @brief   Handle periodic tasks in the protocol stack
+ *
+ * @param   None
+ *
+ * @return  None
+ */
+void WCHNET_PeriodicHandle(void);
 
-/* 库内部函数声明 */
+/**
+ * @brief   Ethernet data input. Always called in the main program, 
+ *          or called after the reception interrupt is detected.
+ *
+ * @param
+ *
+ * @return  None
+ */
+void WCHNET_NetInput( void );
 
-u8 WCHNET_Init(const u8 *ip, const u8 *gwip, const u8 *mask, const u8 *macaddr); /* 库初始化 */
+/**
+ * @brief   Ethernet interrupt service function. Called after 
+ *          Ethernet interrupt is generated. 
+ *
+ * @param   None
+ *
+ * @return  None
+ */
+void WCHNET_ETHIsr(void);
 
-u8 WCHNET_GetVer(void);
+/**
+ * @brief   Get PHY status
+ *
+ * @param   None
+ *
+ * @return  PHY status @PHY_STAT
+ */
+uint8_t WCHNET_GetPHYStatus(void);
 
-u8 WCH_GetMac(u8 *macaddr);
+/**
+ * @brief   Query global interrupt status.
+ *
+ * @param   None
+ *
+ * @return  GLOB_INT
+ */
+uint8_t WCHNET_QueryGlobalInt(void);
 
-u8 WCHNET_ConfigLIB(struct _WCH_CFG *cfg); /* 配置库*/
+/**
+ * @brief   Read global interrupt and clear it.
+ *
+ * @param   None
+ *
+ * @return  GLOB_INT
+ */
+uint8_t WCHNET_GetGlobalInt(void);
 
-void WCHNET_MainTask(void); /* 库主任务函数，需要一直不断调用 */
+/**
+ * @brief   create socket
+ *
+ * @param(in)   *socketid - socket variable pointer
+ * @param       socinf - Configuration parameters for creating sockets @SOCK_INF
+ *
+ * @param(out)  *socketid - socket value
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketCreat( uint8_t *socketid, SOCK_INF *socinf);
 
-void WCHNET_TimeIsr(u16 timperiod); /* 时钟中断服务函数，调用前请配置时钟周期 */
+/**
+ * @brief   Socket sends data.
+ *
+ * @param       socketid - socket id value
+ * @param       *buf - the first address of send buffer
+ * @param(in)   *len - pointer to the length of the data expected to be sent
+ *
+ * @param(out)  *len - pointer to the length of the data sent actually
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketSend( uint8_t socketid, uint8_t *buf, uint32_t *len);
 
-void WCHNET_ETHIsr(void); /* ETH中断服务函数 */
+/**
+ * @brief   Socket receives data.
+ *
+ * @param       socketid - socket id value
+ * @param       *buf - the first address of receive buffer
+ * @param(in)   *len - pointer to the length of the data expected to be read
+ *
+ * @param(out)  *buf - the first address of data buffer
+ * @param(out)  *len - pointer to the length of the data read actually
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketRecv( uint8_t socketid, uint8_t *buf, uint32_t *len);
 
-u8 WCHNET_GetPHYStatus(void); /* 获取PHY状态 */
+/**
+ * @brief   Get socket interrupt, and clear socket interrupt. 
+ *
+ * @param   socketid - socket id value
+ *
+ * @return  Sn_INT
+ */
+uint8_t WCHNET_GetSocketInt( uint8_t socketid );
 
-u8 WCHNET_QueryGlobalInt(void); /* 查询全局中断 */
+/**
+ * @brief   Get the length of the data received by socket. 
+ *
+ * @param       socketid - socket id value
+ * @param(in)   *bufaddr - the first address of receive buffer
+ *
+ * @param(out)  *bufaddr - the first address of data buffer
+ *
+ * @return  the length of the data
+ */
+uint32_t WCHNET_SocketRecvLen( uint8_t socketid, uint32_t *bufaddr);
 
-u8 WCHNET_GetGlobalInt(void); /* 读全局中断并将全局中断清零 */
+/**
+ * @brief   TCP connect. Used in TCP Client mode. 
+ *
+ * @param   socketid - socket id value
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketConnect( uint8_t socketid);
 
-void WCHNET_OpenMac(void); /* 打开MAC */
+/**
+ * @brief   TCP listen. Used in TCP SERVER mode. 
+ *
+ * @param   socketid - socket id value
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketListen( uint8_t socketid);
 
-void WCHNET_CloseMac(void); /* 关闭MAC */
+/**
+ * @brief   Close socket. 
+ *
+ * @param   socketid - socket id value
+ * @param   mode - the way of disconnection.Used in TCP connection.
+ *                 @TCP disconnect related codes
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketClose( uint8_t socketid, uint8_t mode );
 
-u8 WCHNET_SocketCreat(u8 *socketid, SOCK_INF *socinf); /* 创建socket */
+/**
+ * @brief   Modify socket receive buffer. 
+ *
+ * @param   socketid - socket id value
+ * @param   bufaddr - Address of the receive buffer 
+ * @param   bufsize - Size of the receive buffer 
+ *
+ * @return  None
+ */
+void WCHNET_ModifyRecvBuf( uint8_t socketid, uint32_t bufaddr, uint32_t bufsize);
 
-u8 WCHNET_SocketSend(u8 socketid, u8 *buf, u32 *len); /* Socket发送数据 */
+/**
+ * @brief   UDP send, specify the target IP and target port 
+ *
+ * @param       socketid - socket id value
+ * @param       *buf - Address of the sent data
+ * @param(in)   *slen - Address of the sent length 
+ * @param       *sip - destination IP address
+ * @param       port - destination port
+ *
+ * @param(out)  *slen - actual length sent
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketUdpSendTo( uint8_t socketid, uint8_t *buf, uint32_t *slen, uint8_t *sip, uint16_t port);
 
-u8 WCHNET_SocketRecv(u8 socketid, u8 *buf, u32 *len); /* Socket接收数据 */
+/**
+ * @brief   Convert ASCII address to network address. 
+ *
+ * @param       *cp - ASCII address to be converted, such as “192.168.1.2”
+ * @param(in)   *addr - First address of the memory stored in the converted network address 
+ * @param(out)  *addr -  Converted network address, such as 0xC0A80102 
+ * @return  0 – Success.   Others – Failure. 
+ */
+uint8_t WCHNET_Aton(const char *cp, uint8_t *addr);
 
-u8 WCHNET_GetSocketInt(u8 sockedid); /* 获取socket中断并清零 */
+/**
+ * @brief   Convert network address to ASCII address. 
+ *
+ * @param   *ipaddr - socket id value
+ *
+ * @return  Converted ASCII address 
+ */
+uint8_t *WCHNET_Ntoa( uint8_t *ipaddr);
 
-u32 WCHNET_SocketRecvLen(u8 socketid, u32 *bufaddr); /* 获取socket接收长度 */
+/**
+ * @brief   Set socket TTL. 
+ *
+ * @param   socketid - socket id value
+ * @param   ttl - TTL value 
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SetSocketTTL( uint8_t socketid, uint8_t ttl);
 
-u8 WCHNET_SocketConnect(u8 socketid); /* TCP连接*/
+/**
+ * @brief   Start TCP retry sending immediately. 
+ *
+ * @param   socketid - TTL value
+ *
+ * @return  None
+ */
+void WCHNET_RetrySendUnack( uint8_t socketid);
 
-u8 WCHNET_SocketListen(u8 socindex); /* TCP监听 */
+/**
+ * @brief   Query the packets that are not sent successfully. 
+ *
+ * @param       socketid - TTL value
+ * @param(in)   *addrlist - pointer to the address of the address list
+ * @param       lislen - Length of the list
+ *
+ * @param(out)  *addrlist - Address list of the data packets that are not sent successfully 
+ *
+ * @return  Number of unsent and unacknowledged segments 
+ */
+uint8_t WCHNET_QueryUnack( uint8_t socketid, uint32_t *addrlist, uint16_t lislen );
 
-u8 WCHNET_SocketClose(u8 socindex, u8 flag); /* 关闭连接 */
+/**
+ * @brief   Start DHCP. 
+ *
+ * @param   dhcp - Application layer callback function 
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_DHCPStart( dhcp_callback dhcp );
 
-void WCHNET_ModifyRecvBuf(u8 sockeid, u32 bufaddr, u32 bufsize); /* 修改接收缓冲区 */
+/**
+ * @brief   Stop DHCP.
+ *
+ * @param   None
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_DHCPStop( void );
 
-u8 WCHNET_SocketUdpSendTo(u8 socketid, u8 *buf, u32 *slen, u8 *sip, u16 port); /* 向指定的目的IP，端口发送UDP包 */
+/**
+ * @brief   Configure DHCP host name. 
+ *
+ * @param   *name - First address of DHCP host name 
+ *
+ * @return  0 – Success.    Others – Failure. 
+ */
+uint8_t WCHNET_DHCPSetHostname(char *name);
 
-u8 WCHNET_Aton(const u8 *cp, u8 *addr); /* ASCII码地址转网络地址 */
+/**
+ * @brief   Initialize the resolver: set up the UDP pcb and configure the default server
+ *
+ * @param   *dnsip - the IP address of dns server 
+ * @param   port - the port number of dns server 
+ *
+ * @return  None
+ */
+void WCHNET_InitDNS( uint8_t *dnsip, uint16_t port);
 
-u8 *WCHNET_Ntoa(u8 *ipaddr); /* 网络地址转ASCII地址 */
+/**
+ * @brief   Stop DNS. 
+ *
+ * @param   None
+ *
+ * @return  None
+ */
+void WCHNET_DNSStop(void);
 
-u8 WCHNET_SetSocketTTL(u8 socketid, u8 ttl); /* 设置socket的TTL */
+/**
+ * Resolve a hostname (string) into an IP address.
+ *
+ * @param   hostname - the hostname that is to be queried
+ * @param   addr     - pointer to a struct ip_addr where to store the address if it is already
+ *                     cached in the dns_table (only valid if ERR_OK is returned!)
+ * @param   found    - a callback function to be called on success, failure or timeout (only if
+ *                     ERR_INPROGRESS is returned!)
+ * @param   arg      - argument to pass to the callback function
+ *
+ * @return  @ERR_T
+ *   WCHNET_ERR_SUCCESS if hostname is a valid IP address string or the host name is already in the local names table.
+ *   ERR_INPROGRESS     enqueue a request to be sent to the DNS server for resolution if no errors are present.
+ */
+uint8_t WCHNET_HostNameGetIp( const char *hostname, uint8_t *addr, dns_callback found, void *arg );
 
-void WCHNET_RetrySendUnack(u8 socketid); /* TCP重传 */
+/**
+ * @brief   Configure KEEP LIVE parameter. 
+ *
+ * @param   *cfg - KEEPLIVE configuration parameter 
+ *
+ * @return  None
+ */
+void WCHNET_ConfigKeepLive( struct _KEEP_CFG *cfg );
 
-u8 WCHNET_QueryUnack(SOCK_INF *sockinf, u32 *addrlist, u16 lislen) /* 查询未发送成功的数据包 */;
+/**
+ * @brief   Configure socket KEEP LIVE enable. 
+ *
+ * @param   socketid - socket id value
+ * @param   enable - 1: Enabled.   0: Disabled. 
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketSetKeepLive( uint8_t socketid, uint8_t enable );
 
-u8 WCHNET_DHCPStart(u8 (*usercall)(u8 status, void *)); /* DHCP启动 */
+/**
+ * @brief   Configure PHY state
+ *
+ * @param   phy_stat - PHY state
+ *
+ * @return  None
+ */
+void WCHNET_PhyStatus( uint32_t phy_stat );
 
-u8 WCHNET_DHCPStop(void); /* DHCP停止 */
-
-void WCHNET_InitDNS(u8 *dnsip, u16 port); /* DNS初始化 */
-
-u8 WCHNET_GetHostName(const char *hostname, u8 *addr, dns_callback found, void *arg); /* DNS获取主机名 */
-
-void WCHNET_ConfigKeepLive(struct _KEEP_CFG *cfg); /* 配置库KEEP LIVE参数 */
-
-u8 WCHNET_SocketSetKeepLive(u8 socindex, u8 cfg); /* 配置socket KEEP LIVE*/
-
-void WCHNET_SetHostname(char *name); /* 配置DHCP主机名*/
-
-void Ethernet_LED_Configuration(void);
-
-void Ethernet_LED_LINKSET(u8 setbit);
-
-void Ethernet_LED_DATASET(u8 setbit);
 
 #ifdef __cplusplus
 }

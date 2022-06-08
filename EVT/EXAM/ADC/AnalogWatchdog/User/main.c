@@ -11,7 +11,7 @@
 /*
  *@Note
  模拟看门狗例程：
- ADC通道2(PA2),检测该规则组通道上 ADC转换数据为 2000 - 3500 之外触发模拟
+ ADC通道1(PA1),检测该规则组通道上 ADC转换数据为 2000 - 3500 之外触发模拟
  看门狗中断。
 
 */
@@ -35,7 +35,7 @@ void ADC_Function_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -48,11 +48,11 @@ void ADC_Function_Init(void)
 	ADC_InitStructure.ADC_NbrOfChannel = 1;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
-	ADC_RegularChannelConfig(ADC1,ADC_Channel_2, 1, ADC_SampleTime_239Cycles5 );
+	ADC_RegularChannelConfig(ADC1,ADC_Channel_1, 1, ADC_SampleTime_239Cycles5 );
 
     /* Higher Threshold:3500, Lower Threshold:2000 */
 	ADC_AnalogWatchdogThresholdsConfig(ADC1, 3500, 2000);
-	ADC_AnalogWatchdogSingleChannelConfig( ADC1, ADC_Channel_2);
+	ADC_AnalogWatchdogSingleChannelConfig( ADC1, ADC_Channel_1);
 	ADC_AnalogWatchdogCmd( ADC1, ADC_AnalogWatchdog_SingleRegEnable);
 
 	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
@@ -132,7 +132,7 @@ int main(void)
 
 	while(1)
 	{
-		ADC_val = Get_ADC_Val( ADC_Channel_2);
+		ADC_val = Get_ADC_Val( ADC_Channel_1);
 		Delay_Ms(500);
 		printf( "%04d\r\n", ADC_val );
 		Delay_Ms(2);

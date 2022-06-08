@@ -10,8 +10,6 @@
 
 #include "bsp_uart.h"
 
-
-
 #define BAUD_RATE  115200
 
 /* Global Variable */
@@ -79,7 +77,7 @@ typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
  *           UART3  TX-->PB10  RX-->PB11
  *           UART4  TX-->PC10  RX-->PC11
  *           UART5  TX-->PC12  RX-->PD2
- *           UART6  TX-->PC0   RX-->PC1
+ *           UART6  TX-->PC0   RX-->PC1   |  TX_2-->PE10   RX_2-->PE11
  *           UART7  TX-->PC2   RX-->PC3
  *           UART8  TX-->PC4   RX-->PC5
  *
@@ -90,8 +88,8 @@ typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
 void UART_GPIO_Init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure={0};
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB| \
-    		               RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB| \
+    		               RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
 
 #ifndef CH32V307_DEBUG
     /* UART1 TX-->PA9   RX-->PA10 */
@@ -141,14 +139,24 @@ void UART_GPIO_Init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-	/* UART6 TX-->PC0  RX-->PC1 */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	/* UART6 TX-->PC0  RX-->PC1  |  TX_2-->PE10   RX_2-->PE11 */
+//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+//	GPIO_Init(GPIOC, &GPIO_InitStructure);
+//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+//	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+    GPIO_PinRemapConfig(GPIO_FullRemap_USART6,ENABLE);
 
 	/* UART7 TX-->PC2  RX-->PC3 */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;

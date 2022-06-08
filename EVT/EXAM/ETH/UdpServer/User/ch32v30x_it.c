@@ -8,13 +8,14 @@
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
-#include <WCHNET.h>
+#include "eth_driver.h"
 #include "ch32v30x_it.h"
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -41,8 +42,20 @@ void HardFault_Handler(void)
     printf("mepc  :%08x\r\n", __get_MEPC());
     printf("mcause:%08x\r\n", __get_MCAUSE());
     printf("mtval :%08x\r\n", __get_MTVAL());
-    while(1)
-        ;
+    while(1);
+}
+
+/*********************************************************************
+ * @fn      EXTI9_5_IRQHandler
+ *
+ * @brief   This function handles GPIO exception.
+ *
+ * @return  none
+ */
+void EXTI9_5_IRQHandler(void)
+{
+    ETH_PHYLink( );
+    EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
 /*********************************************************************

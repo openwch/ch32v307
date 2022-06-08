@@ -13,12 +13,12 @@
 /* OTH */
 #define pMySetupReqPakHD        ((PUSB_SETUP_REQ)EP0_DatabufHD)
 #define RepDescSize             62
-#define DevEP0SIZE              8
-#define PID_OUT                 0
-#define PID_SOF                 1
-#define PID_IN                  2
-#define PID_SETUP               3
 
+#if DEF_USBD_SPEED == DEF_USBD_SPEED_LOW
+#define RepDataLoadLen          8
+#else
+#define RepDataLoadLen          64
+#endif
 
 /******************************************************************************/
 /* 全局变量 */
@@ -71,7 +71,7 @@ volatile UINT16  SetupReqLen;
 /******************************************************************************/
 /* Device Descriptor */
 const UINT8  MyDevDescrHD[] = {
-    0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZE,
+    0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DEF_USBD_UEP0_SIZE,
     0x86, 0x1A, 0x37, 0x55,
     0x00, 0x01, 0x01, 0x02, 0x00, 0x01,
 };
@@ -332,7 +332,7 @@ void OTG_FS_IRQHandler( void )
                         {
                             SetupReqLen = len;
                         }
-                        len = ( USBHD_Dev_SetupReqLen >= DevEP0SIZE ) ? DevEP0SIZE : USBHD_Dev_SetupReqLen;
+                        len = ( USBHD_Dev_SetupReqLen >= DEF_USBD_UEP0_SIZE ) ? DEF_USBD_UEP0_SIZE : USBHD_Dev_SetupReqLen;
                         memcpy( EP0_DatabufHD, pDescr, len );
                         pDescr += len;
                     }
@@ -433,7 +433,7 @@ void OTG_FS_IRQHandler( void )
                             }
 
                             if( SetupReqLen>len )   SetupReqLen = len;
-                            len = (SetupReqLen >= DevEP0SIZE) ? DevEP0SIZE : SetupReqLen;
+                            len = (SetupReqLen >= DEF_USBD_UEP0_SIZE) ? DEF_USBD_UEP0_SIZE : SetupReqLen;
                             memcpy( pEP0_DataBuf, pDescr, len );
                             pDescr += len;
                         }
@@ -629,7 +629,7 @@ void OTG_FS_IRQHandler( void )
                 {
                     if( chtype & 0x80 )
                     {
-                        len = (SetupReqLen>DevEP0SIZE) ? DevEP0SIZE : SetupReqLen;
+                        len = (SetupReqLen>DEF_USBD_UEP0_SIZE) ? DEF_USBD_UEP0_SIZE : SetupReqLen;
                         SetupReqLen -= len;
                     }
                     else  len = 0;
@@ -647,7 +647,7 @@ void OTG_FS_IRQHandler( void )
                         switch( SetupReqCode )
                         {
                             case USB_GET_DESCRIPTOR:
-                                    len = SetupReqLen >= DevEP0SIZE ? DevEP0SIZE : SetupReqLen;
+                                    len = SetupReqLen >= DEF_USBD_UEP0_SIZE ? DEF_USBD_UEP0_SIZE : SetupReqLen;
                                     memcpy( pEP0_DataBuf, pDescr, len );
                                     SetupReqLen -= len;
                                     pDescr += len;
@@ -670,40 +670,41 @@ void OTG_FS_IRQHandler( void )
                         }
                         break;
 
+                    /* 端点默认回复ACK，可直接进行上下传 */
                 case USBHD_UIS_TOKEN_IN | 1:
-                    USBOTG_FS->UEP1_TX_CTRL  = (USBHD_UEP1_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     USBOTG_FS->UEP1_TX_CTRL ^= USBHD_UEP_T_TOG;
+                    USBOTG_FS->UEP1_TX_CTRL = (USBOTG_FS->UEP1_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 2:
 
                     USBOTG_FS->UEP2_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP2_TX_CTRL = (USBOTG_FS->UEP2_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP2_TX_CTRL = (USBOTG_FS->UEP2_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 3:
                     USBOTG_FS->UEP3_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP3_TX_CTRL  = (USBOTG_FS->UEP3_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP3_TX_CTRL  = (USBOTG_FS->UEP3_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 4:
                     USBOTG_FS->UEP4_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP4_TX_CTRL  = (USBOTG_FS->UEP4_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP4_TX_CTRL  = (USBOTG_FS->UEP4_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 5:
                     USBOTG_FS->UEP5_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP5_TX_CTRL  = (USBOTG_FS->UEP5_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP5_TX_CTRL  = (USBOTG_FS->UEP5_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 6:
                     USBOTG_FS->UEP6_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP6_TX_CTRL  = (USBOTG_FS->UEP6_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP6_TX_CTRL  = (USBOTG_FS->UEP6_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 case USBHD_UIS_TOKEN_IN | 7:
                     USBOTG_FS->UEP7_TX_CTRL ^= USBHD_UEP_T_TOG;
-                    USBOTG_FS->UEP7_TX_CTRL  = (USBOTG_FS->UEP7_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_NAK;
+                    USBOTG_FS->UEP7_TX_CTRL  = (USBOTG_FS->UEP7_TX_CTRL & ~USBHD_UEP_T_RES_MASK) | USBHD_UEP_T_RES_ACK;
                     break;
 
                 default :

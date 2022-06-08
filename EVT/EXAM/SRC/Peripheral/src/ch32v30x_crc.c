@@ -68,7 +68,7 @@ uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength)
  */
 uint32_t CRC_GetCRC(void)
 {
-    return (CRC->IDATAR);
+    return (CRC->DATAR);
 }
 
 /*********************************************************************

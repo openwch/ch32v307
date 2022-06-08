@@ -88,7 +88,9 @@ http://wch.cn
   |      |      |      |      |-- I2S_Interupt：I2S主发从收中断例程   
   |      |      |      |-- INT
   |      |      |      |      |-- Interrupt_Nest：中断嵌套例程
-  |      |      |      |      |-- Interrupt_VTF：使用VTF IRQ中断例程  
+  |      |      |      |      |-- Interrupt_VTF：使用VTF IRQ中断例程 
+  |      |      |      |-- IAP：IAP升级例程-内置Hex转Bin工具和IAP升级工具  
+  |      |      |      |      |-- USB+UART：USB+UART IAP例程   
   |      |      |      |-- IWDG：独立看门狗例程
   |      |      |      |-- OPA：OPA4作电压跟随器输出例程
   |      |      |      |-- PWR
@@ -137,14 +139,21 @@ http://wch.cn
   |      |      |      |      |-- USBFS
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |--CH372Device：模拟自定义USB设备（CH372设备）例程 
-  |      |      |      |      |      |      |--HIDKeyboardDevice：模拟Keyboard例程  
-  |      |      |      |      |      |-- HOST：USBFS设备的简易枚举过程例程  
+  |      |      |      |      |      |      |--CompatibilityHID：模拟HID兼容设备，支持中断上下传，支持控制端点上下传，支持设置全速，低速  
+  |      |      |      |      |      |      |--CompositeKM：模拟Keyboard例程 
+  |      |      |      |      |      |-- HOST：USBFS设备的简易枚举过程例程 
+  |      |      |      |      |      |-- HOST_KM：USBFS设备的简易枚举键鼠过程例程   
+  |      |      |      |      |      |-- HOST_Udisk：操作U盘相关例程
+  |      |      |      |      |      |-- Udisk_Lib：U盘文件系统库文件   
   |      |      |      |      |-- USBHS ——仅适用于CH32V30x_D8C  
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |--CH372Device：模拟自定义USB设备（CH372设备）例程 
-  |      |      |      |      |      |      |--HIDKeyboardDevice：模拟Keyboard例程  
+  |      |      |      |      |      |      |--CompatibilityHID：模拟HID兼容设备，支持中断上下传，支持控制端点上下传，支持设置全速，低速  
+  |      |      |      |      |      |      |--CompositeKM：模拟Keyboard例程 
+  |      |      |      |      |      |      |--HID+CDC_Device：模拟HID+CDC设备例程  
   |      |      |      |      |      |-- HOST：USBHS设备的简易枚举过程例程
-  |      |      |      |      |      |-- HOST_Udisk：C示例源程序,以字节为单位读写文件，包括文件创建、删除、修改文件属性,修改文件名
+  |      |      |      |      |      |-- HOST_KM：USBFS设备的简易枚举键鼠过程例程   
+  |      |      |      |      |      |-- HOST_Udisk：操作U盘相关例程
   |      |      |      |      |      |-- Udisk_Lib：U盘文件系统库文件 
   |      |      |      |-- VoiceRcgExam：独立词语音识别例程 
   |      |      |      |-- WWDG：窗口看门狗例程

@@ -317,10 +317,12 @@ typedef struct
 #define PHY_ConfigDelay                 ((uint32_t)0x00FFFFFF)
 
 /* PHY basic register */
-#define PHY_BCR                          0          /*PHY tranceiver Basic Control Register */
-#define PHY_BSR                          1          /*PHY tranceiver Basic Status Register */
+#define PHY_BCR                          0x0           /*PHY transceiver Basic Control Register */
+#define PHY_BSR                          0x01          /*PHY transceiver Basic Status Register */
 #define PHY_BMCR                         PHY_BCR
 #define PHY_BMSR                         PHY_BSR
+#define PHY_STATUS                       0x10
+#define PHY_MDIX                         0x1E
 
 /* Bit or field definition for PHY basic control register */
 #define PHY_Reset                       ((uint16_t)0x8000)      /* PHY Reset */

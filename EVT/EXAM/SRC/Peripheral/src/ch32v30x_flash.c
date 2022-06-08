@@ -11,15 +11,15 @@
 
 /* Flash Control Register bits */
 #define CR_PG_Set                  ((uint32_t)0x00000001)
-#define CR_PG_Reset                ((uint32_t)0x00001FFE)
+#define CR_PG_Reset                ((uint32_t)0xFFFFFFFE)
 #define CR_PER_Set                 ((uint32_t)0x00000002)
-#define CR_PER_Reset               ((uint32_t)0x00001FFD)
+#define CR_PER_Reset               ((uint32_t)0xFFFFFFFD)
 #define CR_MER_Set                 ((uint32_t)0x00000004)
-#define CR_MER_Reset               ((uint32_t)0x00001FFB)
+#define CR_MER_Reset               ((uint32_t)0xFFFFFFFB)
 #define CR_OPTPG_Set               ((uint32_t)0x00000010)
-#define CR_OPTPG_Reset             ((uint32_t)0x00001FEF)
+#define CR_OPTPG_Reset             ((uint32_t)0xFFFFFFEF)
 #define CR_OPTER_Set               ((uint32_t)0x00000020)
-#define CR_OPTER_Reset             ((uint32_t)0x00001FDF)
+#define CR_OPTER_Reset             ((uint32_t)0xFFFFFFDF)
 #define CR_STRT_Set                ((uint32_t)0x00000040)
 #define CR_LOCK_Set                ((uint32_t)0x00000080)
 #define CR_FAST_LOCK_Set           ((uint32_t)0x00008000)
@@ -940,22 +940,34 @@ void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t *pbuf)
 }
 
 /*********************************************************************
+ * @fn      FLASH_Access_Clock_Cfg
+ *
+ * @brief   Config FLASH Access Clock(Need to unlock )
+ *
+ * @param   FLASH_Access_CLK -
+ *            FLASH_Access_SYSTEM_HALF - System clock/2
+ *            FLASH_Access_SYSTEM - System clock
+ *
+ * @return  none
+ */
+void FLASH_Access_Clock_Cfg(uint32_t FLASH_Access_CLK)
+{
+    FLASH->CTLR &= ~(1 << 25);
+    FLASH->CTLR |= FLASH_Access_CLK;
+}
+
+/*********************************************************************
  * @fn      FLASH_Enhance_Mode
  *
  * @brief   Read FLASH Enhance Mode
  *
- * @param   FLASH_Enhance_CLK -
- *            FLASH_Enhance_SYSTEM_HALF - System clock/2
- *            FLASH_Enhance_SYSTEM - System clock
+ * @param
  *          Newstate - new state of the ReadOut Protection(ENABLE or DISABLE).
  *
  * @return  none
  */
-void FLASH_Enhance_Mode(uint32_t FLASH_Enhance_CLK, FunctionalState NewState)
+void FLASH_Enhance_Mode(FunctionalState NewState)
 {
-    FLASH->CTLR &= ~(1 << 25);
-    FLASH->CTLR |= FLASH_Enhance_CLK;
-
     if(NewState)
     {
         FLASH->CTLR |= (1 << 24);
@@ -966,3 +978,4 @@ void FLASH_Enhance_Mode(uint32_t FLASH_Enhance_CLK, FunctionalState NewState)
         FLASH->CTLR |= (1 << 22);
     }
 }
+
