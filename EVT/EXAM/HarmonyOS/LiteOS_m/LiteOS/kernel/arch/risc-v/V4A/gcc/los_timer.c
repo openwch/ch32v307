@@ -60,9 +60,9 @@ WEAK UINT32 HalTickStart(OS_TICK_HANDLER handler)
     g_cyclesPerTick = g_sysClock / LOSCFG_BASE_CORE_TICK_PER_SECOND;
     g_intCount = 0;
 
-    NVIC_EnableIRQ(SysTicK_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
     NVIC_EnableIRQ(Software_IRQn);
-    NVIC_SetPriority(SysTicK_IRQn,0xf0);
+    NVIC_SetPriority(SysTick_IRQn,0xf0);
     NVIC_SetPriority(Software_IRQn,0xf0);
     systick_handler = handler;
 
@@ -93,7 +93,7 @@ WEAK VOID HalSysTickReload(UINT64 nextResponseTime)
     SysTick->CMP  = nextResponseTime-1;
     SysTick->CNT  = 0;
     SysTick->SR  = 0;
-    NVIC_ClearPendingIRQ(SysTicK_IRQn);
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
     SysTick->CTLR |= (1<<0);
 }
 

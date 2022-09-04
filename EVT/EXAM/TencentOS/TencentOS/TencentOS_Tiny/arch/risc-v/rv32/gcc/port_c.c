@@ -76,13 +76,13 @@ __PORT__ void port_systick_config(uint32_t cycle_per_tick)
 
 __PORT__ void port_systick_priority_set(uint32_t prio)
 {
-    NVIC_SetPriority(SysTicK_IRQn, prio);
+    NVIC_SetPriority(SysTick_IRQn, prio);
 }
 
 __PORT__ void port_cpu_init()
 {
     NVIC_SetPriority(Software_IRQn,0xf0);
-    NVIC_EnableIRQ(SysTicK_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
     NVIC_EnableIRQ(Software_IRQn);
 }
 

@@ -23,9 +23,9 @@ static uint32_t _SysTick_Config(rt_uint32_t ticks)
         return 1;
     }
 
-    NVIC_SetPriority(SysTicK_IRQn,0xff);
+    NVIC_SetPriority(SysTick_IRQn,0xff);
     NVIC_SetPriority(Software_IRQn,0xff);
-    NVIC_EnableIRQ(SysTicK_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
     NVIC_EnableIRQ(Software_IRQn);
     SysTick->CTLR=0;
     SysTick->SR=0;
