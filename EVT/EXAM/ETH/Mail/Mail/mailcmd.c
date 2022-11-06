@@ -1,11 +1,16 @@
-/********************************** (C) COPYRIGHT ******************************
+/********************************** (C) COPYRIGHT *******************************
 * File Name          : mailcmd.c
 * Author             : WCH
-* Version            : V1.0
+* Version            : V1.0.0
 * Date               : 2020/05/06
-* Description        : 收发邮件命令代码
+* Description        : Send and receive mail function.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #include "mailcmd.h"
+
+char send_buff[512];
+char EncodeHostName[32];
 
 #ifdef receive_mail
 const     char base64_decode_map[256] =
@@ -33,45 +38,48 @@ const char base64_map[64] =
 /* SMTP CMD Codes */
 const  char  SMTP_CLIENT_CMD[5][11] =
 {
-    "EHLO",                                                                     /* 0 退出 */
-    "AUTH LOGIN",                                                               /* 1 登陆 */
-    "MAIL FROM:",                                                               /* 2 发件人地址 */
-    "RCPT TO:",                                                                 /* 3 收件人地址 */
-    "DATA",                                                                     /* 4 开始发送数据命令 */
+    "EHLO",
+    "AUTH LOGIN",
+    "MAIL FROM:",
+    "RCPT TO:",
+    "DATA",
 };
 
 /* POP3 CMD Codes */
 const char  POP3_CLIENT_CMD[12][5] =
 {
     /* basic POP3 commands */
-    "QUIT",                                                                     /* 0 退出 */
-    "USER",                                                                     /* 1 用户名 */
-    "PASS",                                                                     /* 2 密码 */
-    "STAT",                                                                     /* 3 邮箱统计资料 */
-    "LIST",                                                                     /* 4 返回指定邮件的大小 */
-    "RETR",                                                                     /* 5 邮件的全部文本 */
-    "DELE",                                                                     /* 6 标记删除 */
-    "RSET",                                                                     /* 7 撤销所有的DELE命令 */
-    "NOOP",                                                                     /* 8 返回一个肯定的响应 */
+    "QUIT",
+    "USER",
+    "PASS",
+    "STAT",
+    "LIST",
+    "RETR",
+    "DELE",
+    "RSET",
+    "NOOP",
     /* alternative POP3 commands */
-    "APOP",                                                                     /* 9  认证一种安全传输口令的办法，执行成功导致状态转换 */
-    "TOP" ,                                                                     /* 10 处理返回n号邮件的前m行内容，m必须是自然数 */
-    "UIDL"                                                                      /* 11 返回用于该指定邮件的唯一标识 */
+    "APOP",
+    "TOP" ,
+    "UIDL"
 };
 /******************************************************************************/
 char     R_argv[3][32];
 
 POP      m_pop3;
 SMTP     m_smtp;
-/*******************************************************************************
-* Function Name  : Base64Encode
-* Description    : base64编码
-* Input          : src     -需要编码的字符串
-                   src_len -需要编码字符串的长度
-                   dst     -编码后的字符串
-* Output         : None
-* Return         : None
-*******************************************************************************/
+
+/*********************************************************************
+ * @fn      Base64Encode
+ *
+ * @brief   base64 encoding.
+ *
+ * @param   src - String to be encoded.
+ *          src_len - the length of the encoded string required
+ *          dst - encoded string
+ *
+ * @return  none
+ */
 #ifdef send_mail
 void Base64Encode(char *src, u16 src_len, char *dst)
 {
@@ -100,15 +108,17 @@ void Base64Encode(char *src, u16 src_len, char *dst)
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : Base64Decode
-* Description    : base64解码
-* Input          : src     -需要解码的字符串
-                   src_len -需要解码字符串的长度
-                   dst     -解码后的字符串
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      Base64Decode
+ *
+ * @brief   base64 decoding.
+ *
+ * @param   pSrc - String to decode.
+ *          src_len - the length of the string that needs to be decoded
+ *          dst - decoded string
+ *
+ * @return  none
+ */
 #ifdef receive_mail
 void Base64Decode(char *src, u16 src_len, char *dst)
 {
@@ -134,16 +144,18 @@ void Base64Decode(char *src, u16 src_len, char *dst)
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : QuotedPrintableEncode
-* Description    : quoted printable编码
-* Input          : pSrc    -需要编码的字符串
-                   pDst    -编码后的字符串
-                   nSrcLen -需要编码字符串的长度
-                   MaxLine -最大行数
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      QuotedPrintableEncode
+ *
+ * @brief   quoted printable encoding.
+ *
+ * @param   pSrc - String to be encoded.
+ *          pDst - encoded string
+ *          nSrcLen -  data length
+ *          MaxLine - maximum number of lines
+ *
+ * @return  none
+ */
 #ifdef send_mail
 void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine )
 {
@@ -174,15 +186,17 @@ void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine )
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : QuotedPrintableEncode
-* Description    : quoted printable解码
-* Input          : pSrc    -需要解码的字符串
-                   nSrcLen -需要编码字符串的长度
-                   pDst    -解码后的字符串
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      QuotedPrintableDecode
+ *
+ * @brief   quoted printable decoding.
+ *
+ * @param   pSrc - String to decode.
+ *          pDst - decoded string
+ *          nSrcLen -  data length
+ *
+ * @return  none
+ */
 #ifdef receive_mail
 void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen )
 {
@@ -196,7 +210,7 @@ void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen )
         }
         else{
             if( *pSrc == '=' ){
-                sscanf( pSrc, "=%02x",*pDst);
+                sscanf( pSrc, "=%02x",pDst);
                 pDst++;
                 pSrc += 3;
                 i += 3;
@@ -214,15 +228,17 @@ void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen )
 
 /*******************************************************************************/
 #ifdef send_mail
-/*******************************************************************************
-* Function Name  : WCHNET_XToChar
-* Description    : 16进制转字符串
-* Input          : dat -要转换的十六进制数据
-                   p   -转换后对应的字符串
-                   len -要转换的长度
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_XToChar
+ *
+ * @brief   hex to string.
+ *
+ * @param   dat - hex data to convert.
+ *          p - The corresponding string after conversion
+ *          len -  length to convert
+ *
+ * @return  none
+ */
 #ifdef receive_over_reply
 void WCHNET_XToChar( char  *dat,char  *p,char len)
 {
@@ -240,56 +256,57 @@ void WCHNET_XToChar( char  *dat,char  *p,char len)
 }
 #endif //receive_over_reply
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPInit
-* Description    : 发送邮件初始化
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPInit
+ *
+ * @brief   Email sending initialization.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPInit(void)
 {
     p_smtp = &m_smtp;
     p_smtp->g_MIME = 0;
     memset( p_smtp, '\0', sizeof(SMTP) );
-    strcpy( p_smtp->m_strSMTPServer, m_Server );                                /* 服务器名称 */
-    strcpy( p_smtp->m_strUSERID,m_UserName );                                   /* 用户名 */
-    strcpy( p_smtp->m_strPASSWD,m_PassWord );                                   /* 密码 */        
-    strcpy( p_smtp->m_strSendFrom,m_SendFrom );                                 /* 发件人地址 */
-    strcpy( p_smtp->m_strSenderName, m_SendName );                              /* 发送人名字 */
+    strcpy( p_smtp->m_strSMTPServer, m_Server );
+    strcpy( p_smtp->m_strUSERID,m_UserName );
+    strcpy( p_smtp->m_strPASSWD,m_PassWord );
+    strcpy( p_smtp->m_strSendFrom,m_SendFrom );
+    strcpy( p_smtp->m_strSenderName, m_SendName );
 #ifdef receive_over_reply
-    strcpy( p_smtp->m_strSendTo,R_argv[0] );                                    /* 收件人地址 */
-    strcpy( p_smtp->m_strSubject,R_argv[1] );                                   /* 主题 */
-    strcpy( p_smtp->m_strFile,R_argv[2] );                                      /* 附件名字(如果不发送附件，此处不需初始化) */
+    strcpy( p_smtp->m_strSendTo,R_argv[0] );
+    strcpy( p_smtp->m_strSubject,R_argv[1] );
+    strcpy( p_smtp->m_strFile,R_argv[2] );
 #else
-    strcpy( p_smtp->m_strSendTo,m_SendTo );                                     /* 收件人地址 */
-    strcpy( p_smtp->m_strSubject,m_Subject );                                   /* 主题    */
-    strcpy( p_smtp->m_strFile,m_FileName );                                     /* 附件名字(如果不发送附件，此处不需初始化) */
+    strcpy( p_smtp->m_strSendTo,m_SendTo );
+    strcpy( p_smtp->m_strSubject,m_Subject );
+    strcpy( p_smtp->m_strFile,m_FileName );
 #endif // receive_over_reply
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPIsMIME
-* Description    : 判断有无附件
-* Input          : None
-* Output         : None
-* Return         : 0 - 无附件
-                   1 - 有附件
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPIsMIME
+ *
+ * @brief   Check for attachments.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPIsMIME( void )
 {
     if( strlen(p_smtp->m_strFile) <= 0 ) p_smtp->g_MIME = 0;
     else p_smtp->g_MIME = 1;
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPAttachHeader
-* Description    : 用于组建附件信封 
-* Input          : pFileName     -附件名字
-                   pAttachHeader -组建好的信封内容
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPAttachHeader
+ *
+ * @brief   Attachment envelope.
+ *
+ * @param   pFileName - Attachment name.
+ *          pAttachHeader - Envelope Contents
+ *
+ * @return  none
+ */
 void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader )
 {
     const char *strContentType = "application/octet-stream";
@@ -297,14 +314,16 @@ void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader )
     attachment;\r\n filename=\"%s\"\r\n\r\n", g_strBoundary, strContentType, pFileName,g_AttachHead, pFileName ); 
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPAttachEnd
-* Description    : 组建附件结束内容 
-* Input          : EndSize     发送长度
-*                  pAttachEnd  发送buff
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPAttachEnd
+ *
+ * @brief   Form attachment end content.
+ *
+ * @param   EndSize - data length.
+ *          pAttachEnd - data buff
+ *
+ * @return  none
+ */
 void WCHNET_SMTPAttachEnd( u16 *EndSize, char *pAttachEnd )
 {
     strcat( pAttachEnd, "\r\n--" );
@@ -313,13 +332,13 @@ void WCHNET_SMTPAttachEnd( u16 *EndSize, char *pAttachEnd )
     *EndSize = strlen(pAttachEnd);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPMailHeader
-* Description    : 邮件信封  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPMailHeader
+ *
+ * @brief   mail envelope.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPMailHeader( void )
 {
     // "FROM: "
@@ -367,16 +386,16 @@ void WCHNET_SMTPMailHeader( void )
 #if DIALOG
     printf("Mail Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPSendAttachData
-* Description    : 发送附件内容  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPSendAttachData
+ *
+ * @brief   Send attachment content.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPSendAttachData( void )
 {
     u16  EndSize;
@@ -386,9 +405,9 @@ void WCHNET_SMTPSendAttachData( void )
 #if DIALOG
     printf("Attach Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck ,p_smtp->Socket);   /* Send attached file header */
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);   /* Send attached file header */
 /*****************************************************************************
-*发送附件内容 
+*Attachment content
 *****************************************************************************/
 //    GetAttachedFileBody( &FileSize, m_smtp->m_strFile, pAttachedFileBody );
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -396,42 +415,43 @@ void WCHNET_SMTPSendAttachData( void )
 #if DIALOG
     printf("Attach Data send_buff:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
     memset( send_buff, '\0', sizeof(send_buff) );
     WCHNET_SMTPAttachEnd( &EndSize, send_buff );
 #if DIALOG
     printf("Attach End :\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck ,p_smtp->Socket);   /* Send attached file end */
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);   /* Send attached file end */
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPSendAttachHeader
-* Description    : 发送附件信封  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPSendAttachHeader
+ *
+ * @brief   Send attachment envelope.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPSendAttachHeader( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, g_FormatMail );
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,p_smtp->Socket );
     memset( send_buff, '\0', sizeof(send_buff) );
-    sprintf( send_buff, "\r\n--%s\r\nContent-Type: %s;\r\n\tcharset=\"%s\"%s\r\n", g_strBoundary, g_AttachHedType, g_strcharset,g_AttachHead );
+    sprintf( send_buff, "\r\n--%s\r\nContent-Type: %s;\r\n\tcharset=\"%s\"%s\r\n",
+            g_strBoundary, g_AttachHedType, g_strcharset,g_AttachHead );
 #if DIALOG
     printf("MIME Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,p_smtp->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPEhlo
-* Description    : 进入发送邮件状态  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPEhlo
+ *
+ * @brief   Send HELLO command.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPEhlo( void )
 {
     memset( EncodeHostName, '\0', sizeof(EncodeHostName) );
@@ -444,13 +464,13 @@ void WCHNET_SMTPEhlo( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_HELO ,p_smtp->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPAuth
-* Description    : 进入发送邮件状态  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPAuth
+ *
+ * @brief   send login command.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPAuth( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -462,13 +482,13 @@ void WCHNET_SMTPAuth( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_AUTH ,p_smtp->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPUser
-* Description    : 认证用户名   
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPUser
+ *
+ * @brief   Authentication user name.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPUser( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -480,13 +500,13 @@ void WCHNET_SMTPUser( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_USER,p_smtp->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPPass
-* Description    : 登陆密码    
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPPass
+ *
+ * @brief   Authentication login password.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPPass( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -498,13 +518,13 @@ void WCHNET_SMTPPass( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_PASS,p_smtp->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPMail
-* Description    : 发送发件人名字  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPMail
+ *
+ * @brief   Send sender name.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPMail( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -515,13 +535,13 @@ void WCHNET_SMTPMail( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_MAIL,p_smtp->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPRcpt
-* Description    : 收件人地址 
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPRcpt
+ *
+ * @brief   receiver's address.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPRcpt( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -532,13 +552,13 @@ void WCHNET_SMTPRcpt( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_RCPT,p_smtp->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPData
-* Description    : 发送data命令 
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPData
+ *
+ * @brief   send DATA command.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPData( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -549,13 +569,13 @@ void WCHNET_SMTPData( void )
     WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_DATA,p_smtp->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_SMTPSendMail
-* Description    : 发送邮件内容  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_SMTPSendMail
+ *
+ * @brief   Send email content.
+ *
+ * @return  none
+ */
 void WCHNET_SMTPSendMail( void )
 {
     WCHNET_SMTPIsMIME( );
@@ -564,7 +584,7 @@ void WCHNET_SMTPSendMail( void )
         WCHNET_SMTPSendAttachHeader(  );                                      /* Send MIME Header */
     }
     else {
-        WCHNET_SendData("\r\n", strlen("\r\n"),uncheck,p_smtp->Socket);
+        WCHNET_SendData("\r\n", strlen("\r\n"),UNCHECK,p_smtp->Socket);
     }
     memset( send_buff, '\0', sizeof(send_buff) );
 #ifdef    receive_over_reply
@@ -575,7 +595,7 @@ void WCHNET_SMTPSendMail( void )
 #if DIALOG
     printf("text data:\n%s\n",send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),uncheck ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
     if( 1 == p_smtp->g_MIME ) WCHNET_SMTPSendAttachData( );                   /* Send Attached file */
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "\r\n.\r\n" );
@@ -590,29 +610,29 @@ void WCHNET_SMTPSendMail( void )
 #endif // send_mail
 /******************************************************************************/
 #ifdef receive_mail
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Init
-* Description    : 接收邮件初始化
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Init
+ *
+ * @brief   Receive mail initialization.
+ *
+ * @return  none
+ */
 void WCHNET_POP3Init( void )
 {
     p_pop3 = &m_pop3;
     memset( p_pop3, '\0', sizeof(POP) );
-    strcpy( p_pop3->pPop3Server,   p_Server );                                  /* 服务器名称 */
-    strcpy( p_pop3->pPop3UserName, p_UserName );                                /* 用户名 */
-    strcpy( p_pop3->pPop3PassWd,   p_PassWord );                                /* 密码    */
+    strcpy( p_pop3->pPop3Server,   p_Server );
+    strcpy( p_pop3->pPop3UserName, p_UserName );
+    strcpy( p_pop3->pPop3PassWd,   p_PassWord );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3User
-* Description    : 认证用户名  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3User
+ *
+ * @brief   Authentication user name.
+ *
+ * @return  none
+ */
 void WCHNET_POP3User( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -623,13 +643,13 @@ void WCHNET_POP3User( void )
     WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_USER ,p_pop3->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Pass
-* Description    : 密码  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Pass
+ *
+ * @brief   Authentication password.
+ *
+ * @return  none
+ */
 void WCHNET_POP3Pass( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -640,13 +660,13 @@ void WCHNET_POP3Pass( void )
     WCHNET_SendData(  send_buff, strlen(send_buff), POP_CHECK_PASS,p_pop3->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Stat
-* Description    : 回送邮箱统计资料  
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Stat
+ *
+ * @brief   Get mailbox statistics.
+ *
+ * @return  none
+ */
 void WCHNET_POP3Stat( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
@@ -657,13 +677,13 @@ void WCHNET_POP3Stat( void )
     WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_STAT,p_pop3->Socket );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3List
-* Description    : 处理server返回指定邮件的大小 
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3List
+ *
+ * @brief   Get email list information.
+ *
+ * @return  none
+ */
 void WCHNET_POP3List( void )
 {
 #if    0            /* 如果需指定某封邮件则置1 */
@@ -681,13 +701,15 @@ void WCHNET_POP3List( void )
     WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_LIST,p_pop3->Socket);
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Retr
-* Description    : 处理server邮件的全部文本 
-* Input          : num -邮件号
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Retr
+ *
+ * @brief   deal the full text of an email
+ *
+ * @param   num - mail number.
+ *
+ * @return  none
+ */
 #ifdef    POP_RTER 
 void WCHNET_POP3Retr( u8 num )
 {
@@ -700,13 +722,16 @@ void WCHNET_POP3Retr( u8 num )
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Dele
-* Description    : 处理server标记删除 
-* Input          : num -邮件号
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Dele
+ *
+ * @brief   Mark to delete, only when the QUIT
+ *          command is executed is actually deleted.
+ *
+ * @param   num - mail number.
+ *
+ * @return  none
+ */
 #ifdef    POP_DELE
 void WCHNET_POP3Dele( u8 num )
 {
@@ -719,13 +744,13 @@ void WCHNET_POP3Dele( u8 num )
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Rset
-* Description    : 处理server撤销删除
-* Input          : num -邮件号
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Rset
+ *
+ * @brief   Undo delete.
+ *
+ * @return  none
+ */
 #ifdef    POP_RSET
 void WCHNET_POP3Rset( void )
 {
@@ -738,33 +763,37 @@ void WCHNET_POP3Rset( void )
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Top
-* Description    : 返回n号邮件的前m行内容
-* Input          : num -邮件号
-                   m   -行数
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Top
+ *
+ * @brief   Returns the first 'm' lines of mail number 'num'.
+ *
+ * @param   num - mail number.
+ *          m - rows.
+ *
+ * @return  none
+ */
 #ifdef    POP_TOP
 void WCHNET_POP3Top( char num ,char m  )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
-    sprintf( send_buff, "%s %c %c\r\n", POP3_CLIENT_CMD[10],num,m);
+    sprintf( send_buff, "%s %c %c\r\n", POP3_CLIENT_CMD[10], num, m);
 #if DIALOG
     printf("TOP :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_TOP,p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_TOP, p_pop3->Socket );
 }
 #endif
 
-/*******************************************************************************
-* Function Name  : WCHNET_POP3Uidl
-* Description    : 处理server返回用于该指定邮件的唯一标识
-* Input          : num -邮件号
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_POP3Uidl
+ *
+ * @brief   Returns the unique identifier for the specified message.
+ *
+ * @param   num - mail number.
+ *
+ * @return  none
+ */
 #ifdef    POP_UIDL
 void WCHNET_POP3Uidl( char num )
 {
@@ -773,37 +802,42 @@ void WCHNET_POP3Uidl( char num )
 #if DIALOG
     printf("UIDL :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, sizeof(send_buff), POP_CHECK_UIDL,p_pop3->Socket );
+    WCHNET_SendData( send_buff, sizeof(send_buff), POP_CHECK_UIDL, p_pop3->Socket );
 }
 #endif
 
 /******************************************************************************/
 #endif    // receive_mail
-/*******************************************************************************
-* Function Name  : WCHNET_Quit
-* Description    : 退出登陆
-* Input          : index -需退出的socketid
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void WCHNET_Quit( u8 index )
+
+/*********************************************************************
+ * @fn      WCHNET_Quit
+ *
+ * @brief   sign out.
+ *
+ * @param   id - socket id.
+ *
+ * @return  none
+ */
+void WCHNET_Quit( u8 id )
 {
 #if  DIALOG
-    printf("QUIT(socket=%2d)\n",index);
+    printf("QUIT(socket=%2d)\n", id);
 #endif
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "%s\r\n", POP3_CLIENT_CMD[0]);
-    if(index==p_smtp->Socket)    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_QUIT,index );
-    if(index==p_pop3->Socket)    WCHNET_SendData( send_buff, strlen(send_buff),POP_CHECK_QUIT,index );
+    if(id == p_smtp->Socket)    WCHNET_SendData( send_buff, strlen(send_buff), SMTP_CHECK_QUIT, id );
+    if(id == p_pop3->Socket)    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_QUIT, id );
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_MailCmd
-* Description    : 判断命令进入对应子程序
-* Input          : choiceorder -命令类型
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_MailCmd
+ *
+ * @brief   Analytical data.
+ *
+ * @param   choiceorder - Command type.
+ *
+ * @return  none
+ */
 void WCHNET_MailCmd( u8 choiceorder )
 {
     u8 i;
@@ -836,7 +870,7 @@ void WCHNET_MailCmd( u8 choiceorder )
             break;
         case SMTP_ERR_CHECK:
             WCHNET_Quit( p_smtp->Socket );
-            CheckType = uncheck;
+            CheckType = UNCHECK;
             i = WCHNET_SocketClose( p_smtp->Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
             break;
@@ -844,7 +878,7 @@ void WCHNET_MailCmd( u8 choiceorder )
             WCHNET_Quit( p_smtp->Socket );
             break;
         case SMTP_CLOSE_SOCKET:
-            CheckType = uncheck;
+            CheckType = UNCHECK;
             i = WCHNET_SocketClose( p_smtp->Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
 #ifdef    receive_over_reply
@@ -852,7 +886,7 @@ void WCHNET_MailCmd( u8 choiceorder )
 #endif
             break;
         case SMTP_SEND_START:
-            WCHNET_CreatTcpSmtp( );
+            WCHNET_CreateTcpSmtp( );
             break;
 #endif    // send_mail 
 #ifdef receive_mail
@@ -870,7 +904,7 @@ void WCHNET_MailCmd( u8 choiceorder )
             break;
         case POP_ERR_CHECK:
             WCHNET_Quit( p_pop3->Socket );
-            CheckType = uncheck;
+            CheckType = UNCHECK;
             i = WCHNET_SocketClose( p_pop3->Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
             break;
@@ -878,7 +912,7 @@ void WCHNET_MailCmd( u8 choiceorder )
             WCHNET_Quit( p_pop3->Socket );
             break;
         case POP_CLOSE_SOCKET:
-            CheckType = uncheck;
+            CheckType = UNCHECK;
             i = WCHNET_SocketClose( p_pop3->Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
 #ifdef    send_over_receive
@@ -886,7 +920,7 @@ void WCHNET_MailCmd( u8 choiceorder )
 #endif
             break;
         case POP_RECEIVE_START:
-            WCHNET_CreatTcpPop3( );                                           /* TCP连接 */
+            WCHNET_CreateTcpPop3( );
             break;
 #endif    // receive_mail
         default: 

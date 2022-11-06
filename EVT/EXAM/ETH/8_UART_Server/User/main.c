@@ -12,7 +12,7 @@
  * @note
  * 基于CH32V307实现8串口网络服务器
  * 默认波特率为115200
- * 网络处于TCP client模式，目的IP为192.168.1.100，目的端口号为5000
+ * 网络处于TCP client模式，目的IP为192.168.1.100，目的端口号为1000
  *
  * uart1 <-> socket0  |  uart2 <-> socket1 | ... | uart8 <-> socket7
  *
@@ -41,29 +41,28 @@ uint8_t IPAddr[4]   = {192,168,1,10};
 uint8_t GWIPAddr[4] = {192,168,1,1};
 uint8_t IPMask[4]   = {255,255,255,0};
 uint8_t DESIP[4]    = {192,168,1,100};
-
-uint16_t desport = 5000;
+uint16_t desport = 1000;
 uint16_t srcport = 1000;
-
 volatile uint8_t tcp_connect_num = 0;
-
 /*********************************************************************
  * @fn      mStopIfError
  *
  * @brief   check if error.
  *
+ * @param   iError - error constants.
+ *
  * @return  none
  */
 void mStopIfError(u8 iError)
 {
-    if (iError == WCHNET_ERR_SUCCESS) return;                                   /* 操作成功 */
-    printf("Error: %02X\r\n", (u16)iError);                                     /* 显示错误 */
+    if (iError == WCHNET_ERR_SUCCESS) return;
+    PRINT("Error: %02X\r\n", (u16)iError);
 }
 
 /*********************************************************************
  * @fn      TIM2_Init
  *
- * @brief   Ethernet send counter.
+ * @brief   Initializes TIM2.
  *
  * @return  none
  */
@@ -86,16 +85,15 @@ void TIM2_Init( void )
 }
 
 /*********************************************************************
- * @fn      WCHNET_CreatTcpSocket
+ * @fn      WCHNET_CreateTcpSocket
  *
  * @brief   create TCP socket, and connect
  *
  * @return  none
  */
-void WCHNET_CreatTcpSocket(uint8_t *socket_revbuf)
+void WCHNET_CreateTcpSocket(uint8_t *socket_revbuf)
 {
 	uint8_t temp;
-
 	SOCK_INF TmpSocketInf;
 
 	memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
@@ -109,10 +107,8 @@ void WCHNET_CreatTcpSocket(uint8_t *socket_revbuf)
 	    TmpSocketInf.SourPort = srcport++;                                       /* set source port */
 	    TmpSocketInf.RecvStartPoint = (uint32_t)&socket_revbuf[i*RECE_BUF_LEN];  /* set receive buff address */
 	    temp = WCHNET_SocketCreat(&SocketId[tcp_connect_num],&TmpSocketInf);     /* create socket */
-	    //PRINT("WCHNET_SocketCreat  %x\r\n",SocketId) ;
 		WCHNET_SocketConnect(SocketId[tcp_connect_num]);                         /* TCP connect */
 	}
-
 }
 
 /*********************************************************************
@@ -120,17 +116,23 @@ void WCHNET_CreatTcpSocket(uint8_t *socket_revbuf)
  *
  * @brief   Socket Interrupt Handle
  *
+ * @param   socketid - socket id.
+ *          intstat - interrupt status
+ *
  * @return  none
  */
-void WCHNET_HandleSockInt(uint8_t socketid,uint8_t initstat)
+void WCHNET_HandleSockInt(uint8_t socketid,uint8_t intstat)
 {
     uint32_t len;
     uint8_t write_buf = 0;
     int8_t receive_state = -1;
 
-    if(initstat & SINT_STAT_RECV)                                               /* socket receive */
+    if(intstat & SINT_STAT_RECV)                                               /* socket receive */
     {
         len = WCHNET_SocketRecvLen(socketid,NULL);                               /* query length */
+        if(len > ETH_RECEIVE_SIZE){
+            len = ETH_RECEIVE_SIZE;
+        }
         if( (uart_data_t[socketid].tx_write - uart_data_t[socketid].tx_read) < UART_TX_BUF_NUM )
         {
         	write_buf = (uart_data_t[socketid].tx_write)%UART_TX_BUF_NUM;
@@ -148,16 +150,16 @@ void WCHNET_HandleSockInt(uint8_t socketid,uint8_t initstat)
         	PRINT("eth %d receive buff busy\n",socketid);
 		}
     }
-    if(initstat & SINT_STAT_CONNECT)                         /* TCP connect */
+    if(intstat & SINT_STAT_CONNECT)                         /* TCP connect */
     {
 
     	PRINT("TCP Connect Success\n");
     }
-    if(initstat & SINT_STAT_DISCONNECT)                      /* TCP disconnect  */
+    if(intstat & SINT_STAT_DISCONNECT)                      /* TCP disconnect  */
     {
 		PRINT("TCP Disconnect\r\n");
     }
-    if(initstat & SINT_STAT_TIM_OUT)                         /* TCP time out */
+    if(intstat & SINT_STAT_TIM_OUT)                         /* TCP time out */
     {
 		PRINT("TCP Timeout\r\n");
     }
@@ -172,22 +174,22 @@ void WCHNET_HandleSockInt(uint8_t socketid,uint8_t initstat)
  */
 void WCHNET_HandleGlobalInt(void)
 {
-	uint8_t initstat;
+	uint8_t intstat;
 	uint16_t i;
-	uint8_t socketinit;
-	initstat = WCHNET_GetGlobalInt();                         /* get global interrupt, and clear */
+	uint8_t socketint;
+	intstat = WCHNET_GetGlobalInt();                         /* get global interrupt, and clear */
 
-	if(initstat & GINT_STAT_UNREACH)                          /* unreachable */
+	if(intstat & GINT_STAT_UNREACH)                          /* unreachable */
 	{
 		PRINT("GINT_STAT_UNREACH\r\n");
 	}
 
-	if(initstat & GINT_STAT_IP_CONFLI)                        /* IP conflict */
+	if(intstat & GINT_STAT_IP_CONFLI)                        /* IP conflict */
 	{
 		PRINT("GINT_STAT_IP_CONFLI\r\n");
 	}
 
-	if(initstat & GINT_STAT_PHY_CHANGE)                       /* PHY change */
+	if(intstat & GINT_STAT_PHY_CHANGE)                       /* PHY change */
 	{
 		i = WCHNET_GetPHYStatus();                            /*get PHY state*/
 		if(i&PHY_Linked_Status)
@@ -195,14 +197,14 @@ void WCHNET_HandleGlobalInt(void)
 		PRINT("GINT_STAT_PHY_CHANGE %x\n",i);
 	}
 
-	if(initstat & GINT_STAT_SOCKET)                           /*Socket interrupt*/
+	if(intstat & GINT_STAT_SOCKET)                           /*Socket interrupt*/
 	{
 		for(i = 0; i < SOCKET_NUM; i++)
 		{
-			socketinit = WCHNET_GetSocketInt(i);              /* get Socket interrupt*/
-			if(socketinit)
+		    socketint = WCHNET_GetSocketInt(i);              /* get Socket interrupt*/
+			if(socketint)
 			{
-				WCHNET_HandleSockInt(i,socketinit);           /* IQR */
+				WCHNET_HandleSockInt(i,socketint);           /* IQR */
 			}
 		}
 	}
@@ -376,8 +378,6 @@ void uart_rx(void)
 		/* uart rx dma CNTR not equal to last, indicating that data is received*/
 		if(temp!=uart_data_t[i].last_RX_DMA_length)
 		{
-
-
 			/* calculate the length of the received data */
 			uart_data_t[i].rx_write += (uart_data_t[i].last_RX_DMA_length - temp) & (UART_RX_DMA_SIZE - 1);
 
@@ -437,8 +437,7 @@ int main(void)
 	RCC_ClocksTypeDef RCC_ClocksStatus;
 	uint8_t i;
 	uint32_t len;
-	uint8_t *name="ch32v307";
-
+	uint8_t *name = "WCHNET";
 
 	Delay_Init();
 
@@ -447,30 +446,33 @@ int main(void)
 #endif
 
 	PRINT("SystemClk:%d\r\n",SystemCoreClock);
-
 	RCC_GetClocksFreq(&RCC_ClocksStatus);
 	PRINT("SystemClk:%d\r\n",SystemCoreClock);
-	PRINT("net version:%x\n",WCHNET_GetVer());
+	PRINT("net version:%x\r\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() )
     {
-        PRINT("version error.\n");
+        PRINT("version error.\r\n");
     }
-    WCHNET_GetMacAddr(MACAddr);                          /*获取芯片Mac地址*/
+    WCHNET_GetMacAddr(MACAddr);                          //get the chip MAC address
     PRINT("mac addr:");
-    for(int i=0;i<6;i++) PRINT("%x ",MACAddr[i]);
-    PRINT("\n");
+    for(i = 0; i < 6; i++) 
+        PRINT("%x ",MACAddr[i]);
+    PRINT("\r\n");
     TIM2_Init();
-    BSP_Uart_Init(); /*uart init*/
-    WCHNET_DHCPSetHostname(name);                        /*设置DHCP主机名称*/
-    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);     /*以太网库初始化*/
+    BSP_Uart_Init();                                     /*uart init*/
+    WCHNET_DHCPSetHostname(name);                        //Configure DHCP host name
+    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);     //Ethernet library initialize
     mStopIfError(i);
     if(i == WCHNET_ERR_SUCCESS) PRINT("WCHNET_LibInit Success\r\n");
-	WCHNET_CreatTcpSocket(&SocketRecvBuf[0]);
+	WCHNET_CreateTcpSocket(&SocketRecvBuf[0]);            //Create  UDP Socket
 
 	while(1)
 	{
+        /*Ethernet library main task function,
+         * which needs to be called cyclically*/
 		WCHNET_MainTask();
-
+        /*Query the Ethernet global interrupt,
+         * if there is an interrupt, call the global interrupt handler*/
 		if(WCHNET_QueryGlobalInt())
 		{
 			WCHNET_HandleGlobalInt();

@@ -59,13 +59,8 @@ uint8_t  UART8_RX_DMA_DataBuf[UART_RX_DMA_SIZE]= {0};
 uint8_t  UART8_TX_DMA_DataBuf[UART_TX_BUF_NUM][ETH_RECEIVE_SIZE] = {0};
 uint16_t UART8_TX_Buf_Length[UART_TX_BUF_NUM] = {0};
 
-
-
-
 /* Global typedef */
 typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
-
-
 
 /**********************************************************************
  *  @fn      UART_GPIO_Init

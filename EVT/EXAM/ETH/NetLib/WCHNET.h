@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name        : WCHNET.H
 * Author           : WCH
-* Version          : V1.30
-* Date             : 2022/06/01
+* Version          : V1.40
+* Date             : 2022/06/27
 * Description      : This file contains the headers of 
 *                    the Ethernet protocol stack library.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x13              //the library version number
+#define WCHNET_LIB_VER                  0x14              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */
@@ -166,7 +166,7 @@ typedef uint8_t (*dhcp_callback)( uint8_t status, void * );
 struct _SCOK_INF;
 typedef void (*pSockRecv)( struct _SCOK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
 
-/* sokcet陓洘桶 */
+/* socket information */
 typedef struct _SCOK_INF
 {
     uint32_t IntStatus;                       //interrupt state
@@ -175,7 +175,7 @@ typedef struct _SCOK_INF
     uint32_t RecvBufLen;                      //Receive buffer length
     uint32_t RecvCurPoint;                    //current pointer to receive buffer
     uint32_t RecvReadPoint;                   //The read pointer of the receive buffer
-    uint32_t RecvRemLen;                      //Remaining length of receive buffer
+    uint32_t RecvRemLen;                      //The length of the data stored in the receive buffer
     uint32_t ProtoType;                       //protocol type
     uint32_t ScokStatus;                      //Low byte Socket state, the next low byte is TCP state, only meaningful in TCP mode
     uint32_t DesPort;                         //destination port
@@ -455,10 +455,10 @@ uint8_t WCHNET_SocketUdpSendTo( uint8_t socketid, uint8_t *buf, uint32_t *slen, 
 /**
  * @brief   Convert ASCII address to network address. 
  *
- * @param       *cp - ASCII address to be converted, such as ※192.168.1.2§
+ * @param       *cp - ASCII address to be converted
  * @param(in)   *addr - First address of the memory stored in the converted network address 
  * @param(out)  *addr -  Converted network address, such as 0xC0A80102 
- * @return  0 每 Success.   Others 每 Failure. 
+ * @return      0:Success Others:Failure.
  */
 uint8_t WCHNET_Aton(const char *cp, uint8_t *addr);
 
@@ -526,7 +526,7 @@ uint8_t WCHNET_DHCPStop( void );
  *
  * @param   *name - First address of DHCP host name 
  *
- * @return  0 每 Success.    Others 每 Failure. 
+ * @return  0:Success Others:Failure.
  */
 uint8_t WCHNET_DHCPSetHostname(char *name);
 

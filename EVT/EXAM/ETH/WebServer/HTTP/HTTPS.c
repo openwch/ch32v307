@@ -1,28 +1,26 @@
-/********************************** (C) COPYRIGHT ******************************
- * File Name          : HTTPS.C
+/********************************** (C) COPYRIGHT *******************************
+ * File Name          : HTTPS.c
  * Author             : WCH
- * Version            : V1.0
- * Date               : 2022/05/16
- * Description        : WCHNET¿â-HTTPS
+ * Version            : V1.0.0
+ * Date               : 2022/05/31
+ * Description        : HTTPS related functions.
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
-
-/******************************************************************************/
-/* Í·ÎÄ¼ş°üº¬ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>    
 #include "HTTPS.h"
-#include "debug.h"
-#include "WCHNET.h"
 
-#define HTML_LEN     1024*8                                                                       /* µ¥¸öÍøÒ³µÄ×î´ó´óĞ¡*/
+#define HTML_LEN     1024*8                                 //Maximum size of a single web page
 
-/* ±äÁ¿¶¨Òå */
-char tempURL[MAX_URL_SIZE];                             /* ±£´æä¯ÀÀÆ÷ÇëÇóµÄ×ÊÔ´Ãû*/
+char tempURL[MAX_URL_SIZE];                                 //Save the resource name requested by the browser
 
 st_http_request *http_request;
 
-Parameter Para_Basic[4], Para_Port[4], Para_Login[2];   /* ¶¨ÒåÈı¸ö½á¹¹ÌåÊı×é£¬·Ö±ğÓÃÓÚ±£´æ»ù´¡ÉèÖÃ£¬¶Ë¿ÚÉèÖÃ£¬ÃÜÂëÉèÖÃµÄÍøÒ³Ìá½»ĞÅÏ¢*/
+/*Define three structure arrays, which are used to save basic
+ * settings, port settings, and password settings.*/
+Parameter Para_Basic[4], Para_Port[4], Para_Login[2];
 
 u8 basicbuf[BASIC_CFG_LEN], portbuf[PORT_CFG_LEN], loginbuf[LOGIN_CFG_LEN];
 
@@ -30,22 +28,25 @@ Basic_Cfg Basic_CfgBuf = (Basic_Cfg)basicbuf;
 Port_Cfg  Port_CfgBuf  = (Port_Cfg)portbuf;
 Login_Cfg Login_CfgBuf = (Login_Cfg)loginbuf;
 
-u8 Basic_Default[BASIC_CFG_LEN] = {                     /* WCHNETÍøÂç²ÎÊıÄ¬ÈÏÅäÖÃ*/
-0x57, 0xAB,                                             /* 57 AB ÊÇ¿ªÍ·µÄĞ£ÑéÂë*/
+/*Default configuration of WCHNET network parameters*/
+u8 Basic_Default[BASIC_CFG_LEN] = {
+0x57, 0xAB,
 01, 02, 03, 04, 05, 06, 192, 168, 1, 10, 255, 255, 255, 0, 192, 168, 1, 1};
 
-u8 Login_Default[LOGIN_CFG_LEN] = {                     /* WCHNETµÇÂ¼Ä¬ÈÏÓÃ»§ÃûÓëÃÜÂë*/
+/*WCHNET login default parameters, user name and password*/
+u8 Login_Default[LOGIN_CFG_LEN] = {
 0x57, 0xAB,
-'1', '2', '3', 0, 0, 0, 0, 0, 0, 0, '1', '2', '3', 0, 0, 0, 0, 0, 0, 0 };
+'a', 'd', 'm', 'i', 'n', 0, 0, 0, 0, 0, '1', '2', '3', 0, 0, 0, 0, 0, 0, 0 };
 
-u8 Port_Default[PORT_CFG_LEN] = {                       /* WCHNETÄ¬ÈÏ¶Ë¿ÚÅäÖÃ*/
+/*WCHNET default port configuration*/
+u8 Port_Default[PORT_CFG_LEN] = {
 0x57, 0xAB,
 MODE_TCPCLIENT, 1000 / 256, 1000 % 256, 192, 168, 1, 100, 1000 / 256, 1000 % 256 };
 
-u8 *name;                                               /* httpÇëÇóµÄÍøÒ³Ãû×Ö*/
-u8 socket;                                              /* ÍøÒ³Í¨Ñ¶ÖĞ½¨Á¢µÄsocketË÷ÒıºÅ*/
-u8 httpweb[200];                                        /* Êı×éÓÃÓÚ±£´æhttpÏìÓ¦±¨ÎÄ*/
-char HtmlBuffer[HTML_LEN];                              /* ÍøÒ³µÄ·¢ËÍ»º³åÇø*/
+u8 *name;                                               //The name of the web page requested by HTTP
+u8 socket;                                              //socket id
+u8 httpweb[200];                                        //The array is used to store the HTTP response message
+char HtmlBuffer[HTML_LEN];                              //Web page send buffer
 
 const char Html_login[] = {
     "<!DOCTYPE html>\r\n"
@@ -126,7 +127,7 @@ const char Html_login[] = {
     "return true;\r\n"
     "else\r\n"
     "{\r\n"
-    "alert(\"ÓÃ»§Ãû»òÃÜÂë´íÎó\");\r\n"
+    "alert(\"Wrong user name or password\");\r\n"
     "return false;\r\n"
     "}\r\n"
     "\r\n"
@@ -147,9 +148,9 @@ const char Html_login[] = {
     "</div>\r\n"
     "<h1>User Login</h1>\r\n"
     "<div align=\"center\" >\r\n"
-    "<input   type=\"text\" name=\"__PUSE\" placeholder=\"ÇëÊäÈëÓÃ»§Ãû\" ><br>\r\n"
-    "<input   type=\"password\" name=\"__PPAS\" placeholder=\"ÇëÊäÈëÃÜÂë\"><br>\r\n"
-    "<button  id=\"but\" type=\"submit\"  ><b>µÇÂ¼</b></button>\r\n"
+    "<input   type=\"text\" name=\"__PUSE\" placeholder=\"Please enter user name\" ><br>\r\n"
+    "<input   type=\"password\" name=\"__PPAS\" placeholder=\"Please enter password\"><br>\r\n"
+    "<button  id=\"but\" type=\"submit\"  ><b>Log in</b></button>\r\n"
     "</div>\r\n"
     "</form>\r\n"
     "</div>\r\n"
@@ -301,40 +302,40 @@ const char Html_main[] = {
     "\r\n"
     "</div>\r\n"
     "\r\n"
-    "<!--ÕâÊÇ×ó²àÄ¿Â¼À¸ -->\r\n"
+    "<!--è¿™æ˜¯å·¦ä¾§ç›®å½•æ  -->\r\n"
     "<div id=\"basicContent\">\r\n"
     "<ul id=\"bConFun\" >\r\n"
-    "<!--Ä¿Â¼µÚÒ»ĞĞ -->\r\n"
+    "<!--ç›®å½•ç¬¬ä¸€è¡Œ -->\r\n"
     "<li  id=\"1\">\r\n"
     "<a href=\"basic.html\" target=\"ifrPage\" onclick=\"changeCss('1')\">\r\n"
-    "<img  class=\"tubiao\" src=\"png1.png\"/><h2 >»ù´¡ÉèÖÃ</h2>\r\n"
+    "<img  class=\"tubiao\" src=\"png1.png\"/><h2 >Basic Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--Ä¿Â¼µÚ¶şĞĞ -->\r\n"
+    "<!--ç›®å½•ç¬¬äºŒè¡Œ -->\r\n"
     "<li   id=\"2\">\r\n"
     "<a href=\"port.html\" target=\"ifrPage\"onclick=\"changeCss('2')\" >\r\n"
-    "<img class=\"tubiao\" src=\"png2.png\"/> <h2>¶Ë¿ÚÉèÖÃ</h2>\r\n"
+    "<img class=\"tubiao\" src=\"png2.png\"/> <h2>Port Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--Ä¿Â¼µÚÈıĞĞ -->\r\n"
+    "<!--ç›®å½•ç¬¬ä¸‰è¡Œ -->\r\n"
     "\r\n"
     "<li id=\"3\">\r\n"
     "<a href=\"user.html\" target=\"ifrPage\"onclick=\"changeCss('3')\" >\r\n"
-    "<img class=\"tubiao\" src=\"png3.png\"/><h2>ÃÜÂë¹ÜÀí</h2>\r\n"
+    "<img class=\"tubiao\" src=\"png3.png\"/><h2>Password Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--Ä¿Â¼µÚËÄĞĞ -->\r\n"
+    "<!--ç›®å½•ç¬¬å››è¡Œ -->\r\n"
     "<li id=\"4\" >\r\n"
     "<a href=\"about.html\" target=\"ifrPage\" onclick=\"changeCss('4')\" >\r\n"
-    "<img class=\"tubiao\" src=\"png4.png\"/><h2>¹ØÓÚÇßºã</h2>\r\n"
+    "<img class=\"tubiao\" src=\"png4.png\"/><h2>About us</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
     "</ul>\r\n"
     "<iframe id=\"ifrPage\" name=\"ifrPage\" src=\"basic.html\" frameborder=\"no\"></iframe>\r\n"
     "\r\n"
     "<div id=\"foot\">\r\n"
-    "<p>Copyright:@2002-2022 ÄÏ¾©ÇßºãÎ¢µç×Ó¹É·İÓĞÏŞ¹«Ë¾.All Rights Reserved</p>\r\n"
-    "<div id=\"left\">¹ÙÍø£º<a href=\"http://www.wch.cn\">www.wch.cn</a></div>\r\n"
+    "<p>Copyright:@2002-2022 Nanjing Qinheng Microelectronics Co., Ltd.All Rights Reserved</p>\r\n"
+    "<div id=\"left\">Official website:<a href=\"http://www.wch.cn\">www.wch.cn</a></div>\r\n"
     "</div>\r\n"
     "</body>\r\n"
     "</html>\r\n"
@@ -346,7 +347,7 @@ const char Html_main[] = {
 const char Html_basic[] = {
     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" >\r\n"
     "<head>\r\n"
-    "<title>»ù´¡ÉèÖÃ</title>\r\n"
+    "<title>Basic Settings</title>\r\n"
     "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\" />\r\n"
     "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />\r\n"
     "</head>\r\n"
@@ -364,22 +365,22 @@ const char Html_basic[] = {
     "<body onLoad=\"init_main()\">\r\n"
     "<form name= \"basic\" method=\"post\" action=\"success.html\">\r\n"
     "<div>\r\n"
-    "<h2>»ù´¡ÉèÖÃ</h2>\r\n"
+    "<h2>Basic Settings</h2>\r\n"
     "<ul >\r\n"
     "<li class=\"config\">\r\n"
-    "<label >Éè±¸MAC</label><input name=\"__PMAC\" class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Device MAC</label><input name=\"__PMAC\" class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >Éè±¸IP</label><input name=\"__PSIP\" class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Device IP</label><input name=\"__PSIP\" class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >×ÓÍøÑÚÂë</label><input name=\"__PMSK\"class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Subnet mask</label><input name=\"__PMSK\"class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >Íø¹Ø</label><input name=\"__PGAT\"class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Gateway</label><input name=\"__PGAT\"class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "</ul>\r\n"
-    "<button  class=\"but\" type=\"submit\"  ><b>±£´æÅäÖÃ</b></button>\r\n"
+    "<button  class=\"but\" type=\"submit\"  ><b>Save configuration</b></button>\r\n"
     "</div>\r\n"
     "</form>\r\n"
     "</body>\r\n"
@@ -388,7 +389,7 @@ const char Html_basic[] = {
 const char Html_port[] ={
     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" >\r\n"
     "<head>\r\n"
-    "<title>¶Ë¿ÚÉèÖÃ</title>\r\n"
+    "<title>Port Settings</title>\r\n"
     "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\" />\r\n"
     "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />\r\n"
     "</head>\r\n"
@@ -412,25 +413,25 @@ const char Html_port[] ={
     "<body onLoad=\"init_main()\">\r\n"
     "<form name= \"port\" method=\"post\" action=\"success.html\">\r\n"
     "<div>\r\n"
-    "<h2 >¶Ë¿ÚÉèÖÃ</h2>\r\n"
+    "<h2 >Port Settings</h2>\r\n"
     "<ul  >\r\n"
     "<li class=\"config\">\r\n"
-    "<label >ÍøÂçÄ£Ê½</label><select class=\"fuxuan\" name=\"__PMOD\">\r\n"
+    "<label >Network mode</label><select class=\"fuxuan\" name=\"__PMOD\">\r\n"
     "<option  value=\"0\">TCP-Server</option>\r\n"
     "<option value=\"1\">TCP-Client</option>\r\n"
     "</select>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >±¾µØ¶Ë¿Ú</label><input name=\"__PSPT\" class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Local port</label><input name=\"__PSPT\" class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >Ä¿µÄIP</label><input name=\"__PDIP\" class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Destination IP</label><input name=\"__PDIP\" class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >Ä¿µÄ¶Ë¿ÚºÅ</label><input name=\"__PDPT\" class=\"shuru\" maxlength=\"32\"/>\r\n"
+    "<label >Destination port</label><input name=\"__PDPT\" class=\"shuru\" maxlength=\"32\"/>\r\n"
     "</li>\r\n"
     "</ul>\r\n"
-    "<button  class=\"but\" type=\"submit\"  ><b>±£´æÅäÖÃ</b></button>\r\n"
+    "<button  class=\"but\" type=\"submit\"  ><b>Save configuration</b></button>\r\n"
     "</div>\r\n"
     "</form>\r\n"
     "</body>\r\n"
@@ -457,16 +458,16 @@ const char Html_user[] = {
     "<body onLoad=\"init_main()\">\r\n"
     "<form name= \"user\" method=\"post\" action=\"success.html\">\r\n"
     "<div>\r\n"
-    "<h2>ÃÜÂë¹ÜÀí</h2>\r\n"
+    "<h2>Password settings</h2>\r\n"
     "<ul >\r\n"
     "<li class=\"config\">\r\n"
-    "<label >ÓÃ»§Ãû</label><input name=\"__PUSE\" class=\"shuru\" maxlength=\"10\"/>\r\n"
+    "<label >Username</label><input name=\"__PUSE\" class=\"shuru\" maxlength=\"10\"/>\r\n"
     "</li>\r\n"
     "<li class=\"config\">\r\n"
-    "<label >ÃÜÂë</label><input name=\"__PPAS\" class=\"shuru\" maxlength=\"10\"/>\r\n"
+    "<label >Password</label><input name=\"__PPAS\" class=\"shuru\" maxlength=\"10\"/>\r\n"
     "</li>\r\n"
     "</ul>\r\n"
-    "<button  class=\"but\" type=\"submit\"  ><b>±£´æÅäÖÃ</b></button>\r\n"
+    "<button  class=\"but\" type=\"submit\"  ><b>Save configuration</b></button>\r\n"
     "\r\n"
     "</div>\r\n"
     "</form>\r\n"
@@ -502,24 +503,31 @@ const char Html_about[] = {
     "\r\n"
     "<div class=\"top_content\" style=\"height:600px\">\r\n"
     "<div class=\"top\">\r\n"
-    "<h2 >¹ØÓÚÇßºã</h2>\r\n"
+    "<h2 >About us</h2>\r\n"
     "</div>\r\n"
-    "<div class=\"div_c\"  style=\"font-family:Î¢ÈíÑÅºÚ;margin-top:30px;\">\r\n"
+    "<div class=\"div_c\"  style=\"font-family:å¾®è½¯é›…é»‘;margin-top:30px;\">\r\n"
     "\r\n"
-    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">¹«Ë¾¼ò½é</span><br />\r\n"
-    "<p style=\"text-indent: 2em\" align=\"left\">ÄÏ¾©ÇßºãÎ¢µç×Ó¹É·İÓĞÏŞ¹«Ë¾³ÉÁ¢ÓÚ2004Äê£¬ÊÇÒ»¼ÒÍ¨Ñ¶½Ó¿ÚĞ¾Æ¬ºÍÈ«Õ»MCUĞ¾Æ¬¹«Ë¾¡£</p>\r\n"
-    "<p style=\"text-indent: 2em\" align=\"left\">Çßºã×¨×¢ÓÚÁ¬½Ó¼¼ÊõºÍMCUÄÚºËÑĞ¾¿£¬»ùÓÚ×ÔÑĞÊÕ·¢Æ÷PHYºÍ´¦ÀíÆ÷IPµÄÈ«Õ»ÑĞ·¢Ä£Ê½£¬È¡´ú´«Í³µÄÍâ¹ºIPÕûºÏÄ£Ê½£¬Ìá¹©ÒÔÌ«Íø¡¢À¶ÑÀÎŞÏß¡¢USBºÍPCIÀàµÈ½Ó¿ÚĞ¾Æ¬£¬¼°¼¯³ÉÉÏÊö½Ó¿ÚµÄÁ¬½ÓĞÍ/»¥ÁªĞÍ/ÎŞÏßĞÍÈ«Õ»MCU+µ¥Æ¬»ú¡£</p>\r\n"
-    "<p style=\"text-indent: 2em\" align=\"left\">¼¼ÊõÉÏÉæ¼°¡°¸ĞÖª+¿ØÖÆ+Á¬½Ó+ÔÆ¾Û¡±£ºADC/PGAµÈÄ£Äâ¼ì²â¡¢MCUÖÇÄÜ¿ØÖÆ¼°Çı¶¯Ëã·¨¡¢HIDÈË»ú½»»¥¡¢Ethernet/Bluetooth-LEµÈÍøÂçÍ¨ĞÅ¡¢UART/USB/USB PD/PCIE/CAN/SerDesµÈ½Ó¿ÚÍ¨Ñ¶¡¢Êı¾İ°²È«¡¢ÎïÁªĞ­ÒéºÍÔÆ¶Ë·şÎñ£¬ÖÂÁ¦ÓÚÎª¿Í»§Ìá¹©ÍòÎï»¥Áª¡¢ÉÏÏÂ»¥Í¨µÄĞ¾Æ¬¼°½â¾ö·½°¸¡£</p>\r\n"
+    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">Company Profile</span><br />\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">Nanjing Qinheng Microelectronics Co., Ltd. founded in 2004, is an IC communication interface and full-stack MCU Design Company.</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">Qinheng specializes in connectivity technology and MCU core development. The company operates a full-stack development model based on self-developed transceiver PHY and processor IP instead of traditionally outsourcing IP integration models. Qinheng provides Ethernet, Bluetooth, USB and PCI interface chips, alongside connectivity/interconnectivity/wireless full-stack MCU+ microcontrollers integrated with these interfaces.</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">Technically involves \"perception + control + connection + cloud gathering\":</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- ADC/PGA and other analog detection modules</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- MCU smart control and driving algorithms</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- HID human-computer interactionHID human-computer interaction</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- Ethernet/Bluetooth-LE and other network communication protocols</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- UART/USB/USB PD/PCIE/CAN/SerDes and other communication interfaces</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- Data security</p>\r\n"
+    "<p style=\"text-indent: 2em\" align=\"left\">- IoT protocol and cloud services</p>\r\n"
     "</div>\r\n"
     "<br>\r\n"
-    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">×ÊÔ´ÏÂÔØ</span><br />\r\n"
-    "<p class=\"STYLE4\">Ğ¾Æ¬×ÊÁÏ£º<a href=\"http://www.wch.cn/search?q=%E4%BB%A5%E5%A4%AA%E7%BD%91&t=all\" target=\"_blank\">ÒÔÌ«ÍøÏà¹ØĞ¾Æ¬×ÊÁÏ</a></p>\r\n"
+    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">Download</span><br />\r\n"
+    "<p class=\"STYLE4\">Chip data:<a href=\"http://www.wch.cn/search?q=%E4%BB%A5%E5%A4%AA%E7%BD%91&t=all\" target=\"_blank\">Chip Profile with Ethernet</a></p>\r\n"
     "</div>\r\n"
     "<br>\r\n"
-    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">ÁªÏµÎÒÃÇ</span><br />\r\n"
-    "<p class=\"STYLE4\"><a>¼¼ÊõÓÊÏä£ºtech@wch.cn</a></p>\r\n"
-    "<p class=\"STYLE4\">¼¼Êõµç»°£º025-52638370</p>\r\n"
-    "<p class=\"STYLE4\">ÏúÊÛµç»°£º025-52638389</p>\r\n"
+    "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">Contact us</span><br />\r\n"
+    "<p class=\"STYLE4\"><a>Technician Email:tech@wch.cn</a></p>\r\n"
+    "<p class=\"STYLE4\">Technician Phone:025-52638370</p>\r\n"
+    "<p class=\"STYLE4\">sales phone:025-52638389</p>\r\n"
     "</div>\r\n"
     "<br>\r\n"
     "</div>\r\n"
@@ -540,12 +548,12 @@ const char Html_success[] = {
     "</head>\r\n"
     "<body >\r\n"
     "<form name= \"success\" method=\"post\" action=\"success.html\">\r\n"
-    "<h2>ÉèÖÃ³É¹¦</h2>\r\n"
+    "<h2>Set successfully</h2>\r\n"
     "<br />\r\n"
     "<br />\r\n"
-    "ÉèÖÃ³É¹¦<br />\r\n"
+    "Set successfully<br />\r\n"
     "<br />\r\n"
-    "ÇëÖØÆôµ¥Æ¬»ú»òÕß¼ÌĞøÉèÖÃ\r\n"
+    "Please restart the microcontroller or continue to set\r\n"
     "</div>\r\n"
     "</form>\r\n"
     "</body>\r\n"
@@ -2224,13 +2232,15 @@ const char Html_png4[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00,
 /*********************************************************************
  * @fn      ParseHttpRequest
  *
- * @brief   ·ÖÎöÇëÇó±¨ÎÄ
+ * @brief   Analyze the request message, take out the method and assign it to request->method,
+ *          and assign the URL to request->URL (with '/')
  *
- * @input   request£º ½á¹¹Ìå£¬ÓÃÀ´±£´æpostÇëÇó¸÷²¿·ÖÄÚÈİ
- *          buf£º              POSTÇëÇó
+ * @param   request - data buff,Used to save the content of each part of the post request
+ *          buf - POST request
+ *
  * @return  none
  */
-void ParseHttpRequest(st_http_request *request, char *buf)    /*·ÖÎöÇëÇó±¨ÎÄ£¬È¡³öÆäÖĞµÄmethod¸³¸ørequest->method,URL¸³¸ørequest->URL(´ø'/')*/
+void ParseHttpRequest(st_http_request *request, char *buf)
 {
     char * nexttok;
 
@@ -2238,25 +2248,18 @@ void ParseHttpRequest(st_http_request *request, char *buf)    /*·ÖÎöÇëÇó±¨ÎÄ£¬È¡
 
     if (!nexttok) {
         request->METHOD = METHOD_ERR;
-        // printf("REQUEST ERROR\n");
         return;
     }
-    if (!strcmp(nexttok, "GET") || !strcmp(nexttok, "get")) { /*ä¯ÀÀÆ÷getÇëÇó*/
+    if (!strcmp(nexttok, "GET") || !strcmp(nexttok, "get")) {       /*browser 'get' request*/
         request->METHOD = METHOD_GET;
         nexttok = strtok(NULL, " ");
-        //printf("METHOD=GET\n");
     }
-
     else if (!strcmp(nexttok, "POST") || !strcmp(nexttok, "post")) {
         request->METHOD = METHOD_POST;
         nexttok = strtok(NULL, " ");
-        //printf("METHOD=POST\n");
-
     }
-
     else {
         request->METHOD = METHOD_ERR;
-        // printf("METHOD ERROR\n");
         return;
     }
     strcpy((char*) request->URL, nexttok);
@@ -2265,12 +2268,13 @@ void ParseHttpRequest(st_http_request *request, char *buf)    /*·ÖÎöÇëÇó±¨ÎÄ£¬È¡
 /*********************************************************************
  * @fn      GetURLName
  *
- * @brief   »ñÈ¡URLÃû³Æ
+ * @brief   Get URL name.
  *
- * @input   URL Ãû³Æ
- * @return  ·µ»ØURL×ÊÔ´Ãû
+ * @param   URL - URL.
+ *
+ * @return  url_name
  */
-char* GetURLName(char* URL)                           /*·µ»ØURL×ÊÔ´Ãû(È¥µô¡®/')*/
+char* GetURLName(char* URL)
 {
     char* url_name;
 
@@ -2287,21 +2291,22 @@ char* GetURLName(char* URL)                           /*·µ»ØURL×ÊÔ´Ãû(È¥µô¡®/')*
 /*********************************************************************
  * @fn      ParseURLType
  *
- * @brief   »ñÈ¡URLÃû³Æ
+ * @brief   Parse URL type
  *
- * @input   type  ÀàĞÍ
- *          buf   Êı¾İ
- * @return  none
+ * @param   type - type.
+ *          buf - data buff
+ *
+ * @return  URL type
  */
-void ParseURLType(char *type, char * buf)            /*·µ»ØURLÀàĞÍ*/
+void ParseURLType(char *type, char * buf)
 {
-    if (strstr(buf, ".html") || (strlen(name) == 1)) /*htmlÀàĞÍ(°üº¬login½çÃæ£¬ÇëÇóloginÊ±£¬ä¯ÀÀÆ÷·¢³öµÄURLÃûÎª"/ ")*/
+    if (strstr(buf, ".html") || (strlen(name) == 1)) //html type
         *type = PTYPE_HTML;
-    else if (strstr(buf, ".png"))                    /*pngÀàĞÍ*/
+    else if (strstr(buf, ".png"))                    /*png type*/
         *type = PTYPE_PNG;
-    else if (strstr(buf, ".css"))                    /*cssÀàĞÍ*/
+    else if (strstr(buf, ".css"))                    /*css type*/
         *type = PTYPE_CSS;
-    else if (strstr(buf, ".gif"))                    /*gifÀàĞÍ*/
+    else if (strstr(buf, ".gif"))                    /*gif type*/
         *type = PTYPE_GIF;
     else
         *type = PTYPE_ERR;
@@ -2310,13 +2315,15 @@ void ParseURLType(char *type, char * buf)            /*·µ»ØURLÀàĞÍ*/
 /*********************************************************************
  * @fn      MakeHttpResponse
  *
- * @brief   ¸ù¾İtypeÑ¡ÔñÏàÓ¦µÄÏìÓ¦±¨ÎÄ¸³Öµ¸øbuf
+ * @brief   Select the corresponding response message and assign
+ *           it to buf, according to the type .
  *
- * @input   buf£ºÏìÓ¦·¢ËÍ»º³åÇø
- *          type:±»ÇëÇó×ÊÔ´µÄÀàĞÍ
+ * @param   buf - data buff
+ *          type - type
+ *
  * @return  none
  */
-void MakeHttpResponse(u8 *buf, char type) /*¸ù¾İtypeÑ¡ÔñÏàÓ¦µÄÏìÓ¦±¨ÎÄ¸³Öµ¸øbuf*/
+void MakeHttpResponse(u8 *buf, char type)
 {
     char *head = 0;
 
@@ -2331,17 +2338,37 @@ void MakeHttpResponse(u8 *buf, char type) /*¸ù¾İtypeÑ¡ÔñÏàÓ¦µÄÏìÓ¦±¨ÎÄ¸³Öµ¸øbuf*
     strcpy(buf, head);
 }
 
-char * DataLocate(char *buf, char *name) /*¶¨Î»¡°name¡±ËùÔÚµÄÎ»ÖÃ£¬·µ»ØnameºóÒ»Î»µÄÖ¸Õë*/
+/*********************************************************************
+ * @fn      DataLocate
+ *
+ * @brief   Locate the location of "name"
+ *
+ * @param   buf - data buff
+ *          name - name strings
+ *
+ * @return  pointer to the last digit of name
+ */
+char * DataLocate(char *buf, char *name)
 {
     char *p;
     p = strstr(buf, name);
     if (p == NULL)
-        return NULL;                    /*ÈôÃ»ÓĞÕÒµ½¡°name"£¬·µ»ØNULL*/
+        return NULL;
     p += strlen(name);
-    return p;                           /*ÕÒµ½¡±name¡°£¬·µ»ØnameºóÒ»Î»Ö¸Õë*/
+    return p;
 }
 
-char * Para_DataLocate(char *buf)       /*¶¨Î»"__"ÔÚbufÖĞµÄÎ»ÖÃ£¬ÍøÒ³ÖĞËùÓĞµÄÅäÖÃÃû×Ö¶¼ÊÇÒÔ"__"¿ªÍ·*/
+/*********************************************************************
+ * @fn      Para_DataLocatePara_DataLocate
+ *
+ * @brief   Locate the position of "__" in buf, all configuration
+ *          names in the web page start with "__".
+ *
+ * @param   buf - data buff
+ *
+ * @return  Pointer where "__" appears in buf
+ */
+char * Para_DataLocate(char *buf)
 {
     char *p = buf;
     while(1)
@@ -2353,49 +2380,51 @@ char * Para_DataLocate(char *buf)       /*¶¨Î»"__"ÔÚbufÖĞµÄÎ»ÖÃ£¬ÍøÒ³ÖĞËùÓĞµÄÅäÖ
         else
         p++;
     }
-    return p;                           /*·µ»Ø"__"bufÖĞ³öÏÖµÄÎ»ÖÃ*/
+    return p;
 }
 
 /*********************************************************************
  * @fn      Refresh_Basic
  *
- * @brief   ´ÓpostÇëÇóÖĞ½âÎöbasic½çÃæÅäÖÃ²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ
+ * @brief   Parse the basic interface configuration parameters from
+ *          the post request and store the parsed parameters in the
+ *          flash in the form of a structure
  *
- * @input   buf£ºPOSTÇëÇóÀïµÄÍøÒ³±äÁ¿¸³Öµ×Ö·û´®
+ * @param   buf - data buff
  *
  * @return  none
  */
 void Refresh_Basic(u8 *buf)
-{                                                   /*´ÓpostÇëÇóÖĞ½âÎöbasic½çÃæÅäÖÃ²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ*/
+{
     char *p, *q;
-    char temp[30];                                  /*×Ö·û´®µÄĞÎÊ½±£´æ¸÷ÏîÅäÖÃµÄÖµ*/
+    char temp[30];                               //Save the value of each configuration in the form of a string
     Basic_Cfg BasicCfg;
     u8 i, cfgBuff[BASIC_CFG_LEN];
 
     memset(cfgBuff, 0, BASIC_CFG_LEN);
     BasicCfg = (Basic_Cfg) cfgBuff;
-    BasicCfg->flag[0] = 0x57;                       /*ÑéÖ¤±êÖ¾Î»£¬0X57 ,0XAB ÈôÔÚEEPROMÀïÃ»ÓĞ¶Áµ½ÕâÁ½¸ö±êÖ¾Î»£¬ÔòÑéÖ¤Ê§°Ü£¬ĞèÒª»Ö¸´Ä¬ÈÏÉèÖÃ */
+    BasicCfg->flag[0] = 0x57;
     BasicCfg->flag[1] = 0xAB;
 
-    p = DataLocate(buf, "__PMAC=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PMAC=¡¯µÄÎ»ÖÃ,·µ»ØºóÒ»Î»Ö¸Õë£¬postÃüÁîÌá½»µÄ²ÎÊı¸ñÊ½Îª£º__PMAC="****"&__PSIP="****"&......*/
+    p = DataLocate(buf, "__PMAC=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {               /*½«"__PMAC"µÄÖµÒÔ×Ö·û´®ĞÎÊ½±£´æÔÚtempÀï*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
-        q = strtok(temp, ".");                      /*½«MACµØÖ·ÒÔ¡®.'Îª¼ä¸ô·ÖÎª6¶Î£¬·Ö±ğ±£´æ*/
+        q = strtok(temp, ".");
         BasicCfg->mac[0] = atoi(q);
         for (i = 1; i < 6; i++) {
             q = strtok(NULL, ".");
-            BasicCfg->mac[i] = atoi(q);             /*ÒÔÊıÖµµÄĞÎÊ½±£´æMACµØÖ·*/
+            BasicCfg->mac[i] = atoi(q);
         }
     }
 
-    p = DataLocate(buf, "__PSIP=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PSIP¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PSIP=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {               /*ÒÔ¡¯&¡®½áÎ²*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
@@ -2403,14 +2432,14 @@ void Refresh_Basic(u8 *buf)
         BasicCfg->ip[0] = atoi(q);
         for (i = 1; i < 4; i++) {
             q = strtok(NULL, ".");
-            BasicCfg->ip[i] = atoi(q);              /*±£´æipµØÖ·*/
+            BasicCfg->ip[i] = atoi(q);
         }
     }
 
-    p = DataLocate(buf, "__PMSK=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PMSK¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PMSK=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {               /*ÒÔ¡¯&¡®½áÎ²*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
@@ -2418,15 +2447,14 @@ void Refresh_Basic(u8 *buf)
         BasicCfg->mask[0] = atoi(q);
         for (i = 1; i < 4; i++) {
             q = strtok(NULL, ".");
-            BasicCfg->mask[i] = atoi(q);            /*±£´æÑÚÂë*/
-
+            BasicCfg->mask[i] = atoi(q);
         }
     }
 
-    p = DataLocate(buf, "__PGAT=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PGAT¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PGAT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != 0x00; i++) {              /*×îºóÒ»Î»µ½0X00ÎªÖ¹*/
+        for (i = 0; *p != 0x00; i++) {
             temp[i] = *p;
             p++;
         }
@@ -2434,44 +2462,46 @@ void Refresh_Basic(u8 *buf)
         BasicCfg->gateway[0] = atoi(q);
         for (i = 1; i < 4; i++) {
             q = strtok(NULL, ".");
-            BasicCfg->gateway[i] = atoi(q);         /*±£´æÍø¹Ø*/
+            BasicCfg->gateway[i] = atoi(q);
         }
     }
-    EEPROM_ERASE( BASIC_CFG_ADDR, FLASH_PAGE_SIZE);
-    EEPROM_WRITE( BASIC_CFG_ADDR, cfgBuff, BASIC_CFG_LEN);
+    WEB_ERASE( BASIC_CFG_ADDR, FLASH_PAGE_SIZE);
+    WEB_WRITE( BASIC_CFG_ADDR, cfgBuff, BASIC_CFG_LEN);
 }
 
 /*********************************************************************
- * @fn      Refresh_Port
+ * @fn      Refresh_Basic
  *
- * @brief   ´ÓpostÇëÇóÖĞ½âÎöport²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ
+ * @brief   Parse the basic interface configuration parameters from
+ *          the post request and store the parsed parameters in the
+ *          flash
  *
- * @input   buf£ºPOSTÇëÇóÀïµÄÍøÒ³±äÁ¿¸³Öµ×Ö·û´®
+ * @param   buf - data buff
  *
  * @return  none
  */
-void Refresh_Port(char *buf)                /*´ÓpostÇëÇóÖĞ½âÎöport²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ*/
+void Refresh_Port(char *buf)
 {
     u8 i;
     char *p, *q;
-    char temp[30];                          /*×Ö·û´®µÄĞÎÊ½±£´æ¸÷ÏîÅäÖÃµÄÖµ*/
+    char temp[30];
     Port_Cfg portCfg;
     u8 cfgBuff[PORT_CFG_LEN];
 
     memset(cfgBuff, 0, PORT_CFG_LEN);
     portCfg = (Port_Cfg) cfgBuff;
-    portCfg->flag[0] = 0X57;                /*ÑéÖ¤±êÖ¾Î»£¬0X57 ,0XAB ÈôÔÚEEPROMÀïÃ»ÓĞ¶Áµ½ÕâÁ½¸ö±êÖ¾Î»£¬ÔòÑéÖ¤Ê§°Ü£¬ĞèÒª»Ö¸´Ä¬ÈÏÉèÖÃ */
+    portCfg->flag[0] = 0X57;
     portCfg->flag[1] = 0XAB;
 
-    p = DataLocate(buf, "__PMOD=");         /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PMOD¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PMOD=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {       /*ÒÔ¡¯&¡®½áÎ²*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
         printf("mode==%s\n", temp);
-        if (strcmp(temp, "0") == 0)         /*±£´æ¶Ë¿ÚÄ£Ê½*/
+        if (strcmp(temp, "0") == 0)
         {
             printf("mode 0\n");
             portCfg->mode = MODE_TCPSERVER;
@@ -2483,22 +2513,22 @@ void Refresh_Port(char *buf)                /*´ÓpostÇëÇóÖĞ½âÎöport²ÎÊı ²¢½«½âÎöº
 
     }
 
-    p = DataLocate(buf, "__PSPT=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PSPT¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PSPT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {               /*ÒÔ¡¯&¡®½áÎ²*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
 
-        portCfg->src_port[0] = atoi(temp) / 256;    /*±£´æÔ´¶Ë¿ÚºÅ*/
+        portCfg->src_port[0] = atoi(temp) / 256;
         portCfg->src_port[1] = atoi(temp) % 256;
     }
 
-    p = DataLocate(buf, "__PDIP=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PDIP¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PDIP=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {               /*ÒÔ¡¯&¡®½áÎ²*/
+        for (i = 0; *p != '&'; i++) {
             temp[i] = *p;
             p++;
         }
@@ -2507,34 +2537,35 @@ void Refresh_Port(char *buf)                /*´ÓpostÇëÇóÖĞ½âÎöport²ÎÊı ²¢½«½âÎöº
         for (i = 1; i < 4; i++) {
             q = strtok(NULL, ".");
             portCfg->des_ip[i] = atoi(q);
-        } /*±£´æÄ¿µÄip*/
+        } /*ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ip*/
     }
 
-    p = DataLocate(buf, "__PDPT=");                 /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PDPT¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PDPT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != 0x00; i++) {              /*ÒÔ0½áÎ²*/
+        for (i = 0; *p != 0x00; i++) {
             temp[i] = *p;
             p++;
         }
 
-        portCfg->des_port[0] = atoi(temp) / 256;    /*±£´æÄ¿µÄ¶Ë¿ÚºÅ*/
+        portCfg->des_port[0] = atoi(temp) / 256;
         portCfg->des_port[1] = atoi(temp) % 256;
     }
-    EEPROM_ERASE( PORT_CFG_ADDR, FLASH_PAGE_SIZE);
-    EEPROM_WRITE( PORT_CFG_ADDR, cfgBuff, PORT_CFG_LEN);
+    WEB_ERASE( PORT_CFG_ADDR, FLASH_PAGE_SIZE);
+    WEB_WRITE( PORT_CFG_ADDR, cfgBuff, PORT_CFG_LEN);
 }
 
 /*********************************************************************
- * @fn      Refresh_Login
+ * @fn      Refresh_Basic
  *
- * @brief   ´ÓpostÇëÇóÖĞ½âÎölogint²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ
+ * @brief   Parse the login parameter from the post request
+ *          and store the parsed parameter in flash
  *
- * @input    buf£ºPOSTÇëÇóÀïµÄÍøÒ³±äÁ¿¸³Öµ×Ö·û´®
+ * @param   buf - data buff
  *
  * @return  none
  */
-void Refresh_Login(char *buf)           /*´ÓpostÇëÇóÖĞ½âÎölogin²ÎÊı ²¢½«½âÎöºóµÄ²ÎÊıÒÔ½á¹¹ÌåµÄĞÎÊ½´æ·ÅÔÚEEPROMÖĞ*/
+void Refresh_Login(char *buf)
 {
     char *p;
     u8 i;
@@ -2544,41 +2575,42 @@ void Refresh_Login(char *buf)           /*´ÓpostÇëÇóÖĞ½âÎölogin²ÎÊı ²¢½«½âÎöºóµÄ
     LoginInf = (Login_Cfg) cfgBuff;
     memset(LoginInf, 0, LOGIN_CFG_LEN);
     memset(cfgBuff, 0, LOGIN_CFG_LEN);
-    LoginInf->flag[0] = 0X57;           /*ÑéÖ¤±êÖ¾Î»£¬0X57 ,0XAB ÈôÔÚEEPROMÀïÃ»ÓĞ¶Áµ½ÕâÁ½¸ö±êÖ¾Î»£¬ÔòÑéÖ¤Ê§°Ü£¬ĞèÒª»Ö¸´Ä¬ÈÏÉèÖÃ */
+    LoginInf->flag[0] = 0X57;
     LoginInf->flag[1] = 0XAB;
 
-    p = DataLocate(buf, "__PUSE=");     /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PUSE¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PUSE=");
     if (p != NULL)
         if (p != NULL) {
             for (i = 0; *p != '&'; i++) {
-                LoginInf->user[i] = *p; /*ÒÔ¡¯&¡®½áÎ²*/
+                LoginInf->user[i] = *p;
                 p++;
             }
         }
 
-    p = DataLocate(buf, "__PPAS=");     /*Ñ°ÕÒPOSTÃüÁîÖĞµÄ'__PUSE¡¯µÄÎ»ÖÃ*/
+    p = DataLocate(buf, "__PPAS=");
     if (p != NULL) {
         for (i = 0; *p != 0x00; i++) {
             LoginInf->pass[i] = *p;
             p++;
         }
     }
-    EEPROM_ERASE( LOGIN_CFG_ADDR, FLASH_PAGE_SIZE);
-    EEPROM_WRITE( LOGIN_CFG_ADDR, cfgBuff, LOGIN_CFG_LEN);
+    WEB_ERASE( LOGIN_CFG_ADDR, FLASH_PAGE_SIZE);
+    WEB_WRITE( LOGIN_CFG_ADDR, cfgBuff, LOGIN_CFG_LEN);
 }
 
 /*********************************************************************
  * @fn      Refresh_Html
  *
- * @brief   Ñ¡ÔñflashÀïµÄÒ»¸öhtmlÎÄ¼ş£¬½«ËüÓë²ÎÊı±í¶ÔÕÕÌæ»»£¬²¢±£´æµ½HtmlBuffer[]Àï
+ * @brief   Select an html file in flash, replace it with the
+ *          parameter table, and save it to HtmlBuffer[].
  *
- * @input   html£º¶¨ÒåµÄHTMLÊı×é³£Á¿
- *          buf£º   ¶¨ÒåµÄ²ÎÊı½á¹¹Ìå
- *          paranum£ºÅäÖÃ²ÎÊı²ÎÊıµÄ¸öÊı
+ * @param   html - HTML array constants
+ *          buf - parameter structure
+ *          paranum - parameters number
  *
  * @return  none
  */
-void Refresh_Html(const char *html, Parameter *buf, u8 paranum) /*Ñ¡ÔñflashÀïµÄÒ»¸öhtmlÎÄ¼ş£¬½«ËüÓë²ÎÊı±í¶ÔÕÕÌæ»»£¬²¢±£´æµ½HtmlBuffer[]Àï*/
+void Refresh_Html(const char *html, Parameter *buf, u8 paranum)
 {
     const char *p1;
     char *p2, *q;
@@ -2586,23 +2618,23 @@ void Refresh_Html(const char *html, Parameter *buf, u8 paranum) /*Ñ¡ÔñflashÀïµÄÒ
     Parameter *tab;
     u32 i, k, valuelen, htmllen;
     u8 j;
-    memset(HtmlBuffer, 0, HTML_LEN);                            /*ÏÈÇå¿ÕHtmlBuffer*/
+    memset(HtmlBuffer, 0, HTML_LEN);
     p1 = html;
     p2 = HtmlBuffer;
     htmllen = strlen(html);
     for (k = 0; k < htmllen; k++) {
-        if ((*p1) == '_' && *((p1 + 1)) == '_' && (*(p1 + 2)) == 'A') { /*ËùÓĞÒªÌæ»»µÄ±äÁ¿¶¼ÊÇÒÔ"__A"¿ªÍ·*/
-            for (i = 0; i < 6; i++) {                           /*´ÓhtmlÎÄ¼şÀïÌáÈ¡³ö"__A"¿ªÍ·µÄ±äÁ¿£¬±£´æÔÚparaÊı×éÖĞ*/
+        if ((*p1) == '_' && *((p1 + 1)) == '_' && (*(p1 + 2)) == 'A') {
+            for (i = 0; i < 6; i++) {
                 para[i] = *p1;
                 p1++;
             }
 
             tab = buf;
             for (i = 0; i < paranum; i++) {
-                if (strstr(para, tab->para) != NULL) {          /*½«ÉÏÃæ±£´æµÄ±äÁ¿Óë²ÎÊı±í½øĞĞ¶ÔÕÕ*/
+                if (strstr(para, tab->para) != NULL) {
                     q = tab->value;
                     valuelen = strlen(tab->value);
-                    for (j = 0; j < valuelen; j++) {            /*²ÎÊı±íÖĞÕÒµ½ÏàÓ¦µÄ±äÁ¿ºóÖ®ºó½øĞĞÌæ»»*/
+                    for (j = 0; j < valuelen; j++) {
                         *p2 = *q;
                         p2++;
                         q++;
@@ -2610,7 +2642,7 @@ void Refresh_Html(const char *html, Parameter *buf, u8 paranum) /*Ñ¡ÔñflashÀïµÄÒ
                 }
                 tab++;
             }
-        } else {                                                /*ÈôÃ»ÓĞÕÒµ½"__A"¿ªÍ·µÄ±äÁ¿£¬Ôò½«htmlÖ±½Ó¸´ÖÆµ½htmlbuffer*/
+        } else {
             *p2 = *p1;
             p1++;
             p2++;
@@ -2621,21 +2653,31 @@ void Refresh_Html(const char *html, Parameter *buf, u8 paranum) /*Ñ¡ÔñflashÀïµÄÒ
 /*********************************************************************
  * @fn      copy_flash
  *
- * @brief   Ñ¡ÔñflashÀïµÄhtmlÎÄ¼ş£¬Ö±½Ó¸´ÖÆµ½HtmlBufferÖĞ£¨½öÕë¶Ô²¿·ÖÃ»ÓĞ±äÁ¿µÄÍøÒ³£©
+ * @brief   Select the html file in the flash and copy it directly
+ *          to the HtmlBuffer (only for some webpages without variables)
  *
- * @input   html£º¶¨ÒåµÄHTMLÊı×é³£Á¿
- *          len £ºÊı¾İ³¤¶È
+ * @param   html - HTML array constants
+ *          len - data length
+ *
  * @return  none
  */
-
-void copy_flash(const char *html, u32 len)               /*Ñ¡ÔñflashÀïµÄhtmlÎÄ¼ş£¬Ö±½Ó¸´ÖÆµ½HtmlBufferÖĞ£¨½öÕë¶Ô²¿·ÖÃ»ÓĞ±äÁ¿µÄÍøÒ³£©*/
+void copy_flash(const char *html, u32 len)
 {
     memset(HtmlBuffer, 0, HTML_LEN);
     memcpy(HtmlBuffer, html, len);
 }
 
-/*erase Data-Flash block, minimal block is 256B, return SUCCESS if success*/
-void EEPROM_ERASE(uint32_t Page_Address, u32 Length) {
+/*********************************************************************
+ * @fn      WEB_ERASE
+ *
+ * @brief   erase Data-Flash block, minimal block is 256B.
+ *
+ * @param   Page_Address - the address of the page being erased
+ *          Length - erasing length
+ *
+ * @return  none
+ */
+void WEB_ERASE(uint32_t Page_Address, u32 Length) {
     u32 NbrOfPage, EraseCounter;
 
     FLASH_Unlock_Fast();
@@ -2647,8 +2689,18 @@ void EEPROM_ERASE(uint32_t Page_Address, u32 Length) {
     FLASH_Lock_Fast();
 }
 
-/*write Data-Flash data block, return FLASH_Status*/
-FLASH_Status EEPROM_WRITE(u32 StartAddr, u8 *Buffer, u32 Length) {
+/*********************************************************************
+ * @fn      WEB_WRITE
+ *
+ * @brief   write Data-Flash data block.
+ *
+ * @param   StartAddr - the address of the page being written.
+ *          Buffer - data buff
+ *          Length - data length
+ *
+ * @return  FLASH_Status
+ */
+FLASH_Status WEB_WRITE(u32 StartAddr, u8 *Buffer, u32 Length) {
     u32 address = StartAddr;
     u32 *p_buff = (u32 *) Buffer;
     FLASH_Status FLASHStatus = FLASH_COMPLETE;
@@ -2664,8 +2716,18 @@ FLASH_Status EEPROM_WRITE(u32 StartAddr, u8 *Buffer, u32 Length) {
     return FLASHStatus;
 }
 
-/*read Data-Flash data block */
-void EEPROM_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
+/*********************************************************************
+ * @fn      WEB_READ
+ *
+ * @brief   read Data-Flash data block.
+ *
+ * @param   StartAddr - the address of the page being read.
+ *          Buffer - data buff
+ *          Length - data length
+ *
+ * @return  none
+ */
+void WEB_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
     u32 address = StartAddr;
     u32 *p_buff = (u32 *) Buffer;
 
@@ -2677,7 +2739,14 @@ void EEPROM_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
     }
 }
 
-void Init_Para_Tab(void) /*³õÊ¼»¯²ÎÊı±í*/
+/*********************************************************************
+ * @fn      Init_Para_Tab
+ *
+ * @brief   Initialization parameter table.
+ *
+ * @return  none
+ */
+void Init_Para_Tab(void)
 {
     u8 s[20];
 
@@ -2739,63 +2808,76 @@ void Init_Para_Tab(void) /*³õÊ¼»¯²ÎÊı±í*/
     strcpy(Para_Login[1].value, Login_CfgBuf->pass);
 }
 
-void Web_Server(void)                                           /*web´¦Àíº¯Êı*/
+/*********************************************************************
+ * @fn      Web_Server
+ *
+ * @brief   web process function.
+ *
+ * @return  none
+ */
+void Web_Server(void)
 {
     char *para_p;
     u32 len;
 
     if(flag){
         flag = 0;
-        ParseHttpRequest(http_request, RecvBuffer);                 /*·ÖÎöä¯ÀÀÆ÷ÇëÇó£¬»ñÈ¡ÇëÇó·½·¨£¬×ÊÔ´Ãû,ÀàĞÍ*/
-        switch (http_request->METHOD)                               /*ÅĞ¶ÏÇëÇó·½·¨*/
+        ParseHttpRequest(http_request, RecvBuffer);
+        switch (http_request->METHOD)
         {
             case METHOD_ERR:
                 break;
 
-            case METHOD_POST:                                       /*postÇëÇó*/
+            case METHOD_POST:                                       //'post' request
                 name = (char*)GetURLName(http_request->URL);
                 //printf("URL name: %s\n",name);
                 ParseURLType(&http_request->TYPE, name);
 
-                MakeHttpResponse(httpweb, http_request->TYPE);      /*·ÖÎöÇëÇó×ÊÔ´ÀàĞÍ£¬»ØÏìÓ¦*/
+                /*Analyze the requested resource type and return the response*/
+                MakeHttpResponse(httpweb, http_request->TYPE);
                 len = strlen(httpweb);
                 WCHNET_SocketSend(socket, httpweb, &len);
-                if (strstr(name, "main") != NULL) {                 /*ÇëÇó¡°main¡±ÍøÒ³*/
+                if (strstr(name, "main") != NULL) {                 //Request the "main" page
                     len = strlen(Html_main);
                     copy_flash(Html_main, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);    /*Ö±½Ó¸´ÖÆHtml_main[],·¢ËÍ*/
+                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "success") != NULL) {          /*ÇëÇó¡°success¡±ÍøÒ³*/
+                else if(strstr(name, "success") != NULL) {          //Request "success" page
                     len = strlen(Html_success);
                     copy_flash(Html_success, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);    /*Ö±½Ó¸´ÖÆHtml_success[],·¢ËÍ*/
+                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
+                /*After the request is processed, the current
+                 * socket connection is closed, and a new connection
+                 * will be established when the browser sends the next
+                 * request.*/
+                WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);
 
-                WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);       /*ÇëÇó´¦ÀíÍê±Ïºó¹Ø±Õµ±Ç°socketÁ¬½Ó£¬ä¯ÀÀÆ÷·¢ÏÂÒ»ÇëÇóÊ±»áĞÂ½¨Á¢Ò»¸öÁ¬½Ó*/
+                para_p = Para_DataLocate((char *) RecvBuffer);      //Get the assigned variable in the POST request
 
-                para_p = Para_DataLocate((char *) RecvBuffer);      /*»ñÈ¡POSTÇëÇóÀïµÄÍøÒ³±äÁ¿¸³Öµ*/
-
-                if (strstr(para_p, "__PMAC") != NULL) {             /*¼ì²âµ½POSTÇëÇó±¨ÎÄÀïº¬ÓĞ"Basic"ÍøÒ³µÄÅäÖÃĞÅÏ¢*/
+                if (strstr(para_p, "__PMAC") != NULL) {             //Configuration information with "Basic" pages
                     Refresh_Basic(para_p);
                     memset(para_p, 0, strlen(para_p));
                 }
 
-                if (strstr(para_p, "__PMOD") != NULL) {             /*¼ì²âµ½POSTÇëÇó±¨ÎÄÀïº¬ÓĞ"Port"ÍøÒ³µÄÅäÖÃĞÅÏ¢*/
+                if (strstr(para_p, "__PMOD") != NULL) {             //Configuration information with "Port" page
                     Refresh_Port(para_p);
                     memset(para_p, 0, strlen(para_p));
                 }
 
-                if (strstr(para_p, "__PUSE") != NULL) {             /*¼ì²âµ½POSTÇëÇó±¨ÎÄÀïº¬ÓĞ"User"ÍøÒ³µÄÅäÖÃĞÅÏ¢*/
+                if (strstr(para_p, "__PUSE") != NULL) {             //Configuration information with "User" page
                     Refresh_Login(para_p);
                     memset(para_p, 0, strlen(para_p));
                 }
                 break;
 
-            case METHOD_GET:                                        /*getÇëÇó*/
+            case METHOD_GET:                                        //'get' request
                 name = (char*)GetURLName(http_request->URL);
                 // printf("URL name: %s\n",name);
                 ParseURLType(&http_request->TYPE, name);
-                MakeHttpResponse(httpweb, http_request->TYPE);      /*·ÖÎöÇëÇó×ÊÔ´ÀàĞÍ£¬»ØÏìÓ¦*/
+
+                /*Analyze the requested resource type and return the response*/
+                MakeHttpResponse(httpweb, http_request->TYPE);
                 len = strlen(httpweb);
                 WCHNET_SocketSend(socket, httpweb, &len);
                 if (strlen(name) == 1) {
@@ -2803,67 +2885,71 @@ void Web_Server(void)                                           /*web´¦Àíº¯Êı*/
                     len = strlen(HtmlBuffer);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "main") != NULL) {             /*ÇëÇó»ñÈ¡¡°main¡±ÍøÒ³*/
+                else if(strstr(name, "main") != NULL) {             //Request to get the "main" web page
                     len = strlen(Html_main);
                     copy_flash(Html_main, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "basic") != NULL) {            /*ÇëÇó»ñÈ¡¡°basic¡±ÍøÒ³*/
+                else if(strstr(name, "basic") != NULL) {            //Request to get the "basic" web page
                     Refresh_Html(Html_basic, Para_Basic, 4);
                     len = strlen(HtmlBuffer);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "port") != NULL) {             /*ÇëÇó»ñÈ¡¡°port¡±ÍøÒ³*/
+                else if(strstr(name, "port") != NULL) {             //Request to get the "port" page
                     Refresh_Html(Html_port, Para_Port, 4);
                     len = strlen(HtmlBuffer);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "user") != NULL) {             /*ÇëÇó»ñÈ¡¡°user¡±ÍøÒ³*/
+                else if(strstr(name, "user") != NULL) {             //Request to get the "user" web page
                     Refresh_Html(Html_user, Para_Login, 2);
                     len = strlen(HtmlBuffer);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "about") != NULL) {            /*ÇëÇó»ñÈ¡¡°about¡±ÍøÒ³*/
+                else if(strstr(name, "about") != NULL) {            //Request to get the "about" page
                     len = strlen(Html_about);
                     copy_flash(Html_about, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "logo") != NULL) {             /*ÇëÇó»ñÈ¡¡°logo¡±Í¼Æ¬*/
+                else if(strstr(name, "logo") != NULL) {             //Request for "logo" image
                     len = sizeof(Html_logo);
                     copy_flash(Html_logo, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "png1") != NULL) {             /*ÇëÇó»ñÈ¡¡°png1¡±Í¼Æ¬*/
+                else if(strstr(name, "png1") != NULL) {             //Request to get "png1" image
                     len = sizeof(Html_png1);
                     copy_flash(Html_png1, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "png2") != NULL) {             /*ÇëÇó»ñÈ¡¡°png2¡±Í¼Æ¬*/
+                else if(strstr(name, "png2") != NULL) {             //Request to get "png2" image
                     len = sizeof(Html_png2);
                     copy_flash(Html_png2, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "png3") != NULL) {             /*ÇëÇó»ñÈ¡¡°png3¡±Í¼Æ¬*/
+                else if(strstr(name, "png3") != NULL) {             //Request to get "png3" image
                     len = sizeof(Html_png3);
                     copy_flash(Html_png3, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);    /*ÇëÇó»ñÈ¡¡°png4¡±Í¼Æ¬*/
+                    WCHNET_SocketSend(socket, HtmlBuffer, &len);    //Request to get "png4" image
                 }
                 else if(strstr(name, "png4") != NULL) {
                     len = sizeof(Html_png4);
                     copy_flash(Html_png4, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "weixin") != NULL) {           /*ÇëÇó»ñÈ¡¡°weixin¡±Í¼Æ¬*/
+                else if(strstr(name, "weixin") != NULL) {           //Request for "weixin" image
                     len = sizeof(Html_weixin);
                     copy_flash(Html_weixin, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                else if(strstr(name, "style") != NULL) {            /*ÇëÇó»ñÈ¡"style"cssÑùÊ½±íÎÄ¼ş*/
+                else if(strstr(name, "style") != NULL) {            //Request to get the "style" css stylesheet file
                     len = strlen(Html_style);
                     copy_flash(Html_style, len);
                     WCHNET_SocketSend(socket, HtmlBuffer, &len);
                 }
-                WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);       /*ÇëÇó´¦ÀíÍê±Ïºó¹Ø±Õµ±Ç°socketÁ¬½Ó£¬ä¯ÀÀÆ÷·¢ÏÂÒ»ÇëÇóÊ±»áĞÂ½¨Á¢Ò»¸öÁ¬½Ó*/
+                /*After the request is processed, the current
+                 * socket connection is closed, and a new connection
+                 * will be established when the browser sends the next
+                 * request.*/
+                WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);
                 break;
 
             default:

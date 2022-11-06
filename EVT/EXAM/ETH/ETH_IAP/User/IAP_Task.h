@@ -15,16 +15,16 @@
 
 /*
 flash:256K
-BIM区（Image Boot Manager）：40K
-USER区（用户代码区）：108K
-BACKUP区（代码备份区）：108K
-地址分配：
+BIM area（Image Boot Manager）：40K
+USER area（用户代码区）：108K
+BACKUP area（代码备份区）：108K
+address assignment：
 0x0         size:0xA000
 0xA000      size:0x1B000
 0x25000     size:0x1B000
 */
 
-/* flash 定义 */
+/*address assignment */
 #define BIM_IMAGE_START_ADD             ((uint32_t) 0x08000000)
 #define BIM_IMAGE_MAX_SIZE              0xA000
 
@@ -47,18 +47,18 @@ BACKUP区（代码备份区）：108K
 
 #define FILE_FLAG          "WCHNET"
 
-#define IMAGE_FLAG_UPDATA   0x57434820   //'W','C','H',' '
+#define IMAGE_FLAG_UPDATE   0x57434820   //'W','C','H',' '
 
 typedef struct
 {
-    u8  iapFileFlag[8];                  /* 8字节iap标志，固定为 "WCHNET",多余补0 */
-    u32 iapFileLen;                      /* 4字节iap文件长度，为bin文件长度+512字节 */
-    u32 iapFileCheckSum;                 /* 4字节检验和 */
+    u8  iapFileFlag[8];                  //8-byte IAP flag, fixed as "WCHNET", the extra space is 0
+    u32 iapFileLen;                      //4 bytes IAP file length, which is bin file length + 512 bytes
+    u32 iapFileCheckSum;                 //4-byte checksum
 }iapFileHeader;
 
 typedef struct{
-    u16 head;
-    u16 tail;
+    u16 readIndex;
+    u16 writeIndex;
     u16 buffUsedLen;
     u8  *dataBuff;
 }ethDataDeal;
@@ -68,11 +68,11 @@ extern iapFileHeader iapPara;
 extern u32 fileDataLen;
 extern u32 fileCheckSum;
 
-extern void IAPParaInit(void);
 extern u8 IAPCopyFlashDeal(void);
-extern void ETHTx(u8 socketid);
-extern void ETHRx(u8 socketid);
-extern void iapFileParaCheck(u8 socketid);
+extern void IAPParaInit(void);
+extern void saveUpdatedFile(void);
+extern void receUpdatedFile(u8 id);
+extern void IAPFileParaCheck(u8 id);
 extern void IAP_EEPROM_ERASE_108k(u32 StartAddr);
 extern void IAP_EEPROM_READ( u32 StartAddr, u8 *Buffer, u32 Length );
 extern void IAP_EEPROM_ERASE(uint32_t Page_Address, u32 Length);

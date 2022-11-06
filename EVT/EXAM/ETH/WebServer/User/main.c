@@ -7,37 +7,42 @@
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
-#include "string.h"
-#include "debug.h"
-#include "WCHNET.h"
-#include "eth_driver.h"
-#include "HTTPS.h"
 /*
  *@Note
  Web Server例程，本程序用于演示通过Web浏览器配置WCHNET芯片的功能，WCHNET芯片内置web服务器 ，
-                                                通过网页可以实现WCHNET的网络参数配置，以及密码管理
+   通过网页可以实现WCHNET的网络参数配置，以及密码管理。
+    本例程使用手册为1_Tool_Doc文件夹下“WCHNET WEB配置说明”。
  */
-u8 MACAddr[6];                                                  /* MAC地址 */
-u8 IPAddr[4];                                                   /* IP地址 */
-u8 GWIPAddr[4];                                                 /* 网关 */
-u8 IPMask[4];                                                   /* 子网掩码 */
+#include "string.h"
+#include "debug.h"
+#include "wchnet.h"
+#include "eth_driver.h"
+#include "HTTPS.h"
 
-/* 常用变量定义 */
-u8 SocketId, SocketIdForListen, RecvBuffer[RECE_BUF_LEN];
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];          /* socket接收缓冲区 */
+u8 MACAddr[6];                                                  //MAC address
+u8 IPAddr[4];                                                   //IP address
+u8 GWIPAddr[4];                                                 //Gateway IP address
+u8 IPMask[4];                                                   //subnet mask
+
 u8 flag = 0;
-u16 DESPORT, SRCPORT;
+u8 SocketId, SocketIdForListen, RecvBuffer[RECE_BUF_LEN];
+u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];          //socket receive buffer
+u16 DESPORT, SRCPORT;                                           //port
+
 /*********************************************************************
  * @fn      mStopIfError
  *
  * @brief   check if error.
  *
+ * @param   iError - error constants.
+ *
  * @return  none
  */
-void mStopIfError(u8 iError) {
+void mStopIfError(u8 iError)
+{
     if (iError == WCHNET_ERR_SUCCESS)
-        return;                                                 /* 操作成功 */
-    printf("Error: %02X\r\n", (u16) iError);                    /* 显示错误 */
+        return;
+    printf("Error: %02X\r\n", (u16) iError);
 }
 
 /*********************************************************************
@@ -47,7 +52,8 @@ void mStopIfError(u8 iError) {
  *
  * @return  none
  */
-void TIM2_Init(void) {
+void TIM2_Init(void)
+{
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = { 0 };
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
@@ -65,27 +71,40 @@ void TIM2_Init(void) {
 }
 
 /*********************************************************************
- * @fn      WCHNET_CreatTcpSocketListen
+ * @fn      WCHNET_CreateTcpSocketListen
  *
  * @brief   Create TCP Socket for Listening
  *
  * @return  none
  */
-void WCHNET_CreatTcpSocketListen(void) {
+void WCHNET_CreateTcpSocketListen(void)
+{
     u8 i;
     SOCK_INF TmpSocketInf;
 
-    memset((void *) &TmpSocketInf, 0, sizeof(SOCK_INF));            /* 库内部会将此变量复制，所以最好将临时变量先全部清零 */
-    TmpSocketInf.SourPort = HTTP_SERVER_PORT;                       /* 设置源端口 */
-    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;                        /* 设置socket类型 */
-    i = WCHNET_SocketCreat(&SocketIdForListen, &TmpSocketInf);      /* 配置socket，将返回的socket索引保存在SocketIdForListen中*/
+    memset((void *) &TmpSocketInf, 0, sizeof(SOCK_INF));
+    TmpSocketInf.SourPort = HTTP_SERVER_PORT;
+    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+    i = WCHNET_SocketCreat(&SocketIdForListen, &TmpSocketInf);
     printf("SocketIdForListen %d\r\n", SocketIdForListen);
-    mStopIfError(i);                                                /* 检查错误 */
-    i = WCHNET_SocketListen(SocketIdForListen);                     /* TCP监听 */
-    mStopIfError(i);                                                /* 检查错误 */
+    mStopIfError(i);
+    i = WCHNET_SocketListen(SocketIdForListen);
+    mStopIfError(i);
 }
 
-void WCHNET_CreatCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport) /*根据网页的配置信息，WCHNET建立相应的socket*/
+/*********************************************************************
+ * @fn      WCHNET_CreateCfgSocket
+ *
+ * @brief   According to the configuration information of the webpage,
+ *          WCHNET establishes the corresponding socket.
+ *
+ *@param    mode - connection mode.
+ *          Desip - destination IP
+ *          Desport - destination port
+ *          Srcport - source port
+ * @return  none
+ */
+void WCHNET_CreateCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport)
 {
     u8 i;
     SOCK_INF TmpSocketInf;
@@ -121,47 +140,59 @@ void WCHNET_CreatCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport) /*根�
     }
 }
 
-void WCHNET_RestoreDefaults()                                       /*WCHNET恢复全部出厂设置*/
+/*********************************************************************
+ * @fn      WCHNET_RestoreDefaults
+ *
+ * @brief   Parameter restore default value
+ *
+ * @return  none
+ */
+void WCHNET_RestoreDefaults(void)                                       /*WCHNET restore default settings*/
 {
-    EEPROM_ERASE( PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE * 3);
-    EEPROM_WRITE( BASIC_CFG_ADDR, Basic_Default, BASIC_CFG_LEN);
-    EEPROM_WRITE( PORT_CFG_ADDR, Port_Default, PORT_CFG_LEN);
-    EEPROM_WRITE( LOGIN_CFG_ADDR, Login_Default, LOGIN_CFG_LEN);
+    WEB_ERASE( PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE * 3);
+    WEB_WRITE( BASIC_CFG_ADDR, Basic_Default, BASIC_CFG_LEN);
+    WEB_WRITE( PORT_CFG_ADDR, Port_Default, PORT_CFG_LEN);
+    WEB_WRITE( LOGIN_CFG_ADDR, Login_Default, LOGIN_CFG_LEN);
     NVIC_SystemReset();
 }
+
 /*********************************************************************
  * @fn      WCHNET_HandleSockInt
  *
  * @brief   Socket Interrupt Handle
  *
+ * @param   socketid - socket id.
+ *          intstat - interrupt status
+ *
  * @return  none
  */
-void WCHNET_HandleSockInt(u8 socketid, u8 initstat) {
+void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
+{
     u32 len;
 
-    if (initstat & SINT_STAT_RECV)                                  /* socket接收中断*/
+    if (intstat & SINT_STAT_RECV)                                  //receive data
     {
-        len = WCHNET_SocketRecvLen(socketid, NULL);                 /* 获取socket缓冲区数据长度  */
+        len = WCHNET_SocketRecvLen(socketid, NULL);
         printf("WCHNET_SocketRecvLen %d  socket id %d\r\n", len, socketid);
         if (len) {
-            WCHNET_SocketRecv(socketid, RecvBuffer, &len);          /* 将接收到的浏览器请求保存在RecvBuffer[]里*/
+            WCHNET_SocketRecv(socketid, RecvBuffer, &len);
             flag = 1;
             socket = socketid;
         }
     }
-    if (initstat & SINT_STAT_CONNECT)                               /* socket连接成功中断*/
+    if (intstat & SINT_STAT_CONNECT)                               //connect successfully
     {
         WCHNET_ModifyRecvBuf(socketid, (u32)SocketRecvBuf[socketid], RECE_BUF_LEN);
         printf("TCP Connect Success\r\n");
     }
-    if (initstat & SINT_STAT_DISCONNECT)                            /* socket连接断开中断*/
+    if (intstat & SINT_STAT_DISCONNECT)                            //disconnect
     {
         printf("TCP Disconnect\r\n");
     }
-    if (initstat & SINT_STAT_TIM_OUT)                               /* socket连接超时中断*/
+    if (intstat & SINT_STAT_TIM_OUT)                               //timeout disconnect
     {
         printf("TCP Timeout\r\n");
-        WCHNET_CreatCfgSocket(Port_CfgBuf->mode, Port_CfgBuf->des_ip, DESPORT, SRCPORT);
+        WCHNET_CreateCfgSocket(Port_CfgBuf->mode, Port_CfgBuf->des_ip, DESPORT, SRCPORT);
     }
 }
 
@@ -172,43 +203,45 @@ void WCHNET_HandleSockInt(u8 socketid, u8 initstat) {
  *
  * @return  none
  */
-void WCHNET_HandleGlobalInt(void) {
-    u8 initstat;
+void WCHNET_HandleGlobalInt(void)
+{
+    u8 intstat;
     u16 i;
-    u8 socketinit;
+    u8 socketint;
 
-    initstat = WCHNET_GetGlobalInt();                               /* 获取全局中断标志*/
-    if (initstat & GINT_STAT_UNREACH)                               /* 不可达中断 */
+    intstat = WCHNET_GetGlobalInt();                              //get global interrupt flag
+    if (intstat & GINT_STAT_UNREACH)                              //Unreachable interrupt
     {
         printf("GINT_STAT_UNREACH\r\n");
     }
-    if (initstat & GINT_STAT_IP_CONFLI)                             /* IP冲突中断 */
+    if (intstat & GINT_STAT_IP_CONFLI)                            //IP conflict
     {
         printf("GINT_STAT_IP_CONFLI\r\n");
     }
-    if (initstat & GINT_STAT_PHY_CHANGE)                            /* PHY状态变化中断 */
+    if (intstat & GINT_STAT_PHY_CHANGE)                           //PHY status change
     {
-        i = WCHNET_GetPHYStatus();                                  /* 获取PHY连接状态*/
+        i = WCHNET_GetPHYStatus();
         if (i & PHY_Linked_Status)
             printf("PHY Link Success\r\n");
     }
-    if (initstat & GINT_STAT_SOCKET) {
+    if (intstat & GINT_STAT_SOCKET) {                             //socket related interrupt
         for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {
-            socketinit = WCHNET_GetSocketInt(i);
-            if (socketinit)
-                WCHNET_HandleSockInt(i, socketinit);
+            socketint = WCHNET_GetSocketInt(i);
+            if (socketint)
+                WCHNET_HandleSockInt(i, socketint);
         }
     }
 }
 
 /*********************************************************************
- * @fn      gpioInit
+ * @fn      GPIOInit
  *
  * @brief   GPIO initialization
  *
  * @return  none
  */
-void gpioInit(void) {
+void GPIOInit(void)
+{
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
@@ -224,34 +257,39 @@ void gpioInit(void) {
  *
  * @return  none
  */
-int main(void) {
+int main(void)
+{
     u8 i;
     Delay_Init();
-    USART_Printf_Init(115200);                                                  /*串口打印初始化*/
-    gpioInit();
+    USART_Printf_Init(115200);                                                  //USART initialize
+    GPIOInit();
     printf("WEB SERVER\r\n");
     printf("SystemClk:%d\r\n", SystemCoreClock);
     printf("net version:%x\n", WCHNET_GetVer());
     if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");
     }
-    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) {                        /*按键按下后，初始化WCHNET，执行默认配置*/
+    /*After the button(PB6) is pressed, initialize
+     * WCHNET and execute the default configuration*/
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) {
         Delay_Ms(100);
         if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) {
             while(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0);
             WCHNET_RestoreDefaults();
         }
     }
-    EEPROM_READ( BASIC_CFG_ADDR, (u8 *)Basic_CfgBuf, BASIC_CFG_LEN );           /*从EEPROM里读取配置信息*/
-    EEPROM_READ( PORT_CFG_ADDR, (u8 *)Port_CfgBuf, PORT_CFG_LEN );
-    EEPROM_READ( LOGIN_CFG_ADDR, (u8 *)Login_CfgBuf, LOGIN_CFG_LEN );
-    if (Basic_CfgBuf->flag[0] != 0x57 || Basic_CfgBuf->flag[1] != 0xAB)         /*判断网络配置信息标志位，若判断为错误，则说明，EEPROM里保存的配置信息错误，恢复出厂配置*/
+    WEB_READ( BASIC_CFG_ADDR, (u8 *)Basic_CfgBuf, BASIC_CFG_LEN );                //Read configuration information
+    WEB_READ( PORT_CFG_ADDR, (u8 *)Port_CfgBuf, PORT_CFG_LEN );
+    WEB_READ( LOGIN_CFG_ADDR, (u8 *)Login_CfgBuf, LOGIN_CFG_LEN );
+    if((Basic_CfgBuf->flag[0] != 0x57) || (Basic_CfgBuf->flag[1] != 0xAB)){       //Determine network configuration information flags
         WCHNET_RestoreDefaults();
+    }
     else {
-        if (Port_CfgBuf->flag[0] != 0x57 || Port_CfgBuf->flag[1] != 0xAB)     /*判断密码配置信息，同上*/
+        if((Port_CfgBuf->flag[0] != 0x57) || (Port_CfgBuf->flag[1] != 0xAB)){     //Determine password configuration information
             WCHNET_RestoreDefaults();
+        }
         else {
-            if (Login_CfgBuf->flag[0] != 0x57 || Login_CfgBuf->flag[1] != 0xAB) /*判断密码配置信息，同上*/
+            if((Login_CfgBuf->flag[0] != 0x57) || (Login_CfgBuf->flag[1] != 0xAB)) //Determine password configuration information
                 WCHNET_RestoreDefaults();
         }
     }
@@ -264,29 +302,33 @@ int main(void) {
         printf("%d.", IPAddr[i]);
     printf("\n");
 
-    WCHNET_GetMacAddr(MACAddr);                                                 /*获取芯片MAC地址*/
+    WCHNET_GetMacAddr(MACAddr);                                                 //get the chip MAC address
     printf("mac addr:");
-    for (int i = 0; i < 6; i++)
-        printf("%x ", MACAddr[i]);
+    for(i = 0; i < 6; i++) 
+        printf("%x ",MACAddr[i]);
     printf("\n");
     http_request = (st_http_request*) RecvBuffer;
 
     TIM2_Init();
-    i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);                         /*以太网库初始化*/
+    i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);                         //Ethernet library initialize
     mStopIfError(i);
     if (i == WCHNET_ERR_SUCCESS)
         printf("WCHNET_LibInit Success\r\n");
-    WCHNET_CreatTcpSocketListen();                                              /*创建TCP socket*/
+    WCHNET_CreateTcpSocketListen();                                             //Create  TCP Socket
 
     DESPORT = Port_CfgBuf->des_port[0] * 256 + Port_CfgBuf->des_port[1];
     SRCPORT = Port_CfgBuf->src_port[0] * 256 + Port_CfgBuf->src_port[1];
-    WCHNET_CreatCfgSocket(Port_CfgBuf->mode, Port_CfgBuf->des_ip, DESPORT, SRCPORT);
+    WCHNET_CreateCfgSocket(Port_CfgBuf->mode, Port_CfgBuf->des_ip, DESPORT, SRCPORT);
     Init_Para_Tab();
 
     while(1)
     {
-        WCHNET_MainTask();                                                      /*以太网库主任务函数，需要循环调用*/
-        if(WCHNET_QueryGlobalInt())                                             /*查询以太网全局中断，如果有中断，调用全局中断处理函数*/
+        /*Ethernet library main task function,
+         * which needs to be called cyclically*/
+        WCHNET_MainTask();
+        /*Query the Ethernet global interrupt,
+         * if there is an interrupt, call the global interrupt handler*/
+        if(WCHNET_QueryGlobalInt())
         {
             WCHNET_HandleGlobalInt();
         }

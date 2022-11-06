@@ -55,7 +55,7 @@ void OPA_Init(OPA_InitTypeDef *OPA_InitStruct)
  */
 void OPA_StructInit(OPA_InitTypeDef *OPA_InitStruct)
 {
-    OPA_InitStruct->Mode = OUT_IO;
+    OPA_InitStruct->Mode = OUT_IO_OUT1;
     OPA_InitStruct->PSEL = CHP0;
     OPA_InitStruct->NSEL = CHN0;
     OPA_InitStruct->OPA_NUM = OPA1;

@@ -18,7 +18,6 @@ void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void)  __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
-
 /*********************************************************************
  * @fn      NMI_Handler
  *
@@ -68,7 +67,7 @@ void ETH_IRQHandler(void)
  */
 void EXTI9_5_IRQHandler(void)
 {
-    ETH_PHYLink( );
+    // ETH_PHYLink( );
     EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
@@ -82,7 +81,7 @@ void EXTI9_5_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
     WCHNET_TimeIsr(WCHNETTIMERPERIOD);
-    TIM_ClearITPendingBit(TIM2, TIM_IT_Update  );
+    TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
 
 #ifndef CH32V307_DEBUG

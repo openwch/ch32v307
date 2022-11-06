@@ -43,7 +43,8 @@ void Delay_Us(uint32_t n)
     i = (uint32_t)n * p_us;
 
     SysTick->CMP = i;
-    SysTick->CTLR |= (1 << 4) | (1 << 5) | (1 << 0);
+    SysTick->CTLR |= (1 << 4);
+    SysTick->CTLR |= (1 << 5) | (1 << 0);
 
     while((SysTick->SR & (1 << 0)) != (1 << 0))
         ;
@@ -67,7 +68,8 @@ void Delay_Ms(uint32_t n)
     i = (uint32_t)n * p_ms;
 
     SysTick->CMP = i;
-    SysTick->CTLR |= (1 << 4) | (1 << 5) | (1 << 0);
+    SysTick->CTLR |= (1 << 4);
+    SysTick->CTLR |= (1 << 5) | (1 << 0);
 
     while((SysTick->SR & (1 << 0)) != (1 << 0))
         ;

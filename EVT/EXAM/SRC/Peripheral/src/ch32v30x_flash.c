@@ -628,7 +628,6 @@ void FLASH_ITConfig(uint32_t FLASH_IT, FunctionalState NewState)
  *
  * @param   FLASH_FLAG - specifies the FLASH flag to check.
  *            FLASH_FLAG_BSY - FLASH Busy flag
- *            FLASH_FLAG_PGERR - FLASH Program error flag
  *            FLASH_FLAG_WRPRTERR - FLASH Write protected error flag
  *            FLASH_FLAG_EOP - FLASH End of Operation flag
  *            FLASH_FLAG_OPTERR - FLASH Option Byte error flag
@@ -670,7 +669,6 @@ FlagStatus FLASH_GetFlagStatus(uint32_t FLASH_FLAG)
  * @brief   Clears the FLASH's pending flags.
  *
  * @param   FLASH_FLAG - specifies the FLASH flags to clear.
- *            FLASH_FLAG_PGERR - FLASH Program error flag
  *            FLASH_FLAG_WRPRTERR - FLASH Write protected error flag
  *            FLASH_FLAG_EOP - FLASH End of Operation flag
  *
@@ -699,20 +697,13 @@ FLASH_Status FLASH_GetStatus(void)
     }
     else
     {
-        if((FLASH->STATR & FLASH_FLAG_PGERR) != 0)
+        if((FLASH->STATR & FLASH_FLAG_WRPRTERR) != 0)
         {
-            flashstatus = FLASH_ERROR_PG;
+            flashstatus = FLASH_ERROR_WRP;
         }
         else
         {
-            if((FLASH->STATR & FLASH_FLAG_WRPRTERR) != 0)
-            {
-                flashstatus = FLASH_ERROR_WRP;
-            }
-            else
-            {
-                flashstatus = FLASH_COMPLETE;
-            }
+            flashstatus = FLASH_COMPLETE;
         }
     }
     return flashstatus;
@@ -736,20 +727,13 @@ FLASH_Status FLASH_GetBank1Status(void)
     }
     else
     {
-        if((FLASH->STATR & FLASH_FLAG_BANK1_PGERR) != 0)
+        if((FLASH->STATR & FLASH_FLAG_BANK1_WRPRTERR) != 0)
         {
-            flashstatus = FLASH_ERROR_PG;
+            flashstatus = FLASH_ERROR_WRP;
         }
         else
         {
-            if((FLASH->STATR & FLASH_FLAG_BANK1_WRPRTERR) != 0)
-            {
-                flashstatus = FLASH_ERROR_WRP;
-            }
-            else
-            {
-                flashstatus = FLASH_COMPLETE;
-            }
+            flashstatus = FLASH_COMPLETE;
         }
     }
     return flashstatus;

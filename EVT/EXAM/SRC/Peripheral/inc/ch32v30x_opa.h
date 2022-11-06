@@ -45,11 +45,11 @@ typedef enum
    CHN1
 }OPA_NSEL_TypeDef;
 
-/* OPA Mode enumeration */
+/* OPA out channel enumeration */
 typedef enum
 {
-   OUT_IO_ADC=0,
-   OUT_IO
+   OUT_IO_OUT0=0,
+   OUT_IO_OUT1
 }OPA_Mode_TypeDef;
 
 /* OPA Init Structure definition */

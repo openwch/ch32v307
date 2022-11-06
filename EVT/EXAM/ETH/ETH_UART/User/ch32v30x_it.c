@@ -7,7 +7,7 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
-#include <WCHNET.h>
+#include <wchnet.h>
 #include "eth_driver.h"
 #include "ch32v30x_it.h"
 #include "bsp_uart.h"
@@ -17,7 +17,7 @@ void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
-
+void DMA1_Channel7_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 /*********************************************************************
  * @fn      NMI_Handler
  *
@@ -55,7 +55,7 @@ void HardFault_Handler(void)
  */
 void EXTI9_5_IRQHandler(void)
 {
-    ETH_PHYLink( );
+    // ETH_PHYLink( );
     EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
@@ -80,7 +80,6 @@ void ETH_IRQHandler(void)
  */
 void TIM2_IRQHandler(void)
 {
-    sendDataFlag = !sendDataFlag;
     WCHNET_TimeIsr(WCHNETTIMERPERIOD);
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
@@ -88,18 +87,18 @@ void TIM2_IRQHandler(void)
 /*********************************************************************
  * @fn      DMA1_Channel7_IRQHandler
  *
- * @brief   uart2 dma tx completion interrupt.
+ * @brief   uart2 DMA Tx completion interrupt.
  *
  * @return  none
  */
-void DMA1_Channel7_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel7_IRQHandler(void)
 {
     if(DMA_GetITStatus(DMA1_IT_TC7))
     {
         DMA_Cmd(DMA1_Channel7,DISABLE);
-        uart_data_t.uart_tx_dma_state = IDEL;
+        uart_data_t.uart_tx_dma_state = IDLE;
         uart_data_t.tx_read++;
+        uart_data_t.tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA1_IT_TC7);
     }
 }

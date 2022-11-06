@@ -55,6 +55,7 @@ Directory
   |      |      |      |      |-- DVP_TFTLCD: DVP routine to operate OV2640 camera video mode to display image on LCD
   |      |      |      |      |-- DVP_UART: DVP routine to operate OV2640 camera JPEG mode
   |      |      |      |-- ETH ¡ª¡ªonly for CH32V30x_D8C
+  |      |      |      |      |-- 1_Tool_Doc£ºETH routine related documents and tools  
   |      |      |      |      |-- 8_UART_Server: demonstration routine of 8 UART network server   
   |      |      |      |      |-- DHCP: DHCP demonstration routine to obtain IP automatically
   |      |      |      |      |-- DNS: DHCP demonstration routine to obtain IP automatically and then request domain name resolution 
@@ -104,6 +105,7 @@ Directory
   |      |      |      |      |-- Standby_RAM_LV_Mode: when LV is enabled in standby mode, RAM 2k and 30K low-power data holding routines
   |      |      |      |      |-- Standby_RAM_Mode£ºwhen LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
   |      |      |      |-- RCC
+  |      |      |      |      |-- Get_CLK£ºGet system-HCLK-AHB1-AHB2 clock routine  
   |      |      |      |      |-- MCO: MCO pin clock output routine
   |      |      |      |      |-- HSI_PLL_Source£ºHSI or HSI/2 as PLL input clock routine  
   |      |      |      |-- RNG: Random number generator routine   
@@ -142,23 +144,32 @@ Directory
   |      |      |      |-- USB
   |      |      |      |      |-- USBFS
   |      |      |      |      |      |-- DEVICE
-  |      |      |      |      |      |      |--CH372Device: routine to simulate a custom USB device (CH372 device)
-  |      |      |      |      |      |      |--CompatibilityHID: simulate HID compatible device, support interrupt upload/download, support control endpoint upload/download, support to set full speed and low speed  
-  |      |      |      |      |      |      |--CompositeKM: routine to simulate a keyboard
-  |      |      |      |      |      |      |--HID+CDC_Device: routine to simulate a HID+CDC device    
-  |      |      |      |      |      |-- HOST: a simple enumeration procedure routine for USB Full Speed devices 
-  |      |      |      |      |      |-- HOST_KM: a simple keyboard/mouse enumeration procedure routine for USB Full Speed devices   
-  |      |      |      |      |      |-- HOST_Udisk: USB flash disk operation routine
-  |      |      |      |      |      |-- Udisk_Lib: USB flash disk file system library file    
-  |      |      |      |      |-- USBHS ¡ª¡ªonly for CH32V30x_D8C  
+  |      |      |      |      |      |      |-- CH372£ºSimulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
+  |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
+  |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
+  |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
+  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 1 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 1 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |-- HOST_IAP
+  |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
+  |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
+  |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
+  |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
+  |      |      |      |      |-- USBHS 
   |      |      |      |      |      |-- DEVICE
-  |      |      |      |      |      |      |--CH372Device: routine to simulate a custom USB device (CH372 device) 
-  |      |      |      |      |      |      |--CompatibilityHID: simulate a HID compatible device, support interrupt upload/download, support control endpoint upload/download, support to set full speed and low speed  
-  |      |      |      |      |      |      |--CompositeKM: routine to simulate a Keyboard
-  |      |      |      |      |      |-- HOST: a simple enumeration procedure routine for USB High Speed devices 
-  |      |      |      |      |      |-- HOST_KM: a simple keyboard/mouse enumeration procedure routine for USB High Speed devices  
-  |      |      |      |      |      |-- HOST_Udisk: USB flash disk operation routine
-  |      |      |      |      |      |-- Udisk_Lib: USB flash disk file system library file    
+  |      |      |      |      |      |      |-- CH372£ºSimulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
+  |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
+  |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
+  |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
+  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 1 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 1 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |-- HOST_IAP
+  |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
+  |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
+  |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
+  |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
   |      |      |      |-- VoiceRcgExam: individual term voice recognition routine 
   |      |      |      |-- WWDG: window watchdog routine
 

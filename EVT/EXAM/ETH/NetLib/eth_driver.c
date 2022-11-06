@@ -43,10 +43,21 @@ const uint16_t MemSize[8] = {WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB),
 
 uint16_t gPHYAddress;
 uint32_t volatile LocalTime;
-ETH_DMADESCTypeDef *pDMARxSet;
 
+ETH_DMADESCTypeDef *pDMARxSet;
 ETH_DMADESCTypeDef *pDMATxSet;
 
+#if( PHY_MODE == USE_10M_BASE )
+uint32_t phyLinkTime;
+uint8_t  phyLinkStatus=0;
+uint8_t  phyStatus=0;
+uint8_t  phyPN=0;
+#endif
+
+#if( PHY_MODE ==  USE_MAC_MII )
+u16 LastPhyStat = 0;
+u32 LastQueryPhyTime = 0;
+#endif
 /*********************************************************************
  * @fn      WCHNET_GetMacAddr
  *
@@ -80,6 +91,113 @@ void WCHNET_TimeIsr( uint16_t timperiod )
 }
 
 /*********************************************************************
+ * @fn      WCHNET_QueryPhySta
+ *
+ * @brief   Query external PHY status
+ *
+ * @return  none.
+ */
+#if( PHY_MODE ==  USE_MAC_MII )
+void WCHNET_QueryPhySta(void)
+{
+    u16 phy_stat;
+    if(QUERY_STAT_FLAG){                                         /* Query the PHY link status every 1s */
+        LastQueryPhyTime = LocalTime / 1000;
+        phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );
+        if(phy_stat != LastPhyStat){
+            ETH_PHYLink();
+        }
+    }
+}
+#endif
+
+#if( PHY_MODE ==  USE_10M_BASE )
+/*********************************************************************
+ * @fn      WCHNET_LinkProcess
+ *
+ * @brief   link process.
+ *
+ * @param   none.
+ *
+ * @return  none.
+ */
+void WCHNET_LinkProcess( void )
+{
+    uint32_t phy_anlpar;
+
+    phy_anlpar = ETH_ReadPHYRegister( gPHYAddress, PHY_ANLPAR);
+
+    if( (phy_anlpar&PHY_ANLPAR_SELECTOR_FIELD) )
+    {
+        if( !(phyLinkStatus&PHY_LINK_WAIT_SUC) )
+        {
+            if( phyPN == PHY_PN_SWITCH_P )
+            {
+                phyLinkStatus = PHY_LINK_WAIT_SUC;
+            }
+            else
+            {
+                if( !(phyLinkStatus&PHY_LINK_SUC_N) )
+                {
+                    phyLinkStatus |= PHY_LINK_SUC_N;
+                    phyPN ^= PHY_PN_SWITCH_N;
+                    ETH_WritePHYRegister( gPHYAddress, PHY_BCR, PHY_Reset);
+                    Delay_Us(10);
+                    ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, phyPN);
+                }
+                else
+                {
+                    phyLinkStatus = PHY_LINK_WAIT_SUC;
+                }
+            }
+        }
+    }
+    else
+    {
+        if( phyLinkStatus == PHY_LINK_WAIT_SUC )
+        {
+            phyLinkStatus = PHY_LINK_INIT;
+        }
+        else
+        {
+            if( phyPN == PHY_PN_SWITCH_P )
+            {
+                phyLinkStatus &= ~PHY_LINK_SUC_P;
+            }
+            else if( phyPN == PHY_PN_SWITCH_N )
+            {
+                phyLinkStatus &= ~PHY_LINK_SUC_N;
+            }
+            phyPN ^= PHY_PN_SWITCH_N;
+            ETH_WritePHYRegister( gPHYAddress, PHY_BCR, PHY_Reset);
+            Delay_Us(10);
+            ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, phyPN);
+        }
+    }
+}
+
+/*********************************************************************
+ * @fn      WCHNET_HandlePhyNegotiation
+ *
+ * @brief   Handle PHY Negotiation.
+ *
+ * @param   none.
+ *
+ * @return  none.
+ */
+void WCHNET_HandlePhyNegotiation(void)
+{
+    if( !phyStatus )                        /* Handling PHY Negotiation Exceptions */
+    {
+        if( LocalTime - phyLinkTime >= PHY_LINK_TASK_PERIOD )  /* 100ms cycle timing call */
+        {
+            phyLinkTime = LocalTime;
+            WCHNET_LinkProcess( );
+        }
+    }
+}
+#endif
+/*********************************************************************
  * @fn      WCHNET_MainTask
  *
  * @brief   library main task function
@@ -90,6 +208,14 @@ void WCHNET_MainTask(void)
 {
     WCHNET_NetInput( );                     /* Ethernet data input */
     WCHNET_PeriodicHandle( );               /* Protocol stack time-related task processing */
+
+#if( PHY_MODE ==  USE_10M_BASE )
+    WCHNET_HandlePhyNegotiation();
+#endif
+
+#if( PHY_MODE ==  USE_MAC_MII )
+    WCHNET_QueryPhySta();                   /* Query external PHY status*/
+#endif
 }
 
 #if( PHY_MODE ==  USE_10M_BASE )
@@ -161,8 +287,8 @@ void ETH_LedConfiguration(void)
 void ETH_SetClock(void)
 {
     RCC_PLL3Cmd(DISABLE);
-    RCC_PREDIV2Config(RCC_PREDIV2_Div2); // HSE = 8M
-    RCC_PLL3Config(RCC_PLL3Mul_15); // 4M*15 = 60MHz
+    RCC_PREDIV2Config(RCC_PREDIV2_Div2);                // HSE = 8M
+    RCC_PLL3Config(RCC_PLL3Mul_15);                     // 4M*15 = 60MHz
     RCC_PLL3Cmd(ENABLE);
     while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));
 }
@@ -180,38 +306,47 @@ void ETH_MIIPinInit(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);
 
-    define_O(GPIOA,GPIO_Pin_2);/* MDC */
-    define_O(GPIOC,GPIO_Pin_1);/* MDIO */
+    define_O(GPIOA,GPIO_Pin_2);                                                         /* MDIO */
+    define_O(GPIOC,GPIO_Pin_1);                                                         /* MDC */
 
-    define_I(GPIOC,GPIO_Pin_3); //txclk
-    define_O(GPIOB,GPIO_Pin_11);//txen
-    define_O(GPIOB,GPIO_Pin_12);//txd0
-    define_O(GPIOB,GPIO_Pin_13);//txd1
-    define_O(GPIOC,GPIO_Pin_2); //txd2
-    define_O(GPIOB,GPIO_Pin_8); //txd3
-    /* RX组 */
-    define_I(GPIOA,GPIO_Pin_1);/* PA1 RXC */
-    define_I(GPIOA,GPIO_Pin_7);/* PA7 RXDV */
-    define_I(GPIOC,GPIO_Pin_4);/* RXD0 */
-    define_I(GPIOC,GPIO_Pin_5);/* RXD1 */
-    define_I(GPIOB,GPIO_Pin_0);/* RXD2 */
-    define_I(GPIOB,GPIO_Pin_1);/* RXD3 */
-    define_I(GPIOB,GPIO_Pin_10);/* RXER */
+    define_I(GPIOC,GPIO_Pin_3);                                                         /* txclk */
+    define_O(GPIOB,GPIO_Pin_11);                                                        /* txen */
+    define_O(GPIOB,GPIO_Pin_12);                                                        /* txd0 */
+    define_O(GPIOB,GPIO_Pin_13);                                                        /* txd1 */
+    define_O(GPIOC,GPIO_Pin_2);                                                         /* txd2 */
+    define_O(GPIOB,GPIO_Pin_8);                                                         /* txd3 */
+    /* RX */
+    define_I(GPIOA,GPIO_Pin_1);                                                         /* PA1 RXC */
+    define_I(GPIOA,GPIO_Pin_7);                                                         /* PA7 RXDV */
+    define_I(GPIOC,GPIO_Pin_4);                                                         /* RXD0 */
+    define_I(GPIOC,GPIO_Pin_5);                                                         /* RXD1 */
+    define_I(GPIOB,GPIO_Pin_0);                                                         /* RXD2 */
+    define_I(GPIOB,GPIO_Pin_1);                                                         /* RXD3 */
+    define_I(GPIOB,GPIO_Pin_10);                                                        /* RXER */
 
-    define_O(GPIOA,GPIO_Pin_0);/* PA0 */
-    define_O(GPIOA,GPIO_Pin_3);/* PA3 */
+    define_O(GPIOA,GPIO_Pin_0);                                                         /* PA0 */
+    define_O(GPIOA,GPIO_Pin_3);                                                         /* PA3 */
 }
-
-
 #endif
 
 void ETH_PHYLink( void )
 {
-    uint32_t phy_stat;
+    u32 phy_stat;
 
 #if( PHY_MODE ==  USE_10M_BASE )
+    u16 phy_anlpar;
+    phy_anlpar = ETH_ReadPHYRegister( gPHYAddress, PHY_ANLPAR);
     phy_stat = ETH_ReadPHYRegister( gPHYAddress, PHY_BSR);
+
+    if((phy_stat&(PHY_Linked_Status))&&(phy_anlpar == 0)){                         //restart negotiation
+        ETH_WritePHYRegister(gPHYAddress, PHY_BCR, PHY_Reset);
+        EXTEN->EXTEN_CTR &= ~EXTEN_ETH_10M_EN;
+        Delay_Ms(500);
+        EXTEN->EXTEN_CTR |= EXTEN_ETH_10M_EN;
+        return;
+    }
     WCHNET_PhyStatus( phy_stat );
+
     if( (phy_stat&(PHY_Linked_Status)) && (phy_stat&PHY_AutoNego_Complete) )
     {
         phy_stat = ETH_ReadPHYRegister( gPHYAddress, PHY_STATUS );
@@ -221,93 +356,53 @@ void ETH_PHYLink( void )
         }
         else
         {
-            ETH->MACCR &= ~ETH_Mode_FullDuplex;
+            if( (phy_anlpar&PHY_ANLPAR_SELECTOR_FIELD) != PHY_ANLPAR_SELECTOR_VALUE )
+            {
+                ETH->MACCR |= ETH_Mode_FullDuplex;
+            }
+            else
+            {
+                ETH->MACCR &= ~ETH_Mode_FullDuplex;
+            }
         }
         ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
-        if(phy_stat & (1<<3))
-        {
-
-        }
-        else
-        {
-
-        }
+        phyStatus = PHY_Linked_Status;
         ETH_Start( );
     }
-#else
-    ETH_WritePHYRegister( gPHYAddress, 0x1F , 0x0a43 );
-    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x1A );
-    WCHNET_PhyStatus( phy_stat );
-    if( phy_stat&PHY_Linked_Status )
+    else
     {
+        phyStatus = 0;
+        phyLinkStatus = PHY_LINK_INIT;
+    }
+#else
+    phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );
+    LastPhyStat = phy_stat;
+    WCHNET_PhyStatus( phy_stat );
+    if( (phy_stat&PHY_Linked_Status) && (phy_stat&PHY_AutoNego_Complete) )
+    {
+        phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR );
         /* PHY negotiation result */
-        if( phy_stat & (1<<3) )
-        {
-            ETH->MACCR |= ETH_Mode_FullDuplex;
-        }
-        else
-        {
-            ETH->MACCR &= ~ETH_Mode_FullDuplex;
-        }
-
-        if( (phy_stat&0x0030) == 0x0000 )
-        {
-            ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
-        }
-        else if( (phy_stat&0x0030) == 0x0010 )
+        if(phy_stat&(1<<13))                                   //100M
         {
             ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
             ETH->MACCR |= ETH_Speed_100M;
         }
-        else if( (phy_stat&0x0030) == 0x0020 )
+        else                                                  //10M
         {
             ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
-            ETH->MACCR |= ETH_Speed_1000M;
+        }
+        if(phy_stat&(1<<8))                                   //full duplex
+        {
+            ETH->MACCR |= ETH_Mode_FullDuplex;
+        }
+        else                                                  //half duplex
+        {
+            ETH->MACCR &= ~ETH_Mode_FullDuplex;
         }
         ETH_Start( );
     }
-    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 29);/* read INSR */
 #endif
 }
-
-#if( PHY_MODE !=  USE_10M_BASE )
-void EXT5_9_INT_INIT(void)
-{
-    GPIO_InitTypeDef GPIO_InitStructure = {0};
-    EXTI_InitTypeDef EXTI_InitStructure = {0};
-    NVIC_InitTypeDef NVIC_InitStructure = {0};
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOC, ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    /* GPIOC 7 ----> EXTI_Line7 */
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource7);
-    EXTI_InitStructure.EXTI_Line = EXTI_Line7;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;     /* Falling edge triggered interrupt */
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;   /* Preempt the priority, pay attention to the interrupt priority of the V4F kernel */
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;          /* subpriority */
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-void RTL8211FS_interrupt_init(void)
-{
-    uint16_t RegValue;
-
-    ETH_WritePHYRegister(1, 31,0x0a42 );
-    RegValue = ETH_ReadPHYRegister(1, 18);                  /* read INER */
-    RegValue|=(1<<4)|(1<<3);                                /* Enable physical layer state change interrupt and negotiation complete interrupt */
-    ETH_WritePHYRegister(1, 18,RegValue );
-}
-#endif
 
 /*********************************************************************
  * @fn      ETH_RegInit
@@ -330,9 +425,6 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
     tmpreg |= (uint32_t)ETH_MACMIIAR_CR_Div42;
     ETH->MACMIIAR = (uint32_t)tmpreg;
 
-    /* Reset the physical layer */
-    ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_Reset);
-    Delay_Ms(10);
     /*------------------------ MAC register configuration  ----------------------- --------------------*/
     tmpreg = ETH->MACCR;
     tmpreg &= MACCR_CLEAR_MASK;
@@ -353,7 +445,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
     /* Write MAC Control Register */
     ETH->MACCR = (uint32_t)tmpreg;
 #if( PHY_MODE ==  USE_10M_BASE )
-    ETH->MACCR|=ETH_Internal_Pull_Up_Res_Enable;/*  */
+    ETH->MACCR |= ETH_Internal_Pull_Up_Res_Enable;/*  */
 #endif
     ETH->MACFFR = (uint32_t)(ETH_InitStruct->ETH_ReceiveAll |
                           ETH_InitStruct->ETH_SourceAddrFilter |
@@ -404,6 +496,8 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
                            (ETH_InitStruct->ETH_DescriptorSkipLength << 2) |
                             ETH_InitStruct->ETH_DMAArbitration |
                             ETH_DMABMR_USP);
+    /* Reset the physical layer */
+    ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_Reset);
     return ETH_SUCCESS;
 }
 
@@ -417,7 +511,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
 void ETH_Configuration( uint8_t *macAddr )
 {
     ETH_InitTypeDef ETH_InitStructure;
-    uint16_t timeout=10000;
+    uint16_t timeout = 10000;
 
     /* Enable Ethernet MAC clock */
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ETH_MAC|RCC_AHBPeriph_ETH_MAC_Tx|RCC_AHBPeriph_ETH_MAC_Rx,ENABLE);
@@ -426,7 +520,7 @@ void ETH_Configuration( uint8_t *macAddr )
 #if( PHY_MODE ==  USE_10M_BASE )
     ETH_SetClock( );
     /* Enable internal 10BASE-T PHY*/
-    EXTEN->EXTEN_CTR |=EXTEN_ETH_10M_EN;    /* Enable 10M Ethernet physical layer   */
+    EXTEN->EXTEN_CTR |= EXTEN_ETH_10M_EN;    /* Enable 10M Ethernet physical layer   */
 #elif( PHY_MODE ==  USE_MAC_MII)
     /*  Enable MII GPIO */
     ETH_MIIPinInit( );
@@ -449,7 +543,11 @@ void ETH_Configuration( uint8_t *macAddr )
     /* Fill ETH_InitStructure parameters */
     /*------------------------   MAC   -----------------------------------*/
     ETH_InitStructure.ETH_Mode = ETH_Mode_FullDuplex;
-    ETH_InitStructure.ETH_Speed = ETH_Speed_1000M;
+#if( PHY_MODE ==  USE_10M_BASE )
+    ETH_InitStructure.ETH_Speed = ETH_Speed_10M;
+#else
+    ETH_InitStructure.ETH_Speed = ETH_Speed_100M;
+#endif
     ETH_InitStructure.ETH_AutoNegotiation = ETH_AutoNegotiation_Enable  ;
     ETH_InitStructure.ETH_LoopbackMode = ETH_LoopbackMode_Disable;
     ETH_InitStructure.ETH_RetryTransmission = ETH_RetryTransmission_Disable;
@@ -548,16 +646,21 @@ void WCHNET_ETHIsr(void)
     {
         if( int_sta & ETH_DMA_IT_R )
         {
+            if ((int_sta & ETH_DMA_IT_RBU) != (u32)RESET)
+            {
+                /* Clear RBUS ETHERNET DMA flag */
+                ETH->DMASR = ETH_DMA_IT_RBU;
+
+                ((ETH_DMADESCTypeDef *)(((ETH_DMADESCTypeDef *)(ETH->DMACHRDR))->Buffer2NextDescAddr))->Status = ETH_DMARxDesc_OWN;
+
+                /* Resume DMA reception */
+                ETH->DMARPDR = 0;
+            }
             ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
             /* Check if the descriptor is owned by the ETHERNET DMA (when set) or CPU (when reset) */
             if((DMARxDescToGet->Status & ETH_DMARxDesc_OWN) != (u32)RESET)
             {
-                if ((int_sta & ETH_DMA_IT_RBU) != (u32)RESET)
-                {
-                    /* Clear RBUS ETHERNET DMA flag */
-                    ETH->DMASR = ETH_DMA_IT_RBU;
-                    /* Resume DMA reception */
-                }
+                /***/
             }
             else
             {
@@ -572,6 +675,7 @@ void WCHNET_ETHIsr(void)
             ETH_DMAClearITPendingBit(ETH_DMA_IT_T);
             if( (pDMATxSet->Status&ETH_DMATxDesc_ES) )
             {
+                /***/
             }
         }
         if( int_sta & ETH_DMA_IT_PHYLINK)
@@ -595,6 +699,7 @@ void ETH_Init( uint8_t *macAddr )
 #if( PHY_MODE ==  USE_10M_BASE )
     ETH_LedConfiguration( );
 #endif
+    Delay_Ms(100);
     ETH_Configuration( macAddr );
     ETH_DMATxDescChainInit(DMATxDscrTab, MACTxBuf, ETH_TXBUFNB);
     ETH_DMARxDescChainInit(DMARxDscrTab, MACRxBuf, ETH_RXBUFNB);

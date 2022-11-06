@@ -29,7 +29,7 @@ extern "C" {
 /* The number of sockets, the maximum is 31  */
 #define WCHNET_MAX_SOCKET_NUM    (WCHNET_NUM_IPRAW+WCHNET_NUM_UDP+WCHNET_NUM_TCP+WCHNET_NUM_TCP_LISTEN)
 
-#define WCHNET_TCP_MSS                800  /* Size of TCP MSS*/
+#define WCHNET_TCP_MSS                1460  /* Size of TCP MSS*/
 
 /*********************************************************************
  * MAC queue configuration
@@ -75,7 +75,7 @@ extern "C" {
 
 #define WCHNET_NUM_TCP_SEG            (WCHNET_NUM_TCP*2)   /* The number of TCP segments used to send */
 
-#define WCHNET_MEM_HEAP_SIZE          (((WCHNET_TCP_MSS+0x10+54)*WCHNET_NUM_TCP_SEG)+ETH_TX_BUF_SZE) /* memory heap size */
+#define WCHNET_MEM_HEAP_SIZE          (((WCHNET_TCP_MSS+0x10+54)*WCHNET_NUM_TCP_SEG)+ETH_TX_BUF_SZE+64) /* memory heap size */
 
 #define WCHNET_NUM_ARP_TABLE          50   /* Number of ARP lists */
 
