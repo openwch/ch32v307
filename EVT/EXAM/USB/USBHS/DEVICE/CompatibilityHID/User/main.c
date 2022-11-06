@@ -2,26 +2,58 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2022/08/20
 * Description        : Main program body.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
-/*
- *@Note
-   模拟HID兼容设备，支持中断上下传，支持控制端点上下传，支持设置全速，高速
-*/
+/* @Note
+ * Compatibility HID Example:
+ * This program provides examples of the pass-through of USB-HID data and serial port
+ *  data based on compatibility HID device. And the data returned by Get_Report request is
+ *  the data sent by the last Set_Report request.Speed of UART1/2 is 115200bps.
+ *
+ * Interrupt Transfers:
+ *   UART2_RX   ---> Endpoint1
+ *   Endpoint2  ---> UART2_TX
+ *
+ *   Note that the first byte is the valid data length and the remaining bytes are
+ *   the transmission data for interrupt Transfers.
+ *
+ * Control Transfers:
+ *   Set_Report ---> UART1_TX
+ *   Get_Report <--- last Set_Report packet
+ *
+ *  */
+
 #include "ch32v30x_usbhs_device.h"
-#include "debug.h"
+#include "usbd_compatibility_hid.h"
+/******************************************************************************/
+/* Global define */
 
-/* Value */
-UINT8 TestValue[ DEF_USBD_UEP0_SIZE ] = { 0x00 };
+/******************************************************************************/
+/* Global Variables */
 
-/* Function statement */
-void GPIO_Config( void );
-UINT8 Basic_Key_Handle( void );
-
+/*********************************************************************
+ * @fn      Var_Init
+ *
+ * @brief   Software parameter initialization
+ *
+ * @return  none
+ */
+void Var_Init(void)
+{
+    uint16_t i;
+    RingBuffer_Comm.LoadPtr = 0;
+    RingBuffer_Comm.StopFlag = 0;
+    RingBuffer_Comm.DealPtr = 0;
+    RingBuffer_Comm.RemainPack = 0;
+    for(i=0; i<DEF_Ring_Buffer_Max_Blks; i++)
+    {
+        RingBuffer_Comm.PackLen[i] = 0;
+    }
+}
 /*********************************************************************
  * @fn      main
  *
@@ -31,98 +63,32 @@ UINT8 Basic_Key_Handle( void );
  */
 int main(void)
 {
-    UINT8 UpLoadFlag = 0x00;
-    UINT8 i;
 	Delay_Init();
 	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-	printf( "HIDKeyBoard Running On USBHS Controller\n" );
+	printf( "SystemClk:%d\r\n",SystemCoreClock) ;
+	printf( "Compatibility HID Running On USBHS Controller\n" );
+
+	 /* Variables init */
+    Var_Init();
+
+    /* UART2 init */
+    UART2_Init();
+    UART2_DMA_Init();
 
     /* USB20 device init */
-    USBHS_RCC_Init( );                                                         /* USB2.0高速设备RCC初始化 */
+    USBHS_RCC_Init( );
     USBHS_Device_Init( ENABLE );
-    NVIC_EnableIRQ( USBHS_IRQn );
 
-    /* GPIO Config */
-    GPIO_Config( );
+    /* Timer init */
+    TIM2_Init();
 
-    /* Prepare Data For Test */
-    for( i=0; i<DEF_USBD_UEP0_SIZE; i++ )
+    while(1)
     {
-        TestValue[ i ] = i;
-    }
-
-	while(1)
-	{
-	    /* HID Tx */
-	    if( Basic_Key_Handle( ) )
-	    {
-	        if( UpLoadFlag == 0 )
-	        {
-	            UpLoadFlag = 1;
-	            Ep1_Tx( TestValue, DEF_USBD_UEP0_SIZE );
-	            printf( "Tx Data\n" );
-	        }
-	    }
-	    else
-	    {
-	        if( UpLoadFlag )
-	        {
-	            UpLoadFlag = 0;
-	        }
-        }
-	    /* HID Rx */
-	    if( USBHS_Endp1_Down_Flag )
-	    {
-	        USBHS_Endp1_Down_Flag = 0;
-	        printf( "Rx Data\n" );
-	        for( i=0; i<DEF_USBD_UEP0_SIZE; i++ )
-	        {
-	            printf( "%02x ", EP1_Rx_Databuf[ i ] );
-	        }
-	        printf( "\n" );
-	        USBHSD->UEP1_RX_CTRL = (USBHSD->UEP1_RX_CTRL & ~USBHS_EP_R_RES_MASK) | USBHS_EP_R_RES_ACK;
-	    }
-	}
-}
-
-/*********************************************************************
- * @fn      GPIO_Config
- *
- * @brief   GPIO Configuration Program
- *
- * @return  none
- */
-void GPIO_Config( void )
-{
-    GPIO_InitTypeDef GPIO_InitTypdefStruct;
-
-    RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE );
-    GPIO_InitTypdefStruct.GPIO_Pin   = GPIO_Pin_0;
-    GPIO_InitTypdefStruct.GPIO_Mode  = GPIO_Mode_IPU;
-    GPIO_InitTypdefStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-    GPIO_Init( GPIOA, &GPIO_InitTypdefStruct );
-}
-
-/*********************************************************************
- * @fn      Basic_Key_Handle
- *
- * @brief   Basic Key Handle
- *
- * @return  0 - no key press
- *          1 - key press down
- */
-UINT8 Basic_Key_Handle( void )
-{
-    UINT8 keyval = 0;
-    if( ! GPIO_ReadInputDataBit( GPIOA, GPIO_Pin_0 ) )
-    {
-        Delay_Ms(20);
-        if( ! GPIO_ReadInputDataBit( GPIOA, GPIO_Pin_0 ) )
+        if (USBHS_DevEnumStatus)
         {
-            keyval = 1;
+            UART2_Rx_Service();
+            UART2_Tx_Service();
+            HID_Set_Report_Deal();
         }
     }
-    return keyval;
 }

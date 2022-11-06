@@ -3,35 +3,42 @@
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/05/25
-* Description        : Main program body.
+* Description        : IAP related functions.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 #include "debug.h"
-#include "WCHNET.h"
+#include "wchnet.h"
 #include "IAP_Task.h"
-#include "WCHNET.h"
 
 __attribute__((__aligned__(4))) u8 dataDealBuf[RECE_BUF_LEN] = {0};
 
-ethDataDeal dataDeal = {
-        .head = 0,
-        .tail = 0,
+ethDataDeal dataDeal = {                              //Ring buffer parameter initialization
+        .readIndex = 0,
+        .writeIndex = 0,
         .buffUsedLen = 0,
         .dataBuff = dataDealBuf,
 };
 
-iapFileHeader iapPara;
-u32 fileDataLen = 0;
-u32 fileCheckSum = 0;
-u32 flashProgramLen = 0;
-u16 flashProgramPage = 0;
+u32 fileDataLen = 0;                                  //IAP file data length
+u32 fileCheckSum = 0;                                 //IAP file data checksum
+u32 flashProgramLen = 0;                              //length of data written to backup area
+iapFileHeader iapPara;                                //IAP file parameters
 
 extern u8 SocketId;
 
-/*erase Data-Flash block, minimal block is 256B, return SUCCESS if success*/
+/*********************************************************************
+ * @fn      IAP_EEPROM_ERASE
+ *
+ * @brief   erase Data-Flash block, minimal block is 256B
+ *
+ * @param   Page_Address - the address of the page being erased.
+ *          Length - Erased data length
+ *
+ * @return  none
+ */
 void IAP_EEPROM_ERASE(uint32_t Page_Address, u32 Length)
 {
     u32 NbrOfPage, EraseCounter;
@@ -45,7 +52,17 @@ void IAP_EEPROM_ERASE(uint32_t Page_Address, u32 Length)
     FLASH_Lock_Fast();
 }
 
-/*write Data-Flash data block, return FLASH_Status*/
+/*********************************************************************
+ * @fn      IAP_EEPROM_WRITE
+ *
+ * @brief   write Data-Flash data block
+ *
+ * @param   StartAddr - the address of the page being written.
+ *          Buffer - data buff
+ *          Length - written data length
+ *
+ * @return  FLASH_Status
+ */
 void IAP_EEPROM_WRITE( u32 StartAddr, u8 *Buffer, u32 Length )
 {
     u32 address = StartAddr;
@@ -54,7 +71,7 @@ void IAP_EEPROM_WRITE( u32 StartAddr, u8 *Buffer, u32 Length )
     u16 lastDataNum = Length % FLASH_PAGE_SIZE;
     u16 i;
 
-    if(pageNum){
+    if(pageNum){                                                    //write by page(256B)
         FLASH_Unlock_Fast();
 
         for(i = 0; i < pageNum; i++)
@@ -63,19 +80,29 @@ void IAP_EEPROM_WRITE( u32 StartAddr, u8 *Buffer, u32 Length )
         FLASH_Lock_Fast();
     }
 
-    if(lastDataNum){
-        address = StartAddr + FLASH_PAGE_SIZE * pageNum;
+    if(lastDataNum){                                                //write by a half word(2B)
         u8 *p_buff1 = Buffer + FLASH_PAGE_SIZE * pageNum;
+        address = StartAddr + FLASH_PAGE_SIZE * pageNum;
         FLASH_Unlock();
 
-        for(u8 i = 0; i < lastDataNum; i += 2)
+        for(i = 0; i < lastDataNum; i += 2)
             FLASH_ProgramHalfWord((address + i), *(u16 *)(p_buff1 + i));
 
         FLASH_Lock();
     }
 }
 
-/*read Data-Flash data block */
+/*********************************************************************
+ * @fn      IAP_EEPROM_READ
+ *
+ * @brief   read Data-Flash data block
+ *
+ * @param   StartAddr - the address of the page being read.
+ *          Buffer - data buff
+ *          Length - read data length
+ *
+ * @return  none
+ */
 void IAP_EEPROM_READ( u32 StartAddr, u8 *Buffer, u32 Length )
 {
     u32 address = StartAddr;
@@ -89,6 +116,16 @@ void IAP_EEPROM_READ( u32 StartAddr, u8 *Buffer, u32 Length )
     }
 }
 
+/*********************************************************************
+ * @fn      IAP_EEPROM_ERASE_108k
+ *
+ * @brief   erase Data-Flash block, minimal block is 4KB.
+ *          This function is used to erase USER and BACKUP area.
+ *
+ * @param   Page_Address - the address of the page being erased.
+ *
+ * @return  none
+ */
 void IAP_EEPROM_ERASE_108k(u32 StartAddr)
 {
     u8 i = 0;
@@ -99,6 +136,13 @@ void IAP_EEPROM_ERASE_108k(u32 StartAddr)
     FLASH_Lock();
 }
 
+/*********************************************************************
+ * @fn      IAPParaInit
+ *
+ * @brief   IAP parameters initialize
+ *
+ * @return  none
+ */
 void IAPParaInit(void)
 {
     iapPara.iapFileCheckSum = 0;
@@ -106,26 +150,34 @@ void IAPParaInit(void)
     iapPara.iapFileLen = 0;
     dataDeal.buffUsedLen = 0;
     dataDeal.dataBuff = dataDealBuf;
-    dataDeal.head = 0;
-    dataDeal.tail = 0;
+    dataDeal.readIndex = 0;
+    dataDeal.writeIndex = 0;
     fileDataLen = 0;
     fileCheckSum = 0;
     flashProgramLen = 0;
-    flashProgramPage = 0;
 }
 
-void iapFileParaCheck(u8 socketid)
+/*********************************************************************
+ * @fn      IAPFileParaCheck
+ *
+ * @brief   Verify upgrade file parameters.
+ *
+ * @param   id - socket id.
+ *
+ * @return  none
+ */
+void IAPFileParaCheck(u8 id)
 {
     u32 len;
     u8 *pBuff = NULL;
-    len = WCHNET_SocketRecvLen(socketid,NULL);
-    if(BIN_INF_LEN <= len){
+    len = WCHNET_SocketRecvLen(id,NULL);
+    if(BIN_INF_LEN <= len){                                  //The first 512 bytes are the bin file parameters
         u8 buffIndex;
         u32 recLen = BIN_INF_LEN;
 
         pBuff = malloc(recLen);
 
-        WCHNET_SocketRecv(socketid,pBuff,&recLen);
+        WCHNET_SocketRecv(id,pBuff,&recLen);
         memcpy(iapPara.iapFileFlag, pBuff, 8);
         buffIndex = 8;
         iapPara.iapFileLen |= *(pBuff + buffIndex++);
@@ -148,44 +200,55 @@ void iapFileParaCheck(u8 socketid)
     }
 }
 
+/*Ring buffer data distribution*/
+//first case
+/**start******************readIndex********************writeIndex***************end**
+ ******|   writable area  |*******|    readable area   |********| writable area |****/
+
+//second case
+/**start******************writeIndex********************readIndex***************end**
+ ******|   readable area  |********|   writable area    |*******| readable area |****/
+
 /*********************************************************************
- * @fn      ETHRx
+ * @fn      receUpdatedFile
  *
- * @brief   ETH receive data and save it to buff
+ * @brief   ETH receive data and save it to ring buff.
+ *
+ * @param   id - socket id.
  *
  * @return  none
  */
-void ETHRx(u8 socketid)
+void receUpdatedFile(u8 id)
 {
     u32 len, remainLen, recLen;
     int8_t receive_state = -1;
 
-    len = WCHNET_SocketRecvLen(socketid,NULL);                               /* query length */
-    if( dataDeal.buffUsedLen < RECE_BUF_LEN )
+    len = WCHNET_SocketRecvLen(id,NULL);                                    //query length
+    if( dataDeal.buffUsedLen < RECE_BUF_LEN )                               //Ring buffer has free space
     {
-        if(dataDeal.head <= dataDeal.tail){
-            remainLen = RECE_BUF_LEN - dataDeal.tail;                       //到数组结尾剩余字节数
-            if(len <= remainLen){                                           //收到的字节数小于remainLen
+        if(dataDeal.readIndex <= dataDeal.writeIndex){
+            remainLen = RECE_BUF_LEN - dataDeal.writeIndex;
+            if(len <= remainLen){
                 recLen = len;
             }
             else{
                 recLen = remainLen;
             }
-            receive_state = WCHNET_SocketRecv(socketid,&dataDeal.dataBuff[dataDeal.tail],&recLen);
+            receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&recLen);
             if(receive_state == WCHNET_ERR_SUCCESS){
-                dataDeal.tail = (dataDeal.tail + recLen)%RECE_BUF_LEN;  //防止越界
+                dataDeal.writeIndex = (dataDeal.writeIndex + recLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen += recLen;
                 fileDataLen += recLen;
 
                 if(len > remainLen){
-                    remainLen = RECE_BUF_LEN - dataDeal.buffUsedLen;        //缓冲区剩余长度
-                    len -= recLen;                                          //待接收数据长度
+                    remainLen = RECE_BUF_LEN - dataDeal.buffUsedLen;
+                    len -= recLen;
                     if(len <= remainLen){
                         remainLen = len;
                     }
-                    receive_state = WCHNET_SocketRecv(socketid,&dataDeal.dataBuff[dataDeal.tail],&remainLen);
+                    receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&remainLen);
                     if(receive_state == WCHNET_ERR_SUCCESS){
-                        dataDeal.tail = (dataDeal.tail + remainLen)%RECE_BUF_LEN;  //防止越界
+                        dataDeal.writeIndex = (dataDeal.writeIndex + remainLen)%RECE_BUF_LEN;
                         dataDeal.buffUsedLen += remainLen;
                         fileDataLen += remainLen;
                     }
@@ -193,13 +256,13 @@ void ETHRx(u8 socketid)
             }
         }
         else{
-            remainLen = RECE_BUF_LEN - dataDeal.buffUsedLen;                              //buff剩余空间
+            remainLen = dataDeal.readIndex - dataDeal.writeIndex;
             if(len <= remainLen){
                 remainLen = len;
             }
-            receive_state = WCHNET_SocketRecv(socketid,&dataDeal.dataBuff[dataDeal.tail],&remainLen);
+            receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&remainLen);
             if(receive_state == WCHNET_ERR_SUCCESS){
-                dataDeal.tail = (dataDeal.tail + remainLen)%RECE_BUF_LEN;  //防止越界
+                dataDeal.writeIndex = (dataDeal.writeIndex + remainLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen += remainLen;
                 fileDataLen += remainLen;
             }
@@ -207,33 +270,36 @@ void ETHRx(u8 socketid)
     }
     else
     {
-//        printf("eth receive buff busy\n");
+        printf("ETH receive buff busy\n");
     }
-//    printf("***rec\r\n");
-//    printf("head: %d\r\n",dataDeal.head);
-//    printf("tail: %d\r\n",dataDeal.tail);
-//    printf("buffUsedLen: %d\r\n",dataDeal.buffUsedLen);
 }
 
-void ETHTx(u8 socketid)
+/*********************************************************************
+ * @fn      saveUpdatedFile
+ *
+ * @brief   Save the upgrade file to the backup area.
+ *
+ * @return  none
+ */
+void saveUpdatedFile(void)
 {
     u8 *pBuff = NULL, pageCnt = 0;
     u16 writableDataLen = 0, tempLen = 0;
     u32 remainLen = 0;
 
     if(dataDeal.buffUsedLen){
-        pageCnt = dataDeal.buffUsedLen / FLASH_PAGE_SIZE;    // 计算数据页数
-        if(pageCnt){                                   // 至少有256B的数据
-            writableDataLen = pageCnt * FLASH_PAGE_SIZE;
+        pageCnt = dataDeal.buffUsedLen / FLASH_PAGE_SIZE;       // Calculate the number of data pages
+        if(pageCnt){
+            writableDataLen = pageCnt * FLASH_PAGE_SIZE;        //at least one page
         }
-        else if(iapPara.iapFileLen == fileDataLen){
+        else if(iapPara.iapFileLen == fileDataLen){             //Extract data that is less than one page at the end of the file
             writableDataLen = dataDeal.buffUsedLen;
         }
         else return;
 
-        pBuff = malloc(writableDataLen);       // 申请转存数据的空间
-        if(dataDeal.tail <= dataDeal.head){
-            remainLen = RECE_BUF_LEN - dataDeal.head;
+        pBuff = malloc(writableDataLen);
+        if(dataDeal.writeIndex <= dataDeal.readIndex){
+            remainLen = RECE_BUF_LEN - dataDeal.readIndex;
             if(writableDataLen <= remainLen){
                 tempLen = writableDataLen;
             }
@@ -241,43 +307,46 @@ void ETHTx(u8 socketid)
                 tempLen = remainLen;
             }
 
-            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.head], tempLen);
-            dataDeal.head = (dataDeal.head + tempLen)%RECE_BUF_LEN;  //防止越界
+            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.readIndex], tempLen);
+            dataDeal.readIndex = (dataDeal.readIndex + tempLen)%RECE_BUF_LEN;
             dataDeal.buffUsedLen -= tempLen;
 
             if(remainLen < writableDataLen){
-                remainLen = writableDataLen - tempLen;              // 转存剩余空间长度
-                memcpy((pBuff + tempLen), &dataDeal.dataBuff[dataDeal.head], remainLen);
-                dataDeal.head = (dataDeal.head + remainLen)%RECE_BUF_LEN;  //防止越界
+                remainLen = writableDataLen - tempLen;
+                memcpy((pBuff + tempLen), &dataDeal.dataBuff[dataDeal.readIndex], remainLen);
+                dataDeal.readIndex = (dataDeal.readIndex + remainLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen -= remainLen;
             }
             IAP_EEPROM_WRITE((BACKUP_IMAGE_START_ADD + flashProgramLen), pBuff, writableDataLen );
         }
         else{
-            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.head], writableDataLen);
-            dataDeal.head = (dataDeal.head + writableDataLen)%RECE_BUF_LEN;  //防止越界
+            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.readIndex], writableDataLen);
+            dataDeal.readIndex = (dataDeal.readIndex + writableDataLen)%RECE_BUF_LEN;
             dataDeal.buffUsedLen -= writableDataLen;
 
             IAP_EEPROM_WRITE((BACKUP_IMAGE_START_ADD + flashProgramLen), pBuff, writableDataLen );
         }
         flashProgramLen += writableDataLen;
 
-        for(u16 i = 0; i < (writableDataLen / 4); i++)
+        for(u16 i = 0; i < (writableDataLen / 4); i++)          //Calculate checksum
             fileCheckSum += *((u32 *)pBuff + i);
 
+        /*Calculate the checksum of data less than 4 bytes at the end of the file*/
         if((writableDataLen % 4) != 0){
-            u8 lastData = writableDataLen % 4;
+            u8 lastDataLen = writableDataLen % 4;
             u8 temBuff[4] = {0};
-            memcpy(temBuff, (pBuff + writableDataLen - lastData), lastData);
+            memcpy(temBuff, (pBuff + writableDataLen - lastDataLen), lastDataLen);
             fileCheckSum += *(u32 *)temBuff;
         }
 
         free(pBuff);
 
-        if((iapPara.iapFileLen == (flashProgramLen + BIN_INF_LEN))){
+        /*After the data is saved, compare the checksum. If the checksum is correct,
+         * update the upgrade flag. Disconnect if checksum error.*/
+        if(iapPara.iapFileLen == (flashProgramLen + BIN_INF_LEN)){
             if(fileCheckSum == iapPara.iapFileCheckSum){
                 printf("FileCheckSum is right!\r\n");
-                u32 updateFlag = IMAGE_FLAG_UPDATA;
+                u32 updateFlag = IMAGE_FLAG_UPDATE;
                 IAP_EEPROM_ERASE(UPDATA_FLAG_STORAGE_ADD, FLASH_PAGE_SIZE);
                 IAP_EEPROM_WRITE(UPDATA_FLAG_STORAGE_ADD, (u8 *)&updateFlag, 4);
                 WCHNET_SocketClose(SocketId, TCP_CLOSE_RST);
@@ -288,40 +357,42 @@ void ETHTx(u8 socketid)
                 WCHNET_SocketClose(SocketId, TCP_CLOSE_NORMAL);
             }
         }
-//        printf("@@@send\r\n");
-//        printf("head: %d\r\n",dataDeal.head);
-//        printf("tail: %d\r\n",dataDeal.tail);
-//        printf("buffUsedLen: %d\r\n",dataDeal.buffUsedLen);
     }
 }
 
-/* Flash升级复制 */
+/*********************************************************************
+ * @fn      IAPCopyFlashDeal
+ *
+ * @brief   Move the BACKUP area code to the USER area.
+ *          Write in 2KB units.
+ *
+ * @return  upgrade status
+ */
 u8 IAPCopyFlashDeal(void)
 {
+    u16 i,j;
     u32 *pBuf;
-    u32 i,j;
     u32 flashAddr;
     u32 updataBuff[READ_DATA_LEN / 4];
 
     pBuf = updataBuff;
 
-    //擦
     IAP_EEPROM_ERASE_108k(USER_IMAGE_START_ADD);
 
-    for(i = 0; i < (BACKUP_IMAGE_MAX_SIZE / READ_DATA_LEN); i++)                           /*code flash  以2K为单位进行擦写*/
+    for(i = 0; i < (BACKUP_IMAGE_MAX_SIZE / READ_DATA_LEN); i++)
     {
         flashAddr = USER_IMAGE_START_ADD + i * READ_DATA_LEN;
-        //读
+
         IAP_EEPROM_READ((flashAddr + USER_IMAGE_MAX_SIZE), (u8 *)pBuf, READ_DATA_LEN);
-        //写
+
         IAP_EEPROM_WRITE(flashAddr, (u8 *)pBuf, READ_DATA_LEN);
 
-        //校验
+        //Check data
         for(j = 0; j < (READ_DATA_LEN / 4); j++){
             if(pBuf[j] != *(u32 *)(flashAddr + 4 * j))
-            return ERROR;
+            return NoREADY;
         }
     }
     IAP_EEPROM_ERASE_108k(BACKUP_IMAGE_START_ADD);
-    return SUCCESS;
+    return READY;
 }

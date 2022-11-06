@@ -14,7 +14,7 @@
 
 #include "string.h"
 #include "debug.h"
-#include "WCHNET.h"
+#include "wchnet.h"
 #include "eth_driver.h"
 
 u8 MACAddr[6];                                            //MAC address
@@ -22,11 +22,12 @@ u8 IPAddr[4] = { 192, 168, 1, 10 };                       //IP address
 u8 GWIPAddr[4] = { 192, 168, 1, 1 };                      //Gateway IP address
 u8 IPMask[4] = { 255, 255, 255, 0 };                      //subnet mask
 u8 DESIP[4] = { 192, 168, 1, 100 };                       //destination IP address
-u16 desport = 1000;                                       //destination port
+u16 desport = 1000;                                      //destination port
 u16 srcport = 1000;                                       //source port
 
 u8 SocketId;
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];   //socket receive buffer
+u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];    //socket receive buffer
+u8 MyBuf[RECE_BUF_LEN];
 
 /*********************************************************************
  * @fn      mStopIfError
@@ -89,7 +90,7 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf[SocketId];
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
-    printf("WCHNET_SocketCreat %d srcport %d\r\n", SocketId, srcport);
+    printf("WCHNET_SocketCreat %d\r\n", SocketId);
     mStopIfError(i);
 }
 
@@ -104,20 +105,38 @@ void WCHNET_CreateUdpSocket(void)
  */
 void WCHNET_DataLoopback(u8 id)
 {
+#if 1
     u8 i;
     u32 len;
-    u32 endAddr = SocketInf[id].RecvStartPoint + SocketInf[id].RecvBufLen;
+    u32 endAddr = SocketInf[id].RecvStartPoint + SocketInf[id].RecvBufLen;       //Receive buffer end address
 
-    if ((SocketInf[id].RecvReadPoint + SocketInf[id].RecvRemLen) > endAddr) {
+    if ((SocketInf[id].RecvReadPoint + SocketInf[id].RecvRemLen) > endAddr) {    //Calculate the length of the received data
         len = endAddr - SocketInf[id].RecvReadPoint;
     }
     else {
         len = SocketInf[id].RecvRemLen;
     }
-    i = WCHNET_SocketSend(id, (u8 *) SocketInf[id].RecvReadPoint, &len);
+    i = WCHNET_SocketSend(id, (u8 *) SocketInf[id].RecvReadPoint, &len);        //send data
     if (i == WCHNET_ERR_SUCCESS) {
-        WCHNET_SocketRecv(id, NULL, &len);
+        WCHNET_SocketRecv(id, NULL, &len);                                      //Clear sent data
     }
+#else
+    u32 len, totallen;
+    u8 *p = MyBuf;
+
+    len = WCHNET_SocketRecvLen(id, NULL);                                //query length
+    printf("Receive Len = %02x\n", len);
+    totallen = len;
+    WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
+    while(1){
+        len = totallen;
+        WCHNET_SocketSend(id, p, &len);                                  //Send the data
+        totallen -= len;                                                 //Subtract the sent length from the total length
+        p += len;                                                        //offset buffer pointer
+        if(totallen)continue;                                            //If the data is not sent, continue to send
+        break;                                                           //After sending, exit
+    }
+#endif
 }
 
 /*********************************************************************
@@ -161,7 +180,7 @@ void WCHNET_HandleGlobalInt(void)
 {
     u8 intstat;
     u16 i;
-    u8 socketinit;
+    u8 socketint;
 
     intstat = WCHNET_GetGlobalInt();                          //get global interrupt flag
     if (intstat & GINT_STAT_UNREACH)                          //Unreachable interrupt
@@ -180,9 +199,9 @@ void WCHNET_HandleGlobalInt(void)
     }
     if (intstat & GINT_STAT_SOCKET) {
         for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {         //socket related interrupt
-            socketinit = WCHNET_GetSocketInt(i);
-            if (socketinit)
-                WCHNET_HandleSockInt(i, socketinit);
+            socketint = WCHNET_GetSocketInt(i);
+            if (socketint)
+                WCHNET_HandleSockInt(i, socketint);
         }
     }
 }
@@ -208,8 +227,8 @@ int main(void)
     }
     WCHNET_GetMacAddr(MACAddr);                                //get the chip MAC address
     printf("mac addr:");
-    for (int i = 0; i < 6; i++)
-        printf("%x ", MACAddr[i]);
+    for(i = 0; i < 6; i++) 
+        printf("%x ",MACAddr[i]);
     printf("\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);        //Ethernet library initialize

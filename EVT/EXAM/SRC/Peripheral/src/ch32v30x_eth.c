@@ -1285,7 +1285,6 @@ FlagStatus ETH_GetSoftwareResetStatus(void)
     {
         bitstatus = RESET;
     }
-    printf("ETH->DMABMR is:%08x\n", ETH->DMABMR);
 
     return bitstatus;
 }

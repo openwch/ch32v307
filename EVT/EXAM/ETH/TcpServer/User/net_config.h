@@ -22,7 +22,7 @@ extern "C" {
 
 #define WCHNET_NUM_UDP                0  /* The number of UDP connections */
 
-#define WCHNET_NUM_TCP                4  /* Number of TCP connections (server + client) */
+#define WCHNET_NUM_TCP                1  /* Number of TCP connections (server + client) */
 
 #define WCHNET_NUM_TCP_LISTEN         1  /* Number of TCP listening */
 
@@ -75,7 +75,7 @@ extern "C" {
 
 #define WCHNET_NUM_TCP_SEG            (WCHNET_NUM_TCP*2)   /* The number of TCP segments used to send */
 
-#define WCHNET_MEM_HEAP_SIZE          (((WCHNET_TCP_MSS+0x10+54)*WCHNET_NUM_TCP_SEG)+ETH_TX_BUF_SZE) /* memory heap size */
+#define WCHNET_MEM_HEAP_SIZE          (((WCHNET_TCP_MSS+0x10+54)*WCHNET_NUM_TCP_SEG)+ETH_TX_BUF_SZE+64) /* memory heap size */
 
 #define WCHNET_NUM_ARP_TABLE          50   /* Number of ARP lists */
 

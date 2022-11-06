@@ -49,9 +49,9 @@ uint16_t              Data = 0xAAAA;
 uint32_t              WRPR_Value = 0xFFFFFFFF, ProtectedPages = 0x0;
 uint32_t              NbrOfPage;
 volatile FLASH_Status FLASHStatus = FLASH_COMPLETE;
-
 volatile TestStatus MemoryProgramStatus = PASSED;
 volatile TestStatus MemoryEraseStatus = PASSED;
+u32 buf[64];
 
 /*********************************************************************
  * @fn      Flash_Test
@@ -66,12 +66,13 @@ void Flash_Test(void)
 
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
     __disable_irq();
+    USART_Printf_Init(115200);
 
     FLASH_Unlock();
 
     NbrOfPage = (PAGE_WRITE_END_ADDR - PAGE_WRITE_START_ADDR) / FLASH_PAGE_SIZE;
 
-    FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
+    FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP | FLASH_FLAG_WRPRTERR);
 
     for(EraseCounter = 0; (EraseCounter < NbrOfPage) && (FLASHStatus == FLASH_COMPLETE); EraseCounter++)
     {
@@ -117,6 +118,7 @@ void Flash_Test(void)
 
     RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
     __enable_irq();
+    USART_Printf_Init(115200);
 }
 
 /*********************************************************************
@@ -129,7 +131,6 @@ void Flash_Test(void)
 void Flash_Test_Fast(void)
 {
     u16 i, j, flag;
-    u32 buf[64];
 
     for(i = 0; i < 64; i++)
     {
@@ -140,6 +141,7 @@ void Flash_Test_Fast(void)
 
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
     __disable_irq();
+    USART_Printf_Init(115200);
 
     FLASH_Unlock_Fast();
 
@@ -220,6 +222,7 @@ void Flash_Test_Fast(void)
 
     RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
     __enable_irq();
+    USART_Printf_Init(115200);
 }
 
 /*********************************************************************

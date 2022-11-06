@@ -81,7 +81,7 @@ void Touch_Key_Init(void)
 u16 Touch_Key_Adc(u8 ch)
 {
     ADC_RegularChannelConfig(ADC1, ch, 1, ADC_SampleTime_7Cycles5);
-    TKey1->IDATAR1 = 0x1c; //Charging Time
+    TKey1->IDATAR1 = 0x10; //Charging Time
     TKey1->RDATAR = 0x8;   //Discharging Time
     while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
         ;

@@ -14,7 +14,7 @@
 
 #include "string.h"
 #include "debug.h"
-#include "WCHNET.h"
+#include "wchnet.h"
 #include "eth_driver.h"
 
 u8 MACAddr[6];                                   //MAC address
@@ -79,8 +79,7 @@ void TIM2_Init(void)
  *          len - received data length
  * @return  none
  */
-void WCHNET_UdpServerRecv(struct _SCOK_INF *socinf, u32 ipaddr, u16 port,
-        u8 *buf, u32 len)
+void WCHNET_UdpServerRecv(struct _SCOK_INF *socinf, u32 ipaddr, u16 port, u8 *buf, u32 len)
 {
     u8 ip_addr[4], i;
 
@@ -185,6 +184,7 @@ void WCHNET_HandleGlobalInt(void)
         }
     }
 }
+
 /*********************************************************************
  * @fn      main
  *
@@ -206,8 +206,8 @@ int main(void)
     }
     WCHNET_GetMacAddr(MACAddr);                                   //get the chip MAC address
     printf("mac addr:");
-    for (int i = 0; i < 6; i++)
-        printf("%x ", MACAddr[i]);
+    for(i = 0; i < 6; i++) 
+        printf("%x ",MACAddr[i]);
     printf("\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);           //Ethernet library initialize

@@ -54,7 +54,7 @@ void PWR_EnterSTANDBYMode_RAM(void);
 void PWR_EnterSTANDBYMode_RAM_LV(void);
 void PWR_EnterSTANDBYMode_RAM_VBAT_EN(void);
 void PWR_EnterSTANDBYMode_RAM_LV_VBAT_EN(void);
-
+void PWR_EnterSTOPMode_RAM_LV(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry);
 
 #ifdef __cplusplus
 }

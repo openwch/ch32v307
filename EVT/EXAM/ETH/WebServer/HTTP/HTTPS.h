@@ -1,16 +1,20 @@
-/********************************** (C) COPYRIGHT *********************************
-* File Name          : HTTPS.H
-* Author             : WCH
-* Version            : V1.0
-* Date               : 2022/05/16
-* Description        : WCHNET库-HTTPS
-**********************************************************************************/
+/********************************** (C) COPYRIGHT *******************************
+ * File Name          : HTTPS.h
+ * Author             : WCH
+ * Version            : V1.0.0
+ * Date               : 2022/05/31
+ * Description        : HTTP related parameters.
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
+
 #ifndef	__HTTPS_H__
 #define	__HTTPS_H__
 #include "debug.h"
-#include "WCHNET.h"
+#include "wchnet.h"
 
-/*存储配置信息的地址*/
+/*Address where configuration
+ * information is stored*/
 #define PAGE_WRITE_START_ADDR     ((uint32_t)0x0803FC00) /* Start from 255K */
 #define PAGE_WRITE_END_ADDR       ((uint32_t)0x08040000) /* End at 256K */
 #define FLASH_PAGE_SIZE           256
@@ -44,18 +48,18 @@
 #define MODE_TCPCLIENT            1
 
 /* HTML Doc. for ERROR */
-#define RES_HTMLHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"      /*HTML类型的响应报文，最后两个\r\n必须要有*/
+#define RES_HTMLHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"      //HTML type response message, the last two \r\n must have
 
-#define RES_PNGHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: image/png\r\n\r\n"      /*PNG类型的响应报文，最后两个\r\n必须要有*/
+#define RES_PNGHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: image/png\r\n\r\n"      //PNG type response message, the last two \r\n must have
   
-#define RES_CSSHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n"       /*CSS类型的响应报文，最后两个\r\n必须要有*/
+#define RES_CSSHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n"       //CSS type response message, the last two \r\n must have
 
-#define RES_GIFHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\n\r\n"      /*GIF类型的响应报文，最后两个\r\n必须要有*/
+#define RES_GIFHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\n\r\n"      //GIF type response message, the last two \r\n must have
  /*-----------------*/
 
-typedef struct Basic_Cfg                        //基础设置配置参数
+typedef struct Basic_Cfg                        //Basic configuration parameters
 {
-	u8 flag[2];                                 //配置信息验证码0x57,0xab
+	u8 flag[2];                                 //Configuration information verification code: 0x57,0xab
 	u8 mac[6];
 	u8 ip[4];
 	u8 mask[4];
@@ -63,9 +67,9 @@ typedef struct Basic_Cfg                        //基础设置配置参数
 } *Basic_Cfg;
 
 
-typedef struct Port_Cfg                         //端口设置配置参数
+typedef struct Port_Cfg                         //Port configuration parameters
 {
-    u8 flag[2];                                 //配置信息验证码0x57,0xab
+    u8 flag[2];                                 //Configuration information verification code: 0x57,0xab
     u8 mode;
     u8 src_port[2];
     u8 des_ip[4];
@@ -73,25 +77,25 @@ typedef struct Port_Cfg                         //端口设置配置参数
 } *Port_Cfg;
 
 
-typedef struct Login_Cfg                        //登录设置配置参数
+typedef struct Login_Cfg                        //Login configuration parameters
 {
-    u8  flag[2];                                //配置信息验证码0x57,0xab
+    u8  flag[2];                                //Configuration information verification code: 0x57,0xab
     u8  user[10];
     u8  pass[10];
 } *Login_Cfg;
 
 
-typedef struct _st_http_request                 //浏览器请求信息
+typedef struct _st_http_request                 //Browser request information
 {
 	char	METHOD;					
 	char	TYPE;					
 	char	URL[MAX_URL_SIZE];
 }st_http_request;
 
-typedef struct Para_Tab                         //配置信息参数表
+typedef struct Para_Tab                         //Configuration information parameter table
 {
-	char *para;                                 //配置项名称
-	char value[20];                             //配置项数值
+	char *para;                                 //Configuration item name
+	char value[20];                             //Configuration item value
 }Parameter;
 
 extern Basic_Cfg Basic_CfgBuf;
@@ -114,7 +118,7 @@ extern u8 Login_Default[LOGIN_CFG_LEN];
 
 extern u8 Port_Default[PORT_CFG_LEN];
 
-extern u8 httpweb[200] ;                        /*用来保存http响应报文*/
+extern u8 httpweb[200] ;
 
 extern u8 RecvBuffer[];
 
@@ -138,13 +142,10 @@ extern void Init_Para_Tab(void) ;
 
 extern void Web_Server(void);
 
-/*erase Data-Flash block, minimal block is 256B*/
-extern void EEPROM_ERASE(u32 Page_Address, u32 Length );
+extern void WEB_ERASE(u32 Page_Address, u32 Length );
 
-/*write Data-Flash data block, return FLASH_Status*/
-extern FLASH_Status EEPROM_WRITE( u32 StartAddr, u8 *Buffer, u32 Length );
+extern FLASH_Status WEB_WRITE( u32 StartAddr, u8 *Buffer, u32 Length );
 
-/*read Data-Flash data block */
-extern void EEPROM_READ( u32 StartAddr, u8 *Buffer, u32 Length );
+extern void WEB_READ( u32 StartAddr, u8 *Buffer, u32 Length );
 
 #endif	

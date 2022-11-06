@@ -7,27 +7,20 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
-#include "string.h"
-#include "debug.h"
-#include "WCHNET.h"
-#include "eth_driver.h"
-
 /*
  *@Note
 DNS例程，演示DHCP自动获取IP后，再请求域名解析
 */
+#include "string.h"
+#include "debug.h"
+#include "wchnet.h"
+#include "eth_driver.h"
 
-u8 MACAddr[6];                                      /*MAC地址*/
-u8 IPAddr[4]   = {192, 168, 1, 10};                 /*IP地址*/
-u8 GWIPAddr[4] = {192, 168, 1, 1};                  /*网关*/
-u8 IPMask[4]   = {255, 255, 255, 0};                /*子网掩码*/
-u8 DESIP[4]    = {255, 255, 255, 255};              /*目的IP地址*/
-
-u8  SocketId;                                       /*socket id号*/
-u8  SocketRecvBuf[RECE_BUF_LEN];                    /*socket缓冲区*/
-u8  MyBuf[RECE_BUF_LEN];
-u16 desport = 1000;                                 /*目的端口号*/
-u16 srcport = 1000;                                 /*源端口号*/
+u8 MACAddr[6];                                      //MAC address
+u8 IPAddr[4]   = {0, 0, 0, 0};                      //IP address
+u8 GWIPAddr[4] = {0, 0, 0, 0};                      //Gateway IP address
+u8 IPMask[4]   = {0, 0, 0, 0};                      //subnet mask
+u8 DESIP[4]    = {255, 255, 255, 255};              //destination IP address
 u16 DnsPort = 53;
 __attribute__((__aligned__(4))) u8  RemoteIp[4];
 
@@ -36,13 +29,15 @@ __attribute__((__aligned__(4))) u8  RemoteIp[4];
  *
  * @brief   check if error.
  *
+ * @param   iError - error constants.
+ *
  * @return  none
  */
 void mStopIfError(u8 iError)
 {
-    if(iError == WCHNET_ERR_SUCCESS)
-        return;                                     /* 操作成功 */
-    printf("Error: %02X\r\n", (u16)iError);         /* 显示错误 */
+    if (iError == WCHNET_ERR_SUCCESS)
+        return;
+    printf("Error: %02X\r\n", (u16) iError);
 }
 
 /*********************************************************************
@@ -75,22 +70,25 @@ void TIM2_Init(void)
  *
  * @brief   Socket Interrupt Handle
  *
+ * @param   socketid - socket id.
+ *          intstat - interrupt status
+ *
  * @return  none
  */
-void WCHNET_HandleSockInt(u8 sockeid, u8 initstat)
+void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
 {
-    if(initstat & SINT_STAT_RECV)                   /* socket接收中断*/
+    if (intstat & SINT_STAT_RECV)                              //receive data
     {
     }
-    if(initstat & SINT_STAT_CONNECT)                /* socket连接成功中断*/
+    if (intstat & SINT_STAT_CONNECT)                           //connect successfully
     {
         printf("TCP Connect Success\r\n");
     }
-    if(initstat & SINT_STAT_DISCONNECT)             /* socket连接断开中断*/
+    if (intstat & SINT_STAT_DISCONNECT)                        //disconnect
     {
         printf("TCP Disconnect\r\n");
     }
-    if(initstat & SINT_STAT_TIM_OUT)                /* socket连接超时中断*/
+    if (intstat & SINT_STAT_TIM_OUT)                           //timeout disconnect
     {
         printf("TCP Timeout\r\n");
     }
@@ -105,32 +103,30 @@ void WCHNET_HandleSockInt(u8 sockeid, u8 initstat)
  */
 void WCHNET_HandleGlobalInt(void)
 {
-    u8  initstat;
+    u8 intstat;
     u16 i;
-    u8  socketinit;
+    u8 socketint;
 
-    initstat = WCHNET_GetGlobalInt();               /* 获取全局中断标志*/
-    if(initstat & GINT_STAT_UNREACH)                /* 不可达中断 */
+    intstat = WCHNET_GetGlobalInt();                              //get global interrupt flag
+    if (intstat & GINT_STAT_UNREACH)                              //Unreachable interrupt
     {
         printf("GINT_STAT_UNREACH\r\n");
     }
-    if(initstat & GINT_STAT_IP_CONFLI)              /* IP冲突中断 */
+    if (intstat & GINT_STAT_IP_CONFLI)                            //IP conflict
     {
         printf("GINT_STAT_IP_CONFLI\r\n");
     }
-    if(initstat & GINT_STAT_PHY_CHANGE)             /* PHY状态变化中断 */
+    if (intstat & GINT_STAT_PHY_CHANGE)                           //PHY status change
     {
-        i = WCHNET_GetPHYStatus();                  /* 获取PHY连接状态*/
-        if(i & PHY_Linked_Status)
+        i = WCHNET_GetPHYStatus();
+        if (i & PHY_Linked_Status)
             printf("PHY Link Success\r\n");
     }
-    if(initstat & GINT_STAT_SOCKET)
-    {
-        for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
-        {
-            socketinit = WCHNET_GetSocketInt(i);
-            if(socketinit)
-                WCHNET_HandleSockInt(i, socketinit);
+    if (intstat & GINT_STAT_SOCKET) {                             //socket related interrupt
+        for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {
+            socketint = WCHNET_GetSocketInt(i);
+            if (socketint)
+                WCHNET_HandleSockInt(i, socketint);
         }
     }
 }
@@ -155,12 +151,16 @@ void WCHNET_DNSCallBack(const char *name, u8 *ipaddr, void *callback_arg)
     {
         printf("callback_arg = %02x\r\n", (*(u8 *)callback_arg));
     }
+    WCHNET_DNSStop();                                                          //stop DNS,and release socket
 }
 
 /*********************************************************************
  * @fn      WCHNET_DHCPCallBack
  *
  * @brief   DHCPCallBack
+ *
+ * @param   status - status returned by DHCP
+ *          arg - Data returned by DHCP
  *
  * @return  DHCP status
  */
@@ -181,17 +181,18 @@ u8 WCHNET_DHCPCallBack(u8 status, void *arg)
                (u16)GWIPAddr[2], (u16)GWIPAddr[3]);
         printf("IPAddr = %d.%d.%d.%d \r\n", (u16)IPMask[0], (u16)IPMask[1],
                (u16)IPMask[2], (u16)IPMask[3]);
-        printf("DNS1: %d.%d.%d.%d \r\n", p[12], p[13], p[14], p[15]);               /*路由器提供的DNS服务器地址*/
+        printf("DNS1: %d.%d.%d.%d \r\n", p[12], p[13], p[14], p[15]);            //DNS server address provided by the router
         printf("DNS2: %d.%d.%d.%d \r\n", p[16], p[17], p[18], p[19]);
 
-        WCHNET_InitDNS(&p[12], DnsPort);                                            /*设置DNS服务器IP地址，和DNS服务器端口53*/
-        WCHNET_HostNameGetIp("www.baidu.com", RemoteIp, WCHNET_DNSCallBack, NULL);  /*开始DNS解析，解析结果在WCHNET_DNSCallBack中 */
+        WCHNET_InitDNS(&p[12], DnsPort);                                         //Set DNS server IP address, and DNS server port is 53
+        WCHNET_HostNameGetIp("www.wch.cn", RemoteIp, WCHNET_DNSCallBack, NULL);  //Start DNS
+        return READY;
     }
     else
     {
         printf("DHCP Fail %02x \r\n", status);
+        return NoREADY;
     }
-    return 0;
 }
 
 /*********************************************************************
@@ -206,28 +207,34 @@ int main(void)
     u8 i;
 
     Delay_Init();
-    USART_Printf_Init(115200); /*串口打印初始化*/
+    USART_Printf_Init(115200);                                          //USART initialize
     printf("DNS Test\r\n");
     printf("SystemClk:%d\r\n",SystemCoreClock);
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-      printf("version error.\n");
+        printf("version error.\n");
     }
-    WCHNET_GetMacAddr(MACAddr);                                                     /*获取芯片MAC地址*/
+    WCHNET_GetMacAddr(MACAddr);                                         //get the chip MAC address
     printf("mac addr:");
-    for(int i=0;i<6;i++) printf("%x ",MACAddr[i]);
+    for(i = 0; i < 6; i++) 
+        printf("%x ",MACAddr[i]);
     printf("\n");
     TIM2_Init();
-    WCHNET_DHCPSetHostname("ch32v307");                                             /*设置DHCP主机名称*/
-    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                                /*以太网库初始化*/
+    WCHNET_DHCPSetHostname("WCHNET");                                 //Configure DHCP host name
+    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                    //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
-    WCHNET_DHCPStart(WCHNET_DHCPCallBack);                                          /*启用DHCP，DHCP成功后，在DHCP回调函数里开始DNS解析*/
+    if(i == WCHNET_ERR_SUCCESS)
+        printf("WCHNET_LibInit Success\r\n");
+    WCHNET_DHCPStart(WCHNET_DHCPCallBack);                              //Start DHCP
 
     while(1)
     {
-        WCHNET_MainTask();                                                          /*以太网库主任务函数，需要循环调用*/
-        if(WCHNET_QueryGlobalInt())                                                 /*查询以太网全局中断，如果有中断，调用全局中断处理函数*/
+        /*Ethernet library main task function,
+         * which needs to be called cyclically*/
+        WCHNET_MainTask();
+        /*Query the Ethernet global interrupt,
+         * if there is an interrupt, call the global interrupt handler*/
+        if(WCHNET_QueryGlobalInt())
         {
             WCHNET_HandleGlobalInt();
         }

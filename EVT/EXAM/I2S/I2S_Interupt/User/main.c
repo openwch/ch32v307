@@ -11,7 +11,7 @@
 /*
  *@Note
    I2S主发从收中断例程：
-      本例程演示 I2S3作从机接收，I2S2作主机发送。
+      本例程演示两块板子 -1块板子I2S3作从机接收，1块板子I2S2作主机发送。
  SPI2-I2S2:
      WS —— PB12
      CK —— PB13
@@ -32,17 +32,32 @@
 #define   _16bit__data_mode   0    //<= 16bit
 #define   _32bit__data_mode   1    //> 16bit
 
-#define  data_len_mode   _16bit__data_mode
-//#define  data_len_mode   _32bit__data_mode
+//#define  data_len_mode   _16bit__data_mode
+#define  data_len_mode   _32bit__data_mode
+
+/* I2S Mode Definition */
+#define HOST_MODE     0
+#define SLAVE_MODE    1
+
+/* I2S Communication Mode Selection */
+#define I2S_MODE   HOST_MODE
+//#define I2S_MODE   SLAVE_MODE
 
 #define  Len    10
 
+volatile u8 t=0, p=0, flag_end = 0;
+
+#if (I2S_MODE == HOST_MODE)
 u32 I2S2_Tx[Len];
-u32 I2S3_Rx[Len];
-
-void SPI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void SPI2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+#else
 
+u32 I2S3_Rx[Len];
+void SPI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+#endif
+
+
+#if (I2S_MODE == HOST_MODE)
 /*********************************************************************
  * @fn      I2S2_Init
  *
@@ -91,16 +106,45 @@ void I2S2_Init(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    SPI_I2S_ClearITPendingBit(SPI3, SPI_I2S_IT_TXE);
-    SPI_I2S_ClearITPendingBit(SPI3, SPI_I2S_IT_ERR);
+    SPI_I2S_ClearITPendingBit(SPI2, SPI_I2S_IT_TXE);
 
     SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, ENABLE);
-    SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_ERR, ENABLE);
 
     I2S_Cmd(SPI2, ENABLE);
 
 }
 
+/*********************************************************************
+ * @fn      SPI2_IRQHandler
+ *
+ * @brief   This function handles SPI2 exception.
+ *
+ * @return  none
+ */
+void SPI2_IRQHandler(void)
+{
+    static u8 flag = 0;
+
+    if(SPI_I2S_GetITStatus(SPI2, SPI_I2S_IT_TXE) == 1){
+#if (data_len_mode == _16bit__data_mode)
+        SPI_I2S_SendData(SPI2, I2S2_Tx[t++]);
+
+#elif (data_len_mode == _32bit__data_mode)
+        if(flag==0){
+            SPI_I2S_SendData(SPI2, (u16)(I2S2_Tx[t]>>16));
+            flag =1;
+        }
+        else{
+            SPI_I2S_SendData(SPI2, (u16)(I2S2_Tx[t++]));;
+            flag =0;
+        }
+
+#endif
+
+    }
+
+}
+#else
 /*********************************************************************
  * @fn      I2S3_Init
  *
@@ -150,45 +194,11 @@ void I2S3_Init(void)
     NVIC_Init(&NVIC_InitStructure);
 
     SPI_I2S_ClearITPendingBit(SPI3, SPI_I2S_IT_RXNE);
-    SPI_I2S_ClearITPendingBit(SPI3, SPI_I2S_IT_ERR);
 
     SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, ENABLE);
-    SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_ERR, ENABLE);
+
 
     I2S_Cmd(SPI3, ENABLE);
-}
-
-u8 t=0, p=0;
-
-/*********************************************************************
- * @fn      SPI2_IRQHandler
- *
- * @brief   This function handles SPI2 exception.
- *
- * @return  none
- */
-void SPI2_IRQHandler(void)
-{
-    static u8 falg = 0;
-
-    if(SPI_I2S_GetITStatus(SPI2, SPI_I2S_IT_TXE) == 1){
-#if (data_len_mode == _16bit__data_mode)
-        SPI_I2S_SendData(SPI2, I2S2_Tx[t++]);
-
-#elif (data_len_mode == _32bit__data_mode)
-        if(falg==0){
-            SPI_I2S_SendData(SPI2, (u16)(I2S2_Tx[t]>>16));
-            falg =1;
-        }
-        else{
-            SPI_I2S_SendData(SPI2, (u16)(I2S2_Tx[t++]));;
-            falg =0;
-        }
-
-#endif
-
-    }
-
 }
 
 /*********************************************************************
@@ -206,10 +216,9 @@ void SPI3_IRQHandler(void)
 #if (data_len_mode == _16bit__data_mode)
         I2S3_Rx[p++] = SPI_I2S_ReceiveData(SPI3);
 
-        if(p==11){
-
+        if(p==10){
+            flag_end = 1;
             SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, DISABLE);
-      SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, DISABLE);
         }
 
 #elif (data_len_mode == _32bit__data_mode)
@@ -222,9 +231,9 @@ void SPI3_IRQHandler(void)
             falg =0;
         }
 
-        if(p==21){
+        if(p==20){
+            flag_end = 1;
             SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, DISABLE);
-            SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE, DISABLE);
         }
 #endif
 
@@ -232,6 +241,7 @@ void SPI3_IRQHandler(void)
 
 }
 
+#endif
 
 /*********************************************************************
  * @fn      main
@@ -250,8 +260,11 @@ int main(void)
     printf("SystemClk:%d\r\n",SystemCoreClock);
 
     Delay_Ms(1000);
-    Delay_Ms(1000);
 
+
+#if (I2S_MODE == HOST_MODE)
+
+    Delay_Ms(1000);
     for(i=0; i<Len; i++){
 #if(data_len_mode == _16bit__data_mode)
     I2S2_Tx[i] = 0x5aa1 +i;
@@ -261,17 +274,29 @@ int main(void)
 
 #endif
     }
-
     SPI_I2S_DeInit(SPI2);
-    SPI_I2S_DeInit(SPI3);
-
-    I2S3_Init();
     I2S2_Init();
+
+    Delay_Ms(10);
+    printf("Tx data:\r\n");
+    for(i=0; i<Len; i++){
+        printf("%08x\r\n", I2S2_Tx[i]);
+    }
+
+#else
+
+
+    SPI_I2S_DeInit(SPI3);
+    I2S3_Init();
+
+    while(flag_end==0);
 
     printf("Rx data:\r\n");
     for(i=0; i<Len; i++){
-        printf("%08x %08x\r\n", I2S2_Tx[i], I2S3_Rx[i]);
+        printf("%08x\r\n", I2S3_Rx[i]);
     }
+
+#endif
 
     while(1);
 }

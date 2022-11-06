@@ -10,9 +10,12 @@
 
 /*
  *@Note
-  模拟自定义USB设备（CH372设备）例程：
-  本例程演示使用 USBHS模拟自定义设备 CH372，端点1，2可自由上下传，下传数据将复制到上传，批量设备，最大包长512，
-  可使用Bushund或其它上位机软件对设备进行操作。其它端点可以参考端点1,2操作。
+  Example routine to emulate a custom USB device (CH372 device).
+  This routine demonstrates the use of a USBHS Device to emulate a custom device, the CH372, 
+  with endpoints 1/3/5 downlinking data and uploading via endpoints 1/4/6 respectively
+  Endpoint 1 uploads and downlinks via ring buffer with no data reversal, endpoints 3/4, and endpoints 5/6 copy and upload.
+  The device can be operated using Bushund or other upper computer software.
+  Note: This routine needs to be demonstrated in conjunction with the host software.
 */
 
 #include "ch32v30x_usbhs_device.h"
@@ -27,15 +30,48 @@
  */
 int main(void)
 {
+    uint8_t ret;
 	Delay_Init();
 	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "SystemClk:%d\r\n",SystemCoreClock) ;
+	printf( "CH372Device Running On USBHS Controller\n" );
+	
     /* USB20 device init */
-    USBHS_RCC_Init( );                                                         /* USB2.0高速设备RCC初始化 */
+    USBHS_RCC_Init( );
     USBHS_Device_Init( ENABLE );
     NVIC_EnableIRQ( USBHS_IRQn );
 
 	while(1)
-	{ }
+	{
+        /* Determine if enumeration is complete, perform data transfer if completed */
+        if(USBHS_DevEnumStatus)
+        {
+            /* Data Transfer */
+            if(RingBuffer_Comm.RemainPack)
+            {
+                ret = USBHS_Endp_DataUp(DEF_UEP1, &Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_HS_PACK_SIZE], RingBuffer_Comm.PackLen[RingBuffer_Comm.DealPtr], DEF_UEP_DMA_LOAD);
+                if(ret == 0)
+                {
+                    NVIC_DisableIRQ(USBHS_IRQn);
+                    RingBuffer_Comm.RemainPack--;
+                    RingBuffer_Comm.DealPtr++;
+                    if(RingBuffer_Comm.DealPtr == DEF_Ring_Buffer_Max_Blks)
+                    {
+                        RingBuffer_Comm.DealPtr = 0;
+                    }
+                    NVIC_EnableIRQ(USBHS_IRQn);
+                }
+            }
+
+            /* Monitor whether the remaining space is available for further downloads */
+            if(RingBuffer_Comm.RemainPack < (DEF_Ring_Buffer_Max_Blks - DEF_RING_BUFFER_RESTART))
+            {
+                if(RingBuffer_Comm.StopFlag)
+                {
+                    RingBuffer_Comm.StopFlag = 0;
+                    USBHSD->UEP1_RX_CTRL = (USBHSD->UEP1_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
+                }
+            }
+        }
+	}
 }

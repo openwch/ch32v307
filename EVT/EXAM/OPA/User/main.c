@@ -14,7 +14,7 @@
  DAC_CH1——PA4
  OPA4_CHP1——PC4
  OPA4_CHN1——PC3
- OPA4_OUT_IO_ADC——PA0
+ OPA4_OUT_IO_OUT0——PA0
 
    本例中PA0和PC3短接，PA4接PC4，若负反馈接电阻，也可构成运算放大器
 */
@@ -49,7 +49,7 @@ void OPA4_Init(void)
     OPA_InitStructure.OPA_NUM=OPA4;
     OPA_InitStructure.PSEL=CHP1;
     OPA_InitStructure.NSEL=CHN1;
-    OPA_InitStructure.Mode=OUT_IO_ADC;
+    OPA_InitStructure.Mode=OUT_IO_OUT0;
     OPA_Init(&OPA_InitStructure);
     OPA_Cmd(OPA4,ENABLE);
 

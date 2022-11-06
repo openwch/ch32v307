@@ -14,15 +14,17 @@
 #ifndef __CHRV3UFI_H__
 #define __CHRV3UFI_H__
 
+
+
 #define CHRV3_LIB_VER		0x10
 
 //#define DISK_BASE_BUF_LEN		512	/* 默认的磁盘数据缓冲区大小为512字节(可以选择为2048甚至4096以支持某些大扇区的U盘),为0则禁止在本文件中定义缓冲区并由应用程序在pDISK_BASE_BUF中指定 */
 /* 如果需要复用磁盘数据缓冲区以节约RAM,那么可将DISK_BASE_BUF_LEN定义为0以禁止在本文件中定义缓冲区,而由应用程序在调用CHRV3LibInit之前将与其它程序合用的缓冲区起始地址置入pDISK_BASE_BUF变量 */
 
-//#define NO_DEFAULT_ACCESS_SECTOR	1		/* 禁止默认的磁盘扇区读写子程序,下面用自行编写的程序代替它 */
+//#define NO_DEFAULT_ACCESS_SECTOR	    1		/* 禁止默认的磁盘扇区读写子程序,下面用自行编写的程序代替它 */
 //#define NO_DEFAULT_DISK_CONNECT		1		/* 禁止默认的检查磁盘连接子程序,下面用自行编写的程序代替它 */
 //#define NO_DEFAULT_FILE_ENUMER		1		/* 禁止默认的文件名枚举回调程序,下面用自行编写的程序代替它 */
-
+#define FOR_ROOT_UDISK_ONLY           1
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,18 +88,18 @@ extern "C" {
 
 /* FAT数据区中文件目录信息 */
 typedef struct _FAT_DIR_INFO {
-	UINT8	DIR_Name[11];				/* 00H,文件名,共11字节,不足处填空格 */
-	UINT8	DIR_Attr;					/* 0BH,文件属性,参考下面的说明 */
-	UINT8	DIR_NTRes;					/* 0CH */
-	UINT8	DIR_CrtTimeTenth;			/* 0DH,文件创建的时间,以0.1秒单位计数 */
-	UINT16	DIR_CrtTime;				/* 0EH,文件创建的时间 */
-	UINT16	DIR_CrtDate;				/* 10H,文件创建的日期 */
-	UINT16	DIR_LstAccDate;				/* 12H,最近一次存取操作的日期 */
-	UINT16	DIR_FstClusHI;				/* 14H */
-	UINT16	DIR_WrtTime;				/* 16H,文件修改时间,参考宏MAKE_FILE_TIME */
-	UINT16	DIR_WrtDate;				/* 18H,文件修改日期,参考宏MAKE_FILE_DATA */
-	UINT16	DIR_FstClusLO;				/* 1AH */
-	UINT32	DIR_FileSize;				/* 1CH,文件长度 */
+	uint8_t	DIR_Name[11];				/* 00H,文件名,共11字节,不足处填空格 */
+	uint8_t	DIR_Attr;					/* 0BH,文件属性,参考下面的说明 */
+	uint8_t	DIR_NTRes;					/* 0CH */
+	uint8_t	DIR_CrtTimeTenth;			/* 0DH,文件创建的时间,以0.1秒单位计数 */
+	uint16_t	DIR_CrtTime;				/* 0EH,文件创建的时间 */
+	uint16_t	DIR_CrtDate;				/* 10H,文件创建的日期 */
+	uint16_t	DIR_LstAccDate;				/* 12H,最近一次存取操作的日期 */
+	uint16_t	DIR_FstClusHI;				/* 14H */
+	uint16_t	DIR_WrtTime;				/* 16H,文件修改时间,参考宏MAKE_FILE_TIME */
+	uint16_t	DIR_WrtDate;				/* 18H,文件修改日期,参考宏MAKE_FILE_DATA */
+	uint16_t	DIR_FstClusLO;				/* 1AH */
+	uint32_t	DIR_FileSize;				/* 1CH,文件长度 */
 } FAT_DIR_INFO;							/* 20H */
 
 typedef FAT_DIR_INFO *PX_FAT_DIR_INFO;
@@ -110,14 +112,14 @@ typedef FAT_DIR_INFO *PX_FAT_DIR_INFO;
 #define ATTR_DIRECTORY			0x10	/* 子目录 */
 #define ATTR_ARCHIVE			0x20	/* 文件为存档属性 */
 #define ATTR_LONG_NAME			( ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID )
-/* 文件属性 UINT8 */
+/* 文件属性 uint8_t */
 /* bit0 bit1 bit2 bit3 bit4 bit5 bit6 bit7 */
 /*  只   隐   系   卷   目   存   未定义   */
 /*  读   藏   统   标   录   档            */
-/* 文件时间 UINT16 */
+/* 文件时间 uint16_t */
 /* Time = (Hour<<11) + (Minute<<5) + (Second>>1) */
 #define MAKE_FILE_TIME( h, m, s )	( (h<<11) + (m<<5) + (s>>1) )	/* 生成指定时分秒的文件时间数据 */
-/* 文件日期 UINT16 */
+/* 文件日期 uint16_t */
 /* Date = ((Year-1980)<<9) + (Month<<5) + Day */
 #define MAKE_FILE_DATE( y, m, d )	( ((y-1980)<<9) + (m<<5) + d )	/* 生成指定年月日的文件日期数据 */
 
@@ -130,83 +132,101 @@ typedef FAT_DIR_INFO *PX_FAT_DIR_INFO;
 #endif
 
 /* 外部命令参数 */
-typedef union _CMD_PARAM {
-	struct {
-		UINT8	mBuffer[ MAX_PATH_LEN ];
-	} Other;
-	struct {
-		UINT32	mTotalSector;			/* 返回: 当前逻辑盘的总扇区数 */
-		UINT32	mFreeSector;			/* 返回: 当前逻辑盘的剩余扇区数 */
-		UINT32	mSaveValue;
-	} Query;							/* CMD_DiskQuery, 查询磁盘信息 */
-	struct {
-		UINT8	mPathName[ MAX_PATH_LEN ];	/* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
-	} Open;								/* CMD_FileOpen, 打开文件 */
-//	struct {
-//		UINT8	mPathName[ MAX_PATH_LEN ];	/* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名(含通配符*)...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILE*",00H */
-//	} Open;								/* CMD_FileOpen, 枚举文件, CHRV3vFileSize最高位为1则各调用xFileNameEnumer,为0则返回指定序号的文件名 */
-	struct {
-		UINT8	mUpdateLen;				/* 输入参数: 是否允许更新长度: 0禁止,1允许 */
-	} Close;							/* CMD_FileClose, 关闭当前文件 */
-	struct {
-		UINT8	mPathName[ MAX_PATH_LEN ];	/* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
-	} Create;							/* CMD_FileCreate, 新建文件并打开,如果文件已经存在则先删除后再新建 */
-	struct {
-		UINT8	mPathName[ MAX_PATH_LEN ];	/* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
-	} Erase;							/* CMD_FileErase, 删除文件并关闭 */
-	struct {
-		UINT32	mFileSize;				/* 输入参数: 新的文件长度,为0FFFFFFFFH则不修改, 返回: 原长度 */
-		UINT16	mFileDate;				/* 输入参数: 新的文件日期,为0FFFFH则不修改, 返回: 原日期 */
-		UINT16	mFileTime;				/* 输入参数: 新的文件时间,为0FFFFH则不修改, 返回: 原时间 */
-		UINT8	mFileAttr;				/* 输入参数: 新的文件属性,为0FFH则不修改, 返回: 原属性 */
-	} Modify;							/* CMD_FileQuery, 查询当前文件的信息; CMD_FileModify, 查询或者修改当前文件的信息 */
-	struct {
-		UINT32	mSaveCurrClus;
-		UINT32	mSaveLastClus;
-	} Alloc;							/* CMD_FileAlloc, 根据文件长度调整为文件分配的磁盘空间 */
-	struct {
-		UINT32	mSectorOffset;			/* 输入参数: 扇区偏移,0则移动到文件头,0FFFFFFFFH则移动到文件尾, 返回: 当前文件指针对应的绝对线性扇区号, 0FFFFFFFFH则已到文件尾 */
-		UINT32	mLastOffset;
-	} Locate;							/* CMD_FileLocate, 移动当前文件指针 */
-	struct {
-		UINT8	mSectorCount;			/* 输入参数: 读取扇区数, 返回: 实际读取扇区数 */
-		UINT8	mActCnt;
-		UINT8	mLbaCount;
-		UINT8	mRemainCnt;
-		PUINT8	mDataBuffer;			/* 输入参数: 缓冲区起始地址, 返回: 缓冲区当前地址 */
-		UINT32	mLbaStart;
-	} Read;								/* CMD_FileRead, 从当前文件读取数据 */
-	struct {
-		UINT8	mSectorCount;			/* 输入参数: 写入扇区数, 返回: 实际写入扇区数 */
-		UINT8	mActCnt;
-		UINT8	mLbaCount;
-		UINT8	mAllocCnt;
-		PUINT8	mDataBuffer;			/* 输入参数: 缓冲区起始地址, 返回: 缓冲区当前地址 */
-		UINT32	mLbaStart;
-		UINT32	mSaveValue;
-	} Write;							/* CMD_FileWrite, 向当前文件写入数据 */
-	struct {
-		UINT32	mDiskSizeSec;			/* 返回: 整个物理磁盘的总扇区数, 仅首次调用时返回 */
-	} DiskReady;						/* CMD_DiskReady, 查询磁盘就绪 */
-	struct {
-		UINT32	mByteOffset;			/* 输入参数: 以字节为单位的偏移量, 以字节为单位的文件指针, 返回: 当前文件指针对应的绝对线性扇区号, 0FFFFFFFFH则已到文件尾 */
-		UINT32	mLastOffset;
-	} ByteLocate;						/* CMD_ByteLocate, 以字节为单位移动当前文件指针 */
-	struct {
-		UINT16	mByteCount;				/* 输入参数: 准备读取的字节数, 返回: 实际读出的字节数 */
-		PUINT8	mByteBuffer;			/* 输入参数: 指向存放读出数据块的缓冲区 */
-		UINT16	mActCnt;
-	} ByteRead;							/* CMD_ByteRead, 以字节为单位从当前文件读取数据块 */
-	struct {
-		UINT16	mByteCount;				/* 输入参数: 准备写入的字节数, 返回: 实际写入的字节数 */
-		PUINT8	mByteBuffer;			/* 输入参数: 指向存放读出数据块的缓冲区 */
-		UINT16	mActCnt;
-	} ByteWrite;						/* CMD_ByteWrite, 以字节为单位向当前文件写入数据块 */
-	struct {
-		UINT8	mSaveVariable;			/* 输入参数: 为0则恢复单个U盘的变量,为0x80则恢复多个U盘的变量,其它值则备份/保存变量 */
-		UINT8	mReserved[3];
-		PUINT8	mBuffer;				/* 输入参数: 指向子程序库的变量的备份缓冲区,长度不小于80个字节 */
-	} SaveVariable;						/* CMD_SaveVariable, 备份/保存/恢复子程序库的变量 */
+typedef union _CMD_PARAM
+{
+    struct
+    {
+        uint8_t mBuffer[ MAX_PATH_LEN ];
+    } Other;
+    struct
+    {
+        uint32_t mTotalSector;          /* 返回: 当前逻辑盘的总扇区数 */
+        uint32_t mFreeSector;           /* 返回: 当前逻辑盘的剩余扇区数 */
+        uint32_t mSaveValue;
+    } Query;                            /* CMD_DiskQuery, 查询磁盘信息 */
+    struct
+    {
+        uint8_t mPathName[ MAX_PATH_LEN ];  /* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
+    } Open;                             /* CMD_FileOpen, 打开文件 */
+//  struct
+//  {
+//      uint8_t mPathName[ MAX_PATH_LEN ];  /* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名(含通配符*)...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILE*",00H */
+//  } Open;                             /* CMD_FileOpen, 枚举文件, CHRV3vFileSize最高位为1则各调用xFileNameEnumer,为0则返回指定序号的文件名 */
+    struct
+    {
+        uint8_t mUpdateLen;             /* 输入参数: 是否允许更新长度: 0禁止,1允许 */
+    } Close;                            /* CMD_FileClose, 关闭当前文件 */
+    struct
+    {
+        uint8_t mPathName[ MAX_PATH_LEN ];  /* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
+    } Create;                           /* CMD_FileCreate, 新建文件并打开,如果文件已经存在则先删除后再新建 */
+    struct
+    {
+        uint8_t mPathName[ MAX_PATH_LEN ];  /* 输入参数: 路径: [盘符,冒号,斜杠,目录名或者文件名及扩展名...,结束符00H], 其中盘符和冒号可以省略, 例如"C:\DIR1.EXT\DIR2\FILENAME.EXT",00H */
+    } Erase;                            /* CMD_FileErase, 删除文件并关闭 */
+    struct
+    {
+        uint32_t mFileSize;             /* 输入参数: 新的文件长度,为0FFFFFFFFH则不修改, 返回: 原长度 */
+        uint16_t mFileDate;             /* 输入参数: 新的文件日期,为0FFFFH则不修改, 返回: 原日期 */
+        uint16_t mFileTime;             /* 输入参数: 新的文件时间,为0FFFFH则不修改, 返回: 原时间 */
+        uint8_t  mFileAttr;             /* 输入参数: 新的文件属性,为0FFH则不修改, 返回: 原属性 */
+    } Modify;                           /* CMD_FileQuery, 查询当前文件的信息; CMD_FileModify, 查询或者修改当前文件的信息 */
+    struct
+    {
+        uint32_t mSaveCurrClus;
+        uint32_t mSaveLastClus;
+    } Alloc;                            /* CMD_FileAlloc, 根据文件长度调整为文件分配的磁盘空间 */
+    struct
+    {
+        uint32_t mSectorOffset;      /* 输入参数: 扇区偏移,0则移动到文件头,0FFFFFFFFH则移动到文件尾, 返回: 当前文件指针对应的绝对线性扇区号, 0FFFFFFFFH则已到文件尾 */
+        uint32_t mLastOffset;
+    } Locate;                           /* CMD_FileLocate, 移动当前文件指针 */
+    struct
+    {
+        uint8_t mSectorCount;           /* 输入参数: 读取扇区数, 返回: 实际读取扇区数 */
+        uint8_t mActCnt;
+        uint8_t mLbaCount;
+        uint8_t mRemainCnt;
+        uint8_t *mDataBuffer;           /* 输入参数: 缓冲区起始地址, 返回: 缓冲区当前地址 */
+        uint32_t mLbaStart;
+    } Read;                             /* CMD_FileRead, 从当前文件读取数据 */
+    struct
+    {
+        uint8_t mSectorCount;           /* 输入参数: 写入扇区数, 返回: 实际写入扇区数 */
+        uint8_t mActCnt;
+        uint8_t mLbaCount;
+        uint8_t mAllocCnt;
+        uint8_t *mDataBuffer;           /* 输入参数: 缓冲区起始地址, 返回: 缓冲区当前地址 */
+        uint32_t mLbaStart;
+        uint32_t mSaveValue;
+    } Write;                            /* CMD_FileWrite, 向当前文件写入数据 */
+    struct
+    {
+        uint32_t mDiskSizeSec;          /* 返回: 整个物理磁盘的总扇区数, 仅首次调用时返回 */
+    } DiskReady;                        /* CMD_DiskReady, 查询磁盘就绪 */
+    struct
+    {
+        uint32_t mByteOffset;           /* 输入参数: 以字节为单位的偏移量, 以字节为单位的文件指针, 返回: 当前文件指针对应的绝对线性扇区号, 0FFFFFFFFH则已到文件尾 */
+        uint32_t mLastOffset;
+    } ByteLocate;                       /* CMD_ByteLocate, 以字节为单位移动当前文件指针 */
+    struct
+    {
+        uint16_t mByteCount;            /* 输入参数: 准备读取的字节数, 返回: 实际读出的字节数 */
+        uint8_t *mByteBuffer;           /* 输入参数: 指向存放读出数据块的缓冲区 */
+        uint16_t mActCnt;
+    } ByteRead;                         /* CMD_ByteRead, 以字节为单位从当前文件读取数据块 */
+    struct
+    {
+        uint16_t mByteCount;            /* 输入参数: 准备写入的字节数, 返回: 实际写入的字节数 */
+        uint8_t *mByteBuffer;           /* 输入参数: 指向存放读出数据块的缓冲区 */
+        uint16_t mActCnt;
+    } ByteWrite;                        /* CMD_ByteWrite, 以字节为单位向当前文件写入数据块 */
+    struct
+    {
+        uint8_t mSaveVariable;          /* 输入参数: 为0则恢复单个U盘的变量,为0x80则恢复多个U盘的变量,其它值则备份/保存变量 */
+        uint8_t mReserved[3];
+        uint8_t *mBuffer;               /* 输入参数: 指向子程序库的变量的备份缓冲区,长度不小于80个字节 */
+    } SaveVariable;                     /* CMD_SaveVariable, 备份/保存/恢复子程序库的变量 */
 } CMD_PARAM;
 
 typedef CMD_PARAM CMD_PARAM_I;
@@ -226,7 +246,6 @@ typedef CMD_PARAM CMD_PARAM_I;
 #endif
 
 /* FILE: CHRV3UFI.C */
-
 #define EN_DISK_WRITE			1
 
 #ifndef DISK_BASE_BUF_LEN
@@ -234,35 +253,35 @@ typedef CMD_PARAM CMD_PARAM_I;
 #endif
 
 /* 子程序库中提供的变量 */
-extern	UINT8V	CHRV3IntStatus;				/* CHRV3操作的中断状态 */
-extern	UINT8V	CHRV3DiskStatus;			/* 磁盘及文件状态 */
-extern	UINT8	CHRV3vDiskFat;				/* 逻辑盘的FAT标志:1=FAT12,2=FAT16,3=FAT32 */
-extern	UINT8	CHRV3vSecPerClus;			/* 逻辑盘的每簇扇区数 */
-extern	UINT8	CHRV3vSectorSizeB;			/* log2(CHRV3vSectorSize) */
-extern	UINT32	CHRV3vStartLba;				/* 逻辑盘的起始绝对扇区号LBA */
-extern	UINT32	CHRV3vDiskRoot;				/* 对于FAT16盘为根目录占用扇区数,对于FAT32盘为根目录起始簇号 */
-extern	UINT32	CHRV3vDataStart;			/* 逻辑盘的数据区域的起始LBA */
-extern	UINT32	CHRV3vStartCluster;			/* 当前文件或者目录的起始簇号 */
-extern	UINT32	CHRV3vFileSize;				/* 当前文件的长度 */
-extern	UINT32	CHRV3vCurrentOffset;		/* 当前文件指针,当前读写位置的字节偏移 */
-extern	UINT32	CHRV3vFdtLba;				/* 当前FDT所在的LBA地址 */
-extern	UINT32	CHRV3vLbaCurrent;			/* 当前读写的磁盘起始LBA地址 */
-extern	UINT16	CHRV3vFdtOffset;			/* 当前FDT在扇区内的偏移地址 */
-extern	UINT16	CHRV3vSectorSize;			/* 磁盘的扇区大小 */
-extern	UINT8	CHRV3vCurrentLun;			/* 磁盘当前操作逻辑单元号 */
-extern	BOOL	CHRV3vSubClassIs6;			/* USB存储类设备的子类为6,0则非6 */
-extern	PUINT8	pDISK_BASE_BUF;		/* 指向外部RAM的磁盘数据缓冲区,缓冲区长度不小于CHRV3vSectorSize,由应用程序初始化 */
-extern	PUINT8	pDISK_FAT_BUF;		/* 指向外部RAM的磁盘FAT数据缓冲区,缓冲区长度不小于CHRV3vSectorSize,由应用程序初始化 */
-extern	UINT16	CHRV3vPacketSize;			/* USB存储类设备的最大包长度:64@FS,512@HS/SS,由应用程序初始化 */
-extern	PUINT32	pTX_DMA_A_REG;				/* 指向发送DMA地址寄存器,由应用程序初始化 */
-extern	PUINT32	pRX_DMA_A_REG;				/* 指向接收DMA地址寄存器,由应用程序初始化 */
-extern	PUINT16	pTX_LEN_REG;				/* 指向发送长度寄存器,由应用程序初始化 */
-extern	PUINT16	pRX_LEN_REG;				/* 指向接收长度寄存器,由应用程序初始化 */
+extern  volatile uint8_t CHRV3IntStatus;  /* CHRV3操作的中断状态 */
+extern  volatile uint8_t CHRV3DiskStatus; /* 磁盘及文件状态 */
+extern  uint8_t  CHRV3vDiskFat;         /* 逻辑盘的FAT标志:1=FAT12,2=FAT16,3=FAT32 */
+extern  uint8_t  CHRV3vSecPerClus;      /* 逻辑盘的每簇扇区数 */
+extern  uint8_t  CHRV3vSectorSizeB;     /* log2(CHRV3vSectorSize) */
+extern  uint32_t CHRV3vStartLba;        /* 逻辑盘的起始绝对扇区号LBA */
+extern  uint32_t CHRV3vDiskRoot;        /* 对于FAT16盘为根目录占用扇区数,对于FAT32盘为根目录起始簇号 */
+extern  uint32_t CHRV3vDataStart;       /* 逻辑盘的数据区域的起始LBA */
+extern  uint32_t CHRV3vStartCluster;    /* 当前文件或者目录的起始簇号 */
+extern  uint32_t CHRV3vFileSize;        /* 当前文件的长度 */
+extern  uint32_t CHRV3vCurrentOffset;   /* 当前文件指针,当前读写位置的字节偏移 */
+extern  uint32_t CHRV3vFdtLba;          /* 当前FDT所在的LBA地址 */
+extern  uint32_t CHRV3vLbaCurrent;      /* 当前读写的磁盘起始LBA地址 */
+extern  uint16_t CHRV3vFdtOffset;       /* 当前FDT在扇区内的偏移地址 */
+extern  uint16_t CHRV3vSectorSize;      /* 磁盘的扇区大小 */
+extern  uint8_t  CHRV3vCurrentLun;      /* 磁盘当前操作逻辑单元号 */
+extern  uint8_t  CHRV3vSubClassIs6;     /* USB存储类设备的子类为6,0则非6 */
+extern  uint8_t  *pDISK_BASE_BUF;       /* 指向外部RAM的磁盘数据缓冲区,缓冲区长度不小于CHRV3vSectorSize,由应用程序初始化 */
+extern  uint8_t  *pDISK_FAT_BUF;        /* 指向外部RAM的磁盘FAT数据缓冲区,缓冲区长度不小于CHRV3vSectorSize,由应用程序初始化 */
+extern  uint16_t CHRV3vPacketSize;     /* USB存储类设备的最大包长度:64@FS,512@HS/SS,由应用程序初始化 */
+extern  uint32_t *pTX_DMA_A_REG;        /* 指向发送DMA地址寄存器,由应用程序初始化 */
+extern  uint32_t *pRX_DMA_A_REG;        /* 指向接收DMA地址寄存器,由应用程序初始化 */
+extern  uint16_t *pTX_LEN_REG;          /* 指向发送长度寄存器,由应用程序初始化 */
+extern  uint16_t *pRX_LEN_REG;          /* 指向接收长度寄存器,由应用程序初始化 */
 
 extern	CMD_PARAM_I	mCmdParam;				/* 命令参数 */
 
-extern	__attribute__ ((aligned(4)))   UINT8	RxBuffer[ ];  // IN, must even address
-extern	__attribute__ ((aligned(4)))   UINT8	TxBuffer[ ];  // OUT, must even address
+extern	__attribute__ ((aligned(4)))   uint8_t 	RxBuffer[ ];  // IN, must even address
+extern	__attribute__ ((aligned(4)))   uint8_t	TxBuffer[ ];  // OUT, must even address
 
 //#define		PXUDISK_BOC_CBW	PUDISK_BOC_CBW
 //#define		PXUDISK_BOC_CSW	PUDISK_BOC_CSW
@@ -280,64 +299,64 @@ extern	__attribute__ ((aligned(4)))   UINT8	TxBuffer[ ];  // OUT, must even addr
 #endif
 
 #if		DISK_BASE_BUF_LEN > 0
-extern	UINT8	DISK_BASE_BUF[ DISK_BASE_BUF_LEN ];	/* 外部RAM的磁盘数据缓冲区,缓冲区长度为一个扇区的长度 */
+extern	uint8_t	DISK_BASE_BUF[ DISK_BASE_BUF_LEN ];	/* 外部RAM的磁盘数据缓冲区,缓冲区长度为一个扇区的长度 */
 #endif
-extern	UINT8	CHRV3ReadSector( UINT8 SectCount, PUINT8 DataBuf );	/* 从磁盘读取多个扇区的数据到缓冲区中 */
+extern	uint8_t	CHRV3ReadSector( uint8_t SectCount, uint8_t * DataBuf );	/* 从磁盘读取多个扇区的数据到缓冲区中 */
 #ifdef	EN_DISK_WRITE
-extern	UINT8	CHRV3WriteSector( UINT8 SectCount, PUINT8 DataBuf );	/* 将缓冲区中的多个扇区的数据块写入磁盘 */
+extern	uint8_t	CHRV3WriteSector( uint8_t SectCount, uint8_t * DataBuf );	/* 将缓冲区中的多个扇区的数据块写入磁盘 */
 #endif
 
-extern	UINT8	CHRV3DiskConnect( void );	/* 检查磁盘是否连接并更新磁盘状态 */
+extern	uint8_t	CHRV3DiskConnect( void );	/* 检查磁盘是否连接并更新磁盘状态 */
 extern	void	xFileNameEnumer( void );	/* 调用外部定义的子程序,文件名枚举回调子程序 */
 
-extern	UINT8	CHRV3LibInit( void );		/* 初始化CHRV3程序库,操作成功返回0 */
+extern	uint8_t	CHRV3LibInit( void );		/* 初始化CHRV3程序库,操作成功返回0 */
 
 /* 子程序库中提供的子程序 */
 /* 下述子程序中, 文件操作子程序CHRV3File*和磁盘查询子程序CHRV3DiskQuery都可能会用到磁盘数据缓冲区pDISK_BASE_BUF,
    并且有可能在pDISK_BASE_BUF中保存了磁盘信息, 所以必须保证pDISK_BASE_BUF不被用于其它用途,
    如果RAM较少, 要将pDISK_BASE_BUF临时用于其它用途, 那么在临时用完后必须调用CHRV3DirtyBuffer清除磁盘缓冲区 */
-extern	UINT8	CHRV3GetVer( void );		/* 获取当前子程序库的版本号 */
+extern	uint8_t	CHRV3GetVer( void );		/* 获取当前子程序库的版本号 */
 extern	void	CHRV3DirtyBuffer( void );	/* 清除磁盘缓冲区 */
-extern	UINT8	CHRV3BulkOnlyCmd( PUINT8 DataBuf );	/* 执行基于BulkOnly协议的命令 */
-extern	UINT8	CHRV3DiskReady( void );		/* 查询磁盘是否准备好 */
-extern	UINT8	CHRV3AnalyzeError( UINT8 iMode );	/* USB操作失败分析CHRV3IntStatus返回错误状态 */
-extern	UINT8	CHRV3FileOpen( void );		/* 打开文件或者枚举文件 */
-extern	UINT8	CHRV3FileClose( void );		/* 关闭当前文件 */
+extern	uint8_t	CHRV3BulkOnlyCmd( uint8_t * DataBuf );	/* 执行基于BulkOnly协议的命令 */
+extern	uint8_t	CHRV3DiskReady( void );		/* 查询磁盘是否准备好 */
+extern	uint8_t	CHRV3AnalyzeError( uint8_t iMode );	/* USB操作失败分析CHRV3IntStatus返回错误状态 */
+extern	uint8_t	CHRV3FileOpen( void );		/* 打开文件或者枚举文件 */
+extern	uint8_t	CHRV3FileClose( void );		/* 关闭当前文件 */
 #ifdef	EN_DISK_WRITE
-extern	UINT8	CHRV3FileErase( void );		/* 删除文件并关闭 */
-extern	UINT8	CHRV3FileCreate( void );	/* 新建文件并打开,如果文件已经存在则先删除后再新建 */
-extern	UINT8	CHRV3FileAlloc( void );		/* 根据文件长度调整为文件分配的磁盘空间 */
+extern	uint8_t	CHRV3FileErase( void );		/* 删除文件并关闭 */
+extern	uint8_t	CHRV3FileCreate( void );	/* 新建文件并打开,如果文件已经存在则先删除后再新建 */
+extern	uint8_t	CHRV3FileAlloc( void );		/* 根据文件长度调整为文件分配的磁盘空间 */
 #endif
-extern	UINT8	CHRV3FileModify( void );	/* 查询或者修改当前文件的信息 */
-extern	UINT8	CHRV3FileQuery( void );		/* 查询当前文件的信息 */
-extern	UINT8	CHRV3FileLocate( void );	/* 移动当前文件指针 */
-extern	UINT8	CHRV3FileRead( void );		/* 从当前文件读取数据到指定缓冲区 */
+extern	uint8_t	CHRV3FileModify( void );	/* 查询或者修改当前文件的信息 */
+extern	uint8_t	CHRV3FileQuery( void );		/* 查询当前文件的信息 */
+extern	uint8_t	CHRV3FileLocate( void );	/* 移动当前文件指针 */
+extern	uint8_t	CHRV3FileRead( void );		/* 从当前文件读取数据到指定缓冲区 */
 #ifdef	EN_DISK_WRITE
-extern	UINT8	CHRV3FileWrite( void );		/* 向当前文件写入指定缓冲区的数据 */
+extern	uint8_t	CHRV3FileWrite( void );		/* 向当前文件写入指定缓冲区的数据 */
 #endif
-extern	UINT8	CHRV3ByteLocate( void );	/* 以字节为单位移动当前文件指针 */
-extern	UINT8	CHRV3ByteRead( void );		/* 以字节为单位从当前位置读取数据块 */
+extern	uint8_t	CHRV3ByteLocate( void );	/* 以字节为单位移动当前文件指针 */
+extern	uint8_t	CHRV3ByteRead( void );		/* 以字节为单位从当前位置读取数据块 */
 #ifdef	EN_DISK_WRITE
-extern	UINT8	CHRV3ByteWrite( void );		/* 以字节为单位向当前位置写入数据块 */
+extern	uint8_t	CHRV3ByteWrite( void );		/* 以字节为单位向当前位置写入数据块 */
 #endif
-extern	UINT8	CHRV3DiskQuery( void );		/* 查询磁盘信息 */
+extern	uint8_t	CHRV3DiskQuery( void );		/* 查询磁盘信息 */
 extern	void	CHRV3SaveVariable( void );	/* 备份/保存/恢复子程序库的变量,用于子程序库在多个芯片或者U盘之间进行切换 */
 
-extern	void	mDelayuS( UINT16 n );		// 以uS为单位延时
-extern	void	mDelaymS( UINT16 n );		// 以mS为单位延时
-extern	UINT8	USBHostTransact( UINT8 endp_pid, UINT8 tog, UINT32 timeout );	// CHRV3传输事务,输入目的端点地址/PID令牌,同步标志,NAK重试时间,返回0成功,超时/出错重试
-extern	UINT8	HostCtrlTransfer( PUINT8 DataBuf, PUINT8 RetLen );	// 执行控制传输,8字节请求码在pSetupReq中,DataBuf为可选的收发缓冲区,实际收发长度返回在ReqLen指向的变量中
-//extern	void	CopySetupReqPkg( PCCHAR pReqPkt );  // 复制控制传输的请求包
-//extern	UINT8	CtrlGetDeviceDescrTB( void );      // 获取设备描述符,返回在TxBuffer中
-extern	UINT8	CtrlGetConfigDescrTB( void );         // 获取配置描述符,返回在TxBuffer中
-//extern	UINT8	CtrlSetUsbAddress( UINT8 addr );  // 设置USB设备地址
-extern	UINT8	CtrlSetUsbConfig( UINT8 cfg );       // 设置USB设备配置
-extern	UINT8	CtrlClearEndpStall( UINT8 endp );   // 清除端点STALL
+extern	void	mDelayuS( uint16_t n );		// 以uS为单位延时
+extern	void	mDelaymS( uint16_t n );		// 以mS为单位延时
+extern	uint8_t	USBHostTransact( uint8_t endp_pid, uint8_t tog, uint32_t timeout );	// CHRV3传输事务,输入目的端点地址/PID令牌,同步标志,NAK重试时间,返回0成功,超时/出错重试
+extern	uint8_t	HostCtrlTransfer( uint8_t * DataBuf, uint8_t * RetLen );	// 执行控制传输,8字节请求码在pSetupReq中,DataBuf为可选的收发缓冲区,实际收发长度返回在ReqLen指向的变量中
+extern	void	CopySetupReqPkg( const char * pReqPkt );  // 复制控制传输的请求包
+extern	uint8_t	CtrlGetDeviceDescrTB( void );       // 获取设备描述符,返回在TxBuffer中
+extern	uint8_t	CtrlGetConfigDescrTB( void );       // 获取配置描述符,返回在TxBuffer中
+extern	uint8_t	CtrlSetUsbAddress( uint8_t addr );  // 设置USB设备地址
+extern	uint8_t	CtrlSetUsbConfig( uint8_t cfg );    // 设置USB设备配置
+extern	uint8_t	CtrlClearEndpStall( uint8_t endp ); // 清除端点STALL
 #ifndef	FOR_ROOT_UDISK_ONLY
-//extern	UINT8	CtrlGetHubDescr( void );  // 获取HUB描述符,返回在TxBuffer中
-extern	UINT8	HubGetPortStatus( UINT8 HubPortIndex );  // 查询HUB端口状态,返回在TxBuffer中
-//extern	UINT8	HubSetPortFeature( UINT8 HubPortIndex, UINT8 FeatureSelt );  // 设置HUB端口特性
-extern	UINT8	HubClearPortFeature( UINT8 HubPortIndex, UINT8 FeatureSelt );  // 清除HUB端口特性
+//extern	uint8_t	CtrlGetHubDescr( void );  // 获取HUB描述符,返回在TxBuffer中
+extern	uint8_t	HubGetPortStatus( uint8_t HubPortIndex );  // 查询HUB端口状态,返回在TxBuffer中
+//extern	uint8_t	HubSetPortFeature( uint8_t HubPortIndex, uint8_t FeatureSelt );  // 设置HUB端口特性
+extern	uint8_t	HubClearPortFeature( uint8_t HubPortIndex, uint8_t FeatureSelt );  // 清除HUB端口特性
 #endif
 
 #ifdef __cplusplus

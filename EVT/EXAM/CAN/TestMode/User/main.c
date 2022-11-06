@@ -189,7 +189,7 @@ int main(void)
 	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 
-/* Bps = 500Kbps */	
+/* Bps = 250Kbps */
 #if (TEST_MODE == SILENT_MODE)	
 	CAN_Test_Mode_Init( CAN_SJW_1tq, CAN_BS2_5tq, CAN_BS1_6tq, 12, CAN_Mode_Silent );		
     printf("Slient Mode\r\n");

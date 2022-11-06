@@ -1,14 +1,14 @@
-/********************************** (C) COPYRIGHT ******************************
- * File Name          : PING.c
- * Author             : WCH
- * Version            : V1.0
- * Date               : 2022/05/27
- * Description        : WCHNET PING function
- *******************************************************************************/
-/* 头文件包含 */
+/********************************** (C) COPYRIGHT *******************************
+* File Name          : PING.c
+* Author             : WCH
+* Version            : V1.0.0
+* Date               : 2022/06/11
+* Description        : ping related functions.
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* SPDX-License-Identifier: Apache-2.0
+*******************************************************************************/
 #include "PING.h"
 
-/* 变量定义 */
 u8 sendErrCnt;
 u8 unreachCnt;
 u8 timeoutCnt;
@@ -19,13 +19,14 @@ u8 ICMPSeq = 0;
 u8 ICMPSuc = 0;
 u8 ICMPTmpVal = 0;
 u32 timeCnt;
-/**********************************************************************************
- * Function Name  : InitParameter
- * Description    : 变量初始化
- * Input          : None
- * Output         : None
- * Return         : None
- **********************************************************************************/
+extern u8 SocketId;
+/*********************************************************************
+ * @fn      InitParameter
+ *
+ * @brief   Initializes parameters.
+ *
+ * @return  none
+ */
 void InitParameter(void)
 {
     unreachCnt = 0;
@@ -34,13 +35,13 @@ void InitParameter(void)
     ICMPSuc = ICMP_KEEP_NO;
 }
 
-/**********************************************************************************
- * Function Name  : InitPing
- * Description    : Ping初始化
- * Input          : None
- * Output         : None
- * Return         : None
- **********************************************************************************/
+/*********************************************************************
+ * @fn      InitPING
+ *
+ * @brief   Initializes PING.
+ *
+ * @return  none
+ */
 void InitPING(void)
 {
     IcmpHeader head;
@@ -81,13 +82,15 @@ void InitPING(void)
     sendBuf[7] = head.i_seq & 0xff;
 }
 
-/**********************************************************************************
- * Function Name  : Respond_Ping
- * Description    : 初始化回应PING包的数据
- * Input          : None
- * Output         : None
- * Return         : None
- **********************************************************************************/
+/*********************************************************************
+ * @fn      Respond_PING
+ *
+ * @brief   Respond to PING request.
+ *
+ * @param   pDat - ACK data.
+ *
+ * @return  none
+ */
 void Respond_PING(u8 *pDat)
 {
     IcmpHeader head;
@@ -123,13 +126,16 @@ void Respond_PING(u8 *pDat)
     sendBuf[7] = head.i_seq & 0xff;
 }
 
-/**********************************************************************************
- * Function Name  : WCHNET_ICMPRecvData
- * Description    : 接收数据
- * Input          : None
- * Output         : None
- * Return         : None
- **********************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_ICMPRecvData
+ *
+ * @brief   receive and parse data.
+ *
+ * @param   len - data length.
+ *          pDat - data buff
+ *
+ * @return  none
+ */
 void WCHNET_ICMPRecvData(u32 len, u8 *pDat)
 {
     u16 tmp = 0;
@@ -167,14 +173,18 @@ void WCHNET_ICMPRecvData(u32 len, u8 *pDat)
     }
 }
 
-/*******************************************************************************
-* Function Name  : WCHNET_PINGSendData
-* Description    : 发送数据
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 index )
+/*********************************************************************
+ * @fn      WCHNET_PINGSendData
+ *
+ * @brief   send PING command.
+ *
+ * @param   PSend - data buff.
+ *          Len - data length
+ *          id - socket id
+ *
+ * @return  none
+ */
+void WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 id )
 {
     u32 length;
     u8 i,count=0;
@@ -184,29 +194,29 @@ void WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 index )
 
     while(1){
         Len = length;
-        i = WCHNET_SocketSend(index,PSend,&Len);                              /* 将MyBuf中的数据发送 */
-        mStopIfError(i);                                                        /* 检查错误 */
+        i = WCHNET_SocketSend(id,PSend,&Len);
+        mStopIfError(i);
         if(Len == 0){
             count++;
             if(count>2){
                 return;
             }
         }
-        length -= Len;                                                          /* 将总长度减去以及发送完毕的长度 */
-        PSend += Len;                                                           /* 将缓冲区指针偏移 */
-        if(length)continue;                                                     /* 如果数据未发送完毕，则继续发送 */
-        break;                                                                  /* 发送完毕，退出 */
+        length -= Len;
+        PSend += Len;                             //offset buffer pointer
+        if(length)continue;                       //If the data is not sent, continue to send
+        break;
     }
     ICMPSuc++;
 }
 
-/**********************************************************************************
- * Function Name  : WCHNET_PINGCmd
- * Description    : 查询状态执行相应命令
- * Input          : None
- * Output         : None
- * Return         : None
- **********************************************************************************/
+/*********************************************************************
+ * @fn      WCHNET_PINGCmd
+ *
+ * @brief   Query status and execute corresponding commands.
+ *
+ * @return  none
+ */
 void WCHNET_PINGCmd(void)
 {
     if (ICMPSuc < ICMP_KEEP_NO) {
@@ -214,7 +224,7 @@ void WCHNET_PINGCmd(void)
         case ICMP_SOKE_CON:
             ICMPSuc = 1;
             timeCnt = 0;
-            WCHNET_PINGSendData(sendBuf, 40, 0);
+            WCHNET_PINGSendData(sendBuf, 40, SocketId);
             printf("Ping %d.%d.%d.%d with %d bytes of data.\r\n",
                     (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
                     (u16) DESIP[3], (u16) ICMP_DATA_BYTES);
@@ -228,24 +238,21 @@ void WCHNET_PINGCmd(void)
                 printf("send data fail!\n");
                 timeCnt = 0;
                 sendErrCnt++;
-                WCHNET_PINGSendData(sendBuf, 40, 0);
+                WCHNET_PINGSendData(sendBuf, 40, SocketId);
             }
             break;
         case ICMP_SEND_SUC:
-            if (timeCnt > 1000) {
+            if (timeCnt > 100) {
                 printf("Request timeout.\n");
                 timeoutCnt++;
-                if (ICMPCnt < 4) {
+                if (ICMPCnt < PING_SEND_CNT) {
                     ICMPSuc = 1;
                     InitPING();
                     timeCnt = 0;
-                    WCHNET_PINGSendData(sendBuf, 40, 0);
+                    WCHNET_PINGSendData(sendBuf, 40, SocketId);
                 } else {
-                    printf(
-                            "Ping statistics for %d.%d.%d.%d:\n    Packets: Sent = 4,Received = %d,Lost = %d<%d%% loss>.\r\n",
-                            (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
-                            (u16) DESIP[3], (u16) (4 - timeoutCnt),
-                            (u16) timeoutCnt, (u16) (timeoutCnt * 25));
+                    printf("PING end!\r\n");
+                    printf("send = %d Received = %d", PING_SEND_CNT, sucRecCnt);
                     ICMPSuc = ICMP_KEEP_NO;
                 }
             }
@@ -259,18 +266,18 @@ void WCHNET_PINGCmd(void)
                     (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
                     (u16) DESIP[3], (u16) ICMP_DATA_BYTES);
             sucRecCnt++;
-            if (ICMPCnt < 4) {
+            if (ICMPCnt < PING_SEND_CNT) {
                 ICMPSuc = 1;
                 InitPING();
                 timeCnt = 0;
-                WCHNET_PINGSendData(sendBuf, 40, 0);
+                WCHNET_PINGSendData(sendBuf, 40, SocketId);
             } else {
                 printf(
-                        "Ping statistics for %d.%d.%d.%d:\n    Packets: Sent = 4,Received = %d,Lost = %d<%d%% loss>.\r\n",
+                        "Ping statistics for %d.%d.%d.%d:\r\nPackets: Sent = %d,Received = %d,Lost = %d<%d%% loss>.\r\n",
                         (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
-                        (u16) DESIP[3], (u16) sucRecCnt,
-                        (u16) (4 - sucRecCnt),
-                        (u16) ((4 - sucRecCnt) * 25));
+                        (u16) DESIP[3], PING_SEND_CNT, (u16) sucRecCnt,
+                        (u16) (PING_SEND_CNT - sucRecCnt),
+                        (u16) ((PING_SEND_CNT - sucRecCnt) * 100 / PING_SEND_CNT));
                 ICMPSuc = ICMP_KEEP_NO;
             }
             break;
@@ -279,25 +286,21 @@ void WCHNET_PINGCmd(void)
                     (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
                     (u16) DESIP[3]);
             unreachCnt++;
-            if (ICMPCnt < 4) {
+            if (ICMPCnt < PING_SEND_CNT) {
                 ICMPSuc = 1;
                 InitPING();
                 timeCnt = 0;
-                WCHNET_PINGSendData(sendBuf, 40, 0);
+                WCHNET_PINGSendData(sendBuf, 40, SocketId);
             } else {
-                printf(
-                        "Ping statistics for %d.%d.%d.%d:\n    Packets: Sent = 4,Received = %d,Lost = %d<%d%% loss>.\r\n",
-                        (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
-                        (u16) DESIP[3], (u16) unreachCnt,
-                        (u16) (4 - unreachCnt),
-                        (u16) ((4 - unreachCnt) * 25));
+                printf("PING end!\r\n");
+                printf("send = %d Received = %d", PING_SEND_CNT, sucRecCnt);
                 ICMPSuc = ICMP_KEEP_NO;
             }
             break;
-        case ICMP_REPLY:                                         // icmp ping 包
-            WCHNET_PINGSendData(sendBuf, 40, 0);
+        case ICMP_REPLY:
+            WCHNET_PINGSendData(sendBuf, 40, SocketId);
             break;
-        case ICMP_REPLY_SUC:                                     // icmp ping 包
+        case ICMP_REPLY_SUC:
             printf("Reply ping.\r\n");
             ICMPSuc = ICMPTmpVal;
             break;

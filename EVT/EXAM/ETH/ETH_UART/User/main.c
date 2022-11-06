@@ -7,42 +7,42 @@
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
-#include "string.h"
-#include "debug.h"
-#include "WCHNET.h"
-#include "eth_driver.h"
-#include "bsp_uart.h"
 /*
  *@Note
-ETH_UART例程，演示以太网与UART的数据透传。默认使用115200波特率（可在bsp_uart.h中更改）进行串口数据传输。
-因串口传输速度较慢，ETH的数据发送速度不宜过快，否则会出现丢包现象。
+  ETH_UART例程，演示以太网与UART的数据透传。默认使用1000000波特率（可在bsp_uart.h中更改）进行串口数据传输。
 */
+#include "string.h"
+#include "debug.h"
+#include "wchnet.h"
+#include "eth_driver.h"
+#include "bsp_uart.h"
 
-u8 MACAddr[6];                                                                            /*MAC地址*/
-u8 IPAddr[4]   = {192,168,1,10};                                                          /*IP地址*/
-u8 GWIPAddr[4] = {192,168,1,1};                                                           /*网关*/
-u8 IPMask[4]   = {255,255,255,0};                                                         /*子网掩码*/
-u8 DESIP[4]    = {192,168,1,100};                                                         /*目的IP地址*/
+u8 MACAddr[6];                                          //MAC address
+u8 IPAddr[4]   = {192,168,1,10};                        //IP address
+u8 GWIPAddr[4] = {192,168,1,1};                         //Gateway IP address
+u8 IPMask[4]   = {255,255,255,0};                       //subnet mask
+u8 DESIP[4]    = {192,168,1,100};                       //destination IP address
 
-u8 SocketId;                                                                              /*socket id号*/
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];                                    /*socket缓冲区*/
-u8 MyBuf[RECE_BUF_LEN];
-u16 desport = 1000;                                                                       /*目的端口号*/
-u16 srcport = 1000;                                                                       /*源端口号*/
+u8 SocketId;                                            //socket id
+u8 SocketRecvBuf[RECE_BUF_LEN];                         //socket data buff
+u16 desport = 1000;                                     //destination port
+u16 srcport = 1000;                                     //source port
 
-u8 sendDataFlag = 0; //0 无效   1 有效
-u8 tcpConnValid = 0; //0 断连   1 连接
+u8 tcpConnValid = 0;                                    //0 disconnected  1 connect
+
 /*********************************************************************
  * @fn      mStopIfError
  *
  * @brief   check if error.
  *
+ * @param   iError - error constants.
+ *
  * @return  none
  */
 void mStopIfError(u8 iError)
 {
-    if (iError == WCHNET_ERR_SUCCESS) return;                                             /* 操作成功 */
-    printf("Error: %02X\r\n", (u16)iError);                                               /* 显示错误 */
+    if (iError == WCHNET_ERR_SUCCESS) return;
+    printf("Error: %02X\r\n", (u16)iError);
 }
 
 /*********************************************************************
@@ -71,28 +71,28 @@ void TIM2_Init( void )
 }
 
 /*********************************************************************
- * @fn      WCHNET_CreatTcpSocket
+ * @fn      WCHNET_CreateTcpSocket
  *
  * @brief   Create TCP Socket
  *
  * @return  none
  */
-void WCHNET_CreatTcpSocket(void)
+void WCHNET_CreateTcpSocket(void)
 {
    u8 i;
-   SOCK_INF TmpSocketInf;                                                       /* 创建临时socket变量 */
+   SOCK_INF TmpSocketInf;
 
-   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));                            /* 库内部会将此变量复制，所以最好将临时变量先全部清零 */
-   memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);                                 /* 设置目的IP地址 */
-   TmpSocketInf.DesPort  = desport;                                             /* 设置目的端口 */
-   TmpSocketInf.SourPort = srcport;                                             /* 设置源端口 */
-   TmpSocketInf.ProtoType = PROTO_TYPE_TCP;                                     /* 设置socket类型 */
-   TmpSocketInf.RecvBufLen = RECE_BUF_LEN;                                      /* 设置接收缓冲区的接收长度 */
-   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);                             /* 创建socket，将返回的socket索引保存在SocketId中 ，从零开始分配*/
+   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
+   memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
+   TmpSocketInf.DesPort  = desport;
+   TmpSocketInf.SourPort = srcport;
+   TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+   TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
+   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
    printf("WCHNET_SocketCreat %d\r\n",SocketId);
-   mStopIfError(i);                                                             /* 检查错误 */
-   i = WCHNET_SocketConnect(SocketId);                                          /* TCP连接 */
-   mStopIfError(i);                                                             /* 检查错误 */
+   mStopIfError(i);
+   i = WCHNET_SocketConnect(SocketId);
+   mStopIfError(i);
 }
 
 
@@ -105,13 +105,10 @@ void WCHNET_CreatTcpSocket(void)
  */
 void uartRxAndSendDataToETH(void)
 {
-    uint32_t temp = 0;
     int ret = -1;
-
+    uint32_t temp = 0;
     uint32_t len = 0;
     uint32_t len_1 = 0;
-
-    if(!sendDataFlag) return;
 
     temp = DMA1_Channel6->CNTR;
 
@@ -130,7 +127,7 @@ void uartRxAndSendDataToETH(void)
         /* RX_buffer is full */
         if(len > UART_RX_DMA_SIZE)
         {
-            printf("uart2 RX DMA Buff is full \n");
+            printf("uart2 RX DMA Buff is full!\r\n");
             len = 0;
             uart_data_t.rx_read = 0;
             uart_data_t.rx_write = 0;
@@ -142,7 +139,7 @@ void uartRxAndSendDataToETH(void)
 
         if(len_1 != 0)
         {
-            ret = WCHNET_SocketSend(0, &uart_data_t.RX_buffer[uart_data_t.rx_read&(UART_RX_DMA_SIZE-1)], &len_1);
+            ret = WCHNET_SocketSend(SocketId, &uart_data_t.RX_buffer[uart_data_t.rx_read&(UART_RX_DMA_SIZE-1)], &len_1);
             if (ret == 0)
             {
                 uart_data_t.rx_read += len_1;
@@ -153,7 +150,7 @@ void uartRxAndSendDataToETH(void)
         if( (len-len_1) != 0)
         {
             len_1 = len-len_1;
-            ret = WCHNET_SocketSend(0, &uart_data_t.RX_buffer[0], &len_1);
+            ret = WCHNET_SocketSend(SocketId, &uart_data_t.RX_buffer[0], &len_1);
             if (ret == 0)
             {
                 uart_data_t.rx_read += len_1;
@@ -174,11 +171,10 @@ void uartTx(void)
 {
     uint16_t read_buf = 0;
 
-    /* uart tx dma is ideal */
-    if(uart_data_t.uart_tx_dma_state == IDEL)
+    if(uart_data_t.uart_tx_dma_state == IDLE)
     {
         /* eth has received data  */
-        if(uart_data_t.tx_read != uart_data_t.tx_write)
+        if(uart_data_t.tx_remainBuffNum < UART_TX_BUF_NUM)
         {
             read_buf = (uart_data_t.tx_read)%UART_TX_BUF_NUM;
             DMA1_Channel7->MADDR = (uint32_t) &uart_data_t.TX_buffer[read_buf];
@@ -192,7 +188,9 @@ void uartTx(void)
 /*********************************************************************
  * @fn      ETHRx
  *
- * @brief   ETH receive data and save it to buff
+ * @brief   ETH receive data and save it to buff.
+ *
+ * @param   socketid - socket id.
  *
  * @return  none
  */
@@ -202,18 +200,20 @@ void ETHRx(u8 socketid)
     uint8_t write_buf = 0;
     int8_t receive_state = -1;
 
-    len = WCHNET_SocketRecvLen(socketid,NULL);                               /* query length */
+    len = WCHNET_SocketRecvLen(socketid, NULL);                               /* query length */
 
-    if( (uart_data_t.tx_write - uart_data_t.tx_read) < UART_TX_BUF_NUM )
+    if( uart_data_t.tx_remainBuffNum > 0)
     {
         write_buf = (uart_data_t.tx_write)%UART_TX_BUF_NUM;
         /* socket receive */
-        receive_state = WCHNET_SocketRecv(socketid,uart_data_t.TX_buffer[write_buf],&len);
-        if(receive_state == 0)
+        receive_state = WCHNET_SocketRecv(socketid, uart_data_t.TX_buffer[write_buf], &len);
+        if(receive_state == WCHNET_ERR_SUCCESS)
         {
             uart_data_t.TX_data_length[write_buf] = len;
 
             uart_data_t.tx_write++;
+
+            uart_data_t.tx_remainBuffNum--;
         }
     }
     else
@@ -222,38 +222,41 @@ void ETHRx(u8 socketid)
     }
     uartTx();
 }
+
 /*********************************************************************
  * @fn      WCHNET_HandleSockInt
  *
  * @brief   Socket Interrupt Handle
  *
+ * @param   socketid - socket id.
+ *          intstat - interrupt status
+ *
  * @return  none
  */
-void WCHNET_HandleSockInt(u8 socketid,u8 initstat)
+void WCHNET_HandleSockInt(u8 socketid,u8 intstat)
 {
-    if(initstat & SINT_STAT_RECV)                                                /* socket接收中断*/
+    if(intstat & SINT_STAT_RECV)                        //receive data
     {
         ETHRx(socketid);
     }
-    if(initstat & SINT_STAT_CONNECT)                                             /* socket连接成功中断*/
+    if(intstat & SINT_STAT_CONNECT)                     //connect successfully
     {
         tcpConnValid = 1;
-        WCHNET_ModifyRecvBuf(socketid, (u32)SocketRecvBuf[socketid], RECE_BUF_LEN);
+        WCHNET_ModifyRecvBuf(socketid, (u32)SocketRecvBuf, RECE_BUF_LEN);
         printf("TCP Connect Success\r\n");
     }
-    if(initstat & SINT_STAT_DISCONNECT)                                          /* socket连接断开中断*/
+    if(intstat & SINT_STAT_DISCONNECT)                  //disconnect
     {
         tcpConnValid = 0;
         printf("TCP Disconnect\r\n");
     }
-    if(initstat & SINT_STAT_TIM_OUT)                                             /* socket连接超时中断*/
+    if(intstat & SINT_STAT_TIM_OUT)                     //timeout disconnect
     {
         tcpConnValid = 0;
         printf("TCP Timeout\r\n");
-        WCHNET_SocketConnect(socketid);                                          /* TCP连接 */
+        WCHNET_CreateTcpSocket();
     }
 }
-
 
 /*********************************************************************
  * @fn      WCHNET_HandleGlobalInt
@@ -264,31 +267,31 @@ void WCHNET_HandleSockInt(u8 socketid,u8 initstat)
  */
 void WCHNET_HandleGlobalInt(void)
 {
-    u8 initstat;
+    u8 intstat;
+    u8 socketint;
     u16 i;
-    u8 socketinit;
 
-    initstat = WCHNET_GetGlobalInt();                                             /* 获取全局中断标志*/
-    if(initstat & GINT_STAT_UNREACH)                                              /* 不可达中断 */
+    intstat = WCHNET_GetGlobalInt();                                           //get global interrupt flag
+    if(intstat & GINT_STAT_UNREACH)                                            //Unreachable interrupt
     {
        printf("GINT_STAT_UNREACH\r\n");
     }
-   if(initstat & GINT_STAT_IP_CONFLI)                                             /* IP冲突中断 */
+   if(intstat & GINT_STAT_IP_CONFLI)                                           //IP conflict
    {
        printf("GINT_STAT_IP_CONFLI\r\n");
    }
-   if(initstat & GINT_STAT_PHY_CHANGE)                                            /* PHY状态变化中断 */
+   if(intstat & GINT_STAT_PHY_CHANGE)                                          //PHY status change
    {
-       i = WCHNET_GetPHYStatus();                                                 /* 获取PHY连接状态*/
+       i = WCHNET_GetPHYStatus();                                               //socket related interrupt
        if(i&PHY_Linked_Status)
-       printf("PHY Link Success\r\n");
+           printf("PHY Link Success\r\n");
    }
-   if(initstat & GINT_STAT_SOCKET)
+   if(intstat & GINT_STAT_SOCKET)
    {
-       for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
+       for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i ++)
        {
-           socketinit = WCHNET_GetSocketInt(i);
-           if(socketinit)WCHNET_HandleSockInt(i,socketinit);
+           socketint = WCHNET_GetSocketInt(i);
+           if(socketint)WCHNET_HandleSockInt(i,socketint);
        }
    }
 }
@@ -305,29 +308,34 @@ int main(void)
     u8 i;
 
 	Delay_Init();
-	USART_Printf_Init(115200);                                              /*串口打印初始化*/
+	USART_Printf_Init(115200);                                              //USART initialize
 	printf("ETH_UART\r\n");
-    printf("SystemClk:%d\r\n",SystemCoreClock);                             /*系统主频*/
-    printf("net version:%x\n",WCHNET_GetVer());                             /*库版本号*/
+    printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
       printf("version error.\n");
     }
-    WCHNET_GetMacAddr(MACAddr);                                             /*获取芯片MAC地址*/
+    WCHNET_GetMacAddr(MACAddr);                                             //get the chip MAC address
     printf("mac addr:");
-    for(int i=0;i<6;i++) printf("%x ",MACAddr[i]);
+    for(i = 0; i < 6; i++) 
+        printf("%x ",MACAddr[i]);
     printf("\n");
     TIM2_Init();
-    BSP_Uart_Init();                                                        /*uart init*/
-    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                        /*以太网库初始化*/
+    BSP_Uart_Init();                                                        //USART2 initialize
+    i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                        //Ethernet library initialize
     mStopIfError(i);
     if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
 
-    WCHNET_CreatTcpSocket();                                                /*创建TCP socket*/
+    WCHNET_CreateTcpSocket();                                               //Create TCP Socket
 
 	while(1)
 	{
-        WCHNET_MainTask();                                                  /*以太网库主任务函数，需要循环调用*/
-        if(WCHNET_QueryGlobalInt())                                         /*查询以太网全局中断，如果有中断，调用全局中断处理函数*/
+        /*Ethernet library main task function,
+         * which needs to be called cyclically*/
+        WCHNET_MainTask();
+        /*Query the Ethernet global interrupt,
+         * if there is an interrupt, call the global interrupt handler*/
+        if(WCHNET_QueryGlobalInt())
         {
             WCHNET_HandleGlobalInt();
         }
