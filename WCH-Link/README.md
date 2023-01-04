@@ -6,12 +6,12 @@ WCH-Link、WCH-LinkE、WCH-DAPLink.
 ### --include
 * WCH-LinkSCH.PDF.
 * WCH-LinkUserManual.PDF.
+* WCH-LinkUserManual-EN.PDF.
 
 ### --Tools and data
 * download website 
-* WCH-LinkE-https://www.wch.cn/products/WCH-Link.html
+* WCH-Link Introduction-https://www.wch.cn/products/WCH-Link.html
 * MounRiver Studio-http://www.mounriver.com/
 * WCH-LinkUtility-https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html
-* WCHISPStudio获-https://www.wch.cn/downloads/WCHISPTool_Setup_exe.html
+* WCHISPStudio-https://www.wch.cn/downloads/WCHISPTool_Setup_exe.html
 * WCHLinkEJtagUpdTool-https://www.wch.cn/downloads/WCHLinkEJtagUpdTool_ZIP.html
-
