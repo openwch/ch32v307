@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file contains the headers of the OV2640.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ov.h"
 
@@ -292,7 +294,7 @@ void DVP_GPIO_Init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD, ENABLE);     //Ê¹ÄÜÏà¹Ø¶Ë¿ÚÊ±ÖÓ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD, ENABLE);     //Ê¹ï¿½ï¿½ï¿½ï¿½Ø¶Ë¿ï¿½Ê±ï¿½ï¿½
 
     //PC3-PC13
     GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3 | GPIO_Pin_13;

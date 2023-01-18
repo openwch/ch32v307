@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2020/04/30
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x.h"
 #include <rtthread.h>
@@ -16,7 +18,7 @@
 
 /* Global define */
 
-/* LED0通过rt的pin驱动接口驱动  */
+/* LED0 is driven by the pin driver interface of rt  */
 #define LED0_PIN  18   //PC3
 
 /* Global Variable */
@@ -24,7 +26,7 @@
 /*********************************************************************
  * @fn      LED1_BLINK_INIT
  *
- * @brief   LED1通过直接调用底层驱动
+ * @brief   LED1 directly calls the underlying driver
  *
  * @return  none
  */
@@ -41,16 +43,19 @@ void LED1_BLINK_INIT(void)
 /*********************************************************************
  * @fn      main
  *
- * @brief   main只是一个线程之一，除此之外还有tshell,idle
- *          本main只是一个LED闪烁，main线程的注册在rtthread_startup中，tshell使用了串口
- *          接收中断，中断栈和线程栈使用分开.
+ * @brief   main is just one of the threads, in addition to tshell,idle
+ * This main is just a flashing LED, the main thread is registered in 
+ * rtthread_startup, tshell uses the serial port to receive interrupts, 
+ * and the interrupt stack and thread stack are used separately.
  *
  * @return  none
  */
 int main(void)
 {
     rt_kprintf("\r\n MCU: CH32V307\r\n");
+    SystemCoreClockUpdate();
 	rt_kprintf(" SysClk: %dHz\r\n",SystemCoreClock);
+	rt_kprintf(" ChipID: %08x\r\n",DBGMCU_GetCHIPID());
     rt_kprintf(" www.wch.cn\r\n");
 	LED1_BLINK_INIT();
 
@@ -67,7 +72,7 @@ int main(void)
 /*********************************************************************
  * @fn      led
  *
- * @brief   测试使用驱动接口操作I/O口
+ * @brief   Test using the driver interface to operate the I/O port
  *
  * @return  none
  */

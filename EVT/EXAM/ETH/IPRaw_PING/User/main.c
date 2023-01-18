@@ -4,12 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2022/01/18
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 /*
  *@Note
-IPRaw_PING例程，演示PING功能。
+IPRaw_PING example, demonstrate the PING function.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
 #include "debug.h"
@@ -53,7 +57,6 @@ void mStopIfError(u8 iError)
 void TIM2_Init( void )
 {
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure={0};
-
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
     TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
@@ -62,7 +65,6 @@ void TIM2_Init( void )
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
     TIM_ITConfig(TIM2, TIM_IT_Update ,ENABLE);
-
     TIM_Cmd(TIM2, ENABLE);
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update );
     NVIC_EnableIRQ(TIM2_IRQn);
@@ -174,10 +176,12 @@ int main(void)
 {
     u8 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                              //USART initialize
-    printf("TcpClient Test\r\n");
+    printf("IPRaw_PING Test\r\n");   	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
       printf("version error.\n");

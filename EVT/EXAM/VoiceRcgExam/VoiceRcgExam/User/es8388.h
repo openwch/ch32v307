@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        :
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __ES8388_H
 #define __ES8388_H
@@ -14,7 +16,7 @@
 
 
 
-#define ES8388_ADDR     0x10	//ES8388µÄÆ÷¼þµØÖ·,¹Ì¶¨Îª0x10 
+#define ES8388_ADDR     0x10	//ES8388ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·,ï¿½Ì¶ï¿½Îª0x10 
 
 u8 ES8388_Init(void);
 u8 ES8388_Write_Reg(u8 reg, u8 val);

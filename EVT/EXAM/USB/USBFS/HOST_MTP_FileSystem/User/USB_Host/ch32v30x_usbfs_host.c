@@ -5,9 +5,11 @@
 * Date               : 2022/09/01
 * Description        : This file provides the relevant operation functions of the
 *                      USB full-speed host port.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-********************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 
 /*******************************************************************************/
@@ -51,7 +53,6 @@ void USBFS_RCC_Init( void )
         RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div1 );
     }
 #endif
-    
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS, ENABLE );
 }
 /*********************************************************************

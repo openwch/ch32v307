@@ -1,12 +1,14 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name        : WCHNET.H
-* Author           : WCH
-* Version          : V1.40
-* Date             : 2022/06/27
-* Description      : This file contains the headers of 
+ * File Name          : wchnet.h
+ * Author             : WCH
+ * Version            : V1.60
+ * Date               : 2023/01/09
+ * Description        : This file contains the headers of 
 *                    the Ethernet protocol stack library.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __WCHNET_H__
 #define __WCHNET_H__
@@ -19,7 +21,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x14              //the library version number
+#define WCHNET_LIB_VER                  0x16              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */
@@ -126,7 +128,7 @@ extern "C" {
 #define WCHNET_SIZE_MEM                0x08               //sizeof(struct mem)
 #define WCHNET_SIZE_ARP_TABLE          0x18               //sizeof ARP table
 
-#define WCHNET_SIZE_POOL_BUF           WCHNET_MEM_ALIGN_SIZE(WCHNET_TCP_MSS + 40 + 14)          //pbuf size
+#define WCHNET_SIZE_POOL_BUF           WCHNET_MEM_ALIGN_SIZE(WCHNET_TCP_MSS + 40 + 14 + 4)          //pbuf size
 #define WCHNET_MEMP_SIZE               ((WCHNET_MEM_ALIGNMENT - 1) +                                    \
                           (WCHNET_NUM_IPRAW * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB)) +           \
                           (WCHNET_NUM_UDP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_UDP_PCB)) +               \
@@ -166,7 +168,7 @@ typedef uint8_t (*dhcp_callback)( uint8_t status, void * );
 struct _SCOK_INF;
 typedef void (*pSockRecv)( struct _SCOK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
 
-/* socket information */
+/* Socket information struct */
 typedef struct _SCOK_INF
 {
     uint32_t IntStatus;                       //interrupt state
@@ -175,9 +177,9 @@ typedef struct _SCOK_INF
     uint32_t RecvBufLen;                      //Receive buffer length
     uint32_t RecvCurPoint;                    //current pointer to receive buffer
     uint32_t RecvReadPoint;                   //The read pointer of the receive buffer
-    uint32_t RecvRemLen;                      //The length of the data stored in the receive buffer
+    uint32_t RecvRemLen;                      //Remaining length of receive buffer
     uint32_t ProtoType;                       //protocol type
-    uint32_t ScokStatus;                      //Low byte Socket state, the next low byte is TCP state, only meaningful in TCP mode
+    uint32_t SockStatus;                      //Low byte Socket state, the next low byte is TCP state, only meaningful in TCP mode
     uint32_t DesPort;                         //destination port
     uint32_t SourPort;                        //Source port, protocol type in IPRAW mode
     uint8_t  IPAddr[4];                       //Socket destination IP address
@@ -455,10 +457,10 @@ uint8_t WCHNET_SocketUdpSendTo( uint8_t socketid, uint8_t *buf, uint32_t *slen, 
 /**
  * @brief   Convert ASCII address to network address. 
  *
- * @param       *cp - ASCII address to be converted
+ * @param       *cp - ASCII address to be converted, such as "192.168.1.2"
  * @param(in)   *addr - First address of the memory stored in the converted network address 
  * @param(out)  *addr -  Converted network address, such as 0xC0A80102 
- * @return      0:Success Others:Failure.
+ * @return  0 - Success.   Others - Failure. 
  */
 uint8_t WCHNET_Aton(const char *cp, uint8_t *addr);
 
@@ -526,7 +528,7 @@ uint8_t WCHNET_DHCPStop( void );
  *
  * @param   *name - First address of DHCP host name 
  *
- * @return  0:Success Others:Failure.
+ * @return  0 - Success.    Others - Failure. 
  */
 uint8_t WCHNET_DHCPSetHostname(char *name);
 

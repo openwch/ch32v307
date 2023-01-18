@@ -4,15 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 外部触发ADC转换例程：
- ADC通道2(PA2)-注入组通道，外部触发引脚(PA15)高电平触发 EXTI线15 事件，
- 该模式下，通过 EXTI线15 事件触发一次ADC转换，转换结束后产生JEOC中断。
+External lines trigger ADC conversion routine:
+ ADC channel 2 (PA2) - injection group channel, external trigger pin (PA15) high level triggers EXTI line 15 event,
+ In this mode, an ADC conversion is triggered by an event on EXTI line 15, and a JEOC interrupt is generated after
+ the conversion is completed.
 
 */
 
@@ -35,7 +38,7 @@ void ADC_Function_Init(void)
 	NVIC_InitTypeDef NVIC_InitStructure={0};
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
@@ -51,9 +54,9 @@ void ADC_Function_Init(void)
 	ADC_InitStructure.ADC_NbrOfChannel = 1;
 	ADC_Init(ADC1, &ADC_InitStructure);
 
-  ADC_InjectedSequencerLengthConfig(ADC1, 1);
+	ADC_InjectedSequencerLengthConfig(ADC1, 1);
 	ADC_InjectedChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_239Cycles5);
-  ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
+	ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 
 	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
@@ -71,7 +74,6 @@ void ADC_Function_Init(void)
     while(ADC_GetCalibrationStatus(ADC1));
 	Calibrattion_Val = Get_CalibrationValue(ADC1);	
 	
-    ADC_BufferCmd(ADC1, ENABLE);   //enable buffer
 }
 
 /*********************************************************************
@@ -86,14 +88,14 @@ void EXTI_Event_Init(void)
 	EXTI_InitTypeDef EXTI_InitStructure={0};
 	GPIO_InitTypeDef GPIO_InitStructure={0};
 
-  RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE );
+	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE );
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO, ENABLE );
 
 	GPIO_EXTILineConfig( GPIO_PortSourceGPIOA, GPIO_PinSource15 );
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	EXTI_InitStructure.EXTI_Line = EXTI_Line15;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
@@ -128,8 +130,9 @@ u16 Get_ConversionVal(s16 val)
 int main(void)
 {
 	USART_Printf_Init(115200);
+	SystemCoreClockUpdate();
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	ADC_Function_Init();
     printf("CalibrattionValue:%d\n", Calibrattion_Val);	
 	EXTI_Event_Init();
@@ -150,7 +153,8 @@ void ADC1_2_IRQHandler()
 {
 	u16 ADC_val;
 
-	if(ADC_GetITStatus( ADC1, ADC_IT_JEOC)){
+	if(ADC_GetITStatus( ADC1, ADC_IT_JEOC))
+	{
 		ADC_val = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_1);
 #if 0
 		printf("ADC Extline trigger conversion...\r\n");

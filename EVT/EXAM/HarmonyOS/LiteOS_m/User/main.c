@@ -155,10 +155,13 @@ LITE_OS_SEC_TEXT_INIT int main(void)
 {
     unsigned int ret;
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+	  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+	  USART_Printf_Init(115200);
+		
+	  printf("SystemClk:%d\r\n",SystemCoreClock);
+	  printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     ret = LOS_KernelInit();
     taskSample();

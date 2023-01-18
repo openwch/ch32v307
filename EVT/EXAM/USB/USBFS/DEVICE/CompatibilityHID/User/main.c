@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /* @Note
@@ -15,8 +17,8 @@
  *  the data sent by the last Set_Report request.Speed of UART1/2 is 115200bps.
  *
  * Interrupt Transfers:
- *   UART2_RX   ---> Endpoint1
- *   Endpoint2  ---> UART2_TX
+ *   UART2_RX   ---> Endpoint2
+ *   Endpoint1  ---> UART2_TX
  *
  *   Note that the first byte is the valid data length and the remaining bytes are
  *   the transmission data for interrupt Transfers.
@@ -61,10 +63,13 @@ void Var_Init(void)
  */
 int main(void)
 {
+	SystemCoreClockUpdate();
 	Delay_Init();
 	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-	printf("USBHD Compatibility HID Example\r\n");
+		
+	printf( "SystemClk:%d\r\n", SystemCoreClock );
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	printf( "USBHD Compatibility HID Example\r\n" );
 	Delay_Ms(10);
 
 	/* Variables init */

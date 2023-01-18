@@ -4,12 +4,16 @@
  * Version            : V1.0.0
  * Date               : 2022/05/31
  * Description        : Main program body.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 /*
  *@Note
- UDP Client例程，演示UDP Client接收数据并回传.
+UDP Client example, demonstrating that UDP Client receives data and sends back.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  */
 
 #include "string.h"
@@ -17,17 +21,18 @@
 #include "wchnet.h"
 #include "eth_driver.h"
 
-u8 MACAddr[6];                                            //MAC address
-u8 IPAddr[4] = { 192, 168, 1, 10 };                       //IP address
-u8 GWIPAddr[4] = { 192, 168, 1, 1 };                      //Gateway IP address
-u8 IPMask[4] = { 255, 255, 255, 0 };                      //subnet mask
-u8 DESIP[4] = { 192, 168, 1, 100 };                       //destination IP address
-u16 desport = 1000;                                      //destination port
-u16 srcport = 1000;                                       //source port
+#define UDP_RECE_BUF_LEN                1472
+u8 MACAddr[6];                                              //MAC address
+u8 IPAddr[4] = { 192, 168, 1, 10 };                         //IP address
+u8 GWIPAddr[4] = { 192, 168, 1, 1 };                        //Gateway IP address
+u8 IPMask[4] = { 255, 255, 255, 0 };                        //subnet mask
+u8 DESIP[4] = { 192, 168, 1, 100 };                         //destination IP address
+u16 desport = 1000;                                         //destination port
+u16 srcport = 1000;                                         //source port
 
 u8 SocketId;
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];    //socket receive buffer
-u8 MyBuf[RECE_BUF_LEN];
+u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][UDP_RECE_BUF_LEN];      //socket receive buffer
+u8 MyBuf[UDP_RECE_BUF_LEN];
 
 /*********************************************************************
  * @fn      mStopIfError
@@ -88,7 +93,7 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.SourPort = srcport++;
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
     TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf[SocketId];
-    TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
+    TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
     printf("WCHNET_SocketCreat %d\r\n", SocketId);
     mStopIfError(i);
@@ -217,10 +222,12 @@ int main(void)
 {
     u8 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                 //USART initialize
-    printf("UdpClient Test\r\n");
+    printf("UdpClient Test\r\n");    	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n", WCHNET_GetVer());
     if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");

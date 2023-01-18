@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the SDIO firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x_sdio.h"
 #include "ch32v30x_rcc.h"
@@ -625,7 +627,7 @@ void SDIO_ClearFlag(uint32_t SDIO_FLAG)
  *            SDIO_IT_SDIOIT - SD I/O interrupt received interrupt
  *            SDIO_IT_CEATAEND - CE-ATA command completion signal received for CMD61 interrupt
  *
- * @return  ITStatus£ºSET or RESET
+ * @return  ITStatusï¿½ï¿½SET or RESET
  */
 ITStatus SDIO_GetITStatus(uint32_t SDIO_IT)
 {

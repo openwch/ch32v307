@@ -4,22 +4,25 @@
 * Version            : V1.0.0
 * Date               : 2020/04/30
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   SDIO操作SD卡例程：
-      本例程演示 通过SDIO接口读写SD卡全部扇区.
-  DVP——PIN：
-    D0——PC8
-    D1——PC9
-    D2——PC10
-    D3——PC11
-    SCK——PC12
-    CMD——PD2
-     注；除了SCK，其余需上拉47K电阻
+   SDIO routine to operate SD card:
+      This example demonstrates reading and writing all sectors of the SD card
+      through the SDIO interface.
+  DVP--PIN:
+    D0--PC8
+    D1--PC9
+    D2--PC10
+    D3--PC11
+    SCK--PC12
+    CMD--PD2
+     Note: Except for SCK, the rest need to pull up 47K resistors
 
 */
 
@@ -69,9 +72,11 @@ int main(void)
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     while(SD_Init())
     {

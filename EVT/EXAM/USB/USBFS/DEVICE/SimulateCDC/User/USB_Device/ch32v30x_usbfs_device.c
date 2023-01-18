@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : This file provides all the USBOTG firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #include "ch32v30x_usbfs_device.h"
@@ -57,10 +59,19 @@ void USBFS_RCC_Init(void)
     RCC_USBHSPLLCKREFCLKConfig( RCC_USBHSPLLCKREFCLK_4M );
     RCC_USBHSPHYPLLALIVEcmd( ENABLE );
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_USBHS, ENABLE );
-
 #else
-    RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
-
+    if( SystemCoreClock == 144000000 )
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
+    }
+    else if( SystemCoreClock == 96000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div2 );
+    }
+    else if( SystemCoreClock == 48000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div1 );
+    }
 #endif
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS, ENABLE );
 }
@@ -83,8 +94,8 @@ void USBFS_Device_Endp_Init( void )
     USBOTG_FS->UEP0_DMA = (uint32_t)USBFS_EP0_Buf;
 
     USBOTG_FS->UEP1_DMA = (uint32_t)USBFS_EP1_Buf;
-    USBOTG_FS->UEP2_DMA = (uint32_t)USBFS_EP2_Buf;
-    USBOTG_FS->UEP3_DMA = (uint32_t)USBFS_EP3_Buf;
+    USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
+    USBOTG_FS->UEP3_DMA = (uint32_t)(uint8_t *)&UART2_Rx_Buf[ 0 ];
 
     USBOTG_FS->UEP0_RX_CTRL = USBFS_UEP_R_RES_ACK;
     USBOTG_FS->UEP2_RX_CTRL = USBFS_UEP_R_RES_ACK;
@@ -348,7 +359,7 @@ void OTG_FS_IRQHandler( void )
                                       Uart.Com_Cfg[ 7 ] = Uart.Rx_TimeOutMax;
 
                                       /* 串口初始化操作 */
-                                      UART1_USB_Init( );
+                                      UART2_USB_Init( );
                                  }
                             }
                             else
@@ -372,11 +383,11 @@ void OTG_FS_IRQHandler( void )
                         /* 记录相关信息,并切换DMA地址 */
                         Uart.Tx_PackLen[ Uart.Tx_LoadNum ] = USBOTG_FS->RX_LEN;
                         Uart.Tx_LoadNum++;
-                        USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART1_Tx_Buf[ ( Uart.Tx_LoadNum * DEF_USB_FS_PACK_LEN ) ];
+                        USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ ( Uart.Tx_LoadNum * DEF_USB_FS_PACK_LEN ) ];
                         if( Uart.Tx_LoadNum >= DEF_UARTx_TX_BUF_NUM_MAX )
                         {
                             Uart.Tx_LoadNum = 0x00;
-                            USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART1_Tx_Buf[ 0 ];
+                            USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
                         }
                         Uart.Tx_RemainNum++;
 
@@ -765,6 +776,7 @@ void OTG_FS_IRQHandler( void )
         /* usb reset interrupt processing */
         USBOTG_FS->DEV_ADDR = 0;
         USBFS_Device_Endp_Init( );
+        UART2_ParaInit( 1 );
         USBOTG_FS->INT_FG = USBFS_UIF_BUS_RST;
     }
     else if( intflag & USBFS_UIF_SUSPEND )

@@ -4,14 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note 
-  双ADC同步注入采样例程：
- ADC1通道1(PA1),ADC2通道2(PA3)。
+  Dual ADC injection simultaneous sampling routine:
+ ADC1 channel 1 (PA1), ADC2 channel 2 (PA3).
 */
 
 #include "debug.h"
@@ -36,7 +38,7 @@ void  ADC_Function_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE );
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1  , ENABLE );
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2  , ENABLE );
-    RCC_ADCCLKConfig(RCC_PCLK2_Div4);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 |GPIO_Pin_3;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
@@ -68,8 +70,6 @@ void  ADC_Function_Init(void)
     ADC_StartCalibration(ADC1);
     while(ADC_GetCalibrationStatus(ADC1));
 	Calibrattion_Val1 = Get_CalibrationValue(ADC1);
-	
-    ADC_BufferCmd(ADC1, ENABLE);   //enable buffer
 
     ADC_Init(ADC2, &ADC_InitStructure);
     ADC_InjectedSequencerLengthConfig(ADC2, 1);
@@ -85,7 +85,6 @@ void  ADC_Function_Init(void)
     while(ADC_GetCalibrationStatus(ADC2));
 	Calibrattion_Val2 = Get_CalibrationValue(ADC2);
 	
-    ADC_BufferCmd(ADC2, ENABLE);   //enable buffer
 }
 
 /*********************************************************************
@@ -130,8 +129,10 @@ u16 Get_ConversionVal2(s16 val)
 int main(void)
 {
     USART_Printf_Init(115200);
-	Delay_Init();
+	SystemCoreClockUpdate();
+	Delay_Init();	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	ADC_Function_Init();
 	printf("CalibrattionValue1:%d\n", Calibrattion_Val1);
 	printf("CalibrattionValue2:%d\n", Calibrattion_Val2);

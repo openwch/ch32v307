@@ -4,22 +4,26 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 硬件NSS模式，Master/Slave 模式数据收发：
- Master：SPI1_NSS(PA4)、SPI1_SCK(PA5)、SPI1_MISO(PA6)、SPI1_MOSI(PA7)。
- Slave：SPI1_NSS(PA4)、SPI1_SCK(PA5)、SPI1_MISO(PA6)、SPI1_MOSI(PA7)。
+ Hardware NSS mode, master/slave mode, data transceiver:
+ Master:SPI1_NSS(PA4)\SPI1_SCK(PA5)\SPI1_MISO(PA6)\SPI1_MOSI(PA7).
+ Slave:SPI1_NSS(PA4)\SPI1_SCK(PA5)\SPI1_MISO(PA6)\SPI1_MOSI(PA7).
  
- 本例程演示在硬件 NSS 模式下，Master 和 Slave 同时全双工收发。
- 注：两块板子分别下载 Master 和 Slave 程序，同时上电。
-     硬件连线：
-               PA5 —— PA5
-               PA6 —— PA6
-               PA7 —— PA7
+ This example demonstrates that in hardware NSS mode, the Master and
+ Slave can transmit and receive in full duplex at the same time.
+ Note: The two boards download the Master and Slave programs respectively,
+ and power on at the same time.
+     Hardware connection:
+               PA5 -- PA5
+               PA6 -- PA6
+               PA7 -- PA7
  
 */
 
@@ -134,9 +138,11 @@ int main(void)
 	u8 j=0;
 	u8 value;
 
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(460800);
+	USART_Printf_Init(460800);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 #if (SPI_MODE == SLAVE_MODE)
   printf("Slave Mode\r\n");

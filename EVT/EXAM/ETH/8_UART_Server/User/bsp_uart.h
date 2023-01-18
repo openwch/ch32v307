@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/01/16
 * Description        : uart init
-* Copyright (c) 2022 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef _BSP_UART_H_
 #define _BSP_UART_H_
@@ -23,7 +25,7 @@ typedef enum { IDEL = 0, BUSY = !IDEL} Uart_TX_DMA_State;
 #define UART_RX_DMA_SIZE    2048  /* Must be a power of 2 ( a%2^n = a&(2^n - 1) )*/
 #define ETH_RECEIVE_SIZE    800
 #define UART_TX_BUF_NUM     5
-
+#define BAUD_RATE  1000000      //BAUDRATE
 
 
 struct uart_data

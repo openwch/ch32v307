@@ -4,25 +4,33 @@
 * Version            : V1.0.0
 * Date               : 2022/01/16
 * Description        : Main program body.
-* Copyright (c) 2022 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  * @note
- * 基于CH32V307实现8串口网络服务器
- * 默认波特率为115200
- * 网络处于TCP client模式，目的IP为192.168.1.100，目的端口号为1000
+ * Based on CH32V307 to implement 8 serial port network server
+ * The default baud rate is 1000000
+ *
+ * The network is in TCP client mode, the destination IP address is 192.168.1.100,
+ * and the destination port number is 1000
  *
  * uart1 <-> socket0  |  uart2 <-> socket1 | ... | uart8 <-> socket7
  *
- * 该例程中，CH32V307 的RAM配置为128KB，Flash配置为192KB（使用WCHISPTool工具进行配置）
+ * In this example, the RAM configuration of CH32V307 is 128KB and the Flash
+ * configuration is 192KB (configured using the WCHISPTool tool)
  *
- * 可在Tool Settings -> GNU RISC_V Cross Compiler -> Preprocessor 中添加 CH32V307_DEBUG 宏定义，打开调试开关（默认为串口1）
+ * CH32V307_DEBUG macro definitions can be added in Tool Settings -> GNU RISC_V Cross
+ * Compiler -> Preprocessor to turn on the debug switch (serial port 1 by default)
+ *
+ * For details on the selection of engineering chips,
+ * please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  * */
 #include "string.h"
 #include "debug.h"
-#include "WCHNET.h"
 #include "eth_driver.h"
 #include "bsp_uart.h"
 
@@ -439,12 +447,11 @@ int main(void)
 	uint32_t len;
 	uint8_t *name = "WCHNET";
 
+	SystemCoreClockUpdate();
 	Delay_Init();
-
 #ifdef CH32V307_DEBUG
-	USART_Printf_Init(256000);
+	USART_Printf_Init(115200);
 #endif
-
 	PRINT("SystemClk:%d\r\n",SystemCoreClock);
 	RCC_GetClocksFreq(&RCC_ClocksStatus);
 	PRINT("SystemClk:%d\r\n",SystemCoreClock);

@@ -4,30 +4,32 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   FSMC操作NANDFLASH例程：
-      本例程演示 通过FSMC接口操作 FS33ND01GS108TF型号NANFLASH 擦-读-写-读，并在读写过程中
-  ECC校验。
-  PIN：
-    FSMC_NOE——PD4  (RE)
-    FSMC_NWE——PD5  (WE)
-    FSMC_NE1_NCE2——PD7  (CE)
-    FSMC_NWAIT——PD6  (R/B)
-    FSMC_D0 ——PD14
-    FSMC_D1 ——PD15
-    FSMC_D2 ——PD0
-    FSMC_D3 ——PD1
-    FSMC_D4 ——PE7
-    FSMC_D5 ——PE8
-    FSMC_D6 ——PE9
-    FSMC_D7 ——PE10
-    FSMC_A16——PD11 (CLE)
-    FSMC_A17——PD12 (ALE)
+   FSMC routine to operate NANDFLASH:
+      This routine demonstrates the operation of FS33ND01GS108TF model NANFLASH erase-read-write-read through the FSMC interface, and in the process of reading and writing
+  ECC check.
+  PIN:
+    FSMC_NOE--PD4  (RE)
+    FSMC_NWE--PD5  (WE)
+    FSMC_NE1_NCE2--PD7  (CE)
+    FSMC_NWAIT--PD6  (R/B)
+    FSMC_D0 --PD14
+    FSMC_D1 -- PD15
+    FSMC_D2 -- PD0
+    FSMC_D3 -- PD1
+    FSMC_D4 -- PE7
+    FSMC_D5 -- PE8
+    FSMC_D6 -- PE9
+    FSMC_D7 -- PE10
+    FSMC_A16 -- PD11 (CLE)
+    FSMC_A17 -- PD12 (ALE)
 */
 
 #include "debug.h"
@@ -51,9 +53,11 @@ int main(void)
     u8 t=0;
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 	memset(buf, 0, NAND_ECC_SECTOR_SIZE);
 	printf("clear buf \n");

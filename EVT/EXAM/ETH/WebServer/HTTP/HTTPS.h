@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/05/31
  * Description        : HTTP related parameters.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 #ifndef	__HTTPS_H__
 #define	__HTTPS_H__
@@ -122,7 +124,7 @@ extern u8 httpweb[200] ;
 
 extern u8 RecvBuffer[];
 
-extern u8 flag;
+extern u8 DealDataFlag;
 
 extern u8 socket;
 

@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /* @Note
@@ -19,6 +21,7 @@
 #include "Internal_Flash.h"
 #include "SPI_FLASH.h"
 #include "SW_UDISK.h"
+
 /*********************************************************************
  * @fn      main
  *
@@ -28,18 +31,23 @@
  */
 int main(void)
 {
-	Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+	SystemCoreClockUpdate( );
+	Delay_Init( );
+	USART_Printf_Init( 115200 );
+		
+	printf( "SystemClk:%d\r\n",SystemCoreClock );
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	printf( "This program is a Simulate UDisk\r\n" );
+	
 	Delay_Ms(10);
 #if (STORAGE_MEDIUM == MEDIUM_SPI_FLASH)
-    printf("USBD UDisk Demo\r\nStorage Medium: SPI FLASH \r\n");
+    printf( "USBD UDisk Demo\r\nStorage Medium: SPI FLASH \r\n" );
     /* SPI flash init */
     FLASH_Port_Init( );
     /* FLASH ID check */
     FLASH_IC_Check( );
 #elif (STORAGE_MEDIUM == MEDIUM_INTERAL_FLASH)
-    printf("USBD UDisk Demo\r\nStorage Medium: INTERNAL FLASH \r\n");
+    printf( "USBD UDisk Demo\r\nStorage Medium: INTERNAL FLASH \r\n" );
     Flash_Sector_Count = IFLASH_UDISK_SIZE  / DEF_UDISK_SECTOR_SIZE;
     Flash_Sector_Size = DEF_UDISK_SECTOR_SIZE;
 #endif

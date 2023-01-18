@@ -4,25 +4,28 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   I2S主收从发例程：
-      本例程演示 I2S3作从机发送，I2S2作主机接收。
+   I2S master receiver slave transmitter routine:
+      This routine demonstrates that I2S3 acts as a slave to send,
+      and I2S2 acts as a master to receive.
  SPI2-I2S2:
-     WS —— PB12
-     CK —— PB13
-     SD —— PB15
-     MCK—— PC6
+     WS -- PB12
+     CK -- PB13
+     SD -- PB15
+     MCK-- PC6
 
  SPI3-I2S3:
-     WS —— PA15
-     CK —— PB3
-     SD —— PB5
-     MCK—— PC7
+     WS -- PA15
+     CK -- PB3
+     SD -- PB5
+     MCK-- PC7
 */
 #include "debug.h"
 #include "string.h"
@@ -101,7 +104,7 @@ void I2S3_Init(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
 
-    GPIO_PinRemapConfig( GPIO_Remap_SWJ_JTAGDisable, ENABLE );
+
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
@@ -145,9 +148,11 @@ int main(void)
     u32 i;
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(921600);
+    USART_Printf_Init(921600);	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     for(i=0; i<Len; i++){
 #if(data_len_mode == _16bit__data_mode)

@@ -5,9 +5,11 @@
  * Date               : 2020/04/30
  * Description        : usb device descriptor,configuration descriptor,
  *                      string descriptors and other descriptors.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 #include "usb_desc.h"
 

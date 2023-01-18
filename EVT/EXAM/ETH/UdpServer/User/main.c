@@ -4,12 +4,16 @@
  * Version            : V1.0.0
  * Date               : 2022/05/31
  * Description        : Main program body.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 /*
  *@Note
- UDP Server例程，演示UDP Server接收数据并回传.
+UDP Server example, demonstrating that the UDP Server receives data and loops back.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  */
 
 #include "string.h"
@@ -17,6 +21,7 @@
 #include "wchnet.h"
 #include "eth_driver.h"
 
+#define UDP_RECE_BUF_LEN                1472
 u8 MACAddr[6];                                   //MAC address
 u8 IPAddr[4] = { 192, 168, 1, 10 };              //IP address
 u8 GWIPAddr[4] = { 192, 168, 1, 1 };             //Gateway IP address
@@ -24,7 +29,7 @@ u8 IPMask[4] = { 255, 255, 255, 0 };             //subnet mask
 u16 srcport = 1000;                              //source port
 
 u8 SocketId;
-u8 SocketRecvBuf[RECE_BUF_LEN];                  //socket receive buffer
+u8 SocketRecvBuf[UDP_RECE_BUF_LEN];              //socket receive buffer
 
 /*********************************************************************
  * @fn      mStopIfError
@@ -112,7 +117,7 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.SourPort = srcport;
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
     TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf;
-    TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
+    TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
     TmpSocketInf.AppCallBack = WCHNET_UdpServerRecv;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
     printf("WCHNET_SocketCreat %d\r\n", SocketId);
@@ -196,10 +201,12 @@ int main(void)
 {
     u8 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                    //USART initialize
-    printf("UdpServer Test\r\n");
+    printf("UdpServer Test\r\n");   	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n", WCHNET_GetVer());
     if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");

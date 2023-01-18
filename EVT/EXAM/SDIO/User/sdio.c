@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/08/08
 * Description        : This file contains the headers of the SDIO.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "sdio.h"
 #include "string.h"
@@ -322,7 +324,7 @@ SD_Error SD_InitializeCards( void )
         CID_Tab[2] = SDIO->RESP3;
         CID_Tab[3] = SDIO->RESP4;
     }
-    if( ( SDIO_STD_CAPACITY_SD_CARD_V1_1 == CardType ) || ( SDIO_STD_CAPACITY_SD_CARD_V2_0 == CardType ) || ( SDIO_SECURE_DIGITAL_IO_COMBO_CARD == CardType ) || ( SDIO_HIGH_CAPACITY_SD_CARD == CardType ) ) //判断卡类型
+    if( ( SDIO_STD_CAPACITY_SD_CARD_V1_1 == CardType ) || ( SDIO_STD_CAPACITY_SD_CARD_V2_0 == CardType ) || ( SDIO_SECURE_DIGITAL_IO_COMBO_CARD == CardType ) || ( SDIO_HIGH_CAPACITY_SD_CARD == CardType ) )
     {
         SDIO_CmdInitStructure.SDIO_Argument = 0x00;
         SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_SET_REL_ADDR;
@@ -409,7 +411,7 @@ SD_Error SD_GetCardInfo( SD_CardInfo *cardinfo )
     cardinfo->SD_csd.RdBlockMisalign = ( tmp & 0x20 ) >> 5;
     cardinfo->SD_csd.DSRImpl = ( tmp & 0x10 ) >> 4;
     cardinfo->SD_csd.Reserved2 = 0;
-    if( ( CardType == SDIO_STD_CAPACITY_SD_CARD_V1_1 ) || ( CardType == SDIO_STD_CAPACITY_SD_CARD_V2_0 ) || ( SDIO_MULTIMEDIA_CARD == CardType ) ) //标准1.1/2.0卡/MMC卡
+    if( ( CardType == SDIO_STD_CAPACITY_SD_CARD_V1_1 ) || ( CardType == SDIO_STD_CAPACITY_SD_CARD_V2_0 ) || ( SDIO_MULTIMEDIA_CARD == CardType ) ) 
     {
         cardinfo->SD_csd.DeviceSize = ( tmp & 0x03 ) << 10;
         tmp = ( u8 )( CSD_Tab[1] & 0x000000FF );
@@ -1392,6 +1394,7 @@ SD_Error SD_WriteMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
     }
     return errorstatus;
 }
+void SDIO_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /*********************************************************************
  * @fn      SDIO_IRQHandler
@@ -1510,7 +1513,7 @@ SD_Error CmdError( void )
 SD_Error CmdResp7Error( void )
 {
     SD_Error errorstatus = SD_OK;
-    u32 status;
+    u32 status=0;
     u32 timeout = SDIO_CMD0TIMEOUT;
     while( timeout-- )
     {
@@ -1607,7 +1610,7 @@ SD_Error CmdResp3Error( void )
 SD_Error CmdResp2Error( void )
 {
     SD_Error errorstatus = SD_OK;
-    u32 status;
+    u32 status=0;
     u32 timeout = SDIO_CMD0TIMEOUT;
     while( timeout-- )
     {
@@ -1645,7 +1648,7 @@ SD_Error CmdResp2Error( void )
 SD_Error CmdResp6Error( u8 cmd, u16 *prca )
 {
     SD_Error errorstatus = SD_OK;
-    u32 status;
+    u32 status=0;
     u32 rspr1;
     while( 1 )
     {

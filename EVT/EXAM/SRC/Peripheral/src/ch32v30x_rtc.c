@@ -4,9 +4,11 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the RTC firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-********************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v30x_rtc.h"
 
 /* RTC_Private_Defines */
@@ -156,7 +158,8 @@ uint32_t RTC_GetDivider(void)
  * @fn      RTC_WaitForLastTask
  *
  * @brief   Waits until last write operation on RTC registers has finished
- *
+ *          Note-
+ *          This function must be called before any write to RTC registers.
  * @return  none
  */
 void RTC_WaitForLastTask(void)
@@ -170,7 +173,10 @@ void RTC_WaitForLastTask(void)
  * @fn      RTC_WaitForSynchro
  *
  * @brief   Waits until the RTC registers are synchronized with RTC APB clock
- *
+ *          Note-
+ *          This function must be called before any read operation after an APB reset
+ *          or an APB clock stop.
+ *          
  * @return  none
  */
 void RTC_WaitForSynchro(void)
@@ -193,7 +199,7 @@ void RTC_WaitForSynchro(void)
  *            RTC_FLAG_ALR - Alarm flag
  *            RTC_FLAG_SEC - Second flag
  *
- * @return  none
+ * @return  The new state of RTC_FLAG (SET or RESET)
  */
 FlagStatus RTC_GetFlagStatus(uint16_t RTC_FLAG)
 {

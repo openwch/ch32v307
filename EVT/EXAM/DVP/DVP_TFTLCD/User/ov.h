@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file contains the headers of the OV2640.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __OV_H
 #define __OV_H
@@ -114,7 +116,7 @@ typedef volatile unsigned long  *PUINT32V;
 #define OV_PWDN_SET    {GPIOC->BSHR = GPIO_Pin_3;}
 #define OV_PWDN_CLR    {GPIOC->BCR = GPIO_Pin_3;}
 
-//OV2640µÄID
+//OV2640ï¿½ï¿½ID
 #define SCCB_ID   			    0X60
 #define OV2640_MID				0X7FA2
 #define OV2640_PID				0X2642

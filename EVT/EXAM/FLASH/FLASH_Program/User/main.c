@@ -4,25 +4,33 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- FLASH的擦/读/写例程：
-   包括标准擦除和编程、快速擦除和编程。
+ FLASH erase/read/write, and fast programming:
+  Includes Standard Erase and Program, Fast Erase and Program.
 
-   注意：
-   a-擦除成功部分读非0xFF：
-              字读——0xe339e339
-              半字读——0xe339
-              字节读——0x39
-              偶地址字节读——0x39
-              奇地址字节读——0xe3
-   b-在主频超过100MHz时，操作FLASH时需注意：
-             在进行非零等待区域FLASH和零等待区域FLASH、用户字读写以及厂商配置字和Boot区域读时，需做以下操作，
-             首先将HCLK进行2分频，FLASH操作完成后再恢复，保证FLASH操作是频率低于100Mhz。
+   Note:
+   a-The erased part reads non-0xFF:
+              Word reading - 0xe339e339
+              Half-word reading - 0xe339
+              byte read - 0x39
+              Even address byte read - 0x39
+              Odd address byte read - 0xe3
+   b-When If the actual application must require the use of the system with a frequency greater than 120M,
+            attention should be paid to:
+            In non-zero wait area FLASH and zero wait area FLASH, user word read and write, manufacturer 
+            configuration word and Boot area read, you need to do the following operations. Firstly, divide 
+            the frequency of HCLK by 2 (the related peripheral clocks are also divided at the same time, and 
+            the impact needs to be evaluated). After the FLASH operation is completed, restore it to ensure 
+            the FLASH access clock The frequency does not exceed 60Mhz (bit[25]-SCKMOD of the FLASH_CTLR register 
+            can configure the FLASH access clock frequency to be the system clock or half of the system clock, 
+            and this bit is configured as half of the system clock by default).
 */
 
 #include "debug.h"
@@ -63,7 +71,10 @@ u32 buf[64];
 void Flash_Test(void)
 {
     printf("FLASH Test\n");
-
+    /*When the main frequency exceeds 120MHz, attention should be paid when
+     *operating FLASH: dividing HCLK by two will result in the related peripheral
+     *clock of HCLK being divided by two. Attention should be paid when using.
+     */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
     __disable_irq();
     USART_Printf_Init(115200);
@@ -139,10 +150,6 @@ void Flash_Test_Fast(void)
 
     printf("FLASH Fast Mode Test\n");
 
-    RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
-    __disable_irq();
-    USART_Printf_Init(115200);
-
     FLASH_Unlock_Fast();
 
     FLASH_EraseBlock_64K_Fast(FAST_FLASH_PROGRAM_START_ADDR);
@@ -159,7 +166,7 @@ void Flash_Test_Fast(void)
     {
         for(j = 0; j < 64; j++)
         {
-            if(*(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 256 * i + 4 * j) != i)
+            if(*(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 256 * i + 4 * j) != j)
             {
                 flag = 0;
                 break;
@@ -219,10 +226,6 @@ void Flash_Test_Fast(void)
     printf("\n");
 
     FLASH_Lock_Fast();
-
-    RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
-    __enable_irq();
-    USART_Printf_Init(115200);
 }
 
 /*********************************************************************
@@ -235,10 +238,11 @@ void Flash_Test_Fast(void)
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("Flash Program Test\r\n");
 
     Flash_Test();

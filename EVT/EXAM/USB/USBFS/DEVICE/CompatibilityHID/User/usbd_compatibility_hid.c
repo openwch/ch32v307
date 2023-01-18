@@ -2,8 +2,12 @@
  * File Name  :usbd_compatibility_hid.c
  * Author     :OWNER
  * Version    : v0.01
- * Date       : 2022Äê7ÔÂ8ÈÕ
+ * Date       : 2022ï¿½ï¿½7ï¿½ï¿½8ï¿½ï¿½
  * Description:
+*******************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #include "debug.h"

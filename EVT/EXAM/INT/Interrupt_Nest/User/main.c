@@ -4,21 +4,25 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-  1.本例程采用同步触发，演示中断嵌套的运用，最大嵌套8级，硬件压栈只
-           保存低三级，高优先级的5级中断需要使用软件压栈，低优先级的3级可以
-           使用硬件压栈或软件压栈。
+  1. This routine uses synchronous triggering to demonstrate the use of interrupt nesting.
+  The maximum nesting level is 8, and the hardware stack only Save the lower three levels,
+  high priority level 5 interrupts need to use software push stack, low priority level 3 can
+  Use hardware push or software push.
 
-  2.若只使用硬件压栈，可配置嵌套等级为4和硬件压栈溢出时关闭全局
-           中断(启动文件中配置CSR(0x804),配置值由0x1f修改为0x0b)
+  2. If you only use hardware push, you can configure the nesting level to be 4 and close
+  the global when the hardware push overflows Interrupt (configure CSR (0x804) in the startup
+  file, the configuration value is changed from 0x1f to 0x0b)
 
-  3.若不使用硬件压栈，配置CSR(0x804)的bit0清0，且中断函数声明去掉
-   "WCH-Interrupt-fast"关键字
+  3. If you don锟斤拷t use hardware push stack, configure bit0 of CSR (0x804) to clear to 0,
+  and remove the interrupt function declaration "WCH-Interrupt-fast" keyword
 
 */
 #include "debug.h"
@@ -56,14 +60,14 @@ void Interrupt_Init(void)
     NVIC_EnableIRQ(EXTI0_IRQn);
     NVIC_EnableIRQ(EXTI1_IRQn);
 
-    NVIC_SetPriority(WWDG_IRQn,  (7<<5) | (0x01<<4)); /* 组优先级7，子优先级1，总优先级较低 */
+    NVIC_SetPriority(WWDG_IRQn,  (7<<5) | (0x01<<4)); /* Group priority 7, sub-priority 1, lower overall priority */
     NVIC_SetPriority(PVD_IRQn,   (6<<5) | (0x01<<4));
     NVIC_SetPriority(TAMPER_IRQn,(5<<5) | (0x01<<4));
     NVIC_SetPriority(RTC_IRQn,   (4<<5) | (0x01<<4));
     NVIC_SetPriority(FLASH_IRQn, (3<<5) | (0x01<<4));
     NVIC_SetPriority(RCC_IRQn,   (2<<5) | (0x01<<4));
     NVIC_SetPriority(EXTI0_IRQn, (1<<5) | (0x01<<4));
-    NVIC_SetPriority(EXTI1_IRQn, (0<<5) | (0x01<<4));/* 组优先级0，子优先级1，总优先级较高 */
+    NVIC_SetPriority(EXTI1_IRQn, (0<<5) | (0x01<<4));/* Group priority 0, sub-priority 1, overall priority is higher */
 }
 
 
@@ -77,9 +81,12 @@ uint8_t step=1;
  */
 int main(void)
 {
+    SystemCoreClockUpdate();
     Delay_Init();
 	USART_Printf_Init(115200);
+		
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("Interrupt Nest Test\r\n");
 	Interrupt_Init();
 	printf("Enter lowest interrupt\r\n");

@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/08/18
  * Description        : Main program body.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 /*
  * @Note
@@ -45,10 +47,14 @@
 int main( void )
 {
     /* Initialize system configuration */
+	SystemCoreClockUpdate( );
     NVIC_PriorityGroupConfig( NVIC_PriorityGroup_2 );
 	Delay_Init( );
 	USART_Printf_Init( 115200 );
+		
 	printf( "SystemClk:%d\r\n", SystemCoreClock );
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	printf("USBHD Composite KM Device Test\r\n");
 
 	/* Initialize USART2 for receiving the specified keyboard data */
 	USART2_Init( 115200 );
@@ -72,9 +78,7 @@ int main( void )
 	USBFS_RCC_Init( );
 	USBFS_Device_Init( ENABLE );
 	USB_Sleep_Wakeup_CFG( );
-
-	printf("USBHD Composite KM Device Test\r\n");
-
+	
 	while( 1 )
     {
 	    if( USBFS_DevEnumStatus )

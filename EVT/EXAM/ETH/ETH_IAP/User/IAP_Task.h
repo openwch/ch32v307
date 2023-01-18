@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/05/25
 * Description        : This file contains the headers of the IAP task.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __IAP_TASK_H__
 #define __IAP_TASK_H__

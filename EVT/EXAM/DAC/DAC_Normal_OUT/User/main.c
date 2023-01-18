@@ -4,15 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 正常输出例程：
- DAC通道0(PA4)输出
- 关闭触发功能，通过写入数据保持寄存器，PA4输出相应电压。
+ normal output routine:
+DAC channel 0 (PA4) output
+ Turn off the trigger function, and by writing to the data holding register,
+ PA4 outputs the corresponding voltage.
 
 */
 
@@ -65,10 +68,12 @@ void Dac_Init(void)
 int main(void)
 {
     u8 i = 0;
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
-    Dac_Init();
+    Dac_Init();	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("DAC Normal OUT\r\n");
     while(1)
     {

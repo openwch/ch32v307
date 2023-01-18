@@ -4,15 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   双DAC输出正弦波例程：
- DAC分别从PA4和PA5输出
-  输出完全相同的正弦波
+ Dual DAC output sine wave routine:
+ DAC outputs from PA4 and PA5 respectively
+  Outputs exactly the same sine wave
 */
 
 #include "debug.h"
@@ -128,9 +130,11 @@ void Timer4_Init(void)
 int main(void)
 {
     uint8_t i=0;
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("Dual DAC Generation Test\r\n");
 	for(i=0;i<Num;i++)
 	{

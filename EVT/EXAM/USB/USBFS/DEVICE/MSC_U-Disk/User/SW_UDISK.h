@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/08/08
  * Description        : header file for SW_UDISK.c
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "stdio.h"
 #include "stdlib.h"
 
@@ -15,7 +17,7 @@
 #endif 
 
 /******************************************************************************/
-/* BulkOnly Mass Storage设备特殊类请求 */
+/* BulkOnly Mass Storage Class requst */
 #define CMD_UDISK_RESET                 0xFF
 #define CMD_UDISK_GET_MAX_LUN           0xFE
 
@@ -30,10 +32,10 @@
 #define CMD_U_RELEASE	             	0x17
 #define CMD_U_MODE_SENSE	            0x1A
 #define CMD_U_START_STOP	            0x1B
-#define CMD_U_SEND_DIAG	  	 	    0x1D
+#define CMD_U_SEND_DIAG	  	 	        0x1D
 #define CMD_U_PREVT_REMOVE	  	 	    0x1E
 #define CMD_U_READ_FORMAT_CAPACITY	  	0x23
-#define CMD_U_READ_CAPACITY	  	    0x25
+#define CMD_U_READ_CAPACITY	  	        0x25
 #define CMD_U_READ10	  				0x28
 #define CMD_U_WRITE10	  				0x2A
 #define CMD_U_SEEK10	  				0x2B
@@ -46,11 +48,10 @@
 #define CMD_U_WRITE12	  				0xAA
 
 /******************************************************************************/
-/* 指定当前小容量U盘大小为32K */
 #define MY_UDISK_SIZE  0x00000040
 
 /******************************************************************************/
-/* BulkOnly传输结构定义 */
+/* BulkOnly */
 typedef union _BULK_ONLY_CMD 
 {
 	uint8_t buf[ 31 ];
@@ -86,64 +87,57 @@ typedef union _BULK_ONLY_CMD
 } BULK_ONLY_CMD;
 
 /******************************************************************************/
-/* 当前U盘相关宏定义(根据需要可以修改) */
+#define DEF_DEBUG_PRINTF               1
+#define MEDIUM_INTERAL_FLASH           1
+#define MEDIUM_SPI_FLASH               2
 
-#define DEF_DEBUG_PRINTF           1
-#define MEDIUM_INTERAL_FLASH       1
-#define MEDIUM_SPI_FLASH           2
-
-#define STORAGE_MEDIUM             MEDIUM_INTERAL_FLASH
-//#define STORAGE_MEDIUM             MEDIUM_SPI_FLASH
+#define STORAGE_MEDIUM                 MEDIUM_INTERAL_FLASH
+//#define STORAGE_MEDIUM                 MEDIUM_SPI_FLASH
 
 #if (STORAGE_MEDIUM == MEDIUM_SPI_FLASH)
-    #define DEF_CFG_DISK_SEC_SIZE      4096                                                /* 磁盘扇区大小 */
-    #define DEF_FLASH_SECTOR_SIZE      4096                                                /* 定义FLASH扇区大小 */
-    #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* 定义U盘扇区大小 */
+    #define DEF_CFG_DISK_SEC_SIZE      4096                                                /* Disk sector size */
+    #define DEF_FLASH_SECTOR_SIZE      4096                                                /* Flash sector size */
+    #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* UDisk sector size */
 #elif (STORAGE_MEDIUM == MEDIUM_INTERAL_FLASH)
-    #define DEF_CFG_DISK_SEC_SIZE      512                                                 /* 磁盘扇区大小 */
-    #define DEF_FLASH_SECTOR_SIZE      512                                                 /* 定义FLASH扇区大小 */
-    #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* 定义U盘扇区大小 */
+    #define DEF_CFG_DISK_SEC_SIZE      512                                                 /* Disk sector size */
+    #define DEF_FLASH_SECTOR_SIZE      512                                                 /* Flash sector size */
+    #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* UDisk sector size */
 #endif
 
-#define DEF_UDISK_PACK_512    	        512
+#define DEF_UDISK_PACK_512    	       512
 #define DEF_UDISK_PACK_64              64
 
 /******************************************************************************/
-/* 当前U盘状态相关宏定义 */
+/* Current u-disk status related macro definition */
 #define DEF_UDISK_EN_FLAG              0x01
 
 /******************************************************************************/
-/* 当前U盘传输状态相关宏定义 */
+/* Current u-disk transfer status related macro definitions */
 #define DEF_UDISK_BLUCK_UP_FLAG        0x01
 #define DEF_UDISK_BLUCK_DOWN_FLAG      0x02
-#define DEF_UDISK_CSW_UP_FLAG  	    0x04
+#define DEF_UDISK_CSW_UP_FLAG  	       0x04
+
 
 /******************************************************************************/
-/* 常、变量外扩 */
+/* external functions */
 extern volatile uint8_t  Udisk_CBW_Tag_Save[ 4 ];
 extern volatile uint8_t  Udisk_Sense_Key;
 extern volatile uint8_t  Udisk_Sense_ASC;
 extern volatile uint8_t  Udisk_CSW_Status;
-
 extern volatile uint32_t UDISK_Transfer_DataLen;
 extern volatile uint32_t UDISK_Cur_Sec_Lba;
 extern volatile uint16_t UDISK_Sec_Pack_Count;
 extern volatile uint16_t UDISK_Pack_Size;
-
 extern BULK_ONLY_CMD	mBOC;
-
 extern volatile uint8_t  Udisk_Status;
 extern volatile uint8_t  Udisk_Transfer_Status;
 extern volatile uint32_t Udisk_Capability;
-
 extern uint8_t  UDISK_Inquity_Tab[ ];
 extern uint8_t  const  UDISK_Rd_Format_Capacity[ ];
 extern uint8_t  const  UDISK_Rd_Capacity[ ];
 extern uint8_t  const  UDISK_Mode_Sense_1A[ ];
 extern uint8_t  const  UDISK_Mode_Senese_5A[ ];
 
-/******************************************************************************/
-/* 函数外扩 */
 extern void UDISK_CMD_Deal_Status( uint8_t key, uint8_t asc, uint8_t status );
 extern void UDISK_CMD_Deal_Fail( void );
 extern void UDISK_SCSI_CMD_Deal( void );

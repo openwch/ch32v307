@@ -4,15 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- MCO引脚时钟输出例程：
+ MCO pin clock output routine:
  MCO(PA8)
- 本例程演示 MCO(PA8) 引脚输出系统时钟。
+This example demonstrates that the MCO(PA8) pin outputs the system clock.
 
 */
 
@@ -31,10 +33,10 @@ int main(void)
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
     USART_Printf_Init(115200);
+    SystemCoreClockUpdate();	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

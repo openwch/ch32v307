@@ -4,15 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 定时器使用DMA例程：
+ Timer DMA routines:
  TIM1_CH1(PA8)
- 本例程演示 使用 DMA 通过 TIM1_CH1(PA8) 引脚输出 PWM。
+ This example demonstrates using DMA to output PWM through TIM1_CH1(PA8) pin.
 
 */
 
@@ -111,8 +113,9 @@ void TIM1_DMA_Init(DMA_Channel_TypeDef *DMA_CHx, u32 ppadr, u32 memadr, u16 bufs
 int main(void)
 {
     USART_Printf_Init(115200);
+    SystemCoreClockUpdate();	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     TIM1_PWMOut_Init(100, 48000 - 1, pbuf[0]);
     TIM1_DMA_Init(DMA1_Channel5, (u32)TIM1_CH1CVR_ADDRESS, (u32)pbuf, 3);
 

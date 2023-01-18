@@ -4,16 +4,19 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 互补输出和死区插入模式例程：
+ Complementary output and deadband insertion mode routines:
  TIM1_CH1(PA8),TIM1_CH1N(PB13)
- 本例程演示 TIM1 三种带死区互补输出模式：带死区插入的互补输出、死区波形延迟
- 大于负脉冲、死区波形延迟大于正脉冲。
+ This example demonstrates three complementary output modes with dead zone of TIM1: complementary output
+ with dead zone insertion, dead zone waveform delay Greater than the negative pulse, the dead zone waveform
+  delay is greater than the positive pulse.
  
 */
 
@@ -92,8 +95,10 @@ void TIM1_Dead_Time_Init( u16 arr, u16 psc, u16 ccp )
 int main(void)
 {
 	USART_Printf_Init(115200);
+	SystemCoreClockUpdate();	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	
 	/* Complementary output with dead-time insertion */
 	TIM1_Dead_Time_Init( 100, 48-1, 50 );
 	/* Dead-time waveforms with delay greater than the negative pulse */

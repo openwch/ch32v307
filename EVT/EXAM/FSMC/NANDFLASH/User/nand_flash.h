@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file contains the headers of the NANDFLASH.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __NAND_FLASH_H
 #define __NAND_FLASH_H
@@ -32,7 +34,7 @@ extern nand_attriute nand_dev;
 #define NAND_CMD                1<<16
 #define NAND_ADDR               1<<17
 
-//NAND FLASHÃüÁî
+//NAND FLASHï¿½ï¿½ï¿½ï¿½
 #define NAND_READID             0X90
 #define NAND_RESET              0XFF
 #define NAND_READSTA            0X70

@@ -5,7 +5,8 @@
 * Date               : 2022/08/20
 * Description        : USB2.0高速设备操作相关头文件
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __CH32V30X_USBHS_DEVICE_H__
 #define __CH32V30X_USBHS_DEVICE_H__

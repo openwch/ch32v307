@@ -4,14 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note 
- ADC使用DMA采样例程：
- ADC通道2(PA2),规则组通道通过DMA获取 ADC连续1024次转换数据。
+ ADC uses DMA sampling routine:
+ ADC channel 2 (PA2), the rule group channel obtains ADC conversion data for 1024
+ consecutive times through DMA.
  
 */
 
@@ -164,9 +167,11 @@ int main(void)
 {
     u16 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("APP\r\n");
 
     ADC_Function_Init();

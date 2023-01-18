@@ -3,9 +3,11 @@
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/08/20
-* Description        : USB2.0¸ßËÙÉè±¸²Ù×÷Ïà¹ØÍ·ÎÄ¼þ
+* Description        : USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __CH32V30X_USBHS_DEVICE_H__
 #define __CH32V30X_USBHS_DEVICE_H__

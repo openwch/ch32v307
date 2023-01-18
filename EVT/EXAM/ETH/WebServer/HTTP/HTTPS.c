@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/05/31
  * Description        : HTTPS related functions.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>    
@@ -2820,8 +2822,8 @@ void Web_Server(void)
     char *para_p;
     u32 len;
 
-    if(flag){
-        flag = 0;
+    if(DealDataFlag){
+        DealDataFlag = 0;
         ParseHttpRequest(http_request, RecvBuffer);
         switch (http_request->METHOD)
         {

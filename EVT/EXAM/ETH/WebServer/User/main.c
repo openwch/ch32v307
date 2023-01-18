@@ -4,14 +4,18 @@
  * Version            : V1.0.0
  * Date               : 2022/01/18
  * Description        : Main program body.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 /*
  *@Note
- Web Server例程，本程序用于演示通过Web浏览器配置WCHNET芯片的功能，WCHNET芯片内置web服务器 ，
-   通过网页可以实现WCHNET的网络参数配置，以及密码管理。
-    本例程使用手册为1_Tool_Doc文件夹下“WCHNET WEB配置说明”。
+Web Server example, this program is used to demonstrate the function
+of configuring the WCHNET chip through a web browser, the WCHNET chip has a built-in web server,
+The web page can implement WCHNET's network parameter configuration and password management.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  */
 #include "string.h"
 #include "debug.h"
@@ -24,7 +28,7 @@ u8 IPAddr[4];                                                   //IP address
 u8 GWIPAddr[4];                                                 //Gateway IP address
 u8 IPMask[4];                                                   //subnet mask
 
-u8 flag = 0;
+u8 DealDataFlag = 0;
 u8 SocketId, SocketIdForListen, RecvBuffer[RECE_BUF_LEN];
 u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];          //socket receive buffer
 u16 DESPORT, SRCPORT;                                           //port
@@ -176,7 +180,7 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
         printf("WCHNET_SocketRecvLen %d  socket id %d\r\n", len, socketid);
         if (len) {
             WCHNET_SocketRecv(socketid, RecvBuffer, &len);
-            flag = 1;
+            DealDataFlag = 1;
             socket = socketid;
         }
     }
@@ -260,11 +264,13 @@ void GPIOInit(void)
 int main(void)
 {
     u8 i;
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                                  //USART initialize
     GPIOInit();
-    printf("WEB SERVER\r\n");
+    printf("WEB SERVER\r\n");   	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n", WCHNET_GetVer());
     if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");

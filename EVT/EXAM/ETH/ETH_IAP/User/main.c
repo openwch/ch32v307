@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/01/18
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include <stdlib.h>
 #include <string.h>
@@ -16,9 +18,12 @@
 #include "IAP_Task.h"
 /*
  *@Note
-ETH IAP例程，演示通过TCP数据传输，进行IAP。
-本例程使用软件为1_Tool_Doc文件夹下“VerifyBinTool_WCHNET”，
-使用手册为“WCHNET IAP升级方案使用教程”。
+ETH IAP example, demonstrating the transmission of data via TCP, perform IAP.
+This example uses the software as the 1_Tool_Doc folder under "VerifyBinTool_WCHNET",
+The user manual is "WCHNET IAP Upgrade Solution Tutorial".
+
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 
 u8 MACAddr[6];                                                      //MAC address
@@ -159,26 +164,26 @@ void WCHNET_HandleGlobalInt(void)
     intstat = WCHNET_GetGlobalInt();                                             //get global interrupt flag
     if(intstat & GINT_STAT_UNREACH)                                              //Unreachable interrupt
     {
-       printf("GINT_STAT_UNREACH\r\n");
+        printf("GINT_STAT_UNREACH\r\n");
     }
-   if(intstat & GINT_STAT_IP_CONFLI)                                             //IP conflict
-   {
-       printf("GINT_STAT_IP_CONFLI\r\n");
-   }
-   if(intstat & GINT_STAT_PHY_CHANGE)                                            //PHY status change
-   {
-       i = WCHNET_GetPHYStatus();
-       if(i&PHY_Linked_Status)
-       printf("PHY Link Success\r\n");
-   }
-   if(intstat & GINT_STAT_SOCKET)                                                //socket related interrupt
-   {
-       for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
-       {
-           socketint = WCHNET_GetSocketInt(i);
-           if(socketint)WCHNET_HandleSockInt(i,socketint);
-       }
-   }
+    if(intstat & GINT_STAT_IP_CONFLI)                                             //IP conflict
+    {
+        printf("GINT_STAT_IP_CONFLI\r\n");
+    }
+    if(intstat & GINT_STAT_PHY_CHANGE)                                            //PHY status change
+    {
+        i = WCHNET_GetPHYStatus();
+        if(i&PHY_Linked_Status)
+            printf("PHY Link Success\r\n");
+    }
+    if(intstat & GINT_STAT_SOCKET)                                                //socket related interrupt
+    {
+        for(i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
+        {
+            socketint = WCHNET_GetSocketInt(i);
+            if(socketint)WCHNET_HandleSockInt(i,socketint);
+        }
+    }
 }
 
 /*********************************************************************
@@ -210,8 +215,11 @@ int main(void)
     u8 i;
     u32 updateFlag;
 
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);                                                      //USART initialize
+    USART_Printf_Init(115200);                                                      //USART initialize   	
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     GPIOInit();
     /*Detect whether the button(PA0) is pressed, if pressed,
      *make a TCP connection to upgrade, otherwise jump

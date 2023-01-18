@@ -5,9 +5,11 @@
  * Date               : 2021/06/06
  * Description        : This file contains all the functions prototypes for the
  *                      USBOTG firmware library.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #ifndef __CH32V30X_USBOTG_DEVICE_H_
 #define __CH32V30X_USBOTG_DEVICE_H_
 
@@ -375,7 +377,7 @@ typedef struct __PACKED _UDISK_BOC_CSW {/* status of BulkOnly USB-FlashDisk */
     UINT8 mCSW_Status; /* return: result status */
 } UDISK_BOC_CSW, *PXUDISK_BOC_CSW;
 
-/* ¿ØÖÆÐÔºê¶¨Òå */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½Ôºê¶¨ï¿½ï¿½ */
 #define USE_SYS_CLK        0
 //#define USBHD_HOST         0
 //#define USB_OTG            0

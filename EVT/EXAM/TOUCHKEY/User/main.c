@@ -4,14 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- TouchKey检测例程：
-   本例程演示 通道2(PA2)，做 Touchkey 应用。
+ touchkey detection routine:
+   This example demonstrates channel 2 (PA2), which is a Touchkey application.
 
 */
 
@@ -33,7 +35,7 @@ void Touch_Key_Init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-    RCC_ADCCLKConfig(RCC_PCLK2_Div4);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
@@ -84,7 +86,7 @@ u16 Touch_Key_Adc(u8 ch)
     TKey1->IDATAR1 = 0x10; //Charging Time
     TKey1->RDATAR = 0x8;   //Discharging Time
     while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC))
-        ;
+    ;
     return (uint16_t)TKey1->RDATAR;
 }
 
@@ -99,10 +101,11 @@ int main(void)
 {
     u16 ADC_val;
 
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     Touch_Key_Init();
     while(1)
     {

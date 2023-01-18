@@ -4,15 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- DAC使用DMA转换例程：
- DAC通道0(PA4)输出
- DMA配置成循环模式，通过TIM8_TRGO事件触发1次DAC转换，PA4输出相应的电压。
+ DAC DMA conversion routines:
+ DAC channel 0 (PA4) output
+ DMA is configured in cyclic mode, a DAC conversion is triggered by a TIM8_TRGO event, and PA4 outputs
+ the corresponding voltage.
 
 */
 
@@ -122,9 +125,11 @@ void TIM8_Init(u16 arr,u16 psc)
 int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);		
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("DAC DMA TEST\r\n");
 	Dac_Init();
 	DAC1_DMA_Init();

@@ -70,6 +70,7 @@ Directory
   |      |      |      |      |-- TcpServer: demonstration routine that TCP server receives data after connecting to the client and then returns data
   |      |      |      |      |-- UdpClient: demonstration routine that Udp Client receives data and returns data
   |      |      |      |      |-- UdpServer: demonstration routine that Udp Server receives data and returns data
+  |      |      |      |      |-- ETH_Filter_Multicast£ºdemonstrate filtering and multicast sending functions
   |      |      |      |      |-- WebServer: Web Server routine, to demonstrate the configuration of WCHNET device functions through Web browser. As the WCHNET devices have built-in web server, the network parameter configuration and password management of WCHNET can be implemented on the web page.   
   |      |      |      |-- EXTI: external interrupt line routine
   |      |      |      |-- FLASH: FLASH erase/read/write, and fast programming
@@ -148,13 +149,15 @@ Directory
   |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
   |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
   |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 1 to send and receive.
-  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 1 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |-- MSC_CD-ROM: Simulate CDROM, need external SPI-Flash
+  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 2 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
   |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
   |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Host_Udisk£ºUSB host operation USB disk routine 
   |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
   |      |      |      |      |-- USBHS 
   |      |      |      |      |      |-- DEVICE
@@ -162,13 +165,16 @@ Directory
   |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
   |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
   |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 1 to send and receive.
-  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 1 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |-- MSC_CD-ROM: Simulate CDROM, need external SPI-Flash
+  |      |      |      |      |      |      |--USB_ECM-NetWorkAdaptor: USB ECM routines
+  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 2 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
   |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
   |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Host_Udisk£ºUSB host operation USB disk routine 
   |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
   |      |      |      |-- VoiceRcgExam: individual term voice recognition routine 
   |      |      |      |-- WWDG: window watchdog routine

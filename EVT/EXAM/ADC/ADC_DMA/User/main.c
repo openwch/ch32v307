@@ -4,14 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note 
- ADC使用DMA采样例程：
- ADC通道1(PA1),规则组通道通过DMA获取 ADC连续1024次转换数据。
+ ADC DMA sampling routines:
+ ADC channel 1 (PA1), the rule group channel obtains ADC
+ conversion data for 1024 consecutive times through DMA.
  
 */
 
@@ -61,7 +64,6 @@ void ADC_Function_Init(void)
 	while(ADC_GetCalibrationStatus(ADC1));
 	Calibrattion_Val = Get_CalibrationValue(ADC1);	
 	
-	ADC_BufferCmd(ADC1, ENABLE);   //enable buffer
 }
 
 /*********************************************************************
@@ -163,10 +165,11 @@ u16 Get_ConversionVal(s16 val)
 int main(void)
 {
 	u16 i;
-
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);		
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     ADC_Function_Init();
     printf("CalibrattionValue:%d\n", Calibrattion_Val);

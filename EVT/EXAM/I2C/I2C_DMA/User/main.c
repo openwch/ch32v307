@@ -4,18 +4,21 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- I2C使用DMA，Master/Slave 模式收发例程：
- I2C1_SCL(PB8)、I2C1_SDA(PB9)。
- 本例程演示7位地址模式， Master 通过 DMA 发，Slave 通过 DMA 收。
- 注：两块板子分别下载 Master 和 Slave 程序，同时上电。
-     硬件连线：PB8 —— PB8
-               PB9 —— PB9
+ I2C DMA, master/slave mode transceiver routine:
+ I2C1_SCL(PB8)\I2C1_SDA(PB9).
+ This example demonstrates the 7-bit address mode, Master sends via DMA, and Slave receives via DMA.
+ Note: The two boards download the Master and Slave programs respectively, and power on at the same time.
+    Hardware connection:
+               PB8 -- PB8
+               PB9 -- PB9
 
 */
 
@@ -30,14 +33,14 @@
 //#define I2C_MODE   SLAVE_MODE
 
 /* Global define */
-#define Size          7
-#define Tize          6
-#define RXAdderss     0x02
-#define TxAdderss     0x02
+#define Size   6
+#define Tize   6
+#define RXAdderss   0x02
+#define TxAdderss   0x02
 
 /* Global Variable */
-u8 TxData[Size] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
-u8 RxData[Size];
+u8 TxData[Size] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+u8 RxData[5][Size];
 
 /*********************************************************************
  * @fn      IIC_Init
@@ -164,55 +167,61 @@ void DMA_Rx_Init(DMA_Channel_TypeDef *DMA_CHx, u32 ppadr, u32 memadr, u16 bufsiz
  */
 int main(void)
 {
-    u8 i = 0;
-
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    uint8_t i ,t;
+	uint8_t j ;
+    NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(460800);
+    USART_Printf_Init(460800);	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
-#if(I2C_MODE == HOST_MODE)
-    printf("IIC Host mode\r\n");
-    DMA_Tx_Init(DMA1_Channel6, (u32)&I2C1->DATAR, (u32)TxData, Tize);
-    IIC_Init(80000, TxAdderss);
+#if (I2C_MODE == HOST_MODE)
+    printf( "IIC Host mode\r\n" );
+    IIC_Init( 80000, TxAdderss );
+    for( j =0; j < 5; j++)
+	 {
+	DMA_Tx_Init( DMA1_Channel6, ( u32 )&I2C1->DATAR, ( u32 )TxData, Tize );
+    while( I2C_GetFlagStatus( I2C1, I2C_FLAG_BUSY ) != RESET );
+    I2C_GenerateSTART( I2C1, ENABLE );
 
-    while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) != RESET)
-        ;
-    I2C_GenerateSTART(I2C1, ENABLE);
+    while( !I2C_CheckEvent( I2C1, I2C_EVENT_MASTER_MODE_SELECT ) );
+    I2C_Send7bitAddress( I2C1, 0x02, I2C_Direction_Transmitter );
 
-    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT))
-        ;
-    I2C_Send7bitAddress(I2C1, 0x02, I2C_Direction_Transmitter);
-
-    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
-        ;
+    while( !I2C_CheckEvent( I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );
 
     DMA_Cmd(DMA1_Channel6, ENABLE);
 
-    while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
-        ;
-    I2C_GenerateSTOP(I2C1, ENABLE);
+    while( !I2C_CheckEvent( I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) );
+    I2C_GenerateSTOP( I2C1, ENABLE );
+	Delay_Ms(1000);
+			
+	} 
 
-#elif(I2C_MODE == SLAVE_MODE)
-    printf("IIC Slave mode\r\n");
-    DMA_Rx_Init(DMA1_Channel7, (u32)&I2C1->DATAR, (u32)RxData, Tize);
-    IIC_Init(80000, RXAdderss);
+#elif (I2C_MODE == SLAVE_MODE)
+    printf( "IIC Slave mode\r\n" );
+    IIC_Init( 80000, RXAdderss );
 
-    while(!I2C_CheckEvent(I2C1, I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED))
-        ;
-    DMA_Cmd(DMA1_Channel7, ENABLE);
+	for(t=0; t<5; t++)
+	{
+	DMA_Rx_Init( DMA1_Channel7, ( u32 )&I2C1->DATAR, ( u32)&RxData[t][0], Tize );
+    while( !I2C_CheckEvent( I2C1, I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED ) );
+    DMA_Cmd( DMA1_Channel7, ENABLE );
+    
+    while( ( !DMA_GetFlagStatus( DMA1_FLAG_TC7 ) ) );
+		
+    printf( "RxData:\r\n" );
 
-    while((!DMA_GetFlagStatus(DMA1_FLAG_TC7)))
-        ;
-
-    printf("RxData:\r\n");
-    for(i = 0; i < 6; i++)
-    {
-        printf("%02x\r\n", RxData[i]);
-    }
-
+	for( i = 0; i < 6; i++ )
+	{
+	  printf( "%02x ", RxData[t][i] );
+	  RxData[t][i] =0;
+	}
+	  printf( "\r\n ");
+	}
+				
+    
 #endif
 
-    while(1)
-        ;
+    while(1);
 }

@@ -4,20 +4,24 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 使用CRC错误校验，Master/Slave 模式收发例程：
- Master：SPI1_SCK(PA5)、SPI1_MOSI(PA7)。
- Slave：SPI1_SCK(PA5)、SPI1_MISO(PA6)。
+ CRC error check and master/slave mode transceiver routine:
+ Master:SPI1_SCK(PA5)\SPI1_MOSI(PA7).
+ Slave:SPI1_SCK(PA5)\SPI1_MISO(PA6).
  
- 本例程演示使用CRC错误校验，Master 发，Slave 收。
- 注：两块板子分别下载 Master 和 Slave 程序，同时上电。
-     硬件连线：PA5 —— PA5
-               PA7 —— PA6
+ This example demonstrates the use of CRC error checking,
+ the Master sends and the Slave receives.
+ Note: The two boards download the Master and Slave programs
+ respectively, and power on at the same time.
+     hardware connection:PA5 -- PA5
+               PA7 -- PA6
  
 */
 
@@ -28,8 +32,8 @@
 #define SLAVE_MODE   1
 
 /* SPI Communication Mode Selection */
-#define SPI_MODE   HOST_MODE
-//#define SPI_MODE   SLAVE_MODE
+//#define SPI_MODE   HOST_MODE
+#define SPI_MODE   SLAVE_MODE
 
 /* Global define */
 #define Size 4
@@ -109,9 +113,11 @@ int main(void)
 	u8 i=0,crcval;
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 #if (SPI_MODE == SLAVE_MODE)
 	printf("SLAVE Mode\r\n");

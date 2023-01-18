@@ -4,9 +4,11 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the DBGMCU firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-****************************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v30x_dbgmcu.h"
 
 #define IDCODE_DEVID_MASK    ((uint32_t)0x0000FFFF)
@@ -97,5 +99,26 @@ void DBGMCU_Config(uint32_t DBGMCU_Periph, FunctionalState NewState)
 
 }
 
-
+/*********************************************************************
+ * @fn      DBGMCU_GetCHIPID
+ *
+ * @brief   Returns the CHIP identifier.
+ *
+ * @return Device identifier.
+ *          ChipID List-
+ *          CH32V303CBT6-0x303305x4
+ *          CH32V303RBT6-0x303205x4
+ *          CH32V303RCT6-0x303105x4
+ *          CH32V303VCT6-0x303005x4
+ *          CH32V305FBP6-0x305205x8
+ *          CH32V305RBT6-0x305005x8
+ *          CH32V307WCU6-0x307305x8
+ *          CH32V307FBP6-0x307205x8
+ *          CH32V307RCT6-0x307105x8
+ *          CH32V307VCT6-0x307005x8
+ */
+uint32_t DBGMCU_GetCHIPID( void )
+{
+    return( *( uint32_t * )0x1FFFF704 );
+}
 
