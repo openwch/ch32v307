@@ -5,8 +5,10 @@
 * Date               : 2022/06/02
 * Description        : This file contains the configurations of 
 *                      Ethernet protocol stack library
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __NET_CONFIG_H__
 #define __NET_CONFIG_H__
@@ -22,7 +24,7 @@ extern "C" {
 
 #define WCHNET_NUM_UDP                0  /* The number of UDP connections */
 
-#define WCHNET_NUM_TCP                5  /* Number of TCP connections (server + client) */
+#define WCHNET_NUM_TCP                5  /* Number of TCP connections */
 
 #define WCHNET_NUM_TCP_LISTEN         2  /* Number of TCP listening */
 
@@ -30,6 +32,8 @@ extern "C" {
 #define WCHNET_MAX_SOCKET_NUM    (WCHNET_NUM_IPRAW+WCHNET_NUM_UDP+WCHNET_NUM_TCP+WCHNET_NUM_TCP_LISTEN)
 
 #define WCHNET_TCP_MSS                800  /* Size of TCP MSS*/
+
+#define WCHNET_NUM_POOL_BUF           (WCHNET_NUM_TCP*2+2)   /* The number of POOL BUFs, the number of receive queues */
 
 /*********************************************************************
  * MAC queue configuration
@@ -81,15 +85,15 @@ extern "C" {
 
 #define WCHNET_NUM_IP_REASSDATA       4    /* Number of IP segments */
 
-#define CFG0_IP_REASS_PBUFS           4    /* Number of reassembled IP PBUFs  */
-
 #define WCHNET_MEM_ALIGNMENT          4    /* 4 byte alignment */
 
-#define WCHNET_NUM_POOL_BUF           (WCHNET_NUM_TCP*2+2)   /* The number of POOL BUFs, the number of receive queues */
-
+#if (WCHNET_NUM_POOL_BUF * (((WCHNET_TCP_MSS + 58) + 3) & ~3) < ETH_RX_BUF_SZE)
+    #error "WCHNET_NUM_POOL_BUF or WCHNET_TCP_MSS Error"
+    #error "Please Increase WCHNET_NUM_POOL_BUF or WCHNET_TCP_MSS to make sure the receive buffer is sufficient"
+#endif
 /* Check the configuration of the SOCKET quantity */
 #if( WCHNET_NUM_TCP_LISTEN && !WCHNET_NUM_TCP )
-  #error "WCHNET_NUM_TCP Error)"
+    #error "WCHNET_NUM_TCP Error"
 #endif
 /* Check byte alignment must be a multiple of 4 */
 #if((WCHNET_MEM_ALIGNMENT % 4) || (WCHNET_MEM_ALIGNMENT == 0))
@@ -127,8 +131,7 @@ extern "C" {
 /* Configuration value 0 */
 #define WCHNET_MISC_CONFIG0    (((CFG0_TCP_SEND_COPY) << 0) |\
                                ((CFG0_TCP_RECV_COPY)  << 1) |\
-                               ((CFG0_TCP_OLD_DELETE) << 2) |\
-                               ((CFG0_IP_REASS_PBUFS) << 3) )
+                               ((CFG0_TCP_OLD_DELETE) << 2) )
 /* Configuration value 1 */
 #define WCHNET_MISC_CONFIG1    (((WCHNET_MAX_SOCKET_NUM)<<0)|\
                                ((WCHNET_PING_ENABLE) << 13) |\

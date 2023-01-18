@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : This file provides all the USBHS firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x_usbhs_device.h"
 
@@ -79,7 +81,7 @@ void USBHS_Device_Endp_Init ( void )
     USBHSD->UEP0_DMA    = (uint32_t)(uint8_t *)USBHS_EP0_Buf;
 
     USBHSD->UEP3_RX_DMA = (uint32_t)(uint8_t *)USBHS_EP3_Tx_Buf;
-    USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART1_Tx_Buf[ 0 ];
+    USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
     USBHSD->UEP2_TX_DMA = (uint32_t)(uint8_t *)USBHS_EP2_Tx_Buf;
 
     USBHSD->UEP0_TX_LEN  = 0;
@@ -360,7 +362,7 @@ void USBHS_IRQHandler( void )
                                      Uart.Com_Cfg[ 7 ] = Uart.Rx_TimeOutMax;
 
                                      /* Uart1 usb init */
-                                     UART1_USB_Init( );
+                                     UART2_USB_Init( );
                                  }
                              }
                              else
@@ -384,11 +386,11 @@ void USBHS_IRQHandler( void )
                         /* DMA address */
                         Uart.Tx_PackLen[ Uart.Tx_LoadNum ] = USBHSD->RX_LEN;
                         Uart.Tx_LoadNum++;
-                        USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART1_Tx_Buf[ ( Uart.Tx_LoadNum * DEF_USB_HS_PACK_LEN ) ];
+                        USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ ( Uart.Tx_LoadNum * DEF_USB_HS_PACK_LEN ) ];
                         if( Uart.Tx_LoadNum >= DEF_UARTx_TX_BUF_NUM_MAX )
                         {
                             Uart.Tx_LoadNum = 0x00;
-                            USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART1_Tx_Buf[ 0 ];
+                            USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
                         }
                         Uart.Tx_RemainNum++;
 
@@ -837,7 +839,7 @@ void USBHS_IRQHandler( void )
 
         USBHSD->DEV_AD = 0;
         USBHS_Device_Endp_Init( );
-        UART1_ParaInit( 1 );
+        UART2_ParaInit( 1 );
         USBHSD->INT_FG = USBHS_UIF_BUS_RST;
     }
     else if( intflag & USBHS_UIF_SUSPEND )

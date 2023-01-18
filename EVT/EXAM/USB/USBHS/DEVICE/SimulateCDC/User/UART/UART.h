@@ -1,9 +1,13 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : UART.H
 * Author             : WCH
-* Version            : V1.00
-* Date               : 2022/08/20
+* Version            : V1.01
+* Date               : 2022/12/13
 * Description        : UART communication-related headers
+*******************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #ifndef __UART_H__
@@ -24,10 +28,10 @@ extern "C" {
 /******************************************************************************/
 /* Related macro definitions */
 /* Serial buffer related definitions */
-#define DEF_UARTx_RX_BUF_LEN       ( 6 * 1024 )                                 /* Serial x receive buffer size */
-#define DEF_UARTx_TX_BUF_LEN       2048                                         /* Serial x transmit buffer size */
-//#define DEF_USB_FS_PACK_LEN        64                                           /* USB full speed mode packet size for serial x data */
-#define DEF_USB_HS_PACK_LEN        512                                          /* USB high speed mode packet size for serial x data */
+#define DEF_UARTx_RX_BUF_LEN       ( 4 * 512 )                                  /* Serial x receive buffer size */
+#define DEF_UARTx_TX_BUF_LEN       ( 2 * 512 )                                  /* Serial x transmit buffer size */
+//#define DEF_USB_FS_PACK_LEN        64                                         /* USB full speed mode packet size for serial x data */
+#define DEF_USB_HS_PACK_LEN        DEF_USBD_HS_PACK_SIZE                        /* USB high speed mode packet size for serial x data */
 #define DEF_UARTx_TX_BUF_NUM_MAX   ( DEF_UARTx_TX_BUF_LEN / DEF_USB_HS_PACK_LEN ) /* Serial x transmit buffer size */
 
 /* Serial port receive timeout related macro definition */
@@ -39,8 +43,8 @@ extern "C" {
 #define DEF_UARTx_USB_UP_TIMEOUT   60000                                        /* Serial port receive upload timeout, in 100uS */
 
 /* Serial port transceiver DMA channel related macro definition */
-#define DEF_UART1_TX_DMA_CH        DMA1_Channel4                                /* Serial 1 transmit channel DMA channel */
-#define DEF_UART1_RX_DMA_CH        DMA1_Channel5                                /* Serial 1 transmit channel DMA channel */
+#define DEF_UART2_TX_DMA_CH        DMA1_Channel7                                /* Serial 2 transmit channel DMA channel */
+#define DEF_UART2_RX_DMA_CH        DMA1_Channel6                                /* Serial 1 transmit channel DMA channel */
 
 /************************************************************/
 /* Serial port X related structure definition */
@@ -79,20 +83,20 @@ typedef struct __attribute__((packed)) _UART_CTL
 extern volatile UART_CTL Uart;                                                    /* Serial x control related structure */
 extern volatile uint32_t UARTx_Rx_DMACurCount;                                    /* Serial x receive DMA current count */
 extern volatile uint32_t UARTx_Rx_DMALastCount;                                   /* last count of DMA received by serial x */
-extern __attribute__ ((aligned(4))) uint8_t UART1_Tx_Buf[ DEF_UARTx_TX_BUF_LEN ]; /* Serial x transmit buffer */
-extern __attribute__ ((aligned(4))) uint8_t UART1_Rx_Buf[ DEF_UARTx_RX_BUF_LEN ]; /* Serial x transmit buffer */
+extern __attribute__ ((aligned(4))) uint8_t UART2_Tx_Buf[ DEF_UARTx_TX_BUF_LEN ]; /* Serial x transmit buffer */
+extern __attribute__ ((aligned(4))) uint8_t UART2_Rx_Buf[ DEF_UARTx_RX_BUF_LEN ]; /* Serial x transmit buffer */
 
 /***********************************************************************************************************************/
 /* Function extensibility */
 extern uint8_t RCC_Configuration( void );
 extern void TIM2_Init( void );
-extern void UART1_CfgInit( uint32_t baudrate, uint8_t stopbits, uint8_t parity ); /* UART1 initialization */
-extern void UART1_ParaInit( uint8_t mode );                                       /* Serial port parameter initialization */
-extern void UART1_DMAInit( uint8_t type, uint8_t *pbuf, uint32_t len );           /* Serial port 1-related DMA initialization */
-extern void UART1_Init( uint8_t mode, uint32_t baudrate, uint8_t stopbits, uint8_t parity ); /* Serial port 1 initialization */
-extern void UART1_DataTx_Deal( void );                                            /* Serial port 1 data sending processing  */
-extern void UART1_DataRx_Deal( void );                                            /* Serial port 1 data reception processing */
-extern void UART1_USB_Init( void );                                               /* USB serial port initialization*/
+extern void UART2_CfgInit( uint32_t baudrate, uint8_t stopbits, uint8_t parity ); /* UART1 initialization */
+extern void UART2_ParaInit( uint8_t mode );                                       /* Serial port parameter initialization */
+extern void UART2_DMAInit( uint8_t type, uint8_t *pbuf, uint32_t len );           /* Serial port 1-related DMA initialization */
+extern void UART2_Init( uint8_t mode, uint32_t baudrate, uint8_t stopbits, uint8_t parity ); /* Serial port 1 initialization */
+extern void UART2_DataTx_Deal( void );                                            /* Serial port 1 data sending processing  */
+extern void UART2_DataRx_Deal( void );                                            /* Serial port 1 data reception processing */
+extern void UART2_USB_Init( void );                                               /* USB serial port initialization*/
 
 #ifdef __cplusplus
 }

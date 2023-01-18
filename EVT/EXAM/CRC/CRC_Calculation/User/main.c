@@ -4,14 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- CRC例程：
- 使用CRC-32多项式 0x4C11DB7。
+ CRC routine:
+ Use CRC-32 polynomial 0x4C11DB7.
 
 */
 
@@ -43,10 +45,11 @@ u32 CRCValue = 0;
 int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("CRC TEST\r\n");
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
 	CRCValue = CRC_CalcBlockCRC((u32 *)SRC_BUF, Buf_Size);

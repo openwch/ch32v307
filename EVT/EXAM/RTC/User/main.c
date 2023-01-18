@@ -4,15 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 日历例程：
- 本例程演示 初始时间为2019年10月8日13时58分55秒，实时计时，每隔 1S 通过串口
- 打印实时时钟值。
+ Calendar routine:
+ This routine demonstrates that the initial time is 13:58:55 on October 8, 2019,
+ real-time timing, every 1S through the serial port
+ Print the real-time clock value.
 
 */
 
@@ -78,40 +81,30 @@ u8 RTC_Init(void)
     PWR_BackupAccessCmd(ENABLE);
 
     /* Is it the first configuration */
-    if(BKP_ReadBackupRegister(BKP_DR1) != 0xA1A1)
+
+    BKP_DeInit();
+    RCC_LSEConfig(RCC_LSE_ON);
+    while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET && temp < 250)
     {
-        BKP_DeInit();
-        RCC_LSEConfig(RCC_LSE_ON);
-        while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET && temp < 250)
-        {
-            temp++;
-            Delay_Ms(20);
-        }
-        if(temp >= 250)
-            return 1;
-        RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
-        RCC_RTCCLKCmd(ENABLE);
-        RTC_WaitForLastTask();
-        RTC_WaitForSynchro();
-        //		RTC_ITConfig(RTC_IT_ALR, ENABLE);
-        RTC_ITConfig(RTC_IT_SEC, ENABLE);
-        RTC_WaitForLastTask();
-        RTC_EnterConfigMode();
-        RTC_SetPrescaler(32767);
-        RTC_WaitForLastTask();
-        RTC_Set(2019, 10, 8, 13, 58, 55); /* Setup Time */
-        RTC_ExitConfigMode();
-        BKP_WriteBackupRegister(BKP_DR1, 0XA1A1);
+        temp++;
+        Delay_Ms(20);
     }
-    else
-    {
-        RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-        PWR_WakeUpPinCmd(DISABLE);
-        RTC_WaitForSynchro();
-        //		RTC_ITConfig(RTC_IT_ALR, ENABLE);
-        RTC_ITConfig(RTC_IT_SEC, ENABLE);
-        RTC_WaitForLastTask();
-    }
+    if(temp >= 250)
+        return 1;
+    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+    RCC_RTCCLKCmd(ENABLE);
+    RTC_WaitForLastTask();
+    RTC_WaitForSynchro();
+    //		RTC_ITConfig(RTC_IT_ALR, ENABLE);
+    RTC_ITConfig(RTC_IT_SEC, ENABLE);
+    RTC_WaitForLastTask();
+    RTC_EnterConfigMode();
+    RTC_SetPrescaler(32767);
+    RTC_WaitForLastTask();
+    RTC_Set(2019, 10, 8, 13, 58, 55); /* Setup Time */
+    RTC_ExitConfigMode();
+    BKP_WriteBackupRegister(BKP_DR1, 0XA1A1);
+
     RTC_NVIC_Config();
     RTC_Get();
 
@@ -334,10 +327,11 @@ u8 RTC_Get_Week(u16 year, u8 month, u8 day)
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("RTC Test\r\n");
     RTC_Init();
 

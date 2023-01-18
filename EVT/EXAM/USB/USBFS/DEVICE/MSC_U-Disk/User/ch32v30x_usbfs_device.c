@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : This file provides all the USBOTG firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #include "ch32v30x_usbfs_device.h"
@@ -57,10 +59,19 @@ void USBFS_RCC_Init(void)
     RCC_USBHSPLLCKREFCLKConfig( RCC_USBHSPLLCKREFCLK_4M );
     RCC_USBHSPHYPLLALIVEcmd( ENABLE );
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_USBHS, ENABLE );
-
 #else
-    RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
-
+    if( SystemCoreClock == 144000000 )
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
+    }
+    else if( SystemCoreClock == 96000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div2 );
+    }
+    else if( SystemCoreClock == 48000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div1 );
+    }
 #endif
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS, ENABLE );
 }
@@ -488,11 +499,21 @@ void OTG_FS_IRQHandler( void )
                                         case ( DEF_UEP_IN | DEF_UEP2 ):
                                             /* Set End-point 2 IN NAK */
                                             USBOTG_FS->UEP2_TX_CTRL = USBFS_UEP_T_RES_NAK;
+                                            /* upload CSW */
+                                            if( Udisk_Transfer_Status & DEF_UDISK_CSW_UP_FLAG )
+                                            {
+                                                UDISK_Up_CSW( );
+                                            }
                                             break;
 
                                         case ( DEF_UEP_OUT | DEF_UEP3 ):
                                             /* Set End-point 3 OUT ACK */
                                             USBOTG_FS->UEP3_RX_CTRL = USBFS_UEP_R_RES_ACK;
+                                            /* upload CSW */
+                                            if( Udisk_Transfer_Status & DEF_UDISK_CSW_UP_FLAG )
+                                            {
+                                                UDISK_Up_CSW( );
+                                            }
                                             break;
 
                                         default:

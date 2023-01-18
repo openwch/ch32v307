@@ -4,6 +4,10 @@
 * Version            : V1.00
 * Date               : 2021/08/01
 * Description        : 模拟U盘(FLASH作为存储介质)部分程序
+*******************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /******************************************************************************/

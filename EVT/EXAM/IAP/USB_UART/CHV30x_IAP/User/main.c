@@ -4,18 +4,23 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-用于IAP实验例程：
-可支持串口与USB进行FLASH烧录
-注：
-1. 用IAP下载工具，实现下载 PA0悬空(默认上拉输入)
-2. 在下载完APP后，PA0接地（低电平输入），按复位键即可运行APP程序。
- 
+IAP upgrade routine:
+Support serial port and USB for FLASH burning
+
+1. Use the IAP download tool to realize the download PA0 floating (default pull-up input)
+2. After downloading the APP, connect PA0 to ground (low level input), and press the reset
+button to run the APP program.
+Note: FLASH operation keeps the frequency below 100Mhz, it is recommended that the main
+frequency of IAP be below 100Mhz
+
 */
 
 #include "debug.h"
@@ -58,10 +63,16 @@ void IAP_2_APP(void)
 int main(void)
 {
 
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    if(PA0_Check() == 0)
+    {
+        IAP_2_APP();
+        while(1);
+    }
     USART3_CFG(57600);
     /* USB20 device init */
     USBHS_RCC_Init( );

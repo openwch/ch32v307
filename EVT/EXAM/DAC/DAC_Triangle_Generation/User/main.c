@@ -4,15 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 三角波形输出例程：
- DAC通道0(PA4)输出
- 通过软件触发1次DAC转换，PA4输出三角波。
+ Triangular waveform generation routine:
+ DAC channel 0 (PA4) output
+ A DAC conversion is triggered by software, and PA4 outputs a triangle wave.
 
 */
 
@@ -80,10 +82,12 @@ void DAC1_Triangle_Gen_Test(void)
  */
 int main(void)
 {
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
-    Dac_Init();
+    Dac_Init();	
     printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("Triangle Wava Generation Test\r\n");
     while(1)
     {

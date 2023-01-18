@@ -3,10 +3,12 @@
  * Author             : WCH
  * Version            : V1.0.0
  * Date               : 2021/06/06
- * Description        : USB2.0¸ßËÙÉè±¸²Ù×÷Ïà¹ØÍ·ÎÄ¼þ
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ * Description        : USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ä¼ï¿½
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #ifndef __CH32V30X_USBHS_DEVICE_H__
 #define __CH32V30X_USBHS_DEVICE_H__
 
@@ -288,7 +290,7 @@ typedef volatile unsigned long  *PUINT32V;
 #define USBHS_MAX_PACK_SIZE 64
 #endif
 /******************************************************************************/
-/* USBÉè±¸ÅäÖÃÏà¹Øºê¶¨Òå */
+/* USBï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºê¶¨ï¿½ï¿½ */
 // USB CONTROL
 #define USBHS_DMA_EN        (1<<0)
 #define USBHS_ALL_CLR       (1<<1)
@@ -602,42 +604,42 @@ typedef volatile unsigned long  *PUINT32V;
 #define DEF_IC_PRG_VER2            0x00
 /******************************************************************************/
 
-extern __attribute__ ((aligned(4))) UINT8 Ep0Buffer[ USBHS_UEP0_SIZE ]; /* ¶Ëµã0Êý¾ÝÊÕ·¢»º³åÇø */
-extern __attribute__ ((aligned(4))) UINT8 Ep1Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ¶Ëµã1Êý¾Ý½ÓÊÕ»º³åÇø */
-extern __attribute__ ((aligned(4))) UINT8 Ep2Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ¶Ëµã1Êý¾Ý·¢ËÍ»º³åÇø */
-extern __attribute__ ((aligned(4))) UINT8 Ep3Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ¶Ëµã2Êý¾Ý½ÓÊÕ»º³åÇø */
+extern __attribute__ ((aligned(4))) UINT8 Ep0Buffer[ USBHS_UEP0_SIZE ]; /* ï¿½Ëµï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½Õ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern __attribute__ ((aligned(4))) UINT8 Ep1Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ï¿½Ëµï¿½1ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern __attribute__ ((aligned(4))) UINT8 Ep2Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ï¿½Ëµï¿½1ï¿½ï¿½ï¿½Ý·ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern __attribute__ ((aligned(4))) UINT8 Ep3Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* ï¿½Ëµï¿½2ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ */
 extern const UINT8 *pDescr;
-extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USB2.0¸ßËÙÉè±¸Setup°üÃüÁîÂë */
-extern volatile UINT16 USBHS_Dev_SetupReqLen;                                   /* USB2.0¸ßËÙÉè±¸Setup°ü³¤¶È */
-extern volatile UINT8  USBHS_Dev_SetupReqValueH;                                /* USB2.0¸ßËÙÉè±¸Setup°üValue¸ß×Ö½Ú */
-extern volatile UINT8  USBHS_Dev_Config;                                        /* USB2.0¸ßËÙÉè±¸ÅäÖÃÖµ */
-extern volatile UINT8  USBHS_Dev_Address;                                       /* USB2.0¸ßËÙÉè±¸µØÖ·Öµ */
-extern volatile UINT8  USBHS_Dev_SleepStatus;                                   /* USB2.0¸ßËÙÉè±¸Ë¯Ãß×´Ì¬ */
-extern volatile UINT8  USBHS_Dev_EnumStatus;                                    /* USB2.0¸ßËÙÉè±¸Ã¶¾Ù×´Ì¬ */
-extern volatile UINT8  USBHS_Dev_Endp0_Tog;                                     /* USB2.0¸ßËÙÉè±¸¶Ëµã0Í¬²½±êÖ¾ */
+extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Setupï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern volatile UINT16 USBHS_Dev_SetupReqLen;                                   /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Setupï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern volatile UINT8  USBHS_Dev_SetupReqValueH;                                /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Setupï¿½ï¿½Valueï¿½ï¿½ï¿½Ö½ï¿½ */
+extern volatile UINT8  USBHS_Dev_Config;                                        /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Öµ */
+extern volatile UINT8  USBHS_Dev_Address;                                       /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½Ö·Öµ */
+extern volatile UINT8  USBHS_Dev_SleepStatus;                                   /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Ë¯ï¿½ï¿½×´Ì¬ */
+extern volatile UINT8  USBHS_Dev_EnumStatus;                                    /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Ã¶ï¿½ï¿½×´Ì¬ */
+extern volatile UINT8  USBHS_Dev_Endp0_Tog;                                     /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½0Í¬ï¿½ï¿½ï¿½ï¿½Ö¾ */
 
-extern volatile UINT16 USBHS_Endp1_Up_Flag;                                     /* USB2.0¸ßËÙÉè±¸¶Ëµã1Êý¾ÝÉÏ´«×´Ì¬: 0:¿ÕÏÐ; 1:ÕýÔÚÉÏ´«; */
-extern volatile UINT8  USBHS_Endp1_Down_Flag;                                   /* USB2.0¸ßËÙÉè±¸¶Ëµã1ÏÂ´«³É¹¦±êÖ¾ */
-extern volatile UINT8  USBHS_Endp1_Down_Len;                                    /* USB2.0¸ßËÙÉè±¸¶Ëµã1ÏÂ´«³¤¶È */
+extern volatile UINT16 USBHS_Endp1_Up_Flag;                                     /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½×´Ì¬: 0:ï¿½ï¿½ï¿½ï¿½; 1:ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½; */
+extern volatile UINT8  USBHS_Endp1_Down_Flag;                                   /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½1ï¿½Â´ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ö¾ */
+extern volatile UINT8  USBHS_Endp1_Down_Len;                                    /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½1ï¿½Â´ï¿½ï¿½ï¿½ï¿½ï¿½ */
 
-extern volatile UINT16 USBHS_Endp2_Up_Flag;                                     /* USB2.0¸ßËÙÉè±¸¶Ëµã2Êý¾ÝÉÏ´«×´Ì¬: 0:¿ÕÏÐ; 1:ÕýÔÚÉÏ´«; */
-extern volatile UINT16 USBHS_Endp2_Up_LoadPtr;                                  /* USB2.0¸ßËÙÉè±¸¶Ëµã2Êý¾ÝÉÏ´«×°ÔØÆ«ÒÆ */
-extern volatile UINT8  USBHS_Endp2_Down_Flag;                                   /* USB2.0¸ßËÙÉè±¸¶Ëµã2ÏÂ´«³É¹¦±êÖ¾ */
+extern volatile UINT16 USBHS_Endp2_Up_Flag;                                     /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½×´Ì¬: 0:ï¿½ï¿½ï¿½ï¿½; 1:ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½; */
+extern volatile UINT16 USBHS_Endp2_Up_LoadPtr;                                  /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½×°ï¿½ï¿½Æ«ï¿½ï¿½ */
+extern volatile UINT8  USBHS_Endp2_Down_Flag;                                   /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½2ï¿½Â´ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ö¾ */
 extern u8 Endp1Busy;
 extern u8 EP1_OUT_Flag;
 extern u8 EP2_OUT_Flag;
 extern u8 Endp3Busy;
 extern u8 Flag_LED;
 /********************************************************************************/
-/* º¯ÊýÍâÀ© */
-extern void USBHS_RCC_Init( void );                                             /* USB2.0¸ßËÙÉè±¸RCC³õÊ¼»¯ */
-extern void USBHS_Device_Endp_Init ( void );                                    /* USB2.0¸ßËÙÉè±¸¶Ëµã³õÊ¼»¯ */
-extern void USBHS_Device_Init ( FunctionalState sta );                          /* USB2.0¸ßËÙÉè±¸³õÊ¼»¯ */
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern void USBHS_RCC_Init( void );                                             /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸RCCï¿½ï¿½Ê¼ï¿½ï¿½ */
+extern void USBHS_Device_Endp_Init ( void );                                    /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ëµï¿½ï¿½Ê¼ï¿½ï¿½ */
+extern void USBHS_Device_Init ( FunctionalState sta );                          /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½Ê¼ï¿½ï¿½ */
 void DevEPhs_IN_Deal(UINT8 l);
 void DevEPhs_OUT_Deal(UINT8 l);
-extern void USBHS_Device_SetAddress( UINT32 address );                          /* USB2.0¸ßËÙÉè±¸ÉèÖÃÉè±¸µØÖ· */
-extern void USBHS_IRQHandler( void );                                           /* USB2.0¸ßËÙÉè±¸ÖÐ¶Ï·þÎñ³ÌÐò */
-extern void USBHS_Sleep_WakeUp_Cfg( void );                                     /* USB2.0¸ßËÙÉè±¸Ë¯Ãß»½ÐÑÅäÖÃ */
+extern void USBHS_Device_SetAddress( UINT32 address );                          /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½Ö· */
+extern void USBHS_IRQHandler( void );                                           /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern void USBHS_Sleep_WakeUp_Cfg( void );                                     /* USB2.0ï¿½ï¿½ï¿½ï¿½ï¿½è±¸Ë¯ï¿½ß»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 
 #ifdef __cplusplus
 }

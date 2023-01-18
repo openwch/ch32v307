@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/08/08
  * Description        : header file for Internal_Flash.c
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 #ifndef USER_INTERNAL__FLASH_C_
 #define USER_INTERNAL__FLASH_C_

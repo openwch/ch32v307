@@ -4,18 +4,21 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- MCO引脚时钟输出系统时钟和获取时钟例程：
+ Get system-HCLK-AHB1-AHB2 clock routine:
  MCO(PA8)
- 本例程演示 MCO(PA8) 引脚输出系统时钟和获取时钟;
-    -RCC_GetClocksFreq()函数获取systemclk-HCLK-AHB1-AHB2时钟
-    -SystemCoreClockUpdate()函数获取 HCLK时钟
-    -system_ch32v20x.c文件中包含PREDIV1时钟源为PLL2时钟配置-仅适用CH32V30x_D8C
+    This example demonstrates MCO(PA8) pin output system clock and get clock;
+    -RCC_GetClocksFreq() function to get systemclk-HCLK-AHB1-AHB2 clock
+    -SystemCoreClockUpdate() function to get HCLK clock
+    - The system_ch32v20x.c file contains the PREDIV1 clock source as the
+    PLL2 clock configuration - only applicable to CH32V30x_D8C
 
 
 */
@@ -35,10 +38,10 @@ int main(void)
     RCC_ClocksTypeDef RCC_ClocksStatus={0};
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-    USART_Printf_Init(115200);
-    SystemCoreClockUpdate();
+    USART_Printf_Init(115200);	
+    SystemCoreClockUpdate();	
     printf("SystemClk:%d\r\n",SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     RCC_GetClocksFreq(&RCC_ClocksStatus);
     printf("SYSCLK_Frequency-%d\r\n", RCC_ClocksStatus.SYSCLK_Frequency);
     printf("HCLK_Frequency-%d\r\n", RCC_ClocksStatus.HCLK_Frequency);

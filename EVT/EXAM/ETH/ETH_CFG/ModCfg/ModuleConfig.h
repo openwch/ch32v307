@@ -5,8 +5,10 @@
 * Date               : 2022/06/10
 * Description        : Module configuration related command codes
 *                      and configuration structures.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __MODULECONFIG_H__
 #define __MODULECONFIG_H__

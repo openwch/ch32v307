@@ -4,8 +4,10 @@
 * Version            : V1.3.0
 * Date               : 2022/06/02
 * Description        : eth program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #include "string.h"
@@ -43,15 +45,19 @@ const uint16_t MemSize[8] = {WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB),
 
 uint16_t gPHYAddress;
 uint32_t volatile LocalTime;
+uint8_t volatile ChipVerNum;
 
 ETH_DMADESCTypeDef *pDMARxSet;
 ETH_DMADESCTypeDef *pDMATxSet;
 
 #if( PHY_MODE == USE_10M_BASE )
 uint32_t phyLinkTime;
-uint8_t  phyLinkStatus=0;
-uint8_t  phyStatus=0;
-uint8_t  phyPN=0;
+uint8_t  phyLinkStatus = 0;
+uint8_t  phyStatus = 0;
+uint8_t  phyRetryCnt = 0;
+uint8_t  phyLinkCnt = 0;
+uint8_t  phySucCnt = 0;
+uint8_t  phyPN = PHY_PN_SWITCH_AUTO;
 #endif
 
 #if( PHY_MODE ==  USE_MAC_MII )
@@ -123,55 +129,74 @@ void WCHNET_QueryPhySta(void)
  */
 void WCHNET_LinkProcess( void )
 {
-    uint32_t phy_anlpar;
-
-    phy_anlpar = ETH_ReadPHYRegister( gPHYAddress, PHY_ANLPAR);
+    uint16_t phy_anlpar, phy_bmsr, RegVal;
+    phy_anlpar = ETH_ReadPHYRegister(gPHYAddress, PHY_ANLPAR);
+    phy_bmsr = ETH_ReadPHYRegister( gPHYAddress, PHY_BMSR);
 
     if( (phy_anlpar&PHY_ANLPAR_SELECTOR_FIELD) )
     {
         if( !(phyLinkStatus&PHY_LINK_WAIT_SUC) )
         {
-            if( phyPN == PHY_PN_SWITCH_P )
+            if( phyPN == PHY_PN_SWITCH_AUTO )
+            {
+                PHY_PN_SWITCH(PHY_PN_SWITCH_P);
+            }
+            else if( phyPN == PHY_PN_SWITCH_P )
             {
                 phyLinkStatus = PHY_LINK_WAIT_SUC;
             }
             else
             {
-                if( !(phyLinkStatus&PHY_LINK_SUC_N) )
-                {
-                    phyLinkStatus |= PHY_LINK_SUC_N;
-                    phyPN ^= PHY_PN_SWITCH_N;
-                    ETH_WritePHYRegister( gPHYAddress, PHY_BCR, PHY_Reset);
-                    Delay_Us(10);
-                    ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, phyPN);
-                }
-                else
-                {
-                    phyLinkStatus = PHY_LINK_WAIT_SUC;
-                }
+                phyLinkStatus = PHY_LINK_WAIT_SUC;
             }
         }
+        else{
+            if((phySucCnt++ == 5) && ((phy_bmsr&(1<<5)) == 0))
+            {
+                phySucCnt = 0;
+                RegVal = ETH_ReadPHYRegister(gPHYAddress, PHY_BCR);
+                RegVal |= 1<<9;
+                ETH_WritePHYRegister( gPHYAddress, PHY_BCR, RegVal);
+                phyPN ^= PHY_PN_SWITCH_N;
+                ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, phyPN);
+            }
+        }
+        phyLinkCnt = 0;
+        phyRetryCnt = 0;
     }
     else
     {
         if( phyLinkStatus == PHY_LINK_WAIT_SUC )
         {
-            phyLinkStatus = PHY_LINK_INIT;
+            phyRetryCnt = 0;
+            if(phyLinkCnt++ == 15 )
+            {
+                phyLinkCnt = 0;
+                phySucCnt = 0;
+                phyLinkStatus = PHY_LINK_INIT;
+                PHY_PN_SWITCH(PHY_PN_SWITCH_AUTO);
+            }
         }
         else
         {
             if( phyPN == PHY_PN_SWITCH_P )
             {
-                phyLinkStatus &= ~PHY_LINK_SUC_P;
+                PHY_PN_SWITCH(PHY_PN_SWITCH_N);
             }
             else if( phyPN == PHY_PN_SWITCH_N )
             {
-                phyLinkStatus &= ~PHY_LINK_SUC_N;
+                phyRetryCnt = 0;
+                if(phyLinkCnt++ == 15 )
+                {
+                    phyLinkCnt = 0;
+                    phySucCnt = 0;
+                    phyLinkStatus = PHY_LINK_INIT;
+                    PHY_PN_SWITCH(PHY_PN_SWITCH_AUTO);
+                }
             }
-            phyPN ^= PHY_PN_SWITCH_N;
-            ETH_WritePHYRegister( gPHYAddress, PHY_BCR, PHY_Reset);
-            Delay_Us(10);
-            ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, phyPN);
+            else{
+                PHY_RESTART_NEGOTIATION( );
+            }
         }
     }
 }
@@ -189,7 +214,7 @@ void WCHNET_HandlePhyNegotiation(void)
 {
     if( !phyStatus )                        /* Handling PHY Negotiation Exceptions */
     {
-        if( LocalTime - phyLinkTime >= PHY_LINK_TASK_PERIOD )  /* 100ms cycle timing call */
+        if( LocalTime - phyLinkTime >= PHY_LINK_TASK_PERIOD )  /* 50ms cycle timing call */
         {
             phyLinkTime = LocalTime;
             WCHNET_LinkProcess( );
@@ -287,8 +312,8 @@ void ETH_LedConfiguration(void)
 void ETH_SetClock(void)
 {
     RCC_PLL3Cmd(DISABLE);
-    RCC_PREDIV2Config(RCC_PREDIV2_Div2);                // HSE = 8M
-    RCC_PLL3Config(RCC_PLL3Mul_15);                     // 4M*15 = 60MHz
+    RCC_PREDIV2Config(RCC_PREDIV2_Div2);                /* HSE = 8M */
+    RCC_PLL3Config(RCC_PLL3Mul_15);                     /* 4M*15 = 60MHz */
     RCC_PLL3Cmd(ENABLE);
     while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));
 }
@@ -338,11 +363,12 @@ void ETH_PHYLink( void )
     phy_anlpar = ETH_ReadPHYRegister( gPHYAddress, PHY_ANLPAR);
     phy_stat = ETH_ReadPHYRegister( gPHYAddress, PHY_BSR);
 
-    if((phy_stat&(PHY_Linked_Status))&&(phy_anlpar == 0)){                         //restart negotiation
+    if((phy_stat&(PHY_Linked_Status))&&(phy_anlpar == 0)){                         /* restart negotiation */
         ETH_WritePHYRegister(gPHYAddress, PHY_BCR, PHY_Reset);
         EXTEN->EXTEN_CTR &= ~EXTEN_ETH_10M_EN;
         Delay_Ms(500);
         EXTEN->EXTEN_CTR |= EXTEN_ETH_10M_EN;
+        PHY_NEGOTIATION_PARAM_INIT( );
         return;
     }
     WCHNET_PhyStatus( phy_stat );
@@ -371,8 +397,7 @@ void ETH_PHYLink( void )
     }
     else
     {
-        phyStatus = 0;
-        phyLinkStatus = PHY_LINK_INIT;
+        PHY_NEGOTIATION_PARAM_INIT( );
     }
 #else
     phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );
@@ -382,20 +407,20 @@ void ETH_PHYLink( void )
     {
         phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR );
         /* PHY negotiation result */
-        if(phy_stat&(1<<13))                                   //100M
+        if(phy_stat&(1<<13))                                    /* 100M */
         {
             ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
             ETH->MACCR |= ETH_Speed_100M;
         }
-        else                                                  //10M
+        else                                                    /* 10M */
         {
             ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
         }
-        if(phy_stat&(1<<8))                                   //full duplex
+        if(phy_stat&(1<<8))                                     /* full duplex */
         {
             ETH->MACCR |= ETH_Mode_FullDuplex;
         }
-        else                                                  //half duplex
+        else                                                    /* half duplex */
         {
             ETH->MACCR &= ~ETH_Mode_FullDuplex;
         }
@@ -489,15 +514,9 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
                     ETH_InitStruct->ETH_SecondFrameOperate);
     ETH->DMAOMR = (uint32_t)tmpreg;
 
-    ETH->DMABMR = (uint32_t)(ETH_InitStruct->ETH_AddressAlignedBeats |
-                            ETH_InitStruct->ETH_FixedBurst |
-                            ETH_InitStruct->ETH_RxDMABurstLength | /* !! if 4xPBL is selected for Tx or Rx it is applied for the other */
-                            ETH_InitStruct->ETH_TxDMABurstLength |
-                           (ETH_InitStruct->ETH_DescriptorSkipLength << 2) |
-                            ETH_InitStruct->ETH_DMAArbitration |
-                            ETH_DMABMR_USP);
     /* Reset the physical layer */
     ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_Reset);
+    ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, PHY_PN_SWITCH_AUTO);
     return ETH_SUCCESS;
 }
 
@@ -537,6 +556,7 @@ void ETH_Configuration( uint8_t *macAddr )
         if( !--timeout )  break;
     }while(ETH->DMABMR & ETH_DMABMR_SR);
 
+    ChipVerNum = GET_CHIP_VER();
     /* ETHERNET Configuration */
     /* Call ETH_StructInit if you don't like to configure all ETH_InitStructure parameter */
     ETH_StructInit(&ETH_InitStructure);
@@ -567,11 +587,6 @@ void ETH_Configuration( uint8_t *macAddr )
     ETH_InitStructure.ETH_ForwardErrorFrames = ETH_ForwardErrorFrames_Enable;
     ETH_InitStructure.ETH_ForwardUndersizedGoodFrames = ETH_ForwardUndersizedGoodFrames_Enable;
     ETH_InitStructure.ETH_SecondFrameOperate = ETH_SecondFrameOperate_Disable;
-    ETH_InitStructure.ETH_AddressAlignedBeats = ETH_AddressAlignedBeats_Enable;
-    ETH_InitStructure.ETH_FixedBurst = ETH_FixedBurst_Enable;
-    ETH_InitStructure.ETH_RxDMABurstLength = ETH_RxDMABurstLength_32Beat;
-    ETH_InitStructure.ETH_TxDMABurstLength = ETH_TxDMABurstLength_32Beat;
-    ETH_InitStructure.ETH_DMAArbitration = ETH_DMAArbitration_RoundRobin_RxTx_2_1;
     /* Configure Ethernet */
     ETH_RegInit( &ETH_InitStructure, gPHYAddress );
 #if( PHY_MODE ==  USE_10M_BASE )
@@ -646,15 +661,18 @@ void WCHNET_ETHIsr(void)
     {
         if( int_sta & ETH_DMA_IT_R )
         {
-            if ((int_sta & ETH_DMA_IT_RBU) != (u32)RESET)
+            if( ChipVerNum < CHIP_C_VER_NUM )
             {
-                /* Clear RBUS ETHERNET DMA flag */
-                ETH->DMASR = ETH_DMA_IT_RBU;
+                if ((int_sta & ETH_DMA_IT_RBU) != (u32)RESET)
+                {
+                    /* Clear RBUS ETHERNET DMA flag */
+                    ETH->DMASR = ETH_DMA_IT_RBU;
 
-                ((ETH_DMADESCTypeDef *)(((ETH_DMADESCTypeDef *)(ETH->DMACHRDR))->Buffer2NextDescAddr))->Status = ETH_DMARxDesc_OWN;
+                    ((ETH_DMADESCTypeDef *)(((ETH_DMADESCTypeDef *)(ETH->DMACHRDR))->Buffer2NextDescAddr))->Status = ETH_DMARxDesc_OWN;
 
-                /* Resume DMA reception */
-                ETH->DMARPDR = 0;
+                    /* Resume DMA reception */
+                    ETH->DMARPDR = 0;
+                }
             }
             ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
             /* Check if the descriptor is owned by the ETHERNET DMA (when set) or CPU (when reset) */

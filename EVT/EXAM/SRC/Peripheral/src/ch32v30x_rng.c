@@ -4,9 +4,11 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the RNG firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-********************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v30x_rng.h"
 #include "ch32v30x_rcc.h"
 
@@ -117,7 +119,7 @@ void RNG_ClearFlag(uint8_t RNG_FLAG)
  *            RNG_IT_CEI - Clock Error Interrupt.
  *            RNG_IT_SEI - Seed Error Interrupt.
  *
- * @return  bitstatus£ºSET or RESET.
+ * @return  bitstatus:SET or RESET.
  */
 ITStatus RNG_GetITStatus(uint8_t RNG_IT)
 {

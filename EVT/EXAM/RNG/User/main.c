@@ -4,14 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-    随机数发生器例程
-   产生32位随机数通过串口(PA9)打印。
+   Random number generator routine:
+  Generate a 32-bit random number and print it through the serial port (PA9).
 
 */
 
@@ -28,10 +30,11 @@ int main(void)
 {
     u32 random = 0;
 
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n",SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_RNG, ENABLE);
     RNG_Cmd(ENABLE);
 

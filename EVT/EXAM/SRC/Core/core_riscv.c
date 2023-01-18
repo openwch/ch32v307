@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : RISC-V Core Peripheral Access Layer Source File
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include <stdint.h>
 
@@ -172,35 +174,6 @@ uint32_t __get_MISA(void)
 void __set_MISA(uint32_t value)
 {
   __ASM volatile ("csrw misa, %0" : : "r" (value) );
-}
-
-/*********************************************************************
- * @fn      __get_MIE
- *
- * @brief   Return the Machine Interrupt Enable Register
- *
- * @return  mie value
- */
-uint32_t __get_MIE(void)
-{
-  uint32_t result;
-
-  __ASM volatile ( "csrr %0," "mie" : "=r" (result) );
-  return (result);
-}
-
-/*********************************************************************
- * @fn      __set_MISA
- *
- * @brief   Set the Machine ISA Register
- *
- * @param   value  - set mie value
- *
- * @return  none
- */
-void __set_MIE(uint32_t value)
-{
-  __ASM volatile ("csrw mie, %0" : : "r" (value) );
 }
 
 /*********************************************************************

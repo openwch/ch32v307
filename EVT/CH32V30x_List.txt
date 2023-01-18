@@ -70,6 +70,7 @@ http://wch.cn
   |      |      |      |      |-- TcpServer：演示Tcp Server连接到客户端后接收数据并回传
   |      |      |      |      |-- UdpClient：演示Udp Client接收数据并回传
   |      |      |      |      |-- UdpServer：演示Udp Server接收数据并回传
+  |      |      |      |      |-- ETH_Filter_Multicast：演示过滤和组播发送功能
   |      |      |      |      |-- WebServer： 演示通过Web浏览器配置WCHNET芯片的功能，WCHNET芯片内置web服务器 ，通过网页可以实现WCHNET的网络参数配置，以及密码管理  
   |      |      |      |-- EXTI：外部中断线例程
   |      |      |      |-- FLASH：FLASH的擦/读/写，以及快速编程
@@ -141,20 +142,22 @@ http://wch.cn
   |      |      |      |      |-- USART_Polling：轮询收发模式，Master/Slave 模式收发例程
   |      |      |      |      |-- USART_Printf：串口打印调试例程
   |      |      |      |      |-- USART_SynchronousMode：同步模式，Master/Slave 模式收发例程
-   |      |      |      |-- USB
+  |      |      |      |-- USB
   |      |      |      |      |-- USBFS
   |      |      |      |      |      |-- DEVICE
   |      |      |      |      |      |      |-- CH372：模拟自定义USB设备（CH372设备），端点1，3下传，2，4上传，端点1下传的数据从端点3上传，不取反，端点2下传的数据从端点4上传，取反。
   |      |      |      |      |      |      |-- Compatibility_HID：模拟HID设备，数据通过串口上下传。
   |      |      |      |      |      |      |-- CompositeKM：模拟键盘和鼠标，使用IO模拟按键，同时模拟数据可以通过串口2上传。
   |      |      |      |      |      |      |-- MSC_U-Disk: 模拟简单U盘，可选使用片内Flash或外部SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口1收发。
-  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口1收发,HID中断端点下发数据取反上传。  
+  |      |      |      |      |      |      |-- MSC_CD-ROM: 模拟CDROM，需要外挂SPI-Flash
+  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
+  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: 与HOST_IAP配套使用的APP，工程修改了程序起始位置，编译后需自行将文件转化为bin文件并重命名为APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  基于U盘读取文件例程整理的主机U盘IAP例程，从U盘内读取名称位APP.bin的文件，写入内部flash，校验后自动跳转。
   |      |      |      |      |      |-- HOST_KM: 主机操作键鼠，获取键鼠上传的端点的数据并打印，支持U口下1级hub
   |      |      |      |      |      |-- HOST_MTP_FileSystem：枚举过程的USB主机到一个支持MTP和PTP协议的设备，支持MTP和PTP协议，并读取其文件
+  |      |      |      |      |      |-- Host_Udisk：USB主机操作U盘例程
   |      |      |      |      |      |-- Udisk_Lib：U盘文件系统库文件   
   |      |      |      |      |-- USBHS 
   |      |      |      |      |      |-- DEVICE
@@ -162,13 +165,16 @@ http://wch.cn
   |      |      |      |      |      |      |-- Compatibility_HID：模拟HID设备，数据通过串口上下传。
   |      |      |      |      |      |      |-- CompositeKM：模拟键盘和鼠标，使用IO模拟按键，同时模拟数据可以通过串口2上传。
   |      |      |      |      |      |      |-- MSC_U-Disk: 模拟简单U盘，可选使用片内Flash或外部SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口1收发。
-  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口1收发,HID中断端点下发数据取反上传。  
+  |      |      |      |      |      |      |-- MSC_CD-ROM: 模拟CDROM，需要外挂SPI-Flash
+  |      |      |      |      |      |      |-- USB_ECM-NetWorkAdaptor: USB ECM网卡例程
+  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
+  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: 与HOST_IAP配套使用的APP，工程修改了程序起始位置，编译后需自行将文件转化为bin文件并重命名为APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  基于U盘读取文件例程整理的主机U盘IAP例程，从U盘内读取名称位APP.bin的文件，写入内部flash，校验后自动跳转。
   |      |      |      |      |      |-- HOST_KM: 主机操作键鼠，获取键鼠上传的端点的数据并打印，支持U口下1级hub
   |      |      |      |      |      |-- HOST_MTP_FileSystem：枚举过程的USB主机到一个支持MTP和PTP协议的设备，支持MTP和PTP协议，并读取其文件
+  |      |      |      |      |      |-- Host_Udisk：USB主机操作U盘例程
   |      |      |      |      |      |-- Udisk_Lib：U盘文件系统库文件
   |      |      |      |-- VoiceRcgExam：独立词语音识别例程 
   |      |      |      |-- WWDG：窗口看门狗例程

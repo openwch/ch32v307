@@ -4,14 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- GPIOÀý³Ì£º
- PA0ÍÆÍìÊä³ö¡£
+ GPIO routine:
+ PA0push-pull output.
  
 */
 
@@ -82,9 +84,9 @@ void task2_entry(void *arg)
 int main(void)
 {
 	USART_Printf_Init(115200);
+	SystemCoreClockUpdate();	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("Welcome to TencentOS tiny(%s)\r\n", TOS_VERSION);
     tos_knl_init();
     tos_task_create(&task1, "task1", task1_entry, NULL, 3, task1_stk, TASK1_STK_SIZE, 0); // Create task1

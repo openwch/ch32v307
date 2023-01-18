@@ -4,12 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2022/05/07
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 /*
  *@Note
-mail例程，演示SMTP以及POP3的邮件收发
+Mail example, demo SMTP and POP3 mail sending and receiving.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
 #include "debug.h"
@@ -145,9 +149,7 @@ void WCHNET_CreateTcpSmtp( void )
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-
     printf("SocketId TCP SMTP = %02x\n",(u16)SocketId);
-
     mStopIfError(i);
     p_smtp->Socket = SocketId;
     CheckType = SMTP_CHECK_CNNT;
@@ -177,7 +179,6 @@ void WCHNET_CreateTcpPop3( void )
    i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
    printf("SocketId TCP pop3 = %02x\n",(u16)SocketId);
    mStopIfError(i);
-
    p_pop3->Socket = SocketId;
    CheckType = POP_CHECK_CNNT;
    i = WCHNET_SocketConnect(SocketId);
@@ -312,10 +313,12 @@ int main(void)
 {
     u8 i;
 
+	SystemCoreClockUpdate();
 	Delay_Init();
 	USART_Printf_Init(115200);                                                    //USART initialize
-	printf("Mail\r\n");
+	printf("Mail\r\n");  	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
       printf("version error.\n");

@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the CAN firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x_can.h"
 #include "ch32v30x_rcc.h"
@@ -324,6 +326,9 @@ void CAN_DBGFreeze(CAN_TypeDef *CANx, FunctionalState NewState)
  *
  * @param   CANx - where x can be 1 to select the CAN peripheral.
  *          NewState - ENABLE or DISABLE.
+ *          Note-
+ *          DLC must be programmed as 8 in order Time Stamp (2 bytes) to be 
+ *          sent over the CAN bus. 
  *
  * @return  none
  */
@@ -792,7 +797,13 @@ uint8_t CAN_GetLastErrorCode(CAN_TypeDef *CANx)
  * @brief   Returns the CANx Receive Error Counter (REC).
  *
  * @param   CANx - where x can be 1 to select the CAN peripheral.
- *
+ *         Note-   
+ *         In case of an error during reception, this counter is incremented 
+ *         by 1 or by 8 depending on the error condition as defined by the CAN 
+ *         standard. After every successful reception, the counter is 
+ *         decremented by 1 or reset to 120 if its value was higher than 128. 
+ *         When the counter value exceeds 127, the CAN controller enters the 
+ *         error passive state.  
  * @return  counter - CAN Receive Error Counter.
  */
 uint8_t CAN_GetReceiveErrorCounter(CAN_TypeDef *CANx)

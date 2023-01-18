@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2020/04/30
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "debug.h"
 #include "lcd.h"
@@ -13,58 +15,58 @@
 
 /*
  *@Note
-  DVP操作OV2640摄像头视频模式在LCD显示图像例程：
-  DVP——PIN：
-    D10——PD6
-    D11——PD2
-    D8——PC10
-    D9——PC12
-    DPWDN——PC3
-    DPCLK——PA6
-    D7——PB9
-    D6——PB8
-    D5——PB6
-    D4——PC11
-    D3——PC9
-    D2——PC8
-    D1——PA10
-    D0——PA9
-    RESET——PC13
-    SDA——PB11
-    HERF——PA4
-    SDCLK——PB10
-    SYNC——PA5
-  LCD——PIN：
-    PD11——FSMC_A16
-    PD12——FSMC_A17
-    PD5 ——FSMC_NEW
-    PD4 ——FSMC_NOE
-    PA15——LCDRST#
-    PD14——FSMC_D0
-    PD15——FSMC_D1
-    PD0 ——FSMC_D2
-    PD1 ——FSMC_D3
-    PE7 ——FSMC_D4
-    PE8 ——FSMC_D5
-    PE9 ——FSMC_D6
-    PE10——FSMC_D7
-    PE11——FSMC_D8
-    PE12——FSMC_D9
-    PE13——FSMC_D10
-    PE14——FSMC_D11
-    PE15——FSMC_D12
-    PD8 ——FSMC_D13
-    PD9 ——FSMC_D14
-    PD10——FSMC_D15
-    PB14——IO_BLCTR
-    PA8 ——IO_MISO_NC
-    PB3 ——IO_MOSI_SDA
-    PB15——IO_TKINT
-    PC13——IO_BUSY_NC
-    PC0 ——IO_TKRST#
-    PB4 ——IO_CLK
-    注：使用UART2(PA2)串口输出，将debug.h中 #define DEBUG   DEBUG_UART2,
-    UART1(PA9)被DVP占用
+  DVP routine to operate OV2640 camera video mode to display image on LCD:
+  DVP--PIN:
+    D10--PD6
+    D11--PD2
+    D8--PC10
+    D9--PC12
+    DPWDN--PC3
+    DPCLK--PA6
+    D7--PB9
+    D6--PB8
+    D5--PB6
+    D4--PC11
+    D3--PC9
+    D2--PC8
+    D1--PA10
+    D0--PA9
+    RESET--PC13
+    SDA--PB11
+    HERF--PA4
+    SDCLK--PB10
+    SYNC--PA5
+  LCD--PIN:
+    PD11--FSMC_A16
+    PD12--FSMC_A17
+    PD5 --FSMC_NEW
+    PD4 --FSMC_NOE
+    PA15--LCDRST#
+    PD14--FSMC_D0
+    PD15--FSMC_D1
+    PD0 --FSMC_D2
+    PD1 --FSMC_D3
+    PE7--FSMC_D4
+    PE8--FSMC_D5
+    PE9 --FSMC_D6
+    PE10--FSMC_D7
+    PE11--FSMC_D8
+    PE12--FSMC_D9
+    PE13--FSMC_D10
+    PE14--FSMC_D11
+    PE15--FSMC_D12
+    PD8--FSMC_D13
+    PD9 --FSMC_D14
+    PD10--FSMC_D15
+    PB14--IO_BLCTR
+    PA8 --IO_MISO_NC
+    PB3 --IO_MOSI_SDA
+    PB15--IO_TKINT
+    PC13--IO_BUSY_NC
+    PC0 --IO_TKRST#
+    PB4 --IO_CLK
+ Note: Use UART2 (PA2) serial port output, #define DEBUG DEBUG_UART2,
+ UART1(PA9) is occupied by DVP
  */
 
 /* DVP Work Mode */
@@ -166,7 +168,7 @@ void DVP_Init(void)
     DVP->CR0 &= ~RB_DVP_MSK_DAT_MOD;
 
 #if (DVP_Work_Mode == RGB565_MODE)
-    /* VSYNC、HSYNC - High level active */
+    /* VSYNC銆丠SYNC - High level active */
     DVP->CR0 |= RB_DVP_D8_MOD | RB_DVP_V_POLAR;
     DVP->CR1 &= ~((RB_DVP_ALL_CLR)| RB_DVP_RCV_CLR);
     DVP->ROW_NUM = RGB565_ROW_NUM;               // rows
@@ -289,9 +291,11 @@ void DVP_IRQHandler(void)
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     /* LCD reset */
     LCD_Reset_GPIO_Init();

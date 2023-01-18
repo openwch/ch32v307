@@ -4,18 +4,21 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   FSMC操作NOR_SRAM例程：
-      本例程演示 通过FSMC接口操作 IS62WV25616BLL型号NOR_SRAM 擦-读.
-  PIN：
-    （锁存器）
+   FSMC routine to operate NOR_ SRAM:
+      This routine demonstrates the operation of IS62WV25616BLL model
+      NOR_SRAM erase-read through FSMC interface.
+  PIN:
+   (Latches)
     FSMC_NADV   -    PB7
-    （SRAM）
+    SRAM
     FSMC_A18    -    PD13 (CS1)
     FSMC_NOE    -    PD4  (OE)
     FSMC_NWE    -    PD5  (WE)
@@ -40,7 +43,8 @@
     FSMC_A16    -    PD11
     FSMC_A17    -    PD12
 
-    注：该例程地址线和数据线复用，需使用锁存器。
+  The address line and data line of this routine are multiplexed
+  and need to use a latch.
 */
 
 #include "debug.h"
@@ -162,9 +166,11 @@ int main(void)
     u32 i=0;
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("SRAM TEST\n");
 
 	FSMC_SRAM_Init();

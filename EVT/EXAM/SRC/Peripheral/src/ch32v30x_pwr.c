@@ -4,9 +4,11 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the PWR firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-********************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v30x_pwr.h"
 #include "ch32v30x_rcc.h"
 
@@ -327,7 +329,6 @@ void PWR_EnterSTANDBYMode_RAM_LV_VBAT_EN(void)
  * @brief   Enters STOP mode with RAM data retention function and LV mode on.
  *
  * @param   PWR_Regulator - specifies the regulator state in STOP mode.
- *            PWR_Regulator_ON - STOP mode with regulator ON
  *            PWR_Regulator_LowPower - STOP mode with regulator in low power mode
  *          PWR_STOPEntry - specifies if STOP mode in entered with WFI or WFE instruction.
  *            PWR_STOPEntry_WFI - enter STOP mode with WFI instruction
@@ -342,9 +343,6 @@ void PWR_EnterSTOPMode_RAM_LV(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry)
     tmpreg &= CTLR_DS_MASK;
     tmpreg |= PWR_Regulator;
 
-    //2K+30K in standby power.
-    tmpreg |= (0x1 << 16) | (0x1 << 17);
-    //2K+30K in standby LV .
     tmpreg |= (0x1 << 20);
     PWR->CTLR = tmpreg;
 

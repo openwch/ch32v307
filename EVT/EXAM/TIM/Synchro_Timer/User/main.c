@@ -4,15 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 定时器同步模式：
+ Timer synchronization mode:
  TIM1_CH1(PA8)
- 本例程演示 4 种定时器同步模式。
+ This example demonstrates 4 timer synchronization modes.
 
 */
 
@@ -147,8 +149,9 @@ void TIM_TimSynchroMode4_Init(void)
 int main(void)
 {
     USART_Printf_Init(115200);
+    SystemCoreClockUpdate();	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     /* Timer synchronization Mode Selection */
     TIM_TimSynchroMode1_Init();
     //	TIM_TimSynchroMode2_Init();

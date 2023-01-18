@@ -4,12 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2022/01/18
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 /*
  *@Note
-DNS例程，演示DHCP自动获取IP后，再请求域名解析
+DNS example ,demonstrate that DHCP automatically obtains
+an IP address and then requests domain name resolution.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
 #include "debug.h"
@@ -206,10 +211,12 @@ int main(void)
 {
     u8 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                          //USART initialize
-    printf("DNS Test\r\n");
+    printf("DNS Test\r\n");	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
         printf("version error.\n");
@@ -220,7 +227,7 @@ int main(void)
         printf("%x ",MACAddr[i]);
     printf("\n");
     TIM2_Init();
-    WCHNET_DHCPSetHostname("WCHNET");                                 //Configure DHCP host name
+    WCHNET_DHCPSetHostname("WCHNET");                                   //Configure DHCP host name
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                    //Ethernet library initialize
     mStopIfError(i);
     if(i == WCHNET_ERR_SUCCESS)

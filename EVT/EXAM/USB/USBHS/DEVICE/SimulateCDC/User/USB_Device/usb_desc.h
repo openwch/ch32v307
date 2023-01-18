@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/08/20
  * Description        : header file of usb_desc.c
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #ifndef USER_USB_DESC_H_
 #define USER_USB_DESC_H_
 
@@ -19,7 +21,7 @@
 /* usb device info define  */
 #define DEF_USB_VID                  0x1A86
 #define DEF_USB_PID                  0xFE0C
-/* USB device descriptor, device serial number£¨bcdDevice£© */
+/* USB device descriptor, device serial numberï¿½ï¿½bcdDeviceï¿½ï¿½ */
 #define DEF_IC_PRG_VER               DEF_FILE_VERSION
 
 /******************************************************************************/
@@ -32,7 +34,7 @@
 #define DEF_USBD_FS_PACK_SIZE        64     /* usb fs device max bluk/int pack size */
 #define DEF_USBD_FS_ISO_PACK_SIZE    1023   /* usb fs device max iso pack size */
 /* LS */
-#define DEf_USBD_LS_UEP0_SIZE        8      /* usb ls device end-point 0 size */
+#define DEF_USBD_LS_UEP0_SIZE        8      /* usb ls device end-point 0 size */
 #define DEF_USBD_LS_PACK_SIZE        64     /* usb ls device max int pack size */
 
 /* HS end-point size */

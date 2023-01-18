@@ -4,17 +4,20 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 低功耗，待机模式例程：
+ low power, standby mode routine:
  WKUP(PA0)
- 本例程演示 WFI 进入待机模式，WKUP(PA0)引脚上升沿，退出待机模式，
- 唤醒后程序复位。
- 注：为尽可能的降低功耗，建议将不用的GPIO设置成下拉模式。
+ This routine demonstrates that WFI enters the standby mode, the rising edge of the WKUP (PA0) pin
+ exits the standby mode,Program reset after wake-up.
+ Note: In order to reduce power consumption as much as possible, it is recommended to
+ set the unused GPIO to pull-down mode.
 
 */
 
@@ -35,9 +38,9 @@ int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    /* 为降低功耗，需将不用的GPIO设置成下拉输入 */
+    /* To reduce power consumption, unused GPIOs need to be set as pull-down inputs. */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|
-             RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
+      RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 
@@ -48,13 +51,13 @@ int main(void)
     GPIO_Init(GPIOE, &GPIO_InitStructure);
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);
+    USART_Printf_Init(115200);	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     Delay_Ms(1000);
     Delay_Ms(1000);
-
     printf("Standby Mode Test\r\n");
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);

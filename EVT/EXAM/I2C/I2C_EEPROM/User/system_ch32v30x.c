@@ -5,9 +5,11 @@
 * Date               : 2021/06/06
 * Description        : CH32V30x Device Peripheral Access Layer System Source File.
 *                      For HSE = 8Mhz
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-*********************************************************************************/
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v30x.h" 
 
 /* 
@@ -16,10 +18,10 @@
 * If none of the define below is enabled, the HSI is used as System clock source. 
 */
 //#define SYSCLK_FREQ_HSE    HSE_VALUE
-#define SYSCLK_FREQ_48MHz_HSE  48000000
+//#define SYSCLK_FREQ_48MHz_HSE  48000000
 //#define SYSCLK_FREQ_56MHz_HSE  56000000
 //#define SYSCLK_FREQ_72MHz_HSE  72000000
-//#define SYSCLK_FREQ_96MHz_HSE  96000000
+#define SYSCLK_FREQ_96MHz_HSE  96000000
 //#define SYSCLK_FREQ_120MHz_HSE  120000000
 //#define SYSCLK_FREQ_144MHz_HSE  144000000
 //#define SYSCLK_FREQ_HSI    HSI_VALUE

@@ -4,16 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 外部触发同步启动两个定时器例程：
+External trigger routines to start two timers synchronously:
  TIM1_CH1(PA8)
- 本例程演示 TIM_CH1(PA8) 引脚上拉输入，该引脚检测到上升沿，则同时启动 TIM1 和
- TIM2。
+ This example demonstrates the TIM_CH1(PA8) pin pull-up input, the pin detects a rising
+ edge, then starts TIM1 and TIM2.
  
 */
 
@@ -75,10 +77,11 @@ void ExtTrigger_Start_Two_TIM( u16 arr, u16 psc )
  */
 int main(void)
 {
+    SystemCoreClockUpdate();
     Delay_Init();
 	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	ExtTrigger_Start_Two_TIM( 0xFFFF, 48000-1);
 
 	while(1)

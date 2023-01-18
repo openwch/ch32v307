@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : This file provides all the FSMC firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x_fsmc.h"
 #include "ch32v30x_rcc.h"
@@ -249,7 +251,7 @@ void FSMC_NANDStructInit(FSMC_NANDInitTypeDef *FSMC_NANDInitStruct)
  *            FSMC_Bank1_NORSRAM2 - FSMC Bank1 NOR/SRAM2
  *            FSMC_Bank1_NORSRAM3 - FSMC Bank1 NOR/SRAM3
  *            FSMC_Bank1_NORSRAM4 - FSMC Bank1 NOR/SRAM4
- *          NewState£ºENABLE or DISABLE.
+ *          NewState:ENABLE or DISABLE.
  *
  * @return  none
  */

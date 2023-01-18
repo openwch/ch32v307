@@ -4,6 +4,10 @@
 * Version            : V1.00
 * Date               : 2022/03/31
 * Description        : Head-file of Debug printf switch
+*******************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #ifndef	__PRINTF_H__

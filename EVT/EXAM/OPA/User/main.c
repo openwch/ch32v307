@@ -4,19 +4,23 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- OPA4作电压跟随器输出，DAC输出给OPA4，ADC采样OPA4
- DAC_CH1——PA4
- OPA4_CHP1——PC4
- OPA4_CHN1——PC3
- OPA4_OUT_IO_OUT0——PA0
+ OPA4 is used as voltage follower output, DAC outputs to OPA4, ADC samples OPA4
+ DAC_CH1--PA4
+ OPA4_CHP1--PC4
+ OPA4_CHN1--PC3
+ OPA4_OUT_IO_OUT0--PA0
 
-   本例中PA0和PC3短接，PA4接PC4，若负反馈接电阻，也可构成运算放大器
+  In this example, PA0 and PC3 are short-circuited, and PA4 is connected to PC4.
+  If the negative feedback is connected to a resistor, it can also form an
+  operational amplifier.
 */
 
 #include "debug.h"
@@ -240,9 +244,11 @@ int main(void)
 {
     u16 ADC_val,i;
     u16 DAC_OUT[6]={0,100,500,1000,2000,3000};
+    SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("OPA Test\r\n");
 	printf("CalibrattionValue:%d\n", Calibrattion_Val);
 	Dac_Channel1_Init();

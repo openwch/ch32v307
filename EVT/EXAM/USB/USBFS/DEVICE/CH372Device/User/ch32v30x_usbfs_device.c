@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : This file provides all the USBOTG firmware functions.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 #include "ch32v30x_usbfs_device.h"
@@ -62,10 +64,19 @@ void USBFS_RCC_Init(void)
     RCC_USBHSPLLCKREFCLKConfig( RCC_USBHSPLLCKREFCLK_4M );
     RCC_USBHSPHYPLLALIVEcmd( ENABLE );
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_USBHS, ENABLE );
-
 #else
-    RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
-
+    if( SystemCoreClock == 144000000 )
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
+    }
+    else if( SystemCoreClock == 96000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div2 );
+    }
+    else if( SystemCoreClock == 48000000 ) 
+    {
+        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div1 );
+    }
 #endif
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS, ENABLE );
 }

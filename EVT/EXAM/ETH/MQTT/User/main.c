@@ -4,15 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2022/01/18
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 /*
  *@Note
-MQTT例程，本程序用于演示基于TCP/IP的MQTT协议通讯，
- 单片机连接以太网、MQTT服务器后将会发布一个主题，
- 再订阅这个主题，并向这个主题发布消息，
-最后接收到自己发送的消息。
+MQTT example, this program is used to demonstrate TCP/IP-based MQTT protocol communication,
+After the single-chip microcomputer connects to Ethernet and MQTT server, a topic will be released.
+Subscribe to this topic and publish messages to this topic.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
 #include "debug.h"
@@ -139,19 +142,8 @@ u8 Transport_Close(void)
  */
 void Transport_SendPacket(u8 *buf, u32 len)
 {
-    u32 totallen;
-    u8 *p = buf;
-
-    totallen = len;
-    while(1)
-    {
-        len = totallen;
-        WCHNET_SocketSend(SocketId, p, &len);
-        totallen -= len;
-        p += len;
-        if(totallen)continue;
-        break;
-    }
+    WCHNET_SocketSend(SocketId, buf, &len);
+    printf("%d bytes uploaded!",len);
 }
 
 /*********************************************************************
@@ -417,10 +409,12 @@ void WCHNET_HandleGlobalInt(void)
 int main(void)
 {
     u8 i;
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                               //USART initialize
-    printf("MQTT\r\n");
+    printf("MQTT\r\n");   	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
         printf("version error.\n");

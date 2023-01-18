@@ -4,12 +4,16 @@
 * Version            : V1.0.0
 * Date               : 2022/05/20
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 /*
  *@Note
-  DHCP例程，演示DHCP自动获取IP功能
+DHCP example, demonstrating that DHCP automatically obtains an IP address.
+For details on the selection of engineering chips,
+please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
 #include "debug.h"
@@ -273,10 +277,12 @@ int main(void)
 {
     u8 i;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                            //USART initialize
-    printf("DHCP Test\r\n");
+    printf("DHCP Test\r\n");  	
     printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("net version:%x\n",WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer() ){
       printf("version error.\n");

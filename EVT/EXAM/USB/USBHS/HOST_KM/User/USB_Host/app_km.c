@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2022/09/01
  * Description        : The USB host operates the keyboard and mouse.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- ********************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 
 
 /********************************************************************************/
@@ -1505,7 +1507,7 @@ uint8_t HUB_Port_PreEnum2( uint8_t usb_port, uint8_t hub_port, uint8_t *pbuf )
                     return s;
                 }
                 retry++;
-            }while( ( buf[ 2 ] & 0x10 ) && ( retry <= 10 ) ); // Çå³ý¶Ë¿Ú¸´Î»Íê³É
+            }while( ( buf[ 2 ] & 0x10 ) && ( retry <= 10 ) ); // ï¿½ï¿½ï¿½ï¿½Ë¿Ú¸ï¿½Î»ï¿½ï¿½ï¿½
 
             if( retry != 10 )
             {

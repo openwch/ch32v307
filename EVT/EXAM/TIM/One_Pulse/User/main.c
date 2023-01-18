@@ -4,16 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 单脉冲输出例程：
- TIM2_CH1(PA0)，TIM2_CH2(PA1)
- 本例程演示 在单脉冲模式下，TIM2_CH2(PA1) 引脚检测到一个上升沿，则在
- TIM2_CH1(PA0) 输出正脉冲。
+ Single pulse output routine:
+ TIM2_CH1(PA0),TIM2_CH2(PA1)
+ This routine demonstrates that in single-pulse mode, when a rising edge is detected
+ on the TIM2_CH2(PA1) pin, the TIM2_CH1(PA0) outputs positive pulse.
  
 */
 #include "debug.h"
@@ -82,8 +84,9 @@ void One_Pulse_Init( u16 arr, u16 psc, u16 ccp )
 int main(void)
 {
 	USART_Printf_Init(115200);
+	SystemCoreClockUpdate();	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
-
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	One_Pulse_Init( 200, 48000-1, 100 );
 
 	while(1);

@@ -4,19 +4,23 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 同步模式例程：
- Master：USART2_CK(PA4)、USART2_Tx(PA2)、USART4_Rx(PA3)。
- Slave：SPI1_SCK(PA5)、SPI1_MISO(PA6)、SPI1_MOSI(PA7)。
- 本例程演示使用 USART2 作主机和 SPI1作从机，全双工收发数据。
- 硬件连线：PA4  —— PA5
-           PA2  —— PA7
-           PA3  —— PA6
+synchronous mode, master/slave mode, transceiver routine:
+ Master:USART2_CK(PA4)\USART2_Tx(PA2)\USART4_Rx(PA3).
+ Slave:SPI1_SCK(PA5)\SPI1_MISO(PA6)\SPI1_MOSI(PA7).
+ This example demonstrates using USART2 as the master and SPI1 as the slave,
+ sending and receiving data in full duplex.
+Hardware connection:
+           PA4 -- PA5
+           PA2  -- PA7
+           PA3  -- PA6
 
 */
 
@@ -164,10 +168,11 @@ void SPI1_INIT(void)
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("USART SynchromousMode TEST\r\n");
     USART2_ReCFG(); /* USART2 ReInitializes */
     SPI1_INIT();

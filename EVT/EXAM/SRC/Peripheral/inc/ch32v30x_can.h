@@ -5,9 +5,11 @@
 * Date               : 2021/06/06
 * Description        : This file contains all the functions prototypes for the 
 *                      CAN firmware library.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
-*******************************************************************************/ 
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #ifndef __CH32V30x_CAN_H
 #define __CH32V30x_CAN_H
 
@@ -259,6 +261,10 @@ typedef struct
 
 
 /* CAN_flags */
+/* If the flag is 0x3XXXXXXX, it means that it can be used with CAN_GetFlagStatus()
+ * and CAN_ClearFlag() functions. 
+ * If the flag is 0x1XXXXXXX, it means that it can only be used with CAN_GetFlagStatus() function. 
+*/
 /* Transmit Flags */
 #define CAN_FLAG_RQCP0                     ((uint32_t)0x38000001) /* Request MailBox0 Flag */
 #define CAN_FLAG_RQCP1                     ((uint32_t)0x38000100) /* Request MailBox1 Flag */
@@ -275,6 +281,10 @@ typedef struct
 /* Operating Mode Flags */
 #define CAN_FLAG_WKU                       ((uint32_t)0x31000008) /* Wake up Flag */
 #define CAN_FLAG_SLAK                      ((uint32_t)0x31000012) /* Sleep acknowledge Flag */
+/* Note:
+ *When SLAK intterupt is disabled (SLKIE=0), no polling on SLAKI is possible. 
+ *In this case the SLAK bit can be polled.
+*/
 
 /* Error Flags */
 #define CAN_FLAG_EWG                       ((uint32_t)0x10F00001) /* Error Warning Flag   */

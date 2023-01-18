@@ -4,16 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/24
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- 待机模式不开启LV时，RAM 2K、30K低功耗数据保持例程：
- 本例程演示在 2K RAM和30K RAM指定位置处写入数据，之后WFI进入STANDBY睡眠模式，通过PA0(wakeup)引脚
- 输入高电平退出待机模式，唤醒后打印RAM数据，测试RAM是否保持住
- 数据。
+ when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines:
+ This routine demonstrates writing data at the specified location of 2K RAM and 30K RAM, and then WFI enters
+ STANDBY sleep mode, through the PA0 (wakeup) pin Input high level to exit standby mode, print RAM data after
+ waking up, and test whether RAM is maintained data.
 
 */
 
@@ -99,6 +101,9 @@ void TestDataRead(void)
 int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure={0};
+    SystemCoreClockUpdate();
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     /* Configure unused GPIO as IPD to reduce power consumption */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|

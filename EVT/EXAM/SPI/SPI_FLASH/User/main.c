@@ -4,23 +4,24 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- SPI接口操作FLASH外设例程：
- Master：SPI1_SCK(PA5)、SPI1_MISO(PA6)、SPI1_MOSI(PA7)。
- 本例程演示 SPI 操作 Winbond W25Qxx SPIFLASH。
- 注：
+ SPI interface operation flash peripheral routine:
+ Master:SPI1_SCK(PA5)銆丼PI1_MISO(PA6)銆丼PI1_MOSI(PA7).
+ This example demonstrates SPI operation Winbond W25Qxx SPIFLASH.
  pins:
-    CS   —— PA2
-    DO   —— PA6(SPI1_MISO)
-    WP   —— 3.3V
-    DI   —— PA7(SPI1_MOSI)
-    CLK  —— PA5(SPI1_SCK)
-    HOLD —— 3.3V
+    CS  -- PA2
+    DO  -- PA6(SPI1_MISO)
+    WP   -- 3.3V
+    DI   -- PA7(SPI1_MOSI)
+    CLK  -- PA5(SPI1_SCK)
+    HOLD -- 3.3V
 
 */
 
@@ -144,8 +145,8 @@ void SPI_Flash_Init(void)
  * @fn      SPI_Flash_ReadSR
  *
  * @brief   Read W25Qxx status register.
- *        ——BIT7  6   5   4   3   2   1   0
- *        ——SPR   RV  TB  BP2 BP1 BP0 WEL BUSY
+ *        锛侊紒BIT7  6   5   4   3   2   1   0
+ *        锛侊紒SPR   RV  TB  BP2 BP1 BP0 WEL BUSY
  *
  * @return  byte - status register value.
  */
@@ -247,7 +248,7 @@ u16 SPI_Flash_ReadID(void)
  *
  * @brief   Erase one sector(4Kbyte).
  *
- * @param   Dst_Addr - 0 —— 2047
+ * @param   Dst_Addr - 0 锛侊紒 2047
  *
  * @return  none
  */
@@ -503,10 +504,11 @@ int main(void)
     u8  datap[SIZE];
     u16 Flash_Model;
 
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
     printf("SystemClk:%d\r\n", SystemCoreClock);
-
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     SPI_Flash_Init();
 
     Flash_Model = SPI_Flash_ReadID();

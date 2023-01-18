@@ -4,16 +4,18 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- *Example routine to emulate a simulate USB-CDC Device, USE USART1(PA9/PA10)
- *Recommended to use UART2(PA2) as debug port, you can modify the debug port
- *by modifying the macro definition in debug.h
- *Merged HID devices, using endpoint 4 data downlink to fetch reverse upload;
+ *(1),Example routine to emulate a simulate USB-CDC Device, USE USART2(PA2/PA3),
+ *Please note: This code uses the default serial port 1 for debugging,
+ *if you need to modify the debugging serial port, please do not use USART2
+ *(2),Merged HID devices, using endpoint 4 data downlink to fetch reverse upload;
 */
 
 #include "UART.h"
@@ -28,16 +30,21 @@
  */
 int main(void)
 {
-	Delay_Init();
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+	SystemCoreClockUpdate( );
+	Delay_Init( );
+	USART_Printf_Init( 115200) ;
+		
+	printf( "SystemClk:%d\r\n", SystemCoreClock );
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf( "Simulate USB-CDC/HID Device running on USBFS Controller\r\n" );
+
     RCC_Configuration( );
 
     /* Tim2 init */
     TIM2_Init( );
 
 	/* Usart1 init */
-    UART1_Init( 1, DEF_UARTx_BAUDRATE, DEF_UARTx_STOPBIT, DEF_UARTx_PARITY );
+    UART2_Init( 1, DEF_UARTx_BAUDRATE, DEF_UARTx_STOPBIT, DEF_UARTx_PARITY );
 
     /* USB20 device init */
     USBFS_RCC_Init( );
@@ -45,7 +52,7 @@ int main(void)
 
 	while(1)
 	{
-        UART1_DataRx_Deal( );
-        UART1_DataTx_Deal( );
+        UART2_DataRx_Deal( );
+        UART2_DataTx_Deal( );
 	}
 }

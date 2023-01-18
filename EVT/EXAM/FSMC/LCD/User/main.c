@@ -4,42 +4,44 @@
 * Version            : V1.0.0
 * Date               : 2020/04/30
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-   FSMC²Ù×÷TFTLCDÀý³Ì£º
-  LCD¡ª¡ªPIN£º
-    PD11¡ª¡ªFSMC_A16
-    PD12¡ª¡ªFSMC_A17
-    PD5 ¡ª¡ªFSMC_NEW
-    PD4 ¡ª¡ªFSMC_NOE
-    PA15¡ª¡ªLCDRST#
-    PD14¡ª¡ªFSMC_D0
-    PD15¡ª¡ªFSMC_D1
-    PD0 ¡ª¡ªFSMC_D2
-    PD1 ¡ª¡ªFSMC_D3
-    PE7 ¡ª¡ªFSMC_D4
-    PE8 ¡ª¡ªFSMC_D5
-    PE9 ¡ª¡ªFSMC_D6
-    PE10¡ª¡ªFSMC_D7
-    PE11¡ª¡ªFSMC_D8
-    PE12¡ª¡ªFSMC_D9
-    PE13¡ª¡ªFSMC_D10
-    PE14¡ª¡ªFSMC_D11
-    PE15¡ª¡ªFSMC_D12
-    PD8 ¡ª¡ªFSMC_D13
-    PD9 ¡ª¡ªFSMC_D14
-    PD10¡ª¡ªFSMC_D15
-    PB14¡ª¡ªIO_BLCTR
-    PA8 ¡ª¡ªIO_MISO_NC
-    PB3 ¡ª¡ªIO_MOSI_SDA
-    PB15¡ª¡ªIO_TKINT
-    PC13¡ª¡ªIO_BUSY_NC
-    PC0 ¡ª¡ªIO_TKRST#
-    PB4 ¡ª¡ªIO_CLK
+   FSMC routine to operate TFTLCD:
+  LCD--PIN:
+    PD11--FSMC_A16
+    PD12--FSMC_A17
+    PD5 --FSMC_NEW
+    PD4 --FSMC_NOE
+    PA15--LCDRST#
+    PD14--FSMC_D0
+    PD15--FSMC_D1
+    PD0 --FSMC_D2
+    PD1--FSMC_D3
+    PE7--FSMC_D4
+    PE8 --FSMC_D5
+    PE9 --FSMC_D6
+    PE10--FSMC_D7
+    PE11--FSMC_D8
+    PE12--FSMC_D9
+    PE13--FSMC_D10
+    PE14--FSMC_D11
+    PE15--FSMC_D12
+    PD8 --FSMC_D13
+    PD9--FSMC_D14
+    PD10--FSMC_D15
+    PB14--IO_BLCTR
+    PA8 --IO_MISO_NC
+    PB3 --IO_MOSI_SDA
+    PB15--IO_TKINT
+    PC13--IO_BUSY_NC
+    PC0 --IO_TKRST#
+    PB4 --IO_CLK
 */
 
 #include "debug.h"
@@ -78,9 +80,11 @@ int main(void)
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
+	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);
+	USART_Printf_Init(115200);	
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 	LCD_Reset_GPIO_Init();
 	//LCD reset

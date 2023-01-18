@@ -4,19 +4,21 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
- FPU硬件浮点运算例程：
-   本例程演示硬件浮点运算。
+ FPU hardware floating point operation routine:
+   This example demonstrates hardware floating-point arithmetic.
 
-    注：开启硬件浮点M-RS配置参考 本例程配置
-    具体配置-Properties -> C/C++ Build -> Setting -> Target Processor
-    -> Floating point 选项配置成 Single precision extension （RVF）
-       Floating point ABI 选项配置成 Single precision(f)
+       Enable hardware floating point M-RS configuration reference This example configuration
+    Specific configuration-Properties -> C/C++ Build -> Setting -> Target Processor
+    -> The Floating point option is configured as Single precision extension (RVF)
+       Floating point ABI option configured as Single precision(f)
 
 */
 
@@ -37,7 +39,9 @@ int main(void)
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	USART_Printf_Init(115200);
+	SystemCoreClockUpdate();
 	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 	val1 = (val1/2+11.12)*2;
     t=(int)(val1*10)%10;

@@ -4,14 +4,17 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /*
  *@Note
-  *±æ¿˝≥Ã≈‰∫œHOST_IAP π”√£¨◊˜Œ™APP—› æ¥˙¬Î£¨Ã¯◊™∫Û¥Ú”°°∞This is a APP code for a IAP application°±,
- *PA0¿≠µÕ≤¡≥˝±Í÷æ£¨»Ì∏¥Œª∫ÛÃ¯◊™µΩIAP
+  *This routine is used in conjunction with HOST_IAP, as the APP demonstration code, and prints  
+  *‚ÄúThis is a APP code for a IAP application‚Äù after jumping ,
+ *PA0 pulls the erase flag low, and jumps to IAP after soft reset.
 */
 
 #include "debug.h"
@@ -61,11 +64,15 @@ uint8_t IAP_Flash_Erase( uint32_t address, uint32_t length );
 int main(void)
 {
     uint8_t ret;
+	SystemCoreClockUpdate( );
 	Delay_Init( );
     Delay_Ms( 100 );
-	USART_Printf_Init(115200);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-	printf("This is a APP code for a IAP application\n" );
+	USART_Printf_Init( 115200 );
+		
+	printf( "SystemClk:%d\r\n", SystemCoreClock);
+	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	printf( "This is a APP code for a IAP application\n" );
+    
 	GPIO_Cfg_init( );
 
 	Flash_Operation_Key0 = DEF_FLASH_OPERATION_KEY_CODE_0;

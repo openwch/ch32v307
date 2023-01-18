@@ -4,8 +4,10 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        :
+*********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* SPDX-License-Identifier: Apache-2.0
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "debug.h"
 #include "es8388.h"
@@ -55,7 +57,7 @@ void IIC_Init( u32 bound , u16 address )
 /*********************************************************************
  * @fn      ES8388_Contrl_Init
  *
- * @brief   ¿ØÖÆI2SµÄSDÊý¾Ý·½Ïò
+ * @brief   ï¿½ï¿½ï¿½ï¿½I2Sï¿½ï¿½SDï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½
  *
  * @return  none
  */
@@ -80,37 +82,37 @@ void ES8388_Contrl_Init(void)
  */
 u8 ES8388_Init(void)
 {
-    ES8388_Contrl_Init();		//ÅäÖÃÄ£Äâ¿ª¹Ø¿ØÖÆSDÊý¾Ý·½Ïò
-    IIC_Init(200000,0x01);                 //³õÊ¼»¯IIC½Ó¿Ú
+    ES8388_Contrl_Init();		//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½â¿ªï¿½Ø¿ï¿½ï¿½ï¿½SDï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½
+    IIC_Init(200000,0x01);                 //ï¿½ï¿½Ê¼ï¿½ï¿½IICï¿½Ó¿ï¿½
 
-    //Èí¸´Î»ES8388
+    //ï¿½ï¿½ï¿½ï¿½Î»ES8388
     ES8388_Write_Reg(0, 0x80);
     ES8388_Write_Reg(0, 0x00);
-    Delay_Ms(100);				//µÈ´ý¸´Î»
+    Delay_Ms(100);				//ï¿½È´ï¿½ï¿½ï¿½Î»
 
     ES8388_Write_Reg(0x01, 0x58);
     ES8388_Write_Reg(0x01, 0x50);
     ES8388_Write_Reg(0x02, 0xF3);
     ES8388_Write_Reg(0x02, 0xF0);
 	
-	ES8388_Write_Reg(0x03, 0x09);	//Âó¿Ë·çÆ«ÖÃµçÔ´¹Ø±Õ
-	ES8388_Write_Reg(0x00, 0x06);	//Ê¹ÄÜ²Î¿¼		500KÇý¶¯Ê¹ÄÜ
-	ES8388_Write_Reg(0x04, 0x00);	//DACµçÔ´¹ÜÀí£¬²»´ò¿ªÈÎºÎÍ¨µÀ
-	ES8388_Write_Reg(0x08, 0x00);	//MCLK²»·ÖÆµ
-    ES8388_Write_Reg(0x2B, 0x80);	//DAC¿ØÖÆ	DACLRCÓëADCLRCÏàÍ¬
+	ES8388_Write_Reg(0x03, 0x09);	//ï¿½ï¿½Ë·ï¿½Æ«ï¿½Ãµï¿½Ô´ï¿½Ø±ï¿½
+	ES8388_Write_Reg(0x00, 0x06);	//Ê¹ï¿½Ü²Î¿ï¿½		500Kï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
+	ES8388_Write_Reg(0x04, 0x00);	//DACï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½Í¨ï¿½ï¿½
+	ES8388_Write_Reg(0x08, 0x00);	//MCLKï¿½ï¿½ï¿½ï¿½Æµ
+    ES8388_Write_Reg(0x2B, 0x80);	//DACï¿½ï¿½ï¿½ï¿½	DACLRCï¿½ï¿½ADCLRCï¿½ï¿½Í¬
    
-    ES8388_Write_Reg(0x09, 0x88);	//ADC L/R PGAÔöÒæÅäÖÃÎª+24dB
-    ES8388_Write_Reg(0x0C, 0x4C);	//ADC	Êý¾ÝÑ¡ÔñÎªleft data = left ADC, right data = left ADC 	ÒôÆµÊý¾ÝÎª16bit
-    ES8388_Write_Reg(0x0D, 0x12);	//ADCÅäÖÃ MCLK/²ÉÑùÂÊ=250
-    ES8388_Write_Reg(0x10, 0x00);	//ADCÊý×ÖÒôÁ¿¿ØÖÆ½«ÐÅºÅË¥¼õ L	ÉèÖÃÎª×îÐ¡£¡£¡£¡
-    ES8388_Write_Reg(0x11, 0x00);	//ADCÊý×ÖÒôÁ¿¿ØÖÆ½«ÐÅºÅË¥¼õ R	ÉèÖÃÎª×îÐ¡£¡£¡£¡
+    ES8388_Write_Reg(0x09, 0x88);	//ADC L/R PGAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª+24dB
+    ES8388_Write_Reg(0x0C, 0x4C);	//ADC	ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Îªleft data = left ADC, right data = left ADC 	ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½Îª16bit
+    ES8388_Write_Reg(0x0D, 0x12);	//ADCï¿½ï¿½ï¿½ï¿½ MCLK/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½=250
+    ES8388_Write_Reg(0x10, 0x00);	//ADCï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Åºï¿½Ë¥ï¿½ï¿½ L	ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    ES8388_Write_Reg(0x11, 0x00);	//ADCï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Åºï¿½Ë¥ï¿½ï¿½ R	ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
-    ES8388_Write_Reg(0x17, 0x18);	//DAC ÒôÆµÊý¾ÝÎª16bit
-    ES8388_Write_Reg(0x18, 0x02);	//DAC	ÅäÖÃ MCLK/²ÉÑùÂÊ=256
-    ES8388_Write_Reg(0x1A, 0x00);	//DACÊý×ÖÒôÁ¿¿ØÖÆ½«ÐÅºÅË¥¼õ L	ÉèÖÃÎª×îÐ¡£¡£¡£¡
-    ES8388_Write_Reg(0x1B, 0x00);	//DACÊý×ÖÒôÁ¿¿ØÖÆ½«ÐÅºÅË¥¼õ R	ÉèÖÃÎª×îÐ¡£¡£¡£¡
-    ES8388_Write_Reg(0x27, 0xB8);	//L»ìÆµÆ÷
-    ES8388_Write_Reg(0x2A, 0xB8);	//R»ìÆµÆ÷
+    ES8388_Write_Reg(0x17, 0x18);	//DAC ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½Îª16bit
+    ES8388_Write_Reg(0x18, 0x02);	//DAC	ï¿½ï¿½ï¿½ï¿½ MCLK/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½=256
+    ES8388_Write_Reg(0x1A, 0x00);	//DACï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Åºï¿½Ë¥ï¿½ï¿½ L	ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    ES8388_Write_Reg(0x1B, 0x00);	//DACï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Åºï¿½Ë¥ï¿½ï¿½ R	ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    ES8388_Write_Reg(0x27, 0xB8);	//Lï¿½ï¿½Æµï¿½ï¿½
+    ES8388_Write_Reg(0x2A, 0xB8);	//Rï¿½ï¿½Æµï¿½ï¿½
     Delay_Ms(100);
     return 0;
 }
@@ -118,10 +120,10 @@ u8 ES8388_Init(void)
 /*********************************************************************
  * @fn      ES8388_Write_Reg
  *
- * @brief   Ð´Êý¾Ýµ½ES8388¼Ä´æÆ÷
+ * @brief   Ð´ï¿½ï¿½ï¿½Ýµï¿½ES8388ï¿½Ä´ï¿½ï¿½ï¿½
  *
- * @param   reg - ¼Ä´æÆ÷µØÖ·
- *          val - ÒªÐ´Èë¼Ä´æÆ÷µÄÖµ
+ * @param   reg - ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+ *          val - ÒªÐ´ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
  *
  * @return  0 - success
  *          other - fail
@@ -134,17 +136,17 @@ u8 ES8388_Write_Reg(u8 reg, u8 val)
 
     while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
     I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0),I2C_Direction_Transmitter);
-    //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //µÈ´ýÓ¦´ð
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //ï¿½È´ï¿½Ó¦ï¿½ï¿½
   
     while( I2C_GetFlagStatus( I2C2, I2C_FLAG_TXE ) ==  RESET );
-    I2C_SendData(I2C2,reg); //Ð´¼Ä´æÆ÷µØÖ·
+    I2C_SendData(I2C2,reg); //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) ); //µÈ´ýÓ¦´ð
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) ); //ï¿½È´ï¿½Ó¦ï¿½ï¿½
   
 	while( I2C_GetFlagStatus( I2C2, I2C_FLAG_TXE ) ==  RESET );
-    I2C_SendData(I2C2,val & 0XFF); //·¢ËÍÊý¾Ý
+    I2C_SendData(I2C2,val & 0XFF); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     I2C_GenerateSTOP( I2C2, ENABLE );
     return 0;
@@ -153,9 +155,9 @@ u8 ES8388_Write_Reg(u8 reg, u8 val)
 /*********************************************************************
  * @fn      ES8388_Read_Reg
  *
- * @brief   ´ÓÖ¸¶¨µØÖ·¶Á³öÒ»¸öÊý¾Ý
+ * @brief   ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @param   reg - ¼Ä´æÆ÷µØÖ·
+ * @param   reg - ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
  *
  * @return  read data
  */
@@ -168,23 +170,23 @@ u8 ES8388_Read_Reg(u8 reg)
 
 	while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
     I2C_Send7bitAddress(I2C2,(ES8388_ADDR << 1) | 0X00,I2C_Direction_Transmitter); 
-    //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //µÈ´ýÓ¦´ð
-    I2C_SendData(I2C2,reg);        //Ð´¼Ä´æÆ÷µØÖ·
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //ï¿½È´ï¿½Ó¦ï¿½ï¿½
+    I2C_SendData(I2C2,reg);        //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) );//µÈ´ýÓ¦´ð
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) );//ï¿½È´ï¿½Ó¦ï¿½ï¿½
 
     I2C_GenerateSTART( I2C2, ENABLE );
     while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
 
-    I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0x01),I2C_Direction_Receiver);//·¢ËÍÆ÷¼þµØÖ·+¶ÁÃüÁî
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED ) ); //µÈ´ýÓ¦´ð
+    I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0x01),I2C_Direction_Receiver);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED ) ); //ï¿½È´ï¿½Ó¦ï¿½ï¿½
 
     while(I2C_GetFlagStatus( I2C2, I2C_FLAG_RXNE ) ==  RESET);
     temp = I2C_ReceiveData( I2C2 );
 
-    I2C_GenerateSTOP( I2C2, ENABLE );//²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
+    I2C_GenerateSTOP( I2C2, ENABLE );//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½
 
     return temp;
 }
@@ -192,10 +194,10 @@ u8 ES8388_Read_Reg(u8 reg)
 /*********************************************************************
  * @fn      ES8388_I2S_Cfg
  *
- * @brief   ÉèÖÃI2S¹¤×÷Ä£Ê½
+ * @brief   ï¿½ï¿½ï¿½ï¿½I2Sï¿½ï¿½ï¿½ï¿½Ä£Ê½
  *
  * @param   fmt - I2S mode
- *            0 - ·ÉÀûÆÖ±ê×¼I2S
+ *            0 - ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½×¼I2S
  *            1 - MSB
  *            2 - LSB
  *            3 - PCM/DSP
@@ -206,24 +208,24 @@ u8 ES8388_Read_Reg(u8 reg)
 void ES8388_I2S_Cfg(u8 fmt, u8 len)
 {
     fmt &= 0X03;
-    len &= 0X07; //ÏÞ¶¨·¶Î§
-    ES8388_Write_Reg(23, (fmt << 1) | (len << 3));	//R23,ES8388¹¤×÷Ä£Ê½ÉèÖÃ
+    len &= 0X07; //ï¿½Þ¶ï¿½ï¿½ï¿½Î§
+    ES8388_Write_Reg(23, (fmt << 1) | (len << 3));	//R23,ES8388ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½
 }
 
 /*********************************************************************
  * @fn      ES8388_Set_Volume
  *
- * @brief   ÉèÖÃÒôÁ¿´óÐ¡£¬ÒôÁ¿ÂýÂýÔö¼Óµ½×î´ó
+ * @brief   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½
  *
- * @param   volume - ÒôÁ¿´óÐ¡(0-33)
- *                      0 ¨C -30dB
- *                      1 ¨C -29dB
- *                      2 ¨C -28dB
- *                      ¡­
- *                      30 ¨C 0dB
- *                      31 ¨C 1dB
- *                      ¡­
- *                      33 ¨C 3dB
+ * @param   volume - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡(0-33)
+ *                      0 ï¿½C -30dB
+ *                      1 ï¿½C -29dB
+ *                      2 ï¿½C -28dB
+ *                      ï¿½ï¿½
+ *                      30 ï¿½C 0dB
+ *                      31 ï¿½C 1dB
+ *                      ï¿½ï¿½
+ *                      33 ï¿½C 3dB
  * @return  none
  */
 void ES8388_Set_Volume(u8 volume)
@@ -238,7 +240,7 @@ void ES8388_Set_Volume(u8 volume)
 /*********************************************************************
  * @fn      ES8388_ADDA_Cfg
  *
- * @brief   ES8388 DAC/ADCÅäÖÃ
+ * @brief   ES8388 DAC/ADCï¿½ï¿½ï¿½ï¿½
  *
  * @param   dacen -
  *            0 - dac enable
@@ -267,8 +269,8 @@ void ES8388_ADDA_Cfg(u8 dacen,u8 adcen)
  * @brief   Initializes the IIC peripheral.
  *
  * @param   out -
- *            0 - Í¨µÀ2Êä³ö
- *            1 - Í¨µÀ1Êä³ö
+ *            0 - Í¨ï¿½ï¿½2ï¿½ï¿½ï¿½
+ *            1 - Í¨ï¿½ï¿½1ï¿½ï¿½ï¿½
  *
  * @return  none
  */
@@ -280,15 +282,15 @@ void ES8388_Output_Cfg(u8 out)
 /*********************************************************************
  * @fn      ES8388_Input_Cfg
  *
- * @brief   ES8388 ADCÊä³öÍ¨µÀÅäÖÃ
+ * @brief   ES8388 ADCï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
  * @param   in -
- *            0-Í¨µÀ1ÊäÈë
- *            1-Í¨µÀ2ÊäÈë
+ *            0-Í¨ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½
+ *            1-Í¨ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½
  *
  * @return  none
  */
 void ES8388_Input_Cfg(u8 in)
 {
-	ES8388_Write_Reg(0x0A,(5*in)<<4);	//ADC1 ÊäÈëÍ¨µÀÑ¡ÔñL/R	INPUT1
+	ES8388_Write_Reg(0x0A,(5*in)<<4);	//ADC1 ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½Ñ¡ï¿½ï¿½L/R	INPUT1
 }
