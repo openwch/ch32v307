@@ -17,8 +17,6 @@ For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 
 u8 MACAddr[6];                                      //MAC address
@@ -58,7 +56,7 @@ void TIM2_Init(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -150,11 +148,11 @@ void WCHNET_DNSCallBack(const char *name, u8 *ipaddr, void *callback_arg)
         printf("DNS Fail\r\n");
         return;
     }
-    printf("Host Name = %s\r\n", name);
-    printf("IP= %d.%d.%d.%d\r\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3]);
+    printf("Host Name: %s\r\n", name);
+    printf("IP: %d.%d.%d.%d\r\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3]);
     if(callback_arg != NULL)
     {
-        printf("callback_arg = %02x\r\n", (*(u8 *)callback_arg));
+        printf("callback_arg: %02x\r\n", (*(u8 *)callback_arg));
     }
     WCHNET_DNSStop();                                                          //stop DNS,and release socket
 }
@@ -180,11 +178,11 @@ u8 WCHNET_DHCPCallBack(u8 status, void *arg)
         memcpy(IPAddr, p, 4);
         memcpy(GWIPAddr, &p[4], 4);
         memcpy(IPMask, &p[8], 4);
-        printf("IPAddr = %d.%d.%d.%d \r\n", (u16)IPAddr[0], (u16)IPAddr[1],
+        printf("IPAddr: %d.%d.%d.%d \r\n", (u16)IPAddr[0], (u16)IPAddr[1],
                (u16)IPAddr[2], (u16)IPAddr[3]);
-        printf("GWIPAddr = %d.%d.%d.%d \r\n", (u16)GWIPAddr[0], (u16)GWIPAddr[1],
+        printf("GWIPAddr: %d.%d.%d.%d \r\n", (u16)GWIPAddr[0], (u16)GWIPAddr[1],
                (u16)GWIPAddr[2], (u16)GWIPAddr[3]);
-        printf("IPAddr = %d.%d.%d.%d \r\n", (u16)IPMask[0], (u16)IPMask[1],
+        printf("IPMask: %d.%d.%d.%d \r\n", (u16)IPMask[0], (u16)IPMask[1],
                (u16)IPMask[2], (u16)IPMask[3]);
         printf("DNS1: %d.%d.%d.%d \r\n", p[12], p[13], p[14], p[15]);            //DNS server address provided by the router
         printf("DNS2: %d.%d.%d.%d \r\n", p[16], p[17], p[18], p[19]);
@@ -215,16 +213,16 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                          //USART initialize
     printf("DNS Test\r\n");	
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-    printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+    printf("net version:%x\n", WCHNET_GetVer());
+    if( WCHNET_LIB_VER != WCHNET_GetVer()){
         printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                         //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
     WCHNET_DHCPSetHostname("WCHNET");                                   //Configure DHCP host name

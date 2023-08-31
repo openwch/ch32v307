@@ -162,7 +162,7 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                         endp_tx_ctrl = USBHSD_UEP_TXCTRL( endp );
                         if( mod == DEF_UEP_DMA_LOAD )
                         {
-                            if( endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1 )
+                            if( (endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1) == 0 )
                             {
                                 /* use UEPn_TX_DMA */
                                 USBHSD_UEP_TXDMA( endp ) = (uint32_t)pbuf;
@@ -175,7 +175,7 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                         }
                         else if( mod == DEF_UEP_CPY_LOAD )
                         {
-                            if( endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1 )
+                            if( (endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1) == 0 )
                             {
                                 /* use UEPn_TX_DMA */
                                 memcpy( USBHSD_UEP_TXBUF( endp ), pbuf, len );
@@ -206,7 +206,6 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                     }
                     else if( mod == DEF_UEP_CPY_LOAD )
                     {
-                        /* if end-point buffer mode is double buffer */
                         memcpy( USBHSD_UEP_TXBUF(endp), pbuf, len );
                     }
                     else
@@ -214,13 +213,11 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                         return NoREADY;
                     }
                 }
-
+                /* Set endpoint busy */
+                USBHS_Endp_Busy[ endp ] |= DEF_UEP_BUSY;
                 /* endpoint n response tx ack */
                 USBHSD_UEP_TLEN( endp ) = len;
                 USBHSD_UEP_TXCTRL( endp ) = ( USBHSD_UEP_TXCTRL( endp ) &= ~USBHS_UEP_T_RES_MASK ) | USBHS_UEP_T_RES_ACK;
-
-                /* Set endpoint busy */
-                USBHS_Endp_Busy[ endp ] |= DEF_UEP_BUSY;
             }
             else
             {
@@ -601,7 +598,7 @@ void USBHS_IRQHandler( void )
                         switch( (uint8_t)( USBHS_SetupReqIndex & 0xFF ) )
                         {
                             case ( DEF_UEP_IN | DEF_UEP1 ):
-                                /* Set End-point 1 OUT ACK */
+                                /* Set End-point 1 OUT NAK */
                                 USBHSD->UEP1_TX_CTRL = USBHS_UEP_T_TOG_DATA0 | USBHS_UEP_T_RES_NAK;
                                 break;
 

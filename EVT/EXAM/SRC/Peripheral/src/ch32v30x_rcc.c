@@ -26,8 +26,8 @@
 #define CTLR_HSEON_Set             ((uint32_t)0x00010000)
 #define CTLR_HSITRIM_Mask          ((uint32_t)0xFFFFFF07)
 
-#define CFGR0_PLL_Mask             ((uint32_t)0xFFC0FFFF) /* 103 */
-#define CFGR0_PLL_Mask_1           ((uint32_t)0xFFC2FFFF) /* 107 */
+#define CFGR0_PLL_Mask             ((uint32_t)0xFFC0FFFF)
+#define CFGR0_PLL_Mask_1           ((uint32_t)0xFFC2FFFF)
 
 #define CFGR0_PLLMull_Mask         ((uint32_t)0x003C0000)
 #define CFGR0_PLLSRC_Mask          ((uint32_t)0x00010000)

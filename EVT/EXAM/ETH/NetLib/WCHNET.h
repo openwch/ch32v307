@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : wchnet.h
  * Author             : WCH
- * Version            : V1.60
- * Date               : 2023/01/09
+ * Version            : V1.80
+ * Date               : 2023/05/12
  * Description        : This file contains the headers of 
 *                    the Ethernet protocol stack library.
 *********************************************************************************
@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x16              //the library version number
+#define WCHNET_LIB_VER                  0x18              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */
@@ -122,13 +122,12 @@ extern "C" {
 #define WCHNET_SIZE_UDP_PCB            0x20               //UDP PCB size
 #define WCHNET_SIZE_TCP_PCB            0xB4               //TCP PCB size
 #define WCHNET_SIZE_TCP_PCB_LISTEN     0x24               //TCP LISTEN PCB size
-#define WCHNET_SIZE_IP_REASSDATA       0x10               //IP reassembled Management
+#define WCHNET_SIZE_IP_REASSDATA       0x20               //IP reassembled Management
 #define WCHNET_SIZE_PBUF               0x10               //Packet Buf
 #define WCHNET_SIZE_TCP_SEG            0x14               //TCP SEG structure
 #define WCHNET_SIZE_MEM                0x08               //sizeof(struct mem)
 #define WCHNET_SIZE_ARP_TABLE          0x18               //sizeof ARP table
 
-#define WCHNET_SIZE_POOL_BUF           WCHNET_MEM_ALIGN_SIZE(WCHNET_TCP_MSS + 40 + 14 + 4)          //pbuf size
 #define WCHNET_MEMP_SIZE               ((WCHNET_MEM_ALIGNMENT - 1) +                                    \
                           (WCHNET_NUM_IPRAW * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_IPRAW_PCB)) +           \
                           (WCHNET_NUM_UDP * WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_UDP_PCB)) +               \
@@ -140,7 +139,7 @@ extern "C" {
                           (WCHNET_NUM_POOL_BUF * (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_PBUF) + WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_POOL_BUF))))
 
 #define HEAP_MEM_ALIGN_SIZE          (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_MEM))
-#define WCHNET_RAM_HEAP_SIZE         (WCHNET_MEM_ALIGN_SIZE(WCHNET_MEM_HEAP_SIZE) + (2 * HEAP_MEM_ALIGN_SIZE) )
+#define WCHNET_RAM_HEAP_SIZE         (WCHNET_MEM_ALIGN_SIZE(WCHNET_MEM_HEAP_SIZE) + HEAP_MEM_ALIGN_SIZE )
 #define WCHNET_RAM_ARP_TABLE_SIZE    (WCHNET_MEM_ALIGN_SIZE(WCHNET_SIZE_ARP_TABLE) * WCHNET_NUM_ARP_TABLE)
 
 typedef struct
@@ -165,11 +164,11 @@ typedef void (*dns_callback)( const char *name, uint8_t *ipaddr, void *callback_
 typedef uint8_t (*dhcp_callback)( uint8_t status, void * );
 
 /* socket receive callback type */
-struct _SCOK_INF;
-typedef void (*pSockRecv)( struct _SCOK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
+struct _SOCK_INF;
+typedef void (*pSockRecv)( struct _SOCK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
 
 /* Socket information struct */
-typedef struct _SCOK_INF
+typedef struct _SOCK_INF
 {
     uint32_t IntStatus;                       //interrupt state
     uint32_t SockIndex;                       //Socket index value
@@ -177,7 +176,7 @@ typedef struct _SCOK_INF
     uint32_t RecvBufLen;                      //Receive buffer length
     uint32_t RecvCurPoint;                    //current pointer to receive buffer
     uint32_t RecvReadPoint;                   //The read pointer of the receive buffer
-    uint32_t RecvRemLen;                      //Remaining length of receive buffer
+    uint32_t RecvRemLen;                      //The length of the remaining data in the receive buffer
     uint32_t ProtoType;                       //protocol type
     uint32_t SockStatus;                      //Low byte Socket state, the next low byte is TCP state, only meaningful in TCP mode
     uint32_t DesPort;                         //destination port
@@ -199,14 +198,18 @@ struct _WCH_CFG
   /* Bit 1 TCP receive replication optimization, used for internal debugging */
   /* bit 2 delete oldest TCP connection 1: enable, 0: disable */
   /* Bits 3-7 Number of PBUFs of IP segments  */
+  /* Bit 8 TCP Delay ACK disable */
   uint32_t MiscConfig1;                       //Miscellaneous Configuration 1
   /* Bits 0-7 Number of Sockets*/
   /* Bits 8-12 Reserved */
-  /* Bit 13 PING enable, 1: On 0: Off  */
+  /* Bit  13 PING enable, 1: On 0: Off  */
   /* Bits 14-18 TCP retransmission times  */
   /* Bits 19-23 TCP retransmission period, in 50 milliseconds  */
-  /* bit 25 send failed retry, 1: enable, 0: disable */
-  /* Bits 26-31 Reserved */
+  /* bit  25 send failed retry, 1: enable, 0: disable */
+  /* bit  26 Select whether to perform IPv4 checksum check on
+   *         the TCP/UDP/ICMP header of the received frame payload by hardware,
+   *         and calculate and insert the checksum of the IP header and payload of the sent frame by hardware.*/
+  /* Bits 27-31 period (in 250 milliseconds) of Fine DHCP periodic process */
   led_callback led_link;                      //PHY Link Status Indicator
   led_callback led_data;                      //Ethernet communication indicator
   eth_tx_set net_send;                        //Ethernet send

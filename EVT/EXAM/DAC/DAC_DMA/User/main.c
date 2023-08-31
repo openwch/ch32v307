@@ -71,7 +71,7 @@ void DAC1_DMA_Init(void)
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 
     DMA_StructInit( &DMA_InitStructure);
-    /* Note:DAC1--->DMA1.CH3   DAC2--->DMA1.CH4 */
+    /* Note:DAC1--->DMA2.CH3   DAC2--->DMA2.CH4 */
     DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&(DAC->R12BDHR1);
     DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&dacbuff16bit;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;

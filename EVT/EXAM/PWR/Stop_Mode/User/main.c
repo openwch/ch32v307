@@ -81,6 +81,7 @@ int main(void)
     printf("Stop Mode Test\r\n");
     EXTI0_INT_INIT();
 
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
     printf("\r\n ********** \r\n");
     PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
     printf("\r\n ########## \r\n");

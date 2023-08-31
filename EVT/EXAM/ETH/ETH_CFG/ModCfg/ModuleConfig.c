@@ -117,7 +117,7 @@ u8 ParseConfigbuf(u8 *buf)
             net->len += strlen((char*)&net->dat[net->len + 1]) + 1;
             len = sizeof(net_comm);
             WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("CMD_SEARCH********************\n");
+            printf("**********CMD_SEARCH**********\n");
             return 0;
 
         case NET_MODULE_CMD_SET :                                                //Configure module parameters
@@ -132,7 +132,7 @@ u8 ParseConfigbuf(u8 *buf)
             CFG_WRITE(PAGE_WRITE_START_ADDR,Configbuf,MODULE_CFG_LEN );
             len = sizeof(net_comm);
             WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("CMD_SET***********************\n");
+            printf("**********CMD_SET*************\n");
             return 1;
 
         case NET_MODULE_CMD_GET :                                                //Get module configuration
@@ -146,7 +146,7 @@ u8 ParseConfigbuf(u8 *buf)
             memcpy(net->dat,Configbuf,(MODULE_CFG_LEN-2))  ;
             len = sizeof(net_comm);
             WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("CMD_GET***********************\n");
+            printf("************CMD_GET***********\n");
             return 0;
          
         case NET_MODULE_CMD_RESET :                                              //reset module
@@ -156,7 +156,7 @@ u8 ParseConfigbuf(u8 *buf)
             CFG_WRITE(PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN );
             net->cmd = NET_MODULE_ACK_RESET ;
             len = sizeof(net_comm);
-            printf("CMD_RESET*********************\n");
+            printf("**********CMD_RESET***********\n");
             return 1;
         default:
             return 0 ;

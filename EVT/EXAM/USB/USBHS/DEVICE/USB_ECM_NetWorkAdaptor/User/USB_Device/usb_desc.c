@@ -180,7 +180,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x0D,                           /* bLength */
     0x24,                           /* bDescriptorType: CS_INTERFACE */
     0x0F,                           /* bDescriptorSubType */
-    0x03,                           /* iMACAddress: 字符串描述符索引,ECM/NCM通过序列号描述符上报MAC地址 */
+    0x04,                           /* iMACAddress: 字符串描述符索引,ECM/NCM通过序列号描述符上报MAC地址 */
     0x00,                           /* bmEthernetStatistics: 设备不支持GetEthernetStatistic请求 */
     0x00,
     0x00,
@@ -234,7 +234,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x05,                           /* bDescriptorType */
     0x03,                           /* bEndpointAddress */
     0x02,                           /* bmAttributes */
-    (uint8_t)DEF_USB_EP2_FS_SIZE, (uint8_t)( DEF_USB_EP2_FS_SIZE >> 8 ), /* wMaxPacketSize 512 */
+    (uint8_t)DEF_USB_EP3_FS_SIZE, (uint8_t)( DEF_USB_EP2_FS_SIZE >> 8 ), /* wMaxPacketSize 512 */
     0x00,
 };
 

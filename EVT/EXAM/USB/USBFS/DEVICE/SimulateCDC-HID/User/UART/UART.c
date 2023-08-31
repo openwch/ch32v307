@@ -436,7 +436,7 @@ void UART2_DataRx_Deal( void )
         {
             /* Overflow handling */
             /* Save frame error status */
-            DUG_PRINTF("U0_O:%08lx\n",(uint32_t)Uart.Rx_RemainLen);
+            printf("U0_O:%08lx\n",(uint32_t)Uart.Rx_RemainLen);
         }
         else
         {
@@ -480,11 +480,7 @@ void UART2_DataRx_Deal( void )
                 NVIC_DisableIRQ( OTG_FS_IRQn );
                 Uart.USB_Up_IngFlag = 0x01;
                 Uart.USB_Up_TimeOut = 0x00;
-                USBOTG_FS->UEP3_DMA = (uint32_t)(uint8_t *)&UART2_Rx_Buf[ Uart.Rx_DealPtr ];
-                USBOTG_FS->UEP3_TX_LEN = packlen;
-                USBOTG_FS->UEP3_TX_CTRL &= ~USBFS_UEP_T_RES_MASK;
-                USBOTG_FS->UEP3_TX_CTRL |= USBFS_UEP_T_RES_ACK;
-
+                USBFS_Endp_DataUp( DEF_UEP3, (uint8_t *)&UART2_Rx_Buf[ Uart.Rx_DealPtr ], packlen, DEF_UEP_CPY_LOAD );
                 /* Calculate the variables of interest */
                 Uart.Rx_RemainLen -= packlen;
                 Uart.Rx_DealPtr += packlen;
@@ -498,7 +494,6 @@ void UART2_DataRx_Deal( void )
                 {
                     Uart.USB_Up_Pack0_Flag = 0x01;
                 }
-
                 NVIC_EnableIRQ( OTG_FS_IRQn );
             }
         }

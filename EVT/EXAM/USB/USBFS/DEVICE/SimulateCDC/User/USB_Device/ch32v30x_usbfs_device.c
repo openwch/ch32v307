@@ -95,7 +95,7 @@ void USBFS_Device_Endp_Init( void )
 
     USBOTG_FS->UEP1_DMA = (uint32_t)USBFS_EP1_Buf;
     USBOTG_FS->UEP2_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
-    USBOTG_FS->UEP3_DMA = (uint32_t)(uint8_t *)&UART2_Rx_Buf[ 0 ];
+    USBOTG_FS->UEP3_DMA = (uint32_t)USBFS_EP3_Buf;
 
     USBOTG_FS->UEP0_RX_CTRL = USBFS_UEP_R_RES_ACK;
     USBOTG_FS->UEP2_RX_CTRL = USBFS_UEP_R_RES_ACK;
@@ -221,12 +221,12 @@ uint8_t USBFS_Endp_DataUp(uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod
                 {
                     memcpy( USBFSD_UEP_BUF(endp)+buf_load_offset, pbuf, len );
                 }
+                /* Set end-point busy */
+                USBFS_Endp_Busy[ endp ] = 0x01;
                 /* tx length */
                 USBFSD_UEP_TLEN(endp) = len;
                 /* response ack */
                 USBFSD_UEP_TX_CTRL(endp) = (USBFSD_UEP_TX_CTRL(endp) & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_ACK;
-                /* Set end-point busy */
-                USBFS_Endp_Busy[ endp ] = 0x01;
             }
         }
         else

@@ -21,7 +21,6 @@ extern "C" {
 #include "string.h"
 #include "debug.h"
 #include "string.h"
-#include "PRINTF.h"
 #include "ch32v30x_usbfs_device.h"
 #include "ch32v30x_conf.h"
 

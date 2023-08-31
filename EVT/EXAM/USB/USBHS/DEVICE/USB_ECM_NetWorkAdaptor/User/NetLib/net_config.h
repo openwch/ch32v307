@@ -20,9 +20,9 @@ extern "C" {
 /*********************************************************************
  * MAC queue configuration
  */
-#define ETH_TXBUFNB                   8     /* Number of descriptors sent by the MAC  */
+#define ETH_TXBUFNB                   24     /* Number of descriptors sent by the MAC  */
 
-#define ETH_RXBUFNB                   16    /* Number of MAC received descriptors  */
+#define ETH_RXBUFNB                   36     /* Number of MAC received descriptors  */
 
 #ifndef ETH_MAX_PACKET_SIZE
 #define ETH_RX_BUF_SZE                1520  /* MAC receive buffer length, an integer multiple of 4 */

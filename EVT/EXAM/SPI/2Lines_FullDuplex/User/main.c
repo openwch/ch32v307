@@ -21,8 +21,8 @@
  Note: The two boards download the Master and Slave programs respectively,
  and power on at the same time.
      Hardware connection:PA5 -- PA5
-               PA6 -- PA7
-               PA7 -- PA6
+               PA6 -- PA6
+               PA7 -- PA7
 
 */
 

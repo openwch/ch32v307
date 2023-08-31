@@ -39,7 +39,7 @@ extern u8 End_Flag;
 void IAP_2_APP(void)
 {
     USBHS_Device_Init( DISABLE );
-    NVIC_EnableIRQ( USBHS_IRQn );
+    NVIC_DisableIRQ( USBHS_IRQn );
     USBHSD->HOST_CTRL=0x00;
     USBHSD->CONTROL=0x00;
     USBHSD->INT_EN=0x00;
@@ -47,9 +47,20 @@ void IAP_2_APP(void)
     USBHSD->CONTROL&=~USBHS_DEV_PU_EN;
     USBHSD->CONTROL|=USBHS_ALL_CLR|USBHS_FORCE_RST;
     USBHSD->CONTROL=0x00;
+    USBOTG_FS->BASE_CTRL=0x06;
+    USBOTG_FS->INT_EN=0x00;
     Delay_Ms(50);
     printf("jump APP\r\n");
+    GPIO_DeInit(GPIOA);
+    GPIO_DeInit( GPIOB);
+    USART_DeInit(USART3);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, DISABLE);
+    RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB,DISABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,DISABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USBHS, DISABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, DISABLE);
     Delay_Ms(10);
+    NVIC_DisableIRQ(OTG_FS_IRQn);
     NVIC_EnableIRQ(Software_IRQn);
     NVIC_SetPendingIRQ(Software_IRQn);
 }

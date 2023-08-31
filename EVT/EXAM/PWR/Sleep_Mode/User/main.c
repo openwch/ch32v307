@@ -83,6 +83,10 @@ int main(void)
     EXTI0_INT_INIT();
 
     printf("\r\n ********** \r\n");
+    if(((RCC->CFGR0 & RCC_SWS)==0x04)||((RCC->CFGR0 & RCC_PLLSRC) == RCC_PLLSRC))
+    {
+        RCC_HSICmd(DISABLE);
+    }
     __WFI();
     printf("\r\n ########## \r\n");
 

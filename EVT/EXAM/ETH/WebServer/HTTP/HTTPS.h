@@ -24,40 +24,42 @@
 #define BASIC_CFG_ADDR            ((uint32_t)0x0803FC00)
 #define PORT_CFG_ADDR             ((uint32_t)0x0803FD00)
 #define LOGIN_CFG_ADDR            ((uint32_t)0x0803FE00)
-#define BASIC_CFG_LEN             40
-#define PORT_CFG_LEN              40
-#define LOGIN_CFG_LEN             40
+#define BASIC_CFG_LEN             (sizeof(Basic_Cfg_t))
+#define PORT_CFG_LEN              (sizeof(Port_Cfg_t))
+#define LOGIN_CFG_LEN             (sizeof(Login_Cfg_t))
 
 
-#define MAX_URL_SIZE              128
+#define MAX_URL_SIZE              32
 #define HTTP_SERVER_PORT          80
 
-/* HTTP请求方法 */
+/* HTTP request method*/
 #define	METHOD_ERR		          0
 #define	METHOD_GET		          1
 #define	METHOD_HEAD		          2
 #define	METHOD_POST		          3
 
-/* HTTP请求类型 */
+/* HTTP request URL */
 #define	PTYPE_ERR		          0
 #define	PTYPE_HTML	              1
 #define	PTYPE_PNG		          2
 #define	PTYPE_CSS		          3
 #define PTYPE_GIF                 4
 
-/*WCHNET网页通信协议定义*/
+/*WCHNET communication Mode*/
 #define MODE_TCPSERVER            0
 #define MODE_TCPCLIENT            1
 
 /* HTML Doc. for ERROR */
-#define RES_HTMLHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"      //HTML type response message, the last two \r\n must have
+#define RES_HTMLHEAD_OK "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length:"
 
-#define RES_PNGHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: image/png\r\n\r\n"      //PNG type response message, the last two \r\n must have
+#define RES_PNGHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length:"
   
-#define RES_CSSHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n"       //CSS type response message, the last two \r\n must have
+#define RES_CSSHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nContent-Length:"
 
-#define RES_GIFHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\n\r\n"      //GIF type response message, the last two \r\n must have
- /*-----------------*/
+#define RES_GIFHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\nContent-Length:"
+
+#define RES_END "\r\n\r\n"
+
 
 typedef struct Basic_Cfg                        //Basic configuration parameters
 {
@@ -66,25 +68,25 @@ typedef struct Basic_Cfg                        //Basic configuration parameters
 	u8 ip[4];
 	u8 mask[4];
 	u8 gateway[4];
-} *Basic_Cfg;
+} Basic_Cfg_t;
 
 
-typedef struct Port_Cfg                         //Port configuration parameters
+typedef struct Port_Cfg                          //Port configuration parameters
 {
     u8 flag[2];                                 //Configuration information verification code: 0x57,0xab
     u8 mode;
     u8 src_port[2];
     u8 des_ip[4];
     u8 des_port[2];
-} *Port_Cfg;
+} Port_Cfg_t;
 
 
-typedef struct Login_Cfg                        //Login configuration parameters
+typedef struct Login_Cfg                         //Login configuration parameters
 {
     u8  flag[2];                                //Configuration information verification code: 0x57,0xab
     u8  user[10];
     u8  pass[10];
-} *Login_Cfg;
+} Login_Cfg_t;
 
 
 typedef struct _st_http_request                 //Browser request information
@@ -97,22 +99,16 @@ typedef struct _st_http_request                 //Browser request information
 typedef struct Para_Tab                         //Configuration information parameter table
 {
 	char *para;                                 //Configuration item name
-	char value[20];                             //Configuration item value
+	char value[30];                             //Configuration item value
 }Parameter;
 
-extern Basic_Cfg Basic_CfgBuf;
+extern Basic_Cfg_t Basic_CfgBuf;
 
-extern Login_Cfg Login_CfgBuf;
+extern Login_Cfg_t Login_CfgBuf;
 
-extern Port_Cfg  Port_CfgBuf;
+extern Port_Cfg_t  Port_CfgBuf;
 
-extern st_http_request *http_request;
-
-extern u8 basicbuf[BASIC_CFG_LEN];
-
-extern u8 portbuf[PORT_CFG_LEN];
-
-extern u8 loginbuf[LOGIN_CFG_LEN];
+extern st_http_request http_request;
 
 extern u8 Basic_Default[BASIC_CFG_LEN];
 
@@ -122,9 +118,7 @@ extern u8 Port_Default[PORT_CFG_LEN];
 
 extern u8 httpweb[200] ;
 
-extern u8 RecvBuffer[];
-
-extern u8 DealDataFlag;
+extern u8 HTTPDataBuffer[];
 
 extern u8 socket;
 
@@ -132,7 +126,7 @@ extern void ParseHttpRequest(st_http_request *, char *);
 
 extern void ParseURLType(char *, char *);
 
-extern void MakeHttpResponse(unsigned char *, char);			
+void MakeHttpResponse(u8 *buf, char type, u32 len );
 
 extern char *GetURLName(char* url);
 

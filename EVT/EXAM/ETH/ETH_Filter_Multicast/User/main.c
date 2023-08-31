@@ -17,17 +17,15 @@ please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT
  */
 
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "net_filter.h"
 
-#define UDP_RECE_BUF_LEN                1472
+#define UDP_RECE_BUF_LEN                                    1472
 u8 MACAddr[6];                                              //MAC address
-u8 IPAddr[4] = { 192, 168, 1, 10 };                         //IP address
-u8 GWIPAddr[4] = { 192, 168, 1, 1 };                        //Gateway IP address
-u8 IPMask[4] = { 255, 255, 255, 0 };                        //subnet mask
-u8 DESIP[4] = { 192, 168, 1, 100 };                         //destination IP address
+u8 IPAddr[4] = {192, 168, 1, 10};                           //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                          //Gateway IP address
+u8 IPMask[4] = {255, 255, 255, 0};                          //subnet mask
+u8 DESIP[4] = {192, 168, 1, 100};                           //destination IP address
 u16 desport = 1000;                                         //destination port
 u16 srcport = 1000;                                         //source port
 
@@ -38,7 +36,7 @@ u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][UDP_RECE_BUF_LEN];  //socket receive buf
 u8 MyBuf[UDP_RECE_BUF_LEN];
 
 u8 MulticastData[10] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
-u8 MulticastIPAddr[4] = { 224, 1, 1, 10 };                //Multicast IP address
+u8 MulticastIPAddr[4] = {224, 1, 1, 10};                    //Multicast IP address
 
 u8 UnicastMac0[6] = {0x38,0x3b,0x26,0x62,0x79,0x01};
 u8 UnicastMac1[6] = {0x38,0x3b,0x26,0x62,0x79,0x02};
@@ -74,7 +72,7 @@ void TIM2_Init(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -170,6 +168,7 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
     if (intstat & SINT_STAT_RECV)                             //receive data
     {
         WCHNET_DataLoopback(socketid);                        //Data loopback
+        printf("Received data... ");
     }
     if (intstat & SINT_STAT_CONNECT)                          //connect successfully
     {
@@ -240,7 +239,12 @@ void WCHNET_FilterCfg( void )
 {
     uint8_t RegIndex;
 
+    /* clear filter configuration in eth_driver.c */
+    ETH->MACA0LR = 0xffffffff;
+
 #if DES_ADDR_FILTER                 /* destination MAC address filtering */
+    /* The following are the configuration
+     * options for destination MAC address filtering */
 #if UNICAST_PERFECT_FILTER          /* Unicast Perfect Filtering */
     RegIndex = ETH_PerfectFilter(MACAddr);
     printf("MAC address register index: %d\r\n", RegIndex);
@@ -325,9 +329,9 @@ int main(void)
     USART_Printf_Init(115200);                                 //USART initialize
     printf("Filter and Multicast Test\r\n");
     printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n", WCHNET_GetVer());
-    if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
+    if (WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                //get the chip MAC address
@@ -338,7 +342,7 @@ int main(void)
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);        //Ethernet library initialize
     mStopIfError(i);
-    WCHNET_FilterCfg( );                                        //Configure filtering
+    WCHNET_FilterCfg( );                                       //Configure filtering
     if (i == WCHNET_ERR_SUCCESS)
         printf("WCHNET_LibInit Success\r\n");
     for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)

@@ -53,9 +53,9 @@ address assignment£º
 
 typedef struct
 {
-    u8  iapFileFlag[8];                  //8-byte IAP flag, fixed as "WCHNET", the extra space is 0
+    u8  iapFileFlag[8];                  //8 bytes IAP flag, fixed as "WCHNET", the extra space is 0
     u32 iapFileLen;                      //4 bytes IAP file length, which is bin file length + 512 bytes
-    u32 iapFileCheckSum;                 //4-byte checksum
+    u32 iapFileCheckSum;                 //4 bytes checksum
 }iapFileHeader;
 
 typedef struct{

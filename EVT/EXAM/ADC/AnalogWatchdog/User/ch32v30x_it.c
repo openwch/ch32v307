@@ -50,7 +50,7 @@ void HardFault_Handler(void)
 void ADC1_2_IRQHandler(void)
 {
 	if(ADC_GetITStatus( ADC1, ADC_IT_AWD)){
-#if 0
+#if 1
 		printf( "Enter AnalogWatchdog Interrupt\r\n" );
 #endif
 	}

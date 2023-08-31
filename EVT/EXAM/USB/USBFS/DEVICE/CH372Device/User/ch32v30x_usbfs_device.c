@@ -235,12 +235,12 @@ uint8_t USBFS_Endp_DataUp(uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod
                 {
                     memcpy( USBFSD_UEP_BUF(endp)+buf_load_offset, pbuf, len );
                 }
+                /* Set end-point busy */
+                USBFS_Endp_Busy[ endp ] = 0x01;                
                 /* tx length */
                 USBFSD_UEP_TLEN(endp) = len;
                 /* response ack */
                 USBFSD_UEP_TX_CTRL(endp) = (USBFSD_UEP_TX_CTRL(endp) & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_ACK;
-                /* Set end-point busy */
-                USBFS_Endp_Busy[ endp ] = 0x01;
             }
         }
         else

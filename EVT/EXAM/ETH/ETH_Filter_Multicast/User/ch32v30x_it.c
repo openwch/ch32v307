@@ -9,8 +9,6 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-
-#include <wchnet.h>
 #include "eth_driver.h"
 #include "ch32v30x_it.h"
 
@@ -19,7 +17,6 @@ void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void)  __attribute__((interrupt("WCH-Interrupt-fast")));
 void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
-
 uint8_t TimeCnt = 0;
 uint8_t SendFlag = 0;
 /*********************************************************************
@@ -59,7 +56,7 @@ void HardFault_Handler(void)
  */
 void EXTI9_5_IRQHandler(void)
 {
-    // ETH_PHYLink( );
+    ETH_PHYLink( );
     EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 /*********************************************************************

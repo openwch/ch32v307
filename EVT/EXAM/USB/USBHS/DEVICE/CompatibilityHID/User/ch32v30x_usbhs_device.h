@@ -89,7 +89,7 @@ typedef struct __attribute__((packed)) _RING_BUFF_COMM
     volatile uint8_t  RemainPack;
     volatile uint8_t  StopFlag;
     volatile uint16_t PackLen[DEF_Ring_Buffer_Max_Blks];
-} RING_BUFF_COMM, pRING_BUFF_COMM;
+} RING_BUFF_COMM, *pRING_BUFF_COMM;
 
 /* Ringbuffer variables */
 extern RING_BUFF_COMM  RingBuffer_Comm;

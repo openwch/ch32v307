@@ -67,7 +67,7 @@ typedef struct __PACKED _RING_BUFF_COMM
     volatile uint8_t RemainPack;
     volatile uint8_t PackLen[DEF_Ring_Buffer_Max_Blks];
     volatile uint8_t StopFlag;
-} RING_BUFF_COMM, pRING_BUFF_COMM;
+} RING_BUFF_COMM, *pRING_BUFF_COMM;
 
 /* Setup Request Packets */
 #define pUSBFS_SetupReqPak                 ((PUSB_SETUP_REQ)USBFS_EP0_Buf)
