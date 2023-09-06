@@ -45,11 +45,11 @@
 
 /* SDIO clock */
 #define SDIO_INIT_CLK_DIV        0xB2
-#define SDIO_TRANSFER_CLK_DIV    0x00
+#define SDIO_TRANSFER_CLK_DIV    0x00  //If communication is abnormal, it is recommended to increase this value.
 
 /* SDIO work mode */
-#define SD_POLLING_MODE     0
-#define SD_DMA_MODE         1
+#define SD_POLLING_MODE     0  //If there are problems with reading and writing, it is recommended to add SDIO_TRANSFER_CLK_DIV settings.
+#define SD_DMA_MODE         1  //If there are problems with reading and writing, it is recommended to add SDIO_TRANSFER_CLK_DIV settings.
 
 /*SDIO Err define */
 typedef enum

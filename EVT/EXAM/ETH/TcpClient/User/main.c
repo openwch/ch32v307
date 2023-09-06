@@ -16,19 +16,16 @@ to the server and receives data and then sends it back.
 For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  */
-
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 
 #define KEEPALIVE_ENABLE         1                          //Enable keep alive function
 
 u8 MACAddr[6];                                              //MAC address
-u8 IPAddr[4] = { 192, 168, 1, 10 };                         //IP address
-u8 GWIPAddr[4] = { 192, 168, 1, 1 };                        //Gateway IP address
-u8 IPMask[4] = { 255, 255, 255, 0 };                        //subnet mask
-u8 DESIP[4] = { 192, 168, 1, 100 };                         //destination IP address
+u8 IPAddr[4] = {192, 168, 1, 10};                           //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                          //Gateway IP address
+u8 IPMask[4] = {255, 255, 255, 0};                          //subnet mask
+u8 DESIP[4] = {192, 168, 1, 100};                           //destination IP address
 u16 desport = 1000;                                         //destination port
 u16 srcport = 1000;                                         //source port
 
@@ -66,7 +63,7 @@ void TIM2_Init(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -97,7 +94,7 @@ void WCHNET_CreateTcpSocket(void)
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
-    printf("WCHNET_SocketCreat %d\r\n", SocketId);
+    printf("SocketId %d\r\n", SocketId);
     mStopIfError(i);
     i = WCHNET_SocketConnect(SocketId);                        //make a TCP connection
     mStopIfError(i);
@@ -131,16 +128,18 @@ void WCHNET_DataLoopback(u8 id)
     }
 #else
     u32 len, totallen;
-    u8 *p = MyBuf;
+    u8 *p = MyBuf, TransCnt = 255;
 
     len = WCHNET_SocketRecvLen(id, NULL);                                //query length
-    WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
+    printf("Receive Len = %d\r\n", len);
     totallen = len;
+    WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
     while(1){
         len = totallen;
         WCHNET_SocketSend(id, p, &len);                                  //Send the data
         totallen -= len;                                                 //Subtract the sent length from the total length
         p += len;                                                        //offset buffer pointer
+        if( !--TransCnt )  break;                                        //Timeout exit
         if(totallen) continue;                                           //If the data is not sent, continue to send
         break;                                                           //After sending, exit
     }
@@ -161,18 +160,18 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
 {
     u8 i;
 
-    if (intstat & SINT_STAT_RECV)                              //receive data
+    if (intstat & SINT_STAT_RECV)                               //receive data
     {
-        WCHNET_DataLoopback(socketid);                         //Data loopback
+        WCHNET_DataLoopback(socketid);                          //Data loopback
     }
-    if (intstat & SINT_STAT_CONNECT)                           //connect successfully
+    if (intstat & SINT_STAT_CONNECT)                            //connect successfully
     {
 #if KEEPALIVE_ENABLE
         WCHNET_SocketSetKeepLive(socketid, ENABLE);
 #endif
         WCHNET_ModifyRecvBuf(socketid, (u32) SocketRecvBuf[socketid], RECE_BUF_LEN);
         for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {
-            if (socket[i] == 0xff) {                           //save connected socket id
+            if (socket[i] == 0xff) {                            //save connected socket id
                 socket[i] = socketid;
                 break;
             }
@@ -190,9 +189,9 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
         }
         printf("TCP Disconnect\r\n");
     }
-    if (intstat & SINT_STAT_TIM_OUT)                             //timeout disconnect
+    if (intstat & SINT_STAT_TIM_OUT)                            //timeout disconnect
     {
-        for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {            //delete disconnected socket id
+        for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {           //delete disconnected socket id
             if (socket[i] == socketid) {
                 socket[i] = 0xff;
                 break;
@@ -216,22 +215,22 @@ void WCHNET_HandleGlobalInt(void)
     u16 i;
     u8 socketint;
 
-    intstat = WCHNET_GetGlobalInt();                              //get global interrupt flag
-    if (intstat & GINT_STAT_UNREACH)                              //Unreachable interrupt
+    intstat = WCHNET_GetGlobalInt();                            //get global interrupt flag
+    if (intstat & GINT_STAT_UNREACH)                            //Unreachable interrupt
     {
         printf("GINT_STAT_UNREACH\r\n");
     }
-    if (intstat & GINT_STAT_IP_CONFLI)                            //IP conflict
+    if (intstat & GINT_STAT_IP_CONFLI)                          //IP conflict
     {
         printf("GINT_STAT_IP_CONFLI\r\n");
     }
-    if (intstat & GINT_STAT_PHY_CHANGE)                           //PHY status change
+    if (intstat & GINT_STAT_PHY_CHANGE)                         //PHY status change
     {
         i = WCHNET_GetPHYStatus();
         if (i & PHY_Linked_Status)
             printf("PHY Link Success\r\n");
     }
-    if (intstat & GINT_STAT_SOCKET) {                             //socket related interrupt
+    if (intstat & GINT_STAT_SOCKET) {                           //socket related interrupt
         for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++) {
             socketint = WCHNET_GetSocketInt(i);
             if (socketint)
@@ -253,25 +252,25 @@ int main(void)
 
     SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);                                   //USART initialize
-    printf("TcpClient Test\r\n");   	
+    USART_Printf_Init(115200);                                  //USART initialize
+    printf("TCPClient Test\r\n");
     printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n", WCHNET_GetVer());
-    if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
+    if (WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");
     }
-    WCHNET_GetMacAddr(MACAddr);                                  //get the chip MAC address
+    WCHNET_GetMacAddr(MACAddr);                                 //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+    for(i = 0; i < 6; i++)
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
-    i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);          //Ethernet library initialize
+    i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);         //Ethernet library initialize
     mStopIfError(i);
     if (i == WCHNET_ERR_SUCCESS)
         printf("WCHNET_LibInit Success\r\n");
-#if KEEPALIVE_ENABLE                                             //Configure keep alive parameters
+#if KEEPALIVE_ENABLE                                            //Configure keep alive parameters
     {
         struct _KEEP_CFG cfg;
 
@@ -283,7 +282,7 @@ int main(void)
 #endif
     memset(socket, 0xff, WCHNET_MAX_SOCKET_NUM);
     for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
-        WCHNET_CreateTcpSocket();                                //Create TCP Socket
+        WCHNET_CreateTcpSocket();                               //Create TCP Socket
 
     while(1)
     {

@@ -13,7 +13,9 @@
 /*
  * @note
  * Based on CH32V307 to implement 8 serial port network server
- * The default baud rate is 1000000
+ * The default baud rate is 921600
+ *
+ * note:Due to pin multiplexing, this example only supports 10M networks.
  *
  * The network is in TCP client mode, the destination IP address is 192.168.1.100,
  * and the destination port number is 1000
@@ -30,7 +32,6 @@
  * please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
  * */
 #include "string.h"
-#include "debug.h"
 #include "eth_driver.h"
 #include "bsp_uart.h"
 
@@ -44,11 +45,11 @@
 uint8_t SocketId[SOCKET_NUM];
 uint8_t SocketRecvBuf[WCHNET_NUM_TCP][RECE_BUF_LEN];
 
-uint8_t MACAddr[6]  = {0x02,0x03,0x04,0x05,0x06,0x17};
-uint8_t IPAddr[4]   = {192,168,1,10};
-uint8_t GWIPAddr[4] = {192,168,1,1};
-uint8_t IPMask[4]   = {255,255,255,0};
-uint8_t DESIP[4]    = {192,168,1,100};
+uint8_t MACAddr[6];
+uint8_t IPAddr[4]   = {192, 168, 1, 10};
+uint8_t GWIPAddr[4] = {192, 168, 1, 1};
+uint8_t IPMask[4]   = {255, 255, 255, 0};
+uint8_t DESIP[4]    = {192, 168, 1, 100};
 uint16_t desport = 1000;
 uint16_t srcport = 1000;
 volatile uint8_t tcp_connect_num = 0;
@@ -64,7 +65,7 @@ volatile uint8_t tcp_connect_num = 0;
 void mStopIfError(u8 iError)
 {
     if (iError == WCHNET_ERR_SUCCESS) return;
-    PRINT("Error: %02X\r\n", (u16)iError);
+    PRINT("Error: %02x\r\n", (u16)iError);
 }
 
 /*********************************************************************
@@ -80,7 +81,7 @@ void TIM2_Init( void )
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -120,6 +121,54 @@ void WCHNET_CreateTcpSocket(uint8_t *socket_revbuf)
 }
 
 /*********************************************************************
+ * @fn      ETHRx
+ *
+ * @brief   ETH receive data and save it to buff.
+ *
+ * @param   socketid - socket id.
+ *
+ * @return  none
+ */
+void ETHRx(u8 socketid)
+{
+    u32 len;
+    int8_t receive_state = -1;
+
+    len = WCHNET_SocketRecvLen(socketid, NULL);                               /* query length */
+#ifdef CH32V307_DEBUG
+    if(socketid == 0)
+    {
+        WCHNET_SocketRecv(socketid, NULL, &len);
+        return;
+    }
+#endif
+    if(len > ETH_RECEIVE_SIZE){
+        len = ETH_RECEIVE_SIZE;
+    }
+
+    if( uart_data_t[socketid].tx_remainBuffNum > 0)
+    {
+        /* socket receive */
+        receive_state = WCHNET_SocketRecv(socketid, uart_data_t[socketid].TX_buffer[uart_data_t[socketid].tx_write], &len);
+        if(receive_state == WCHNET_ERR_SUCCESS)
+        {
+            uart_data_t[socketid].TX_data_length[uart_data_t[socketid].tx_write] = len;
+
+            uart_data_t[socketid].tx_write++;
+            /* Prevent access from out-of-bounds */
+            uart_data_t[socketid].tx_write = (uart_data_t[socketid].tx_write)%UART_TX_BUF_NUM;
+
+            uart_data_t[socketid].tx_remainBuffNum--;
+        }
+    }
+    else
+    {
+        PRINT("eth receive buff busy\n");
+    }
+    uartTx();
+}
+
+/*********************************************************************
  * @fn      WCHNET_HandleSockInt
  *
  * @brief   Socket Interrupt Handle
@@ -137,26 +186,7 @@ void WCHNET_HandleSockInt(uint8_t socketid,uint8_t intstat)
 
     if(intstat & SINT_STAT_RECV)                                               /* socket receive */
     {
-        len = WCHNET_SocketRecvLen(socketid,NULL);                               /* query length */
-        if(len > ETH_RECEIVE_SIZE){
-            len = ETH_RECEIVE_SIZE;
-        }
-        if( (uart_data_t[socketid].tx_write - uart_data_t[socketid].tx_read) < UART_TX_BUF_NUM )
-        {
-        	write_buf = (uart_data_t[socketid].tx_write)%UART_TX_BUF_NUM;
-        	/* socket receive */
-        	receive_state = WCHNET_SocketRecv(socketid,uart_data_t[socketid].TX_buffer[write_buf],&len);
-        	if(receive_state == 0)
-        	{
-        		uart_data_t[socketid].TX_data_length[write_buf] = len;
-
-        		uart_data_t[socketid].tx_write++;
-        	}
-        }
-        else
-        {
-        	PRINT("eth %d receive buff busy\n",socketid);
-		}
+        ETHRx(socketid);
     }
     if(intstat & SINT_STAT_CONNECT)                         /* TCP connect */
     {
@@ -219,13 +249,13 @@ void WCHNET_HandleGlobalInt(void)
 }
 
 /*********************************************************************
- * @fn      uart_tx
+ * @fn      uartTx
  *
  * @brief   send data from TX_buffer by uart tx dma
  *
  * @return  none
  */
-void uart_tx(void)
+void uartTx(void)
 {
 	uint16_t read_buf = 0;
 
@@ -235,9 +265,9 @@ void uart_tx(void)
 		if(uart_data_t[i].uart_tx_dma_state == IDEL)
 		{
 			/* eth has received data  */
-			if(uart_data_t[i].tx_read != uart_data_t[i].tx_write)
+		    if(uart_data_t[i].tx_remainBuffNum < UART_TX_BUF_NUM)
 			{
-				read_buf = (uart_data_t[i].tx_read)%UART_TX_BUF_NUM;
+				read_buf = uart_data_t[i].tx_read;
 				switch(i)
 				{
 #ifndef CH32V307_DEBUG
@@ -254,7 +284,7 @@ void uart_tx(void)
 
 						/* enable uart tx dma */
 						DMA_Cmd(DMA1_Channel4,ENABLE);
-					break;
+						break;
 #endif
 					/*uart2*/
 					case 1:
@@ -262,7 +292,7 @@ void uart_tx(void)
 						DMA1_Channel7->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA1_Channel7,ENABLE);
-					break;
+						break;
 
 					/*uart3*/
 					case 2:
@@ -270,7 +300,7 @@ void uart_tx(void)
 						DMA1_Channel2->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA1_Channel2,ENABLE);
-					break;
+						break;
 
 					/*uart4*/
 					case 3:
@@ -278,7 +308,7 @@ void uart_tx(void)
 						DMA2_Channel5->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA2_Channel5,ENABLE);
-					break;
+						break;
 
 					/*uart5*/
 					case 4:
@@ -286,7 +316,7 @@ void uart_tx(void)
 						DMA2_Channel4->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA2_Channel4,ENABLE);
-					break;
+						break;
 
 					/*uart6*/
 					case 5:
@@ -294,7 +324,7 @@ void uart_tx(void)
 						DMA2_Channel6->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA2_Channel6,ENABLE);
-					break;
+						break;
 
 					/*uart7*/
 					case 6:
@@ -302,7 +332,7 @@ void uart_tx(void)
 						DMA2_Channel8->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA2_Channel8,ENABLE);
-					break;
+						break;
 
 					/*uart8*/
 					case 7:
@@ -310,7 +340,7 @@ void uart_tx(void)
 						DMA2_Channel10->CNTR = uart_data_t[i].TX_data_length[read_buf];
 						uart_data_t[i].uart_tx_dma_state = BUSY;
 						DMA_Cmd(DMA2_Channel10,ENABLE);
-					break;
+						break;
 
 					default:
 						break;
@@ -321,21 +351,20 @@ void uart_tx(void)
 }
 
 /*********************************************************************
- * @fn      uart_tx
+ * @fn      uartRxAndSendDataToETH
  *
  * @brief   uart receive data, and send these data to eth
  *
  * @return  none
  */
-void uart_rx(void)
+void uartRxAndSendDataToETH(void)
 {
-	uint32_t temp = 0;
-	int ret = -1;
+    u8 *p;
+    uint32_t temp = 0;
+    uint32_t len = 0;
+    uint32_t readindex = 0;
 
-	uint32_t len = 0;
-	uint32_t len_1 = 0;
-
-	for(uint8_t i=0;i<8;i++)
+	for(uint8_t i = 0; i < 8; i++)
 	{
 		switch(i)
 		{
@@ -343,95 +372,65 @@ void uart_rx(void)
 			/*uart1*/
 			case 0:
 				temp = DMA1_Channel5->CNTR;
-			break;
+				break;
 #endif
 			/*uart2*/
 			case 1:
 				temp = DMA1_Channel6->CNTR;
-			break;
+				break;
 
 			/*uart3*/
 			case 2:
 				temp = DMA1_Channel3->CNTR;
-			break;
+				break;
 
 			/*uart4*/
 			case 3:
 				temp = DMA2_Channel3->CNTR;
-			break;
+				break;
 
 			/*uart5*/
 			case 4:
 				temp = DMA2_Channel2->CNTR;
-			break;
+				break;
 
 			/*uart6*/
 			case 5:
 				temp = DMA2_Channel7->CNTR;
-			break;
+				break;
 
 			/*uart7*/
 			case 6:
 				temp = DMA2_Channel9->CNTR;
-			break;
+				break;
 
 			/*uart8*/
 			case 7:
 				temp = DMA2_Channel11->CNTR;
-			break;
+				break;
 			default:
 				break;
 		}
 
 		/* uart rx dma CNTR not equal to last, indicating that data is received*/
-		if(temp!=uart_data_t[i].last_RX_DMA_length)
+		if(temp != uart_data_t[i].last_RX_DMA_length)
 		{
-			/* calculate the length of the received data */
-			uart_data_t[i].rx_write += (uart_data_t[i].last_RX_DMA_length - temp) & (UART_RX_DMA_SIZE - 1);
-
-			/* update last rx dma CNTR */
-			uart_data_t[i].last_RX_DMA_length = temp;
-
-			/*calculate the length of the RX_buffer */
-			len = uart_data_t[i].rx_write - uart_data_t[i].rx_read;
-
-			/* RX_buffer is full */
-			if(len > UART_RX_DMA_SIZE)
-			{
-				PRINT("uart%d RX DMA Buf is full \n",i);
-				len = 0;
-				uart_data_t[i].rx_read = 0;
-				uart_data_t[i].rx_write = 0;
-				uart_data_t[i].last_RX_DMA_length = 0;
-			}
-
-			/* send data starting from rx_read to RX_buffer end */
-			len_1 = MIN(len,UART_RX_DMA_SIZE-(uart_data_t[i].rx_read&(UART_RX_DMA_SIZE-1)));
-
-            if(len_1 != 0)
-            {
-                ret = WCHNET_SocketSend(i, &uart_data_t[i].RX_buffer[uart_data_t[i].rx_read&(UART_RX_DMA_SIZE-1)], &len_1);
-                if (ret == 0)
-                {
-                    uart_data_t[i].rx_read += len_1;
-                }
-            }
-
-            /* send the rest of the data(if any) at beginning of RX_buffer  */
-            if( (len-len_1) != 0)
-            {
-                len_1 = len-len_1;
-                ret = WCHNET_SocketSend(i, &uart_data_t[i].RX_buffer[0], &len_1);
-                if (ret == 0)
-                {
-                    uart_data_t[i].rx_read += len_1;
-                }
-            }
+	        if(temp < uart_data_t[i].last_RX_DMA_length)
+	        {
+	            len = uart_data_t[i].last_RX_DMA_length - temp;
+	        }
+	        else {
+	            len = uart_data_t[i].last_RX_DMA_length;
+	        }
+	        readindex = UART_RX_DMA_SIZE - uart_data_t[i].last_RX_DMA_length;
+	        p = &uart_data_t[i].RX_buffer[readindex];
+	        WCHNET_SocketSend(i, p, &len);
+	        uart_data_t[i].last_RX_DMA_length -= len;
+	        if(uart_data_t[i].last_RX_DMA_length == 0)
+	            uart_data_t[i].last_RX_DMA_length = UART_RX_DMA_SIZE;
 		}
 	}
-
 }
-
 
 /*********************************************************************
  * @fn      main
@@ -452,18 +451,18 @@ int main(void)
 #ifdef CH32V307_DEBUG
 	USART_Printf_Init(115200);
 #endif
-	PRINT("SystemClk:%d\r\n",SystemCoreClock);
-	RCC_GetClocksFreq(&RCC_ClocksStatus);
+    RCC_GetClocksFreq(&RCC_ClocksStatus);
+	PRINT("8 UART Server Test\r\n");
 	PRINT("SystemClk:%d\r\n",SystemCoreClock);
 	PRINT("net version:%x\r\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() )
+    if(WCHNET_LIB_VER != WCHNET_GetVer())
     {
         PRINT("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                          //get the chip MAC address
     PRINT("mac addr:");
     for(i = 0; i < 6; i++) 
-        PRINT("%x ",MACAddr[i]);
+        PRINT("%x ", MACAddr[i]);
     PRINT("\r\n");
     TIM2_Init();
     BSP_Uart_Init();                                     /*uart init*/
@@ -484,8 +483,8 @@ int main(void)
 		{
 			WCHNET_HandleGlobalInt();
 		}
-		uart_tx();
-		uart_rx();
+		uartTx();
+		uartRxAndSendDataToETH();
 	}
 }
 

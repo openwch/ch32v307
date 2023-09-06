@@ -185,7 +185,7 @@ void PWR_EnterSTANDBYMode(void)
  *            PWR_FLAG_SB - StandBy flag
  *            PWR_FLAG_PVDO - PVD Output
  *
- * @return  none
+ * @return  The new state of PWR_FLAG (SET or RESET).
  */
 FlagStatus PWR_GetFlagStatus(uint32_t PWR_FLAG)
 {

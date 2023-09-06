@@ -14,21 +14,17 @@
 #include <stdlib.h>    
 #include "HTTPS.h"
 
-#define HTML_LEN     1024*8                                 //Maximum size of a single web page
+#define HTML_LEN     1024*5                                 //Maximum size of a single web page
 
-char tempURL[MAX_URL_SIZE];                                 //Save the resource name requested by the browser
-
-st_http_request *http_request;
+st_http_request http_request;
 
 /*Define three structure arrays, which are used to save basic
  * settings, port settings, and password settings.*/
 Parameter Para_Basic[4], Para_Port[4], Para_Login[2];
 
-u8 basicbuf[BASIC_CFG_LEN], portbuf[PORT_CFG_LEN], loginbuf[LOGIN_CFG_LEN];
-
-Basic_Cfg Basic_CfgBuf = (Basic_Cfg)basicbuf;
-Port_Cfg  Port_CfgBuf  = (Port_Cfg)portbuf;
-Login_Cfg Login_CfgBuf = (Login_Cfg)loginbuf;
+Basic_Cfg_t Basic_CfgBuf;
+Port_Cfg_t  Port_CfgBuf;
+Login_Cfg_t Login_CfgBuf;
 
 /*Default configuration of WCHNET network parameters*/
 u8 Basic_Default[BASIC_CFG_LEN] = {
@@ -49,6 +45,8 @@ u8 *name;                                               //The name of the web pa
 u8 socket;                                              //socket id
 u8 httpweb[200];                                        //The array is used to store the HTTP response message
 char HtmlBuffer[HTML_LEN];                              //Web page send buffer
+
+extern u8 HTTPDataBuffer[RECE_BUF_LEN];//MAC address IP address Gateway IP address subnet mask
 
 const char Html_login[] = {
     "<!DOCTYPE html>\r\n"
@@ -278,6 +276,7 @@ const char Html_main[] = {
     "margin-top:5px;\r\n"
     "}\r\n"
     "\r\n"
+    "ul li h2{ margin-top: 5px; }"
     "\r\n"
     "</style>\r\n"
     "<head>\r\n"
@@ -323,7 +322,7 @@ const char Html_main[] = {
     "\r\n"
     "<li id=\"3\">\r\n"
     "<a href=\"user.html\" target=\"ifrPage\"onclick=\"changeCss('3')\" >\r\n"
-    "<img class=\"tubiao\" src=\"png3.png\"/><h2>Password Settings</h2>\r\n"
+    "<img class=\"tubiao\" src=\"png3.png\"/><h2 style=\"line-height: 15px;font-size: 18px;margin-top: 2px\">Password<br/> Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
     "<!--目录第四行 -->\r\n"
@@ -336,7 +335,7 @@ const char Html_main[] = {
     "<iframe id=\"ifrPage\" name=\"ifrPage\" src=\"basic.html\" frameborder=\"no\"></iframe>\r\n"
     "\r\n"
     "<div id=\"foot\">\r\n"
-    "<p>Copyright:@2002-2022 Nanjing Qinheng Microelectronics Co., Ltd.All Rights Reserved</p>\r\n"
+    "<p>Copyright:@2002-2023 Nanjing Qinheng Microelectronics Co., Ltd.All Rights Reserved</p>\r\n"
     "<div id=\"left\">Official website:<a href=\"http://www.wch.cn\">www.wch.cn</a></div>\r\n"
     "</div>\r\n"
     "</body>\r\n"
@@ -408,7 +407,6 @@ const char Html_port[] ={
     "f.__PDIP.value=\"__ADIP\";\r\n"
     "f.__PDPT.value=\"__ADPT\";\r\n"
     "\r\n"
-
     "}\r\n"
     "\r\n"
     "</script>\r\n"
@@ -2244,50 +2242,26 @@ const char Html_png4[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00,
  */
 void ParseHttpRequest(st_http_request *request, char *buf)
 {
-    char * nexttok;
+    char *strptr = buf;
 
-    nexttok = strtok(buf, " ");
-
-    if (!nexttok) {
-        request->METHOD = METHOD_ERR;
-        return;
-    }
-    if (!strcmp(nexttok, "GET") || !strcmp(nexttok, "get")) {       /*browser 'get' request*/
+    if (strstr(strptr, "GET") || strstr(strptr, "get")) {       /*browser 'get' request*/
         request->METHOD = METHOD_GET;
-        nexttok = strtok(NULL, " ");
+        strptr += strlen("GET") + 2;
+        memset(buf, 1, strlen("GET"));                          /* clear the request method */
     }
-    else if (!strcmp(nexttok, "POST") || !strcmp(nexttok, "post")) {
+    else if (strstr(strptr, "POST") || strstr(strptr, "post")) {  /*browser 'post' request*/
         request->METHOD = METHOD_POST;
-        nexttok = strtok(NULL, " ");
+        strptr += strlen("POST") + 2;
+        memset(buf, 1, strlen("POST"));                         /* clear the request method */
     }
     else {
         request->METHOD = METHOD_ERR;
         return;
     }
-    strcpy((char*) request->URL, nexttok);
-}
-
-/*********************************************************************
- * @fn      GetURLName
- *
- * @brief   Get URL name.
- *
- * @param   URL - URL.
- *
- * @return  url_name
- */
-char* GetURLName(char* URL)
-{
-    char* url_name;
-
-    if (!URL)
-        return 0;
-    memset(tempURL, 0, MAX_URL_SIZE);
-    strcpy((char*) tempURL, URL);
-    url_name = tempURL;
-    if (strcmp(url_name, "/"))
-        url_name++;
-    return url_name;
+    request->URL[MAX_URL_SIZE - 1] = '0';
+    memcpy(request->URL, strptr, MAX_URL_SIZE - 1);
+    strptr = strtok(request->URL, " ");
+    strcpy((char*) request->URL, strptr);
 }
 
 /*********************************************************************
@@ -2302,13 +2276,13 @@ char* GetURLName(char* URL)
  */
 void ParseURLType(char *type, char * buf)
 {
-    if (strstr(buf, ".html") || (strlen(name) == 1)) //html type
+    if (strstr(buf, ".html") || strstr(name, "HTTP")) /* html type */
         *type = PTYPE_HTML;
-    else if (strstr(buf, ".png"))                    /*png type*/
+    else if (strstr(buf, ".png"))                    /* png type */
         *type = PTYPE_PNG;
-    else if (strstr(buf, ".css"))                    /*css type*/
+    else if (strstr(buf, ".css"))                    /* css type */
         *type = PTYPE_CSS;
-    else if (strstr(buf, ".gif"))                    /*gif type*/
+    else if (strstr(buf, ".gif"))                    /* gif type */
         *type = PTYPE_GIF;
     else
         *type = PTYPE_ERR;
@@ -2322,13 +2296,16 @@ void ParseURLType(char *type, char * buf)
  *
  * @param   buf - data buff
  *          type - type
+ *          len - data length
  *
  * @return  none
  */
-void MakeHttpResponse(u8 *buf, char type)
+void MakeHttpResponse(u8 *buf, char type, u32 len )
 {
     char *head = 0;
+    char string[8] = {0};
 
+    memset(buf, 0, sizeof(buf));
     if (type == PTYPE_HTML)
         head = RES_HTMLHEAD_OK;
     else if (type == PTYPE_PNG)
@@ -2338,6 +2315,9 @@ void MakeHttpResponse(u8 *buf, char type)
     else if (type == PTYPE_GIF)
         head = RES_GIFHEAD_OK;
     strcpy(buf, head);
+    snprintf(string, sizeof(string), "%d", len);
+    strcat(buf, string);
+    strcat(buf, RES_END);
 }
 
 /*********************************************************************
@@ -2354,34 +2334,8 @@ char * DataLocate(char *buf, char *name)
 {
     char *p;
     p = strstr(buf, name);
-    if (p == NULL)
-        return NULL;
-    p += strlen(name);
-    return p;
-}
-
-/*********************************************************************
- * @fn      Para_DataLocatePara_DataLocate
- *
- * @brief   Locate the position of "__" in buf, all configuration
- *          names in the web page start with "__".
- *
- * @param   buf - data buff
- *
- * @return  Pointer where "__" appears in buf
- */
-char * Para_DataLocate(char *buf)
-{
-    char *p = buf;
-    while(1)
-    {
-        if((*p)=='_' && (*(p+1))=='_')
-        {
-            break;
-        }
-        else
-        p++;
-    }
+    if (p != NULL)
+        p += strlen(name);
     return p;
 }
 
@@ -2400,83 +2354,94 @@ void Refresh_Basic(u8 *buf)
 {
     char *p, *q;
     char temp[30];                               //Save the value of each configuration in the form of a string
-    Basic_Cfg BasicCfg;
-    u8 i, cfgBuff[BASIC_CFG_LEN];
+    Basic_Cfg_t BasicCfg;
+    u8 i;
 
-    memset(cfgBuff, 0, BASIC_CFG_LEN);
-    BasicCfg = (Basic_Cfg) cfgBuff;
-    BasicCfg->flag[0] = 0x57;
-    BasicCfg->flag[1] = 0xAB;
+    memset((uint8_t *)(&BasicCfg), 0, BASIC_CFG_LEN);
+    BasicCfg.flag[0] = 0x57;
+    BasicCfg.flag[1] = 0xAB;
 
     p = DataLocate(buf, "__PMAC=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        q = strtok(temp, ".");
-        BasicCfg->mac[0] = atoi(q);
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
+        p = strtok(temp, ".");
+        BasicCfg.mac[0] = atoi(p);
         for (i = 1; i < 6; i++) {
-            q = strtok(NULL, ".");
-            BasicCfg->mac[i] = atoi(q);
+            p = strtok(NULL, ".");
+            BasicCfg.mac[i] = atoi(p);
         }
     }
+    else return;
 
-    p = DataLocate(buf, "__PSIP=");
+    p = DataLocate(q, "__PSIP=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        q = strtok(temp, ".");
-        BasicCfg->ip[0] = atoi(q);
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
+        p = strtok(temp, ".");
+        BasicCfg.ip[0] = atoi(p);
         for (i = 1; i < 4; i++) {
-            q = strtok(NULL, ".");
-            BasicCfg->ip[i] = atoi(q);
+            p = strtok(NULL, ".");
+            BasicCfg.ip[i] = atoi(p);
         }
     }
+    else return;
 
-    p = DataLocate(buf, "__PMSK=");
+    p = DataLocate(q, "__PMSK=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        q = strtok(temp, ".");
-        BasicCfg->mask[0] = atoi(q);
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
+        p = strtok(temp, ".");
+        BasicCfg.mask[0] = atoi(p);
         for (i = 1; i < 4; i++) {
-            q = strtok(NULL, ".");
-            BasicCfg->mask[i] = atoi(q);
+            p = strtok(NULL, ".");
+            BasicCfg.mask[i] = atoi(p);
         }
     }
+    else return;
 
-    p = DataLocate(buf, "__PGAT=");
+    p = DataLocate(q, "__PGAT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != 0x00; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        q = strtok(temp, ".");
-        BasicCfg->gateway[0] = atoi(q);
+        q = strstr(p, "\r\n");
+        if(q)
+            memcpy(temp, p, (q - p));
+        else
+            memcpy(temp, p, strlen(p));
+        p = strtok(temp, ".");
+        BasicCfg.gateway[0] = atoi(p);
         for (i = 1; i < 4; i++) {
-            q = strtok(NULL, ".");
-            BasicCfg->gateway[i] = atoi(q);
+            p = strtok(NULL, ".");
+            BasicCfg.gateway[i] = atoi(p);
         }
     }
+    else return;
+
     WEB_ERASE( BASIC_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( BASIC_CFG_ADDR, cfgBuff, BASIC_CFG_LEN);
+    WEB_WRITE( BASIC_CFG_ADDR, (uint8_t *)(&BasicCfg), BASIC_CFG_LEN);
+    printf("flag:%x %x\r\n", BasicCfg.flag[0], BasicCfg.flag[1]);
+    printf("mac:%x %x %x %x %x %x\r\n", BasicCfg.mac[0], BasicCfg.mac[1], \
+                                        BasicCfg.mac[2], BasicCfg.mac[3], \
+                                        BasicCfg.mac[4], BasicCfg.mac[5]);
+    printf("ip:%d %d %d %d\r\n", BasicCfg.ip[0], BasicCfg.ip[1],\
+                                    BasicCfg.ip[2], BasicCfg.ip[3]);
+    printf("mask:%d %d %d %d\r\n", BasicCfg.mask[0], BasicCfg.mask[1],\
+                                        BasicCfg.mask[2], BasicCfg.mask[3]);
+    printf("gateway:%d %d %d %d\r\n", BasicCfg.gateway[0], BasicCfg.gateway[1],\
+                                        BasicCfg.gateway[2], BasicCfg.gateway[3]);
 }
 
 /*********************************************************************
- * @fn      Refresh_Basic
+ * @fn      Refresh_Port
  *
- * @brief   Parse the basic interface configuration parameters from
- *          the post request and store the parsed parameters in the
- *          flash
+ * @brief   Parse the Port parameter from the post request
+ *          and store the parsed parameter in flash
  *
  * @param   buf - data buff
  *
@@ -2487,78 +2452,147 @@ void Refresh_Port(char *buf)
     u8 i;
     char *p, *q;
     char temp[30];
-    Port_Cfg portCfg;
-    u8 cfgBuff[PORT_CFG_LEN];
+    Port_Cfg_t portCfg;
 
-    memset(cfgBuff, 0, PORT_CFG_LEN);
-    portCfg = (Port_Cfg) cfgBuff;
-    portCfg->flag[0] = 0X57;
-    portCfg->flag[1] = 0XAB;
+    memset((uint8_t *)(&portCfg), 0, PORT_CFG_LEN);
+    portCfg.flag[0] = 0X57;
+    portCfg.flag[1] = 0XAB;
 
     p = DataLocate(buf, "__PMOD=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        printf("mode==%s\n", temp);
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
         if (strcmp(temp, "0") == 0)
         {
-            printf("mode 0\n");
-            portCfg->mode = MODE_TCPSERVER;
+            portCfg.mode = MODE_TCPSERVER;
         }
         if (strcmp(temp, "1") == 0) {
-            printf("mode 1\n");
-            portCfg->mode = MODE_TCPCLIENT;
+            portCfg.mode = MODE_TCPCLIENT;
         }
-
     }
+    else return;
 
-    p = DataLocate(buf, "__PSPT=");
+    p = DataLocate(q, "__PSPT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-
-        portCfg->src_port[0] = atoi(temp) / 256;
-        portCfg->src_port[1] = atoi(temp) % 256;
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
+        portCfg.src_port[0] = atoi(temp) / 256;
+        portCfg.src_port[1] = atoi(temp) % 256;
     }
+    else return;
 
-    p = DataLocate(buf, "__PDIP=");
+    p = DataLocate(q, "__PDIP=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != '&'; i++) {
-            temp[i] = *p;
-            p++;
-        }
-        q = strtok(temp, ".");
-        portCfg->des_ip[0] = atoi(q);
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        memcpy(temp, p, (q - p));
+        p = strtok(temp, ".");
+        portCfg.des_ip[0] = atoi(p);
         for (i = 1; i < 4; i++) {
-            q = strtok(NULL, ".");
-            portCfg->des_ip[i] = atoi(q);
-        } /*����Ŀ��ip*/
+            p = strtok(NULL, ".");
+            portCfg.des_ip[i] = atoi(p);
+        }
     }
+    else return;
 
-    p = DataLocate(buf, "__PDPT=");
+    p = DataLocate(q, "__PDPT=");
     if (p != NULL) {
         memset(temp, 0, 30);
-        for (i = 0; *p != 0x00; i++) {
-            temp[i] = *p;
-            p++;
-        }
-
-        portCfg->des_port[0] = atoi(temp) / 256;
-        portCfg->des_port[1] = atoi(temp) % 256;
+        q = strstr(p, "\r\n");
+        if(q)
+            memcpy(temp, p, (q - p));
+        else
+            memcpy(temp, p, strlen(p));
+        portCfg.des_port[0] = atoi(temp) / 256;
+        portCfg.des_port[1] = atoi(temp) % 256;
     }
+    else return;
+
     WEB_ERASE( PORT_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( PORT_CFG_ADDR, cfgBuff, PORT_CFG_LEN);
+    WEB_WRITE( PORT_CFG_ADDR, (uint8_t *)(&portCfg), PORT_CFG_LEN);
+
+    printf("mode:%x\r\n",portCfg.mode);
+    printf("src_port:%d\r\n", portCfg.src_port[0]*256 + portCfg.src_port[1]);
+    printf("des_ip:%d %d %d %d\r\n", portCfg.des_ip[0], portCfg.des_ip[1], portCfg.des_ip[2], portCfg.des_ip[3]);
+    printf("des_port:%d\r\n", portCfg.des_port[0]*256 + portCfg.des_port[1]);
 }
 
 /*********************************************************************
- * @fn      Refresh_Basic
+ * @fn      ASCToDec
+ *
+ * @brief   Convert ASC code to Decimal number
+ *
+ * @param   ASCPtr - Pointer to the character to be converted
+ *
+ * @return  status
+ */
+uint8_t ASCToDec(uint8_t *ASCPtr)
+{
+    uint8_t i;
+    for(i = 0; i < 2; i++)
+    {
+        if( (*ASCPtr >= '0') && (*ASCPtr <= '9'))
+        {
+            *ASCPtr = *ASCPtr - '0';
+        }
+        else if( (*ASCPtr >= 'a') && (*ASCPtr <= 'f'))
+        {
+            *ASCPtr = *ASCPtr - 'a' + 10;
+        }
+        else if( ( *ASCPtr >= 'A') && (*ASCPtr <= 'F'))
+        {
+            *ASCPtr = *ASCPtr - 'A' + 10;
+        }
+        else return NoREADY;
+        ASCPtr++;
+    }
+    return READY;
+}
+
+/*********************************************************************
+ * @fn      URLDecode
+ *
+ * @brief   Decoding special characters for URL transmission
+ *
+ * @param   srcptr - source buff
+ *          desptr - destination buff
+ *          bufflen - length of source buff
+ *
+ * @return  status or Decoded string length
+ */
+uint8_t URLDecode(char *srcptr, char *desptr, uint8_t bufflen)
+{
+    uint8_t i = 0, ret, datalen = 0;
+    char tempbuf[2];
+    while(i < bufflen)
+    {
+        if(srcptr[i] == '%')
+        {
+            tempbuf[0] = srcptr[++i];
+            tempbuf[1] = srcptr[++i];
+            ret = ASCToDec(tempbuf);
+            if(ret == NoREADY) return ret;
+            tempbuf[0] = tempbuf[0] * 16 + tempbuf[1];
+            *desptr++ = tempbuf[0];
+            datalen++;
+            i++;
+        }
+        else {
+            *desptr++ = srcptr[i++];
+            datalen++;
+        }
+        if(datalen > sizeof(Login_CfgBuf.pass)) return NoREADY;
+    }
+    return datalen;
+}
+
+/*********************************************************************
+ * @fn      Refresh_Login
  *
  * @brief   Parse the login parameter from the post request
  *          and store the parsed parameter in flash
@@ -2569,35 +2603,43 @@ void Refresh_Port(char *buf)
  */
 void Refresh_Login(char *buf)
 {
-    char *p;
-    u8 i;
-    Login_Cfg LoginInf;
-    u8 cfgBuff[LOGIN_CFG_LEN];
+    char *p, *q = NULL;
+    u8 len;
+    uint8_t tempbuff[10] = {0x00};
+    Login_Cfg_t LoginInf;
 
-    LoginInf = (Login_Cfg) cfgBuff;
-    memset(LoginInf, 0, LOGIN_CFG_LEN);
-    memset(cfgBuff, 0, LOGIN_CFG_LEN);
-    LoginInf->flag[0] = 0X57;
-    LoginInf->flag[1] = 0XAB;
+
+    memset((uint8_t *)(&LoginInf), 0, LOGIN_CFG_LEN);
+    LoginInf.flag[0] = 0X57;
+    LoginInf.flag[1] = 0XAB;
 
     p = DataLocate(buf, "__PUSE=");
-    if (p != NULL)
-        if (p != NULL) {
-            for (i = 0; *p != '&'; i++) {
-                LoginInf->user[i] = *p;
-                p++;
-            }
-        }
-
-    p = DataLocate(buf, "__PPAS=");
     if (p != NULL) {
-        for (i = 0; *p != 0x00; i++) {
-            LoginInf->pass[i] = *p;
-            p++;
-        }
+        q = strstr(p, "&");
+        if(q == NULL) return;
+        len = q - p;
+        if(len > sizeof(LoginInf.user)) return;
+        memcpy(LoginInf.user, p, len);
     }
+    else return;
+
+    p = DataLocate(q, "__PPAS=");
+    if (p != NULL) {
+        q = strstr(p, "\r\n");
+        if(q)
+            len = q - p;
+        else
+            len = strlen(p);
+        len = URLDecode(p, tempbuff, len);
+        if(len == 0) return;
+        memcpy(LoginInf.pass, tempbuff, len);
+    }
+    else return;
+
     WEB_ERASE( LOGIN_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( LOGIN_CFG_ADDR, cfgBuff, LOGIN_CFG_LEN);
+    WEB_WRITE( LOGIN_CFG_ADDR, (uint8_t *)(&LoginInf), LOGIN_CFG_LEN);
+    printf("user:%s\r\n",LoginInf.user);
+    printf("pass:%s\r\n",LoginInf.pass);
 }
 
 /*********************************************************************
@@ -2610,53 +2652,47 @@ void Refresh_Login(char *buf)
  *          buf - parameter structure
  *          paranum - parameters number
  *
- * @return  none
+ * @return  length of data
  */
-void Refresh_Html(const char *html, Parameter *buf, u8 paranum)
+uint16_t Refresh_Html(const char *html, Parameter *buf, u8 paranum)
 {
-    const char *p1;
-    char *p2, *q;
-    char para[10];
-    Parameter *tab;
-    u32 i, k, valuelen, htmllen;
-    u8 j;
-    memset(HtmlBuffer, 0, HTML_LEN);
-    p1 = html;
-    p2 = HtmlBuffer;
-    htmllen = strlen(html);
-    for (k = 0; k < htmllen; k++) {
-        if ((*p1) == '_' && *((p1 + 1)) == '_' && (*(p1 + 2)) == 'A') {
-            for (i = 0; i < 6; i++) {
-                para[i] = *p1;
-                p1++;
-            }
+    const char *lastptr = html;
+    char *currptr;
+    const char *keyword = "__A";
+    uint8_t i;
+    uint16_t datalen = 0, copylen = 0;
 
-            tab = buf;
-            for (i = 0; i < paranum; i++) {
-                if (strstr(para, tab->para) != NULL) {
-                    q = tab->value;
-                    valuelen = strlen(tab->value);
-                    for (j = 0; j < valuelen; j++) {
-                        *p2 = *q;
-                        p2++;
-                        q++;
-                    }
-                }
-                tab++;
-            }
-        } else {
-            *p2 = *p1;
-            p1++;
-            p2++;
+    while(1)
+    {
+        currptr = strstr(lastptr, keyword);
+        if(currptr == NULL) break;
+        copylen = currptr - lastptr;
+        memcpy(&HtmlBuffer[datalen], lastptr, copylen);
+        datalen += copylen;
+        for(i = 0; i < paranum; i++)
+        {
+            if(memcmp(currptr, buf[i].para, strlen(buf[i].para)) == 0)
+                break;
         }
+        if(i == paranum)
+            return 0 ;
+        memcpy(&HtmlBuffer[datalen], buf[i].value, strlen(buf[i].value));
+        datalen += strlen(buf[i].value);
+        lastptr = currptr + strlen(buf[i].para);
     }
+    if(strlen(lastptr) != 0)
+    {
+        memcpy(&HtmlBuffer[datalen], lastptr, strlen(lastptr));
+        datalen += strlen(lastptr);
+    }
+    return datalen;
 }
 
 /*********************************************************************
  * @fn      copy_flash
  *
  * @brief   Select the html file in the flash and copy it directly
- *          to the HtmlBuffer (only for some webpages without variables)
+ *          to the HtmlBuffer (only for some web pages without variables)
  *
  * @param   html - HTML array constants
  *          len - data length
@@ -2750,64 +2786,131 @@ void WEB_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
  */
 void Init_Para_Tab(void)
 {
-    u8 s[20];
+    u8 s[30];
 
     Para_Basic[0].para = "__AMAC";
-    memset(s, 0, 20);
-    sprintf(s, "%d.%d.%d.%d.%d.%d", Basic_CfgBuf->mac[0], Basic_CfgBuf->mac[1],
-            Basic_CfgBuf->mac[2], Basic_CfgBuf->mac[3], Basic_CfgBuf->mac[4],
-            Basic_CfgBuf->mac[5]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d.%d.%d.%d.%d.%d", Basic_CfgBuf.mac[0], Basic_CfgBuf.mac[1],
+            Basic_CfgBuf.mac[2], Basic_CfgBuf.mac[3], Basic_CfgBuf.mac[4],
+            Basic_CfgBuf.mac[5]);
     strcpy(Para_Basic[0].value, s);
-    printf("__AMAC=%s\n", Para_Basic[0].value);
+    printf("__ASIP = %s\n", Para_Basic[0].value);
 
     Para_Basic[1].para = "__ASIP";
-    memset(s, 0, 20);
-    sprintf(s, "%d.%d.%d.%d", Basic_CfgBuf->ip[0], Basic_CfgBuf->ip[1],
-            Basic_CfgBuf->ip[2], Basic_CfgBuf->ip[3]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d.%d.%d.%d", Basic_CfgBuf.ip[0], Basic_CfgBuf.ip[1],
+            Basic_CfgBuf.ip[2], Basic_CfgBuf.ip[3]);
     strcpy(Para_Basic[1].value, s);
-    printf("__ASIP=%s\n", Para_Basic[1].value);
+    printf("__ASIP = %s\n", Para_Basic[1].value);
 
     Para_Basic[2].para = "__AMSK";
-    memset(s, 0, 20);
-    sprintf(s, "%d.%d.%d.%d", Basic_CfgBuf->mask[0], Basic_CfgBuf->mask[1],
-            Basic_CfgBuf->mask[2], Basic_CfgBuf->mask[3]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d.%d.%d.%d", Basic_CfgBuf.mask[0], Basic_CfgBuf.mask[1],
+            Basic_CfgBuf.mask[2], Basic_CfgBuf.mask[3]);
     strcpy(Para_Basic[2].value, s);
-    printf("__AMSK=%s\n", Para_Basic[2].value);
+    printf("__AMSK = %s\n", Para_Basic[2].value);
 
     Para_Basic[3].para = "__AGAT";
-    memset(s, 0, 20);
-    sprintf(s, "%d.%d.%d.%d", Basic_CfgBuf->gateway[0],
-            Basic_CfgBuf->gateway[1], Basic_CfgBuf->gateway[2],
-            Basic_CfgBuf->gateway[3]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d.%d.%d.%d", Basic_CfgBuf.gateway[0],
+            Basic_CfgBuf.gateway[1], Basic_CfgBuf.gateway[2],
+            Basic_CfgBuf.gateway[3]);
     strcpy(Para_Basic[3].value, s);
-    printf("__AGAT=%s\n", Para_Basic[3].value);
+    printf("__AGAT = %s\n", Para_Basic[3].value);
 
     Para_Port[0].para = "__AMOD";
-    memset(s, 0, 20);
-    sprintf(s, "%d", Port_CfgBuf->mode);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d", Port_CfgBuf.mode);
     strcpy(Para_Port[0].value, s);
+    printf("__AMOD = %s\n", Para_Port[0].value);
 
     Para_Port[1].para = "__ASPT";
-    memset(s, 0, 20);
-    sprintf(s, "%d", Port_CfgBuf->src_port[0] * 256 + Port_CfgBuf->src_port[1]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d", Port_CfgBuf.src_port[0] * 256 + Port_CfgBuf.src_port[1]);
     strcpy(Para_Port[1].value, s);
+    printf("__ASPT = %s\n", Para_Port[1].value);
 
     Para_Port[2].para = "__ADIP";
-    memset(s, 0, 20);
-    sprintf(s, "%d.%d.%d.%d", Port_CfgBuf->des_ip[0], Port_CfgBuf->des_ip[1],
-            Port_CfgBuf->des_ip[2], Port_CfgBuf->des_ip[3]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d.%d.%d.%d", Port_CfgBuf.des_ip[0], Port_CfgBuf.des_ip[1],
+            Port_CfgBuf.des_ip[2], Port_CfgBuf.des_ip[3]);
     strcpy(Para_Port[2].value, s);
+    printf("__ADIP = %s\n", Para_Port[2].value);
 
     Para_Port[3].para = "__ADPT";
-    memset(s, 0, 20);
-    sprintf(s, "%d", Port_CfgBuf->des_port[0] * 256 + Port_CfgBuf->des_port[1]);
+    memset(s, 0, 30);
+    snprintf(s, 30, "%d", Port_CfgBuf.des_port[0] * 256 + Port_CfgBuf.des_port[1]);
     strcpy(Para_Port[3].value, s);
+    printf("__ADPT = %s\n", Para_Port[3].value);
 
     Para_Login[0].para = "__AUSE";
-    strcpy(Para_Login[0].value, Login_CfgBuf->user);
+    strcpy(Para_Login[0].value, Login_CfgBuf.user);
+    printf("__AUSE = %s\n", Para_Login[0].value);
 
     Para_Login[1].para = "__APAS";
-    strcpy(Para_Login[1].value, Login_CfgBuf->pass);
+    strcpy(Para_Login[1].value, Login_CfgBuf.pass);
+    printf("__APAS = %s\n", Para_Login[1].value);
+}
+
+/*********************************************************************
+ * @fn      Data_Send
+ *
+ * @brief   Socket sends data.
+ *
+ * @return  none
+ */
+void Data_Send(u8 id, uint8_t *dataptr, uint32_t datalen)
+{
+    u32 len, totallen;
+    u8 *p, timeout = 50;
+
+    p = dataptr;
+    totallen = datalen;
+    while(1){
+        len = totallen;
+        WCHNET_SocketSend(id, p, &len);                         //Send the data
+        totallen -= len;                                        //Subtract the sent length from the total length
+        p += len;                                               //offset buffer pointer
+        if(--timeout == 0) break;
+        if(totallen) continue;                                  //If the data is not sent, continue to send
+        break;                                                  //After sending, exit
+    }
+}
+
+
+/*********************************************************************
+ * @fn      strFind
+ *
+ * @brief   query for a specific string.
+ *
+ * @param   str  - source string.
+ *          substr - String to be queried.
+ *
+ * @return  The number of data segments contained in the received data
+ */
+int strFind( char str[], char substr[] )
+{
+    int i, j, check ,count = 0;
+    int len = strlen( str );
+    int sublen = strlen( substr );
+    for( i = 0; i < len; i++ )
+    {
+        check = 1;
+        for( j = 0; j + i < len && j < sublen; j++ )
+        {
+            if( str[i + j] != substr[j] )
+            {
+                check = 0;
+                break;
+            }
+        }
+        if( check == 1 )
+        {
+            count++;
+            i = i + sublen;
+        }
+    }
+    return count;
 }
 
 /*********************************************************************
@@ -2819,143 +2922,127 @@ void Init_Para_Tab(void)
  */
 void Web_Server(void)
 {
-    char *para_p;
-    u32 len;
+    char *paraptr;
+    uint8_t reqnum = 0;
+    u32 resplen = 0;
+    u32 pagelen = 0;
 
-    if(DealDataFlag){
-        DealDataFlag = 0;
-        ParseHttpRequest(http_request, RecvBuffer);
-        switch (http_request->METHOD)
+    reqnum = strFind(HTTPDataBuffer,"GET") + strFind(HTTPDataBuffer,"get") + \
+             strFind(HTTPDataBuffer,"POST") + strFind(HTTPDataBuffer,"post");
+
+    while(reqnum){
+        reqnum--;
+        ParseHttpRequest(&http_request, HTTPDataBuffer);
+        switch (http_request.METHOD)
         {
             case METHOD_ERR:
                 break;
 
             case METHOD_POST:                                       //'post' request
-                name = (char*)GetURLName(http_request->URL);
-                //printf("URL name: %s\n",name);
-                ParseURLType(&http_request->TYPE, name);
+                name = http_request.URL;
+                ParseURLType(&http_request.TYPE, name);
 
-                /*Analyze the requested resource type and return the response*/
-                MakeHttpResponse(httpweb, http_request->TYPE);
-                len = strlen(httpweb);
-                WCHNET_SocketSend(socket, httpweb, &len);
                 if (strstr(name, "main") != NULL) {                 //Request the "main" page
-                    len = strlen(Html_main);
-                    copy_flash(Html_main, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = strlen(Html_main);
+                    copy_flash(Html_main, pagelen);
                 }
                 else if(strstr(name, "success") != NULL) {          //Request "success" page
-                    len = strlen(Html_success);
-                    copy_flash(Html_success, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = strlen(Html_success);
+                    copy_flash(Html_success, pagelen);
+
+                    paraptr = (char *) HTTPDataBuffer;
+                    if (strstr(paraptr, "__PMAC") != NULL) {             //Configuration information with "Basic" pages
+                        Refresh_Basic(paraptr);
+                    }
+
+                    if (strstr(paraptr, "__PMOD") != NULL) {             //Configuration information with "Port" page
+                        Refresh_Port(paraptr);
+                    }
+
+                    if (strstr(paraptr, "__PUSE") != NULL) {             //Configuration information with "User" page
+                        Refresh_Login(paraptr);
+                    }
                 }
+                /*Analyze the requested resource type and return the response*/
+                MakeHttpResponse(httpweb, http_request.TYPE, pagelen);
+                resplen = strlen(httpweb);
+                Data_Send(socket, httpweb, resplen);
+
+                Data_Send(socket, HtmlBuffer, pagelen);
                 /*After the request is processed, the current
                  * socket connection is closed, and a new connection
                  * will be established when the browser sends the next
                  * request.*/
                 WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);
-
-                para_p = Para_DataLocate((char *) RecvBuffer);      //Get the assigned variable in the POST request
-
-                if (strstr(para_p, "__PMAC") != NULL) {             //Configuration information with "Basic" pages
-                    Refresh_Basic(para_p);
-                    memset(para_p, 0, strlen(para_p));
-                }
-
-                if (strstr(para_p, "__PMOD") != NULL) {             //Configuration information with "Port" page
-                    Refresh_Port(para_p);
-                    memset(para_p, 0, strlen(para_p));
-                }
-
-                if (strstr(para_p, "__PUSE") != NULL) {             //Configuration information with "User" page
-                    Refresh_Login(para_p);
-                    memset(para_p, 0, strlen(para_p));
-                }
                 break;
 
             case METHOD_GET:                                        //'get' request
-                name = (char*)GetURLName(http_request->URL);
-                // printf("URL name: %s\n",name);
-                ParseURLType(&http_request->TYPE, name);
+                name = http_request.URL;
+                ParseURLType(&http_request.TYPE, name);
 
-                /*Analyze the requested resource type and return the response*/
-                MakeHttpResponse(httpweb, http_request->TYPE);
-                len = strlen(httpweb);
-                WCHNET_SocketSend(socket, httpweb, &len);
-                if (strlen(name) == 1) {
-                    Refresh_Html(Html_login, Para_Login, 2);
-                    len = strlen(HtmlBuffer);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                if(strstr(name, "HTTP") != NULL) {
+                    pagelen = Refresh_Html(Html_login, Para_Login, 2);
                 }
                 else if(strstr(name, "main") != NULL) {             //Request to get the "main" web page
-                    len = strlen(Html_main);
-                    copy_flash(Html_main, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = strlen(Html_main);
+                    copy_flash(Html_main, pagelen);
                 }
                 else if(strstr(name, "basic") != NULL) {            //Request to get the "basic" web page
-                    Refresh_Html(Html_basic, Para_Basic, 4);
-                    len = strlen(HtmlBuffer);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = Refresh_Html(Html_basic, Para_Basic, 4);
                 }
                 else if(strstr(name, "port") != NULL) {             //Request to get the "port" page
-                    Refresh_Html(Html_port, Para_Port, 4);
-                    len = strlen(HtmlBuffer);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = Refresh_Html(Html_port, Para_Port, 4);
                 }
                 else if(strstr(name, "user") != NULL) {             //Request to get the "user" web page
-                    Refresh_Html(Html_user, Para_Login, 2);
-                    len = strlen(HtmlBuffer);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = Refresh_Html(Html_user, Para_Login, 2);
                 }
                 else if(strstr(name, "about") != NULL) {            //Request to get the "about" page
-                    len = strlen(Html_about);
-                    copy_flash(Html_about, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = strlen(Html_about);
+                    copy_flash(Html_about, pagelen);
                 }
                 else if(strstr(name, "logo") != NULL) {             //Request for "logo" image
-                    len = sizeof(Html_logo);
-                    copy_flash(Html_logo, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = sizeof(Html_logo);
+                    copy_flash(Html_logo, pagelen);
                 }
                 else if(strstr(name, "png1") != NULL) {             //Request to get "png1" image
-                    len = sizeof(Html_png1);
-                    copy_flash(Html_png1, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = sizeof(Html_png1);
+                    copy_flash(Html_png1, pagelen);
                 }
                 else if(strstr(name, "png2") != NULL) {             //Request to get "png2" image
-                    len = sizeof(Html_png2);
-                    copy_flash(Html_png2, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = sizeof(Html_png2);
+                    copy_flash(Html_png2, pagelen);
                 }
                 else if(strstr(name, "png3") != NULL) {             //Request to get "png3" image
-                    len = sizeof(Html_png3);
-                    copy_flash(Html_png3, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);    //Request to get "png4" image
+                    pagelen = sizeof(Html_png3);
+                    copy_flash(Html_png3, pagelen);
                 }
                 else if(strstr(name, "png4") != NULL) {
-                    len = sizeof(Html_png4);
-                    copy_flash(Html_png4, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = sizeof(Html_png4);
+                    copy_flash(Html_png4, pagelen);
                 }
                 else if(strstr(name, "weixin") != NULL) {           //Request for "weixin" image
-                    len = sizeof(Html_weixin);
-                    copy_flash(Html_weixin, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = sizeof(Html_weixin);
+                    copy_flash(Html_weixin, pagelen);
                 }
                 else if(strstr(name, "style") != NULL) {            //Request to get the "style" css stylesheet file
-                    len = strlen(Html_style);
-                    copy_flash(Html_style, len);
-                    WCHNET_SocketSend(socket, HtmlBuffer, &len);
+                    pagelen = strlen(Html_style);
+                    copy_flash(Html_style, pagelen);
                 }
-                /*After the request is processed, the current
-                 * socket connection is closed, and a new connection
-                 * will be established when the browser sends the next
-                 * request.*/
-                WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);
+                /*Analyze the requested resource type and return the response*/
+                MakeHttpResponse(httpweb, http_request.TYPE, pagelen);
+                resplen = strlen(httpweb);
+                Data_Send(socket, httpweb, resplen);
+                Data_Send(socket, HtmlBuffer, pagelen);
                 break;
 
             default:
                 break;
         }
     }
+    /*After the request is processed, the current
+     * socket connection is closed, and a new connection
+     * will be established when the browser sends the next
+     * request.*/
+    WCHNET_SocketClose(socket, TCP_CLOSE_NORMAL);
+    memset(HTTPDataBuffer, 0,sizeof(HTTPDataBuffer));
 }

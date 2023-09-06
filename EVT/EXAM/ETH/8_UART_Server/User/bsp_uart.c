@@ -172,7 +172,6 @@ void UART_GPIO_Init(void)
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-
 /**********************************************************************
  *  @fn      UART_DMA_Init
  *
@@ -410,27 +409,16 @@ void UART_Interrupt_Init(void)
 #ifndef CH32V307_DEBUG
 	/* UART1  TX-->DMA1_Channel4   RX-->DMA1_Channel5 */
 	DMA_ITConfig(DMA1_Channel4,DMA_IT_TC,ENABLE);
-	//DMA_ITConfig(DMA1_Channel5,DMA_IT_HT,ENABLE);
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-
-//	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel5_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-//
-//	/* enable uart1 idle interrupt */
-//	USART_ITConfig(USART1,USART_IT_IDLE,ENABLE);
-//	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-
 #endif
 
 	/* UART2  TX-->DMA1_Channel7   RX-->DMA1_Channel6 */
 	DMA_ITConfig(DMA1_Channel7,DMA_IT_TC,ENABLE);
-	//DMA_ITConfig(DMA1_Channel6,DMA_IT_HT,ENABLE);
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel7_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
@@ -438,106 +426,41 @@ void UART_Interrupt_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-//	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel6_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-//
-//	/* enable uart2 idle interrupt */
-//	USART_ITConfig(USART2,USART_IT_IDLE,ENABLE);
-//	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-
-
 	/*UART3  TX-->DMA1_Channel2   RX-->DMA1_Channel3*/
 	DMA_ITConfig(DMA1_Channel2,DMA_IT_TC,ENABLE);
-//	DMA_ITConfig(DMA1_Channel3,DMA_IT_HT,ENABLE);
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
 	NVIC_Init(&NVIC_InitStructure);
 
-//	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-//
-//	/* enable uart3 idle interrupt */
-//	USART_ITConfig(USART3,USART_IT_IDLE,ENABLE);
-//	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-
 	/* UART4  TX-->DMA2_Channel5   RX-->DMA2_Channel3 */
     DMA_ITConfig(DMA2_Channel5,DMA_IT_TC,ENABLE);
-//    DMA_ITConfig(DMA2_Channel3,DMA_IT_HT,ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel5_IRQn;
     NVIC_Init(&NVIC_InitStructure);
 
-//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel3_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-//
-//    /* enable uart4 idle interrupt */
-//    USART_ITConfig(UART4,USART_IT_IDLE,ENABLE);
-//    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-
     /* UART5  TX-->DMA2_Channel4   RX-->DMA2_Channel2 */
     DMA_ITConfig(DMA2_Channel4,DMA_IT_TC,ENABLE);
-//    DMA_ITConfig(DMA2_Channel2,DMA_IT_HT,ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel4_IRQn;
     NVIC_Init(&NVIC_InitStructure);
 
-//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel2_IRQn;
-//	NVIC_Init(&NVIC_InitStructure);
-//
-//    /* enable uart5 idle interrupt */
-//    USART_ITConfig(UART5,USART_IT_IDLE,ENABLE);
-//    NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-
     /* UART6  TX-->DMA2_Channel6   RX-->DMA2_Channel7 */
     DMA_ITConfig(DMA2_Channel6,DMA_IT_TC,ENABLE);
-//    DMA_ITConfig(DMA2_Channel7,DMA_IT_HT,ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel6_IRQn;
     NVIC_Init(&NVIC_InitStructure);
-//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel7_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-//
-//
-//    /* enable uart6 idle interrupt */
-//    USART_ITConfig(UART6,USART_IT_IDLE,ENABLE);
-//    NVIC_InitStructure.NVIC_IRQChannel = UART6_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-
 
     /* UART7  TX-->DMA2_Channel8   RX-->DMA2_Channel9 */
     DMA_ITConfig(DMA2_Channel8,DMA_IT_TC,ENABLE);
-//    DMA_ITConfig(DMA2_Channel9,DMA_IT_HT,ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel8_IRQn;
     NVIC_Init(&NVIC_InitStructure);
-//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel9_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-//
-//
-//    /* enable uart7 idle interrupt */
-//    USART_ITConfig(UART7,USART_IT_IDLE,ENABLE);
-//    NVIC_InitStructure.NVIC_IRQChannel = UART7_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-
 
     /* UART8  TX-->DMA2_Channel10  RX-->DMA2_Channel11 */
     DMA_ITConfig(DMA2_Channel10,DMA_IT_TC,ENABLE);
-//    DMA_ITConfig(DMA2_Channel11,DMA_IT_HT,ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel10_IRQn;
     NVIC_Init(&NVIC_InitStructure);
-//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel11_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
-//
-//
-//    /* enable uart8 idle interrupt */
-//    USART_ITConfig(UART8,USART_IT_IDLE,ENABLE);
-//    NVIC_InitStructure.NVIC_IRQChannel = UART8_IRQn;
-//    NVIC_Init(&NVIC_InitStructure);
 
 }
 
@@ -566,11 +489,10 @@ void BSP_Uart_Init(void)
 	uart_data_t[0].RX_data_length = 0;
 	uart_data_t[0].tx_read = 0;
 	uart_data_t[0].rx_write = 0;
+	uart_data_t[0].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[0].uart_tx_dma_state = IDEL;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-
-
 
 	USART_InitStructure.USART_BaudRate = BAUD_RATE;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -593,6 +515,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[1].RX_data_length = 0;
 	uart_data_t[1].tx_read = 0;
 	uart_data_t[1].rx_write = 0;
+	uart_data_t[1].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[1].uart_tx_dma_state = IDEL;
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -617,6 +540,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[2].RX_data_length = 0;
 	uart_data_t[2].tx_read = 0;
 	uart_data_t[2].rx_write = 0;
+	uart_data_t[2].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[2].uart_tx_dma_state = IDEL;
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
@@ -635,6 +559,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[3].RX_data_length = 0;
 	uart_data_t[3].tx_read = 0;
 	uart_data_t[3].rx_write = 0;
+	uart_data_t[3].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[3].uart_tx_dma_state = IDEL;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
@@ -652,6 +577,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[4].RX_data_length = 0;
 	uart_data_t[4].tx_read = 0;
 	uart_data_t[4].rx_write = 0;
+	uart_data_t[4].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[4].uart_tx_dma_state = IDEL;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
@@ -659,7 +585,7 @@ void BSP_Uart_Init(void)
     USART_Init(UART5, &USART_InitStructure);
     USART_Cmd(UART5, ENABLE);
 
-	/* USART6 TX-->PC0  RX-->PC1 */
+    /* UART6 TX_2-->PE10   RX_2-->PE11 */
 	uart_data_t[5].RX_buffer = &UART6_RX_DMA_DataBuf[0];
 	uart_data_t[5].TX_buffer = &UART6_TX_DMA_DataBuf[0];
 	uart_data_t[5].TX_data_length = &UART6_TX_Buf_Length[0];
@@ -669,6 +595,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[5].RX_data_length = 0;
 	uart_data_t[5].tx_read = 0;
 	uart_data_t[5].rx_write = 0;
+	uart_data_t[5].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[5].uart_tx_dma_state = IDEL;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART6, ENABLE);
@@ -686,6 +613,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[6].RX_data_length = 0;
 	uart_data_t[6].tx_read = 0;
 	uart_data_t[6].rx_write = 0;
+	uart_data_t[6].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[6].uart_tx_dma_state = IDEL;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART7, ENABLE);
@@ -704,6 +632,7 @@ void BSP_Uart_Init(void)
 	uart_data_t[7].RX_data_length = 0;
 	uart_data_t[7].tx_read = 0;
 	uart_data_t[7].rx_write = 0;
+	uart_data_t[7].tx_remainBuffNum = UART_TX_BUF_NUM;
 	uart_data_t[7].uart_tx_dma_state = IDEL;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART8, ENABLE);

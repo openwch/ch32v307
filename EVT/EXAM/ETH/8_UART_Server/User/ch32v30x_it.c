@@ -9,10 +9,8 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-
 #include "ch32v30x_it.h"
 #include "eth_driver.h"
-#include "WCHNET.H"
 #include "bsp_uart.h"
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -69,7 +67,7 @@ void ETH_IRQHandler(void)
  */
 void EXTI9_5_IRQHandler(void)
 {
-    // ETH_PHYLink( );
+    ETH_PHYLink( );
     EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
@@ -108,7 +106,9 @@ void DMA1_Channel4_IRQHandler(void)
 
         /* update tx_read */
         uart_data_t[0].tx_read++;
-
+        /* Prevent access from out-of-bounds */
+        uart_data_t[0].tx_read = (uart_data_t[0].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[0].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA1_IT_TC4);
     }
 
@@ -131,6 +131,9 @@ void DMA1_Channel7_IRQHandler(void)
         DMA_Cmd(DMA1_Channel7,DISABLE);
         uart_data_t[1].uart_tx_dma_state = IDEL;
         uart_data_t[1].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[1].tx_read = (uart_data_t[1].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[1].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA1_IT_TC7);
     }
 
@@ -152,6 +155,9 @@ void DMA1_Channel2_IRQHandler(void)
         DMA_Cmd(DMA1_Channel2,DISABLE);
         uart_data_t[2].uart_tx_dma_state = IDEL;
         uart_data_t[2].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[2].tx_read = (uart_data_t[2].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[2].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA1_IT_TC2);
     }
 }
@@ -173,6 +179,9 @@ void DMA2_Channel5_IRQHandler(void)
         DMA_Cmd(DMA2_Channel5,DISABLE);
         uart_data_t[3].uart_tx_dma_state = IDEL;
         uart_data_t[3].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[3].tx_read = (uart_data_t[3].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[3].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA2_IT_TC5);
     }
 
@@ -195,6 +204,9 @@ void DMA2_Channel4_IRQHandler(void)
         DMA_Cmd(DMA2_Channel4,DISABLE);
         uart_data_t[4].uart_tx_dma_state = IDEL;
         uart_data_t[4].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[4].tx_read = (uart_data_t[4].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[4].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA2_IT_TC4);
     }
 }
@@ -216,7 +228,9 @@ void DMA2_Channel6_IRQHandler(void)
         DMA_Cmd(DMA2_Channel6,DISABLE);
         uart_data_t[5].uart_tx_dma_state = IDEL;
         uart_data_t[5].tx_read++;
-
+        /* Prevent access from out-of-bounds */
+        uart_data_t[5].tx_read = (uart_data_t[5].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[5].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA2_IT_TC6);
     }
 
@@ -238,6 +252,9 @@ void DMA2_Channel8_IRQHandler(void)
         DMA_Cmd(DMA2_Channel8,DISABLE);
         uart_data_t[6].uart_tx_dma_state = IDEL;
         uart_data_t[6].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[6].tx_read = (uart_data_t[6].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[6].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA2_IT_TC8);
     }
 
@@ -260,6 +277,9 @@ void DMA2_Channel10_IRQHandler(void)
         DMA_Cmd(DMA2_Channel10,DISABLE);
         uart_data_t[7].uart_tx_dma_state = IDEL;
         uart_data_t[7].tx_read++;
+        /* Prevent access from out-of-bounds */
+        uart_data_t[7].tx_read = (uart_data_t[7].tx_read)%UART_TX_BUF_NUM;
+        uart_data_t[7].tx_remainBuffNum++;
         DMA_ClearITPendingBit(DMA2_IT_TC10);
     }
 

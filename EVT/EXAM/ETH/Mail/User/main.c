@@ -16,18 +16,16 @@ For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "mail.h"
 
-u8 MACAddr[6];                                                     //MAC address
-u8 IPAddr[4]   = {192,168,1,10};                                   //IP address
-u8 GWIPAddr[4] = {192,168,1,1};                                    //Gateway IP address
-u8 IPMask[4]   = {255,255,255,0};                                  //subnet mask
-u8 DESIP[4]    = {192,168,1,100};                                  //destination IP address
-u8 SocketId;                                                       //socket id
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];             //socket data buff
+u8 MACAddr[6];                                                      //MAC address
+u8 IPAddr[4]   = {192, 168, 1, 10};                                 //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                                  //Gateway IP address
+u8 IPMask[4]   = {255, 255, 255, 0};                                //subnet mask
+u8 DESIP[4]    = {192, 168, 1, 100};                                //destination IP address
+u8 SocketId;                                                        //socket id
+u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];              //socket data buff
 
 u8  ReceDatFlag = 0;
 u8  CheckType;
@@ -36,28 +34,28 @@ u16 ReceLen;
 
 /*SMTP related definitions, SMTP sending mail*/
 const u16 SmtpSourPrt     = 5300;
-const u8  SocketSMTPIP[4] = {183,47,101,192};                      //SMTP destination IP address
+const u8  SocketSMTPIP[4] = {183, 47, 101, 192};                    //SMTP destination IP address
 
 /*It is recommended to manually PING to
  * obtain the latest IP before using*/
 /*
- *   {220,181,15,73}    "smtp.126.com"
- *   {220,181,15,161}   "smtp.163.com"
- *   {183,47,101,192}   "smtp.qq.com"
- *   {64,233,189,108}   "smtp.gmail.com"
+ *   {220, 181, 15, 73}    "smtp.126.com"
+ *   {220, 181, 15, 161}   "smtp.163.com"
+ *   {183, 47, 101, 192}   "smtp.qq.com"
+ *   {64, 233, 189, 108}   "smtp.gmail.com"
 */
 
 /*POP3 related definitions, POP receiving mail*/
 const u16 Pop3SourPrt     = 4567;
-const u8  SocketPOP3IP[4] = {183,47,101,192};                      //POP3 destination IP address
+const u8  SocketPOP3IP[4] = {183, 47, 101, 192};                    //POP3 destination IP address
 
 /*It is recommended to manually PING to
  * obtain the latest IP before using*/
 /*
- *   {220,181,15,128}   "pop.126.com",
- *   {220,181,12,110}   "pop.163.com",
- *   {183,47,101,192}   "pop.qq.com",
- *   {108,177,125,108}  "pop.gmail.com"
+ *   {220, 181, 15, 128}   "pop.126.com",
+ *   {220, 181, 12, 110}   "pop.163.com",
+ *   {183, 47, 101, 192}   "pop.qq.com",
+ *   {108, 177, 125, 108}  "pop.gmail.com"
 */
 
 /* SMTP send email related parameters  */
@@ -117,7 +115,7 @@ void TIM2_Init( void )
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -166,24 +164,24 @@ void WCHNET_CreateTcpSmtp( void )
  */
 void WCHNET_CreateTcpPop3( void )
 {
-   u8 i;
-   SOCK_INF TmpSocketInf;
+    u8 i;
+    SOCK_INF TmpSocketInf;
 
-   memset((void *)SocketRecvBuf[1],'\0',sizeof(SocketRecvBuf[1]));
-   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
-   memcpy((void *)TmpSocketInf.IPAddr,SocketPOP3IP,4);
-   TmpSocketInf.DesPort = POP3_SERVER_PORT;
-   TmpSocketInf.SourPort = Pop3SourPrt;
-   TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-   TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
-   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-   printf("SocketId TCP pop3 = %02x\n",(u16)SocketId);
-   mStopIfError(i);
-   p_pop3->Socket = SocketId;
-   CheckType = POP_CHECK_CNNT;
-   i = WCHNET_SocketConnect(SocketId);
-   mStopIfError(i);
-   memset((void *)SocketRecvBuf[SocketId],'\0',sizeof(SocketRecvBuf[SocketId]));
+    memset((void *)SocketRecvBuf[1],'\0',sizeof(SocketRecvBuf[1]));
+    memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
+    memcpy((void *)TmpSocketInf.IPAddr,SocketPOP3IP,4);
+    TmpSocketInf.DesPort = POP3_SERVER_PORT;
+    TmpSocketInf.SourPort = Pop3SourPrt;
+    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+    TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
+    i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
+    printf("SocketId TCP pop3 = %02x\n",(u16)SocketId);
+    mStopIfError(i);
+    p_pop3->Socket = SocketId;
+    CheckType = POP_CHECK_CNNT;
+    i = WCHNET_SocketConnect(SocketId);
+    mStopIfError(i);
+    memset((void *)SocketRecvBuf[SocketId],'\0',sizeof(SocketRecvBuf[SocketId]));
 }
 
 /*********************************************************************
@@ -200,8 +198,10 @@ void WCHNET_CreateTcpPop3( void )
 void WCHNET_SendData( char *PSend, u32 Len,u8 type,u8 id  )
 {
     u32 length;
+    u8 TimoutCnt = 0xff;
     u8 i;
     u8 *p;
+
     p = (u8 *)PSend;
     length = Len;
     CheckType = type;
@@ -212,6 +212,8 @@ void WCHNET_SendData( char *PSend, u32 Len,u8 type,u8 id  )
         mStopIfError(i);
         length -= Len;
         p += Len;
+        if(TimoutCnt-- == 0)
+            break;
         if(length)continue;
         break;
     }
@@ -316,17 +318,17 @@ int main(void)
 	SystemCoreClockUpdate();
 	Delay_Init();
 	USART_Printf_Init(115200);                                                    //USART initialize
-	printf("Mail\r\n");  	
+	printf("Mail Test\r\n");
     printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-      printf("version error.\n");
+    if( WCHNET_LIB_VER != WCHNET_GetVer()){
+        printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                                   //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                              //Ethernet library initialize

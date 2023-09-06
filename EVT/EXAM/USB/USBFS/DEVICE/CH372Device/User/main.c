@@ -56,7 +56,7 @@ int main(void)
                 ret = USBFS_Endp_DataUp(DEF_UEP2, &Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_FS_PACK_SIZE], RingBuffer_Comm.PackLen[RingBuffer_Comm.DealPtr], DEF_UEP_DMA_LOAD);
                 if( ret == 0 )
                 {
-                    NVIC_EnableIRQ(OTG_FS_IRQn);
+                    NVIC_DisableIRQ(OTG_FS_IRQn);
                     RingBuffer_Comm.RemainPack--;
                     RingBuffer_Comm.DealPtr++;
                     if(RingBuffer_Comm.DealPtr == DEF_Ring_Buffer_Max_Blks)

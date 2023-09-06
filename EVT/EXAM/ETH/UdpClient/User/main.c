@@ -17,23 +17,20 @@ please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT
  */
 
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 
-#define UDP_RECE_BUF_LEN                1472
+#define UDP_RECE_BUF_LEN                                    1472
 u8 MACAddr[6];                                              //MAC address
-u8 IPAddr[4] = { 192, 168, 1, 10 };                         //IP address
-u8 GWIPAddr[4] = { 192, 168, 1, 1 };                        //Gateway IP address
-u8 IPMask[4] = { 255, 255, 255, 0 };                        //subnet mask
-u8 DESIP[4] = { 192, 168, 1, 100 };                         //destination IP address
+u8 IPAddr[4] = {192, 168, 1, 10};                           //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                          //Gateway IP address
+u8 IPMask[4] = {255, 255, 255, 0};                          //subnet mask
+u8 DESIP[4] = {192, 168, 1, 100};                           //destination IP address
 u16 desport = 1000;                                         //destination port
 u16 srcport = 1000;                                         //source port
 
 u8 SocketId;
 u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][UDP_RECE_BUF_LEN];      //socket receive buffer
 u8 MyBuf[UDP_RECE_BUF_LEN];
-
 /*********************************************************************
  * @fn      mStopIfError
  *
@@ -63,7 +60,7 @@ void TIM2_Init(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -95,7 +92,7 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf[SocketId];
     TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
-    printf("WCHNET_SocketCreat %d\r\n", SocketId);
+    printf("SocketId %d\r\n", SocketId);
     mStopIfError(i);
 }
 
@@ -225,17 +222,17 @@ int main(void)
     SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                 //USART initialize
-    printf("UdpClient Test\r\n");    	
+    printf("UDPClient Test\r\n");
     printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n", WCHNET_GetVer());
-    if ( WCHNET_LIB_VER != WCHNET_GetVer()) {
+    if (WCHNET_LIB_VER != WCHNET_GetVer()) {
         printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);        //Ethernet library initialize
@@ -243,7 +240,7 @@ int main(void)
     if (i == WCHNET_ERR_SUCCESS)
         printf("WCHNET_LibInit Success\r\n");
     for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
-        WCHNET_CreateUdpSocket();                                  //Create UDP Socket
+        WCHNET_CreateUdpSocket();                              //Create UDP Socket
 
     while(1)
     {

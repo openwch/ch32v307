@@ -16,20 +16,18 @@ For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "PING.h"
 
-u8 MACAddr[6];                                    //MAC address
-u8 IPAddr[4]   = {192,168,1,10};                  //IP address
-u8 GWIPAddr[4] = {192,168,1,1};                   //Gateway IP address
-u8 IPMask[4]   = {255,255,255,0};                 //subnet mask
-u8 DESIP[4]    = {192,168,1,100};                 //destination IP address
+u8 MACAddr[6];                                  //MAC address
+u8 IPAddr[4]   = {192, 168, 1, 10};             //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};              //Gateway IP address
+u8 IPMask[4]   = {255, 255, 255, 0};            //subnet mask
+u8 DESIP[4]    = {192, 168, 1, 100};            //destination IP address
 u8 IPRawProto  = 1;
 
-u8 SocketId;                                      //socket id
-u8 SocketRecvBuf[RECE_BUF_LEN];                   //socket receive buffer
+u8 SocketId;                                    //socket id
+u8 SocketRecvBuf[RECE_BUF_LEN];                 //socket receive buffer
 u8 MyBuf[RECE_BUF_LEN];
 
 /*********************************************************************
@@ -59,7 +57,7 @@ void TIM2_Init( void )
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure={0};
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -79,17 +77,17 @@ void TIM2_Init( void )
  */
 void WCHNET_CreateIPRawSocket(void)
 {
-   u8 i;
-   SOCK_INF TmpSocketInf;
+    u8 i;
+    SOCK_INF TmpSocketInf;
 
-   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
-   memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
-   TmpSocketInf.SourPort = IPRawProto;                               //In IPRAW mode, SourPort is the protocol type
-   TmpSocketInf.ProtoType = PROTO_TYPE_IP_RAW;
-   TmpSocketInf.RecvStartPoint = (u32)SocketRecvBuf;
-   TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
-   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-   mStopIfError(i);
+    memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
+    memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
+    TmpSocketInf.SourPort = IPRawProto;                               //In IPRAW mode, SourPort is the protocol type
+    TmpSocketInf.ProtoType = PROTO_TYPE_IP_RAW;
+    TmpSocketInf.RecvStartPoint = (u32)SocketRecvBuf;
+    TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
+    i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
+    mStopIfError(i);
 }
 
 /*********************************************************************
@@ -181,23 +179,23 @@ int main(void)
     USART_Printf_Init(115200);                                              //USART initialize
     printf("IPRaw_PING Test\r\n");   	
     printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-      printf("version error.\n");
+    if(WCHNET_LIB_VER != WCHNET_GetVer()){
+        printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                             //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                        //Ethernet library initialize
     mStopIfError(i);
     if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
     WCHNET_CreateIPRawSocket();                                             //create IPRAW socket
-    InitParameter( );
-    InitPING( );
+    InitParameter();
+    InitPING();
     while(1)
     {
         /*Ethernet library main task function,

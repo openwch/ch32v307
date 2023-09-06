@@ -1,7 +1,7 @@
 
 Nanjing Qinheng Microelectronics Co., Ltd. 2021.06
 
-http://wch-ic.com
+https://wch-ic.com
 
 
 Directory
@@ -33,6 +33,8 @@ Directory
   |      |      |      |      |-- DualADC_SlowInterleaved: dual ADC slow interleaved sampling routine  
   |      |      |      |      |-- ExtLines_Trigger: external lines trigger ADC conversion routine
   |      |      |      |      |-- Internal_Temperature: internal temperature sensor routine 
+  |      |      |      |      |-- TIM Trigger:TIM trigger ADC conversion routine 
+  |      |      |      |      |-- Temperature-External channel:Temperature-External channel Injection alternating inversion routine 
   |      |      |      |-- BKP: BKP routine
   |      |      |      |-- CAN
   |      |      |      |      |-- Networking: CAN routine: normal mode, standard frame and expanded frame data transceiver
@@ -51,11 +53,11 @@ Directory
   |      |      |      |-- DMA
   |      |      |      |      |-- DMA_MEM2MEM: memory to memory mode routine
   |      |      |      |      |-- DMA_MEM2PERIP: see each peripheral subroutine for memory to peripheral mode and peripheral to memory mode routines
-  |      |      |      |-- DVP ¡ª¡ªonly for CH32V30x_D8C
+  |      |      |      |-- DVP ----only for CH32V30x_D8C
   |      |      |      |      |-- DVP_TFTLCD: DVP routine to operate OV2640 camera video mode to display image on LCD
   |      |      |      |      |-- DVP_UART: DVP routine to operate OV2640 camera JPEG mode
-  |      |      |      |-- ETH ¡ª¡ªonly for CH32V30x_D8C
-  |      |      |      |      |-- 1_Tool_Doc£ºETH routine related documents and tools  
+  |      |      |      |-- ETH ----only for CH32V30x_D8C
+  |      |      |      |      |-- 1_Tool_Doc:ETH routine related documents and tools  
   |      |      |      |      |-- 8_UART_Server: demonstration routine of 8 UART network server   
   |      |      |      |      |-- DHCP: DHCP demonstration routine to obtain IP automatically
   |      |      |      |      |-- DNS: DHCP demonstration routine to obtain IP automatically and then request domain name resolution 
@@ -70,18 +72,19 @@ Directory
   |      |      |      |      |-- TcpServer: demonstration routine that TCP server receives data after connecting to the client and then returns data
   |      |      |      |      |-- UdpClient: demonstration routine that Udp Client receives data and returns data
   |      |      |      |      |-- UdpServer: demonstration routine that Udp Server receives data and returns data
-  |      |      |      |      |-- ETH_Filter_Multicast£ºdemonstrate filtering and multicast sending functions
+  |      |      |      |      |-- ETH_Filter_Multicast:demonstrate filtering and multicast sending functions
   |      |      |      |      |-- WebServer: Web Server routine, to demonstrate the configuration of WCHNET device functions through Web browser. As the WCHNET devices have built-in web server, the network parameter configuration and password management of WCHNET can be implemented on the web page.   
   |      |      |      |-- EXTI: external interrupt line routine
   |      |      |      |-- FLASH: FLASH erase/read/write, and fast programming
   |      |      |      |-- FPU: FPU hardware floating point operation routine
-  |      |      |      |-- FreeRTOS: FreeRTOS migration routine 
+  |      |      |      |-- FreeRTOS
+  |      |      |      |      |-- FreeRTOS_Core:FreeRTOS migration routines
   |      |      |      |-- FSMC  
   |      |      |      |      |-- LCD: FSMC routine to operate TFTLCD
   |      |      |      |      |-- NANDFLASH: FSMC routine to operate NANDFLASH 
   |      |      |      |      |-- SRAM: FSMC routine to operate NOR_ SRAM 
   |      |      |      |-- GPIO: GPIO routine
-  |      |      |      |-- HarmonyOS£ºHarmonyOS migration routine  
+  |      |      |      |-- HarmonyOS:HarmonyOS migration routine  
   |      |      |      |-- I2C
   |      |      |      |      |-- I2C_7bit_Mode: 7-bit address mode, master/slave mode, transceiver routine
   |      |      |      |      |-- I2C_10bit_Mode: 10 bit address mode, master/slave mode transceiver routine
@@ -104,15 +107,16 @@ Directory
   |      |      |      |      |-- Standby_Mode: low power, standby mode routine
   |      |      |      |      |-- Stop_Mode: low power, stop mode routine
   |      |      |      |      |-- Standby_RAM_LV_Mode: when LV is enabled in standby mode, RAM 2k and 30K low-power data holding routines
-  |      |      |      |      |-- Standby_RAM_Mode£ºwhen LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
+  |      |      |      |      |-- Standby_RAM_Mode:when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
   |      |      |      |-- RCC
-  |      |      |      |      |-- Get_CLK£ºGet system-HCLK-AHB1-AHB2 clock routine  
+  |      |      |      |      |-- Get_CLK:Get system-HCLK-AHB1-AHB2 clock routine  
   |      |      |      |      |-- MCO: MCO pin clock output routine
-  |      |      |      |      |-- HSI_PLL_Source£ºHSI or HSI/2 as PLL input clock routine  
+  |      |      |      |      |-- HSI_PLL_Source:HSI or HSI/2 as PLL input clock routine  
+  |      |      |      |      |-- HSE_CLK:HSE frequency check routine 
   |      |      |      |-- RNG: Random number generator routine   
   |      |      |      |-- RTC: calendar routine
-  |      |      |      |-- RT-Thread£ºRT thread migration routine 
-  |      |      |      |-- SDIO£ºSDIO routine to operate SD card
+  |      |      |      |-- RT-Thread:RT thread migration routine 
+  |      |      |      |-- SDIO:SDIO routine to operate SD card
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex: single wire half duplex mode, master/slave mode, data transceiver
   |      |      |      |      |-- 2Lines_FullDuplex: two-wire full duplex mode, master/slave mode, data transceiver
@@ -120,6 +124,8 @@ Directory
   |      |      |      |      |-- SPI_CRC: CRC error check and master/slave mode transceiver routine
   |      |      |      |      |-- SPI_DMA: SPI uses DMA, master/slave mode transceiver routine
   |      |      |      |      |-- SPI_FLASH: SPI interface operation flash peripheral routine
+  |      |      |      |-- SDI_Printf
+  |      |      |      |      |-- SDI_Printfï¼šdebug interface SDI, virtual serial port.   
   |      |      |      |-- TencentOS: TencentOS migration routine     
   |      |      |      |-- TIM
   |      |      |      |      |-- Clock_Select: clock source selection routine
@@ -129,10 +135,10 @@ Directory
   |      |      |      |      |-- One_Pulse: single pulse output routine
   |      |      |      |      |-- Output_Compare_Mode: output comparison mode routine
   |      |      |      |      |-- PWM_Output: PWM output routine
-  |      |      |      |      |-- Synchro_ExtTrigger£ºslave mode routine, including reset mode, gating mode and trigger mode
-  |      |      |      |      |-- Synchro_Timer£ºtimer synchronization mode
+  |      |      |      |      |-- Synchro_ExtTrigger:slave mode routine, including reset mode, gating mode and trigger mode
+  |      |      |      |      |-- Synchro_Timer:timer synchronization mode
   |      |      |      |      |-- TIM_DMA: timer DMA routines
-  |      |      |      |-- TOUCHKEY£ºtouchkey detection routine
+  |      |      |      |-- TOUCHKEY:touchkey detection routine
   |      |      |      |-- USART
   |      |      |      |      |-- USART_DMA: USART DMA, master/slave mode transceiver routine
   |      |      |      |      |-- USART_HalfDuplex: single wire half duplex mode, master/slave mode transceiver routine
@@ -145,37 +151,39 @@ Directory
   |      |      |      |-- USB
   |      |      |      |      |-- USBFS
   |      |      |      |      |      |-- DEVICE
-  |      |      |      |      |      |      |-- CH372£ºSimulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
-  |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
-  |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
+  |      |      |      |      |      |      |-- CH372:Simulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
+  |      |      |      |      |      |      |-- Compatibility_HID:Simulates HID devices, with data transmitted up and down through the serial port.
+  |      |      |      |      |      |      |-- CompositeKM:Simulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
   |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
   |      |      |      |      |      |      |-- MSC_CD-ROM: Simulate CDROM, need external SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 2 to send and receive.
-  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |-- SimulateCDC:Simulate a CDC serial port and use serial port 2 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID:Simulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
   |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
-  |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
-  |      |      |      |      |      |-- Host_Udisk£ºUSB host operation USB disk routine 
-  |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
+  |      |      |      |      |      |-- HOST_MTP_FileSystem:Enumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Host_Udisk:USB host operation USB disk routine 
+  |      |      |      |      |      |-- Udisk_Lib:U disk file system library file   
   |      |      |      |      |-- USBHS 
   |      |      |      |      |      |-- DEVICE
-  |      |      |      |      |      |      |-- CH372£ºSimulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
-  |      |      |      |      |      |      |-- Compatibility_HID£ºSimulates HID devices, with data transmitted up and down through the serial port.
-  |      |      |      |      |      |      |-- CompositeKM£ºSimulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
+  |      |      |      |      |      |      |-- CH372:Simulates a custom USB device (CH372 device) with endpoints 1, 3 down and 2, 4 up. Data down from endpoint 1 is uploaded from endpoint 3 and not reversed, and data down from endpoint 2 is uploaded from endpoint 4 and reversed.
+  |      |      |      |      |      |      |-- Compatibility_HID:Simulates HID devices, with data transmitted up and down through the serial port.
+  |      |      |      |      |      |      |-- CompositeKM:Simulate keyboard and mouse, use IO to simulate keystrokes, while simulated data can be uploaded through serial port 2.
   |      |      |      |      |      |      |-- MSC_U-Disk: Smulates a simple USB flash drive, optionally using on-chip Flash or external SPI-Flash
   |      |      |      |      |      |      |-- MSC_CD-ROM: Simulate CDROM, need external SPI-Flash
   |      |      |      |      |      |      |--USB_ECM-NetWorkAdaptor: USB ECM routines
-  |      |      |      |      |      |      |-- SimulateCDC£ºSimulate a CDC serial port and use serial port 2 to send and receive.
-  |      |      |      |      |      |      |-- SimulateCDC-HID£ºSimulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |--USB_RNDIS-NetWorkAdaptor: USB RNDIS routines
+  |      |      |      |      |      |      |--USB_NCM-NetWorkAdaptor: USB NCM routines
+  |      |      |      |      |      |      |-- SimulateCDC:Simulate a CDC serial port and use serial port 2 to send and receive.
+  |      |      |      |      |      |      |-- SimulateCDC-HID:Simulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
   |      |      |      |      |      |-- HOST_KM: The host operates the keypad, gets the data of the endpoints uploaded by the keypad and prints it, supports U-port under level 1 hub
-  |      |      |      |      |      |-- HOST_MTP_FileSystem£ºEnumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
-  |      |      |      |      |      |-- Host_Udisk£ºUSB host operation USB disk routine 
-  |      |      |      |      |      |-- Udisk_Lib£ºU disk file system library file   
+  |      |      |      |      |      |-- HOST_MTP_FileSystem:Enumeration process of a USB host to a device that supports MTP and PTP protocols, supports MTP and PTP protocols, and reads its files
+  |      |      |      |      |      |-- Host_Udisk:USB host operation USB disk routine 
+  |      |      |      |      |      |-- Udisk_Lib:U disk file system library file   
   |      |      |      |-- VoiceRcgExam: individual term voice recognition routine 
   |      |      |      |-- WWDG: window watchdog routine
 

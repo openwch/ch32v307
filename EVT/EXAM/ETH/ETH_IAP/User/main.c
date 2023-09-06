@@ -12,8 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "IAP_Task.h"
 /*
@@ -27,10 +25,10 @@ please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT
 */
 
 u8 MACAddr[6];                                                      //MAC address
-u8 IPAddr[4]   = {192,168,1,10};                                    //IP address
-u8 GWIPAddr[4] = {192,168,1,1};                                     //Gateway IP address
-u8 IPMask[4]   = {255,255,255,0};                                   //subnet mask
-u8 DESIP[4]    = {192,168,1,100};                                   //destination IP address
+u8 IPAddr[4]   = {192, 168, 1, 10};                                 //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                                  //Gateway IP address
+u8 IPMask[4]   = {255, 255, 255, 0};                                //subnet mask
+u8 DESIP[4]    = {192, 168, 1, 100};                                //destination IP address
 u16 desport = 1000;                                                 //destination port
 u16 srcport = 1000;                                                 //source port
 
@@ -67,7 +65,7 @@ void TIM2_Init( void )
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -88,20 +86,20 @@ void TIM2_Init( void )
  */
 void WCHNET_CreateTcpSocket(void)
 {
-   u8 i;
-   SOCK_INF TmpSocketInf;
+    u8 i;
+    SOCK_INF TmpSocketInf;
 
-   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
-   memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
-   TmpSocketInf.DesPort  = desport;
-   TmpSocketInf.SourPort = srcport;
-   TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-   TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
-   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-   printf("WCHNET_SocketCreat %d\r\n",SocketId);
-   mStopIfError(i);
-   i = WCHNET_SocketConnect(SocketId);
-   mStopIfError(i);
+    memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
+    memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
+    TmpSocketInf.DesPort  = desport;
+    TmpSocketInf.SourPort = srcport;
+    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+    TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
+    i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
+    printf("WCHNET_SocketCreat %d\r\n",SocketId);
+    mStopIfError(i);
+    i = WCHNET_SocketConnect(SocketId);
+    mStopIfError(i);
 }
 
 /*********************************************************************
@@ -219,7 +217,7 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                                      //USART initialize   	
     printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     GPIOInit();
     /*Detect whether the button(PA0) is pressed, if pressed,
      *make a TCP connection to upgrade, otherwise jump
@@ -227,7 +225,7 @@ int main(void)
     if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0){
         Delay_Ms(50);
         if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0){
-            printf("IAP test\r\n");
+            printf("IAP Test\r\n");
             printf("SystemClk:%d\r\n",SystemCoreClock);
             printf("net version:%x\n",WCHNET_GetVer());
             if( WCHNET_LIB_VER != WCHNET_GetVer() ){

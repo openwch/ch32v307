@@ -1,7 +1,7 @@
 
 南京沁恒微电子股份有限公司 2021.06
 最新资料请到我们的网站上查询
-http://wch.cn
+https://wch.cn
 
 
 文件目录
@@ -32,7 +32,9 @@ http://wch.cn
   |      |      |      |      |-- DualADC_RegSimul：双ADC同步规则采样例程
   |      |      |      |      |-- DualADC_SlowInterleaved：双ADC慢速交叉采样例程  
   |      |      |      |      |-- ExtLines_Trigger：外部触发ADC转换例程
-  |      |      |      |      |-- Internal_Temperature：内部温度传感器例程  
+  |      |      |      |      |-- Internal_Temperature：内部温度传感器例程 
+  |      |      |      |      |-- Temperature-External channel：温度传感器_外部通道交替注入例程
+  |      |      |      |      |-- TIM_trigger：定时器触发ADC转换例程 
   |      |      |      |-- BKP：BKP例程
   |      |      |      |-- CAN
   |      |      |      |      |-- Networking：CAN例程：正常模式，标准帧和扩展帧数据收发
@@ -75,7 +77,8 @@ http://wch.cn
   |      |      |      |-- EXTI：外部中断线例程
   |      |      |      |-- FLASH：FLASH的擦/读/写，以及快速编程
   |      |      |      |-- FPU：FPU硬件浮点运算例程
-  |      |      |      |-- FreeRTOS：FreeRTOS移植例程  
+  |      |      |      |-- FreeRTOS：FreeRTOS移植例程
+  |      |      |      |      |-- FreeRTOS_Core：移植FreeRTOS例程
   |      |      |      |-- FSMC  
   |      |      |      |      |-- LCD：FSMC操作TFTLCD例程
   |      |      |      |      |-- NANDFLASH：FSMC操作NANDFLASH例程
@@ -109,6 +112,7 @@ http://wch.cn
   |      |      |      |      |-- Get_CLK：获取system-HCLK-AHB1-AHB2时钟例程  
   |      |      |      |      |-- MCO：MCO引脚时钟输出例程
   |      |      |      |      |-- HSI_PLL_Source：HSI或HSI/2作为PLL输入时钟例程  
+  |      |      |      |      |-- HSE_CLK：检查HSE频率例程
   |      |      |      |-- RNG：随机数发生器例程   
   |      |      |      |-- RTC：日历例程
   |      |      |      |-- RT-Thread：RT-Thread移植例程   
@@ -120,6 +124,8 @@ http://wch.cn
   |      |      |      |      |-- SPI_CRC：使用CRC错误校验，Master/Slave 模式收发例程
   |      |      |      |      |-- SPI_DMA：SPI使用DMA，Master/Slave 模式收发例程
   |      |      |      |      |-- SPI_FLASH：SPI接口操作FLASH外设例程
+  |      |      |      |-- SDI_Printf
+  |      |      |      |      |-- SDI_Printf：调试接口SDI虚拟串口 
   |      |      |      |-- TencentOS：TencentOS移植例程     
   |      |      |      |-- TIM
   |      |      |      |      |-- Clock_Select：时钟源选择例程
@@ -167,6 +173,8 @@ http://wch.cn
   |      |      |      |      |      |      |-- MSC_U-Disk: 模拟简单U盘，可选使用片内Flash或外部SPI-Flash
   |      |      |      |      |      |      |-- MSC_CD-ROM: 模拟CDROM，需要外挂SPI-Flash
   |      |      |      |      |      |      |-- USB_ECM-NetWorkAdaptor: USB ECM网卡例程
+  |      |      |      |      |      |      |-- USB_NCM-NetWorkAdaptor: USB NCM网络适配器例程
+  |      |      |      |      |      |      |-- USB_RNDIS-NetWorkAdaptor: USB RNDIS网络适配器例程
   |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
   |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
   |      |      |      |      |      |-- HOST_IAP

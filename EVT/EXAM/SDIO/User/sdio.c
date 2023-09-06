@@ -31,7 +31,7 @@ u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes );
 
 static u8 CardType = SDIO_STD_CAPACITY_SD_CARD_V1_1;
 static u32 CSD_Tab[4], CID_Tab[4], RCA = 0;
-static u8 DeviceMode = SD_DMA_MODE;
+static u8 DeviceMode = SD_POLLING_MODE;
 static u8 StopCondition = 0;
 volatile SD_Error TransferError = SD_OK;
 volatile u8 TransferEnd = 0;
@@ -725,6 +725,7 @@ SD_Error SD_ReadBlock( u8 *buf, long long addr, u16 blksize )
         TransferEnd = 0;
         SDIO->MASK |= ( 1 << 1 ) | ( 1 << 3 ) | ( 1 << 8 ) | ( 1 << 5 ) | ( 1 << 9 );
         SDIO_DMACmd( ENABLE );
+        DMA_Cmd( DMA2_Channel4, ENABLE );
         while( ( ( DMA2->INTFR & 0X2000 ) == RESET ) && ( TransferEnd == 0 ) && ( TransferError == SD_OK ) && timeout )
         {
             timeout--;
@@ -905,6 +906,7 @@ SD_Error SD_ReadMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
             TransferEnd = 0;
             SDIO->MASK |= ( 1 << 1 ) | ( 1 << 3 ) | ( 1 << 8 ) | ( 1 << 5 ) | ( 1 << 9 );
             SDIO->DCTRL |= 1 << 3;
+            DMA_Cmd( DMA2_Channel4, ENABLE );
             while( ( ( DMA2->INTFR & 0X2000 ) == RESET ) && timeout )
             {
                 timeout--;
@@ -1119,6 +1121,7 @@ SD_Error SD_WriteBlock( u8 *buf, long long addr,  u16 blksize )
         TransferEnd = 0;
         SDIO->MASK |= ( 1 << 1 ) | ( 1 << 3 ) | ( 1 << 8 ) | ( 1 << 4 ) | ( 1 << 9 );
         SDIO->DCTRL |= 1 << 3;
+        DMA_Cmd( DMA2_Channel4, ENABLE );
         while( ( ( DMA2->INTFR & 0X2000 ) == RESET ) && timeout )
         {
             timeout--;
@@ -1361,6 +1364,7 @@ SD_Error SD_WriteMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
             TransferEnd = 0;
             SDIO->MASK |= ( 1 << 1 ) | ( 1 << 3 ) | ( 1 << 8 ) | ( 1 << 4 ) | ( 1 << 9 );
             SDIO->DCTRL |= 1 << 3;
+            DMA_Cmd( DMA2_Channel4, ENABLE );
             timeout = SDIO_DATATIMEOUT;
             while( ( ( DMA2->INTFR & 0X2000 ) == RESET ) && timeout )
             {

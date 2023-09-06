@@ -27,6 +27,13 @@
  *  3¡¢BROADCAST_FILTER
  * */
 
+/* NOTE:
+ * If the following functions are configured as 1,
+ * the corresponding MAC address data packets can be received,
+ * otherwise they will be filtered out.*/
+
+/* The following are the configuration
+ * options for destination MAC address filtering*/
 #define DES_ADDR_FILTER                             1
 
 #define UNICAST_PERFECT_FILTER                      1
@@ -37,8 +44,12 @@
 #define MULTICAST_HASH_FILTER                       0
 #define MULTICAST_HASH_OR_PERFECT_FILTER            0
 
+/* the configuration option for
+ * source MAC address filtering */
 #define SRC_ADDR_PERFECT_FILTER                     0
 
+/* the configuration option for
+ * broadcast filtering */
 #define BROADCAST_FILTER                            0
 
 #define UNICAST_HashOrPerfectFilter                 1

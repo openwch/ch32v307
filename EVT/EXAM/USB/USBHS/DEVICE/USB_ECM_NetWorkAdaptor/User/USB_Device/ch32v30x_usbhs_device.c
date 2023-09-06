@@ -143,13 +143,13 @@ void USBHS_Device_Init( FunctionalState sta )
 }
 
 /*********************************************************************
- * @fn      ECM_Status_USB_UpLoad
+ * @fn      USBHS_EP1_UpLoad
  *
- * @brief   ecm status usb endp1 upload
+ * @brief   usb endp1 upload via dma
  *
  * @return  none
  */
-uint8_t ECM_Status_USB_UpLoad( uint16_t len, uint32_t dma_adr )
+uint8_t USBHS_EP1_UpLoad( uint16_t len, uint32_t dma_adr )
 {
     if( (USBHS_Endp_Busy[ DEF_UEP1 ] & DEF_UEP_BUSY) == RESET )
     {
@@ -166,13 +166,13 @@ uint8_t ECM_Status_USB_UpLoad( uint16_t len, uint32_t dma_adr )
 }
 
 /*********************************************************************
- * @fn      ETH2USB_USB_UpLoad
+ * @fn      USBHS_EP2_UpLoad
  *
- * @brief   eth data usb endp2 upload
+ * @brief   usb endp2 upload via dma
  *
  * @return  none
  */
-uint8_t ETH2USB_USB_UpLoad( uint16_t len, uint32_t dma_adr )
+uint8_t USBHS_EP2_UpLoad( uint16_t len, uint32_t dma_adr )
 {
     if( (USBHS_Endp_Busy[ DEF_UEP2 ] & DEF_UEP_BUSY) == RESET )
     {
@@ -214,12 +214,12 @@ void USBHS_IRQHandler( void )
                     /* end-point 3 data out interrupt */
                     case USBHS_UIS_TOKEN_OUT | DEF_UEP3:
                         len = (uint16_t)(USBHSD->RX_LEN);
-                        if( len >= DEF_USB_EP3_HS_SIZE )
+                        if( len >= USBHS_DevMaxPackLen )
                         {
                             /* full pack */
                             USBHS_Endp3_RxLen += len;
                             /* Move USB DMA Address */
-                            USBHSD->UEP3_RX_DMA += DEF_USB_EP3_HS_SIZE;
+                            USBHSD->UEP3_RX_DMA += USBHS_DevMaxPackLen;
                         }
                         else
                         {
@@ -335,44 +335,6 @@ void USBHS_IRQHandler( void )
                         USBHSD->UEP2_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
                         USBHSD->UEP2_TX_CTRL = (USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
                         USBHS_Endp_Busy[ DEF_UEP2 ] &= ~DEF_UEP_BUSY;
-#if 0
-                        if( E2U_Trance_Manage.StopFlag )
-                        {
-                            e2u_deal_ptr = E2U_Trance_Manage.DealPtr;
-                            if( E2U_PackLen[ e2u_deal_ptr ] >= DEF_USB_EP3_HS_SIZE )
-                            {
-                                ret = ETH2USB_USB_UpLoad( DEF_USB_EP3_HS_SIZE, E2U_PackAdr[ e2u_deal_ptr ] );
-                                if( ret == 0 )
-                                {
-                                    E2U_PackLen[ e2u_deal_ptr ] -= DEF_USB_EP3_HS_SIZE;
-                                }
-                            }
-                            else
-                            {
-                                ret = ETH2USB_USB_UpLoad( E2U_PackLen[ e2u_deal_ptr ], E2U_PackAdr[ e2u_deal_ptr ] );
-                                if( ret == 0 )
-                                {
-                                    /* last pack (size <=512) */
-                                    DMARxDealTabs[ e2u_deal_ptr ]->Status |= ETH_DMARxDesc_OWN;
-                                    E2U_PackLen[ e2u_deal_ptr ] = 0;
-                                    E2U_PackAdr[ e2u_deal_ptr ] = 0;
-                                    E2U_Trance_Manage.StopFlag = 0;
-                                    NVIC_DisableIRQ( ETH_IRQn );
-                                    E2U_Trance_Manage.RemainPack--;
-                                    E2U_Trance_Manage.DealPtr++;
-                                    if( E2U_Trance_Manage.DealPtr >= DEF_E2U_MAXBLOCKS )
-                                    {
-                                        E2U_Trance_Manage.DealPtr = 0;
-                                    }
-                                    NVIC_EnableIRQ( ETH_IRQn );
-                                }
-                            }
-                        }
-                        else
-                        {
-                            USBHSD->UEP2_TX_CTRL = (USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
-                        }
-#endif
                         break;
 
                     default :
@@ -406,46 +368,16 @@ void USBHS_IRQHandler( void )
         if ( ( USBHS_SetupReqType & USB_REQ_TYP_MASK ) != USB_REQ_TYP_STANDARD )
         {
             /* usb non-standard request processing */
-            /* NCM��ECM������ */
+            /* NCM&ECM Request */
             switch( USBHS_SetupReqCode )
             {
-                /******************����ΪECMģʽ�������*************************** */
+                /*********************ECM*************************/
                 case DEF_ECM_SET_ETHPACKETFILTER:
-                    /* 0x43: ���������˽�����̫�����Ĺ����� */
+                    /* 0x43 */
                     errflag = 0x00;
-                    ECM_Change_MAC_Filter( USBHS_SetupReqValue&0x1F );
-                    break;
-#if 0
-                case DEF_ECM_SENDENCAPCMD:
-                    /* 0x00: ���ڷ���һ������Э����֧�ֵ����� */
-                    errflag = 0xFF;
+                    ECM_Change_MAC_Filter( (uint8_t)(USBHS_SetupReqValue&0x1F) );
                     break;
 
-                case DEF_ECM_GET_ENCAPRESPONSE:
-                    /* 0x01: ��������Կ���Э����֧�ֵĻ�Ӧ */
-                    errflag = 0xFF;
-                    break;
-
-                case DEF_ECM_SET_ETHMULFILTERS:
-                    /* 0x40: ���������鲥 */
-                    errflag = 0xFF;
-                    break;
-
-                case DEF_ECM_SET_ETHPOWER:
-                    /* 0x41: ���������Դ����ģʽ */
-                    errflag = 0xFF;
-                    break;
-
-                case DEF_ECM_GET_ETHPOWER:
-                    /* 0x42: ��ȡ�����Դ����ģʽ */
-                    errflag = 0xFF;
-                    break;
-
-                case DEF_ECM_GET_ETHSTATISTIC:
-                    /* 0x44: ��ȡ�����豸��ͳ����Ϣ���������Ͱ����������հ����������մ���������� */
-                    errflag = 0xFF;
-                    break;
-#endif
                 default:
                     errflag = 0xFF;
                     break;
@@ -830,6 +762,8 @@ void USBHS_IRQHandler( void )
 
         USBHSD->DEV_AD = 0;
         USBHS_Device_Endp_Init( );
+        PhyInit_Flag = 0;
+        ETH_DeInit( );
         USBHSD->INT_FG = USBHS_UIF_BUS_RST;
     }
     else if( intflag & USBHS_UIF_SUSPEND )

@@ -13,4 +13,5 @@ Description=ROM(byte): 256K, SRAM(byte): 64K, CHIP PINS: 64, GPIO PORTS: 51.\nWC
 
 PeripheralVersion=1.4
 MCU=CH32V307RVT6
-Target Path=obj/ETH_UART.hex
+Target Path=obj\ETH_UART.hex
+CLKSpeed=1

@@ -106,7 +106,6 @@ int MQTTSerialize_connectLength(MQTTPacket_connectData* options)
 	rc = ptr - buf;
 
 	exit: FUNC_EXIT_RC(rc);
-	printf("rc=%d\n",rc);
 	return rc;
 }
 

@@ -295,8 +295,8 @@ void GPIO_ResetBits(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
  * @param   GPIO_Pin - specifies the port bit to be written.
  *            This parameter can be one of GPIO_Pin_x where x can be (0..15).
  *          BitVal - specifies the value to be written to the selected bit.
- *            Bit_SetL - to clear the port pin.
- *            Bit_SetH - to set the port pin.
+ *            Bit_RESET - to clear the port pin.
+ *            Bit_SET - to set the port pin.
  *
  * @return  none
  */
@@ -484,7 +484,7 @@ void GPIO_PinRemapConfig(uint32_t GPIO_Remap, FunctionalState NewState)
         }
         else /* [31:0] 1bit */
         {
-            tmpreg &= ~(tmp << ((GPIO_Remap >> 0x15) * 0x10));
+            tmpreg &= ~(tmp << (((GPIO_Remap & 0x7FFFFFFF)>> 0x15) * 0x10));
         }
     }
     else
@@ -510,7 +510,7 @@ void GPIO_PinRemapConfig(uint32_t GPIO_Remap, FunctionalState NewState)
     /* Set bit */
     if(NewState != DISABLE)
     {
-        tmpreg |= (tmp << ((GPIO_Remap >> 0x15) * 0x10));
+        tmpreg |= (tmp << (((GPIO_Remap & 0x7FFFFFFF)>> 0x15) * 0x10));
     }
 
     if((GPIO_Remap & 0x80000000) == 0x80000000)
@@ -565,4 +565,236 @@ void GPIO_ETH_MediaInterfaceConfig(uint32_t GPIO_ETH_MediaInterface)
     {
         AFIO->PCFR1 &= ~(1 << 23);
     }
+}
+/*********************************************************************
+ * @fn      GPIO_IPD_Unused
+ *
+ * @brief   Configure unused GPIO as input pull-down.
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+void GPIO_IPD_Unused(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    uint32_t chip = 0;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC|\
+                           RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE, ENABLE);
+    chip =  *( uint32_t * )0x1FFFF704 & (~0x000000F0);
+    switch(chip)
+    {
+        case 0x30330504:     //CH32V303CBT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30320504:     //CH32V303RBT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30310504:     //CH32V303RCT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30520508:     //CH32V305FBP6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_2\
+                                         |GPIO_Pin_3|GPIO_Pin_4\
+                                         |GPIO_Pin_6|GPIO_Pin_7\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOA, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_8|GPIO_Pin_9;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOB, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_13\
+                                         |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_6|GPIO_Pin_7\
+                                         |GPIO_Pin_8|GPIO_Pin_9\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_13\
+                                         |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_6|GPIO_Pin_7\
+                                         |GPIO_Pin_8|GPIO_Pin_9\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_13\
+                                         |GPIO_Pin_14|GPIO_Pin_15;
+
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30500508:     //CH32V305RBT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+          case 0x30710508:     //CH32V307RCT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_2|GPIO_Pin_3\
+                                          |GPIO_Pin_4|GPIO_Pin_5\
+                                          |GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30730508:     //CH32V307WCU6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_2\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13|GPIO_Pin_14\
+                                          |GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x30700508:     //CH32V307VCT6
+        {        
+            break;
+        }
+        case 0x30300504:     //CH32V303VCT6
+        {        
+            break;
+        }
+        default:
+        {
+            break;
+        }
+
+    }
+
 }

@@ -22,10 +22,10 @@
 
 typedef enum { IDEL = 0, BUSY = !IDEL} Uart_TX_DMA_State;
 
-#define UART_RX_DMA_SIZE    2048  /* Must be a power of 2 ( a%2^n = a&(2^n - 1) )*/
 #define ETH_RECEIVE_SIZE    800
 #define UART_TX_BUF_NUM     5
-#define BAUD_RATE  1000000      //BAUDRATE
+#define UART_RX_DMA_SIZE    (2*ETH_RECEIVE_SIZE)
+#define BAUD_RATE  921600      //BAUDRATE
 
 
 struct uart_data
@@ -39,6 +39,7 @@ struct uart_data
 	uint32_t rx_write;
 	uint8_t  tx_read;
 	uint8_t  tx_write;
+    uint8_t  tx_remainBuffNum;
 	Uart_TX_DMA_State  uart_tx_dma_state;    /* 0 -> idle, 1 -> busy */
 };
 

@@ -96,6 +96,8 @@ extern volatile uint8_t  USBHS_DevConfig;
 extern volatile uint8_t  USBHS_DevAddr;
 extern volatile uint8_t  USBHS_DevSleepStatus;
 extern volatile uint8_t  USBHS_DevEnumStatus;
+extern volatile uint16_t USBHS_DevMaxPackLen;
+extern volatile uint8_t  USBHS_DevSpeed;
 
 /* Endpoint tx busy flag */
 extern volatile uint8_t  USBHS_Endp_Busy[ ];
@@ -112,8 +114,8 @@ extern void USBHS_Device_SetAddress( uint32_t address );
 extern void USBHS_IRQHandler( void );
 extern void USBHS_Sleep_WakeUp_Cfg( void );
 extern void USBHD_Sleep_Wakeup_Operate( void );
-extern uint8_t ETH2USB_USB_UpLoad( uint16_t len, uint32_t dma_adr );
-extern uint8_t ECM_Status_USB_UpLoad( uint16_t len, uint32_t dma_adr );
+extern uint8_t USBHS_EP1_UpLoad( uint16_t len, uint32_t dma_adr );
+extern uint8_t USBHS_EP2_UpLoad( uint16_t len, uint32_t dma_adr );
 
 #ifdef __cplusplus
 }

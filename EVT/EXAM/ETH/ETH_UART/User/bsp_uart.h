@@ -16,13 +16,13 @@
 #include "net_config.h"
 
 /* Global define */
-#define BAUD_RATE  1000000
+#define BAUD_RATE  921600
 
 #define size(a)   (sizeof(a) / sizeof(*(a)))
 
 #define MIN(X,Y)  ((X) < (Y) ? (X) : (Y))
 
-#define UART_RX_DMA_SIZE    2048            //Must be a power of 2 ( a%2^n = a&(2^n - 1) )
+#define UART_RX_DMA_SIZE    RECE_BUF_LEN
 
 #define ETH_RECEIVE_SIZE    RECE_BUF_LEN
 
@@ -47,7 +47,7 @@ struct uart_data
 
 extern struct uart_data  uart_data_t;
 
-extern void BSP_Uart_Init(void);
+extern void BSP_Uart_Init(uint32_t baudrate );
 
 #endif /* end of bsp_uart.h */
 

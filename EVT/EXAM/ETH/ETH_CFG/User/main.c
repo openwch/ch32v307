@@ -18,40 +18,38 @@ For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "ModuleConfig.h"
 
-__attribute__((aligned(4))) u8 Default_cfg[MODULE_CFG_LEN]= {                    //Module default configuration
-    'W','C','H','N','E','T','M','O','D','U','L','E',0,0,0,0,0,0,0,0,0,           //module name
-    NET_MODULE_TYPE_NONE,                                                        //The module is in default mode (no mode is enabled by default)
-    192,168,1,10,                                                                //The IP address of the module
-    255,255,255,0,                                                               //The subnet mask of the module
-    192,168,1,1,                                                                 //The gateway address of the module
-    1000%256,1000/256,                                                           //Module source port
-    192,168,1,100,                                                               //destination IP address
-    1000%256,1000/256 ,                                                          //destination port
-    checkcode1,checkcode2                                                        //Verification code, used to verify configuration information
+__attribute__((aligned(4))) u8 Default_cfg[MODULE_CFG_LEN]= {                   //Module default configuration
+    'W','C','H','N','E','T','M','O','D','U','L','E',0,0,0,0,0,0,0,0,0,          //module name
+    NET_MODULE_TYPE_NONE,                                                       //The module is in default mode (no mode is enabled by default)
+    192,168,1,10,                                                               //The IP address of the module
+    255,255,255,0,                                                              //The subnet mask of the module
+    192,168,1,1,                                                                //The gateway address of the module
+    1000%256,1000/256,                                                          //Module source port
+    192,168,1,100,                                                              //destination IP address
+    1000%256,1000/256 ,                                                         //destination port
+    checkcode1,checkcode2                                                       //Verification code, used to verify configuration information
 };
 
 u8 sockFlag;
 u8 Configbuf[MODULE_CFG_LEN];
 pmodule_cfg CFG = (pmodule_cfg)Configbuf;
 
-u8 MACAddr[6];                                                                   //MAC address
-u8 IPAddr[4];                                                                    //IP address
-u8 GWIPAddr[4];                                                                  //Gateway IP address
-u8 IPMask[4];                                                                    //subnet mask
-u8 DESIP[4];                                                                     //destination IP address
+u8 MACAddr[6];                                                                  //MAC address
+u8 IPAddr[4];                                                                   //IP address
+u8 GWIPAddr[4];                                                                 //Gateway IP address
+u8 IPMask[4];                                                                   //subnet mask
+u8 DESIP[4];                                                                    //destination IP address
 
-u8 SocketId;                                                                     //socket id
-u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];                           //socket data buff
+u8 SocketId;                                                                    //socket id
+u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];                          //socket data buff
 
 /*Host computer communication parameters*/
-u8  brocastIp[4] = {255,255,255,255};                                            //Broadcast IP address, cannot be changed
-u16 brocastPort = 60000;                                                         //Host computer communication port
-u16 localPort = 50000;                                                           //local communication port
+u8  brocastIp[4] = {255, 255, 255, 255};                                        //Broadcast IP address, cannot be changed
+u16 brocastPort = 60000;                                                        //Host computer communication port
+u16 localPort = 50000;                                                          //local communication port
 u8 MyBuf[RECE_BUF_LEN];
 /*********************************************************************
  * @fn      mStopIfError
@@ -82,7 +80,7 @@ void TIM2_Init( void )
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -107,7 +105,7 @@ void TIM2_Init( void )
  *
  * @return  none
  */
-void WCHNET_UdpServerRecv(struct _SCOK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u32 len)
+void WCHNET_UdpServerRecv(struct _SOCK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u32 len)
 {
     u8 i;
 
@@ -130,7 +128,7 @@ void WCHNET_UdpServerRecv(struct _SCOK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u
  *
  * @return  none
  */
-void WCHNET_UdpSRecv(struct _SCOK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u32 len)
+void WCHNET_UdpSRecv(struct _SOCK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u32 len)
 {
     u8 ip_addr[4],i;
 
@@ -163,41 +161,41 @@ void WCHNET_Create_Communication_Socket(void)
     TmpSocketInf.DesPort = ((u16)CFG->dest_port[0]+(u16)CFG->dest_port[1]*256);
     TmpSocketInf.SourPort = ((u16)CFG->src_port[0]+(u16)CFG->src_port[1]*256);
     switch(CFG->type){
-     case NET_MODULE_TYPE_TCP_S:
-          TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-          sockFlag= NET_MODULE_TYPE_TCP_S;
-          break;
-     case NET_MODULE_TYPE_TCP_C:
-          TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-          sockFlag= NET_MODULE_TYPE_TCP_C;
-          break;
-     case NET_MODULE_TYPE_UDP_S:
-          TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
-          TmpSocketInf.AppCallBack = WCHNET_UdpSRecv;
-          sockFlag= NET_MODULE_TYPE_UDP_S;
-          break;
-     case NET_MODULE_TYPE_UDP_C:
-          TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
-          sockFlag= NET_MODULE_TYPE_UDP_C;
-          break;
-     default:
-          break;
+        case NET_MODULE_TYPE_TCP_S:
+            TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+            sockFlag= NET_MODULE_TYPE_TCP_S;
+            break;
+        case NET_MODULE_TYPE_TCP_C:
+            TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+            sockFlag= NET_MODULE_TYPE_TCP_C;
+            break;
+        case NET_MODULE_TYPE_UDP_S:
+            TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
+            TmpSocketInf.AppCallBack = WCHNET_UdpSRecv;
+            sockFlag= NET_MODULE_TYPE_UDP_S;
+            break;
+        case NET_MODULE_TYPE_UDP_C:
+            TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
+            sockFlag= NET_MODULE_TYPE_UDP_C;
+            break;
+        default:
+            break;
     }
     TmpSocketInf.RecvStartPoint = (u32)SocketRecvBuf[1];
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
     mStopIfError(i);
     switch(CFG->type){
-     case NET_MODULE_TYPE_TCP_S:
-          WCHNET_SocketListen(SocketId);
-          printf("listening\n");
-          break;
-     case NET_MODULE_TYPE_TCP_C:
-          WCHNET_SocketConnect(SocketId);
-          printf("connecting\n");
-          break;
-     default:
-          break;
+        case NET_MODULE_TYPE_TCP_S:
+            WCHNET_SocketListen(SocketId);
+            printf("listening\n");
+            break;
+        case NET_MODULE_TYPE_TCP_C:
+            WCHNET_SocketConnect(SocketId);
+            printf("connecting\n");
+            break;
+        default:
+            break;
     }
 }
 
@@ -252,18 +250,19 @@ void WCHNET_DataLoopback(u8 id)
     }
 #else
     u32 len, totallen;
-    u8 *p = MyBuf;
+    u8 *p = MyBuf, TransCnt = 255;
 
     len = WCHNET_SocketRecvLen(id, NULL);                                //query length
-    printf("Receive Len = %02x\n", len);
-    WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
+    printf("Receive Len = %d\r\n", len);
     totallen = len;
+    WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
     while(1){
         len = totallen;
         WCHNET_SocketSend(id, p, &len);                                  //Send the data
         totallen -= len;                                                 //Subtract the sent length from the total length
         p += len;                                                        //offset buffer pointer
-        if(totallen)continue;                                            //If the data is not sent, continue to send
+        if( !--TransCnt )  break;                                        //Timeout exit
+        if(totallen) continue;                                           //If the data is not sent, continue to send
         break;                                                           //After sending, exit
     }
 #endif
@@ -374,12 +373,12 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                            //USART initialize
     GPIOInit();
-    printf("ETH_CFG\r\n");    	
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-    printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-      printf("version error.\n");
+    printf("ETH CFG Test\r\n");
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+    printf("net version:%x\n", WCHNET_GetVer());
+    if(WCHNET_LIB_VER != WCHNET_GetVer()){
+        printf("version error.\n");
     }
     /*After the button(PB6) is pressed, initialize WCHNET
      *  and execute the default configuration*/
@@ -407,7 +406,7 @@ int main(void)
     WCHNET_GetMacAddr(MACAddr);                                           //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
     memcpy(IPAddr,CFG->src_ip,sizeof(CFG->src_ip));

@@ -167,7 +167,7 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                         endp_tx_ctrl = USBHSD_UEP_TXCTRL( endp );
                         if( mod == DEF_UEP_DMA_LOAD )
                         {
-                            if( endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1 )
+                            if( (endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1) ==  0 )
                             {
                                 /* use UEPn_TX_DMA */
                                 USBHSD_UEP_TXDMA( endp ) = (uint32_t)pbuf;
@@ -180,7 +180,7 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                         }
                         else if( mod == DEF_UEP_CPY_LOAD )
                         {
-                            if( endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1 )
+                            if( (endp_tx_ctrl & USBHS_UEP_T_TOG_DATA1) ==  0 )
                             {
                                 /* use UEPn_TX_DMA */
                                 memcpy( USBHSD_UEP_TXBUF(endp), pbuf, len );
@@ -211,7 +211,6 @@ uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mo
                     }
                     else if( mod == DEF_UEP_CPY_LOAD )
                     {
-                        /* if end-point buffer mode is double buffer */
                         memcpy( USBHSD_UEP_TXBUF(endp), pbuf, len );
                     }
                     else

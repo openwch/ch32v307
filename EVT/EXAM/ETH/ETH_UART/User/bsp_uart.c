@@ -110,7 +110,7 @@ void UART_Interrupt_Init(void)
  *
  *  @return  none
  * */
-void BSP_Uart_Init(void)
+void BSP_Uart_Init(uint32_t baudrate )
 {
     USART_InitTypeDef USART_InitStructure = {0};
 
@@ -131,7 +131,7 @@ void BSP_Uart_Init(void)
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-    USART_InitStructure.USART_BaudRate = BAUD_RATE;
+    USART_InitStructure.USART_BaudRate = baudrate;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
     USART_InitStructure.USART_StopBits = USART_StopBits_1;
     USART_InitStructure.USART_Parity = USART_Parity_No;

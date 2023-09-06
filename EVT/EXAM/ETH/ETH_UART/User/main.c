@@ -12,21 +12,20 @@
 /*
  *@Note
 ETH_UART example demonstrates data transparency between Ethernet and UART.
-By default, 1000000 baud rate (can be changed in bsp_uart.h) is used for serial port data transmission.
+By default, 921600 baud rate (can be changed in bsp_uart.h) is used for serial port data transmission.
+note:Due to pin multiplexing, this example only supports 10M networks.
 For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "bsp_uart.h"
 
 u8 MACAddr[6];                                          //MAC address
-u8 IPAddr[4]   = {192,168,1,10};                        //IP address
-u8 GWIPAddr[4] = {192,168,1,1};                         //Gateway IP address
-u8 IPMask[4]   = {255,255,255,0};                       //subnet mask
-u8 DESIP[4]    = {192,168,1,100};                       //destination IP address
+u8 IPAddr[4]   = {192, 168, 1, 10};                     //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                      //Gateway IP address
+u8 IPMask[4]   = {255, 255, 255, 0};                    //subnet mask
+u8 DESIP[4]    = {192, 168, 1, 100};                    //destination IP address
 
 u8 SocketId;                                            //socket id
 u8 SocketRecvBuf[RECE_BUF_LEN];                         //socket data buff
@@ -63,7 +62,7 @@ void TIM2_Init( void )
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -84,20 +83,20 @@ void TIM2_Init( void )
  */
 void WCHNET_CreateTcpSocket(void)
 {
-   u8 i;
-   SOCK_INF TmpSocketInf;
+    u8 i;
+    SOCK_INF TmpSocketInf;
 
-   memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
-   memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
-   TmpSocketInf.DesPort  = desport;
-   TmpSocketInf.SourPort = srcport;
-   TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
-   TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
-   i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-   printf("WCHNET_SocketCreat %d\r\n",SocketId);
-   mStopIfError(i);
-   i = WCHNET_SocketConnect(SocketId);
-   mStopIfError(i);
+    memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
+    memcpy((void *)TmpSocketInf.IPAddr,DESIP,4);
+    TmpSocketInf.DesPort  = desport;
+    TmpSocketInf.SourPort = srcport;
+    TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
+    TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
+    i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
+    printf("WCHNET_SocketCreat %d\r\n",SocketId);
+    mStopIfError(i);
+    i = WCHNET_SocketConnect(SocketId);
+    mStopIfError(i);
 }
 
 
@@ -110,59 +109,30 @@ void WCHNET_CreateTcpSocket(void)
  */
 void uartRxAndSendDataToETH(void)
 {
-    int ret = -1;
+    u8 *p;
     uint32_t temp = 0;
     uint32_t len = 0;
-    uint32_t len_1 = 0;
+    uint32_t readindex = 0;
 
     temp = DMA1_Channel6->CNTR;
 
     /* uart rx dma CNTR not equal to last, indicating that data is received*/
     if(temp != uart_data_t.last_RX_DMA_length)
     {
-        /* calculate the length of the received data */
-        uart_data_t.rx_write += (uart_data_t.last_RX_DMA_length - temp) & (UART_RX_DMA_SIZE - 1);
-
-        /* update last rx dma CNTR */
-        uart_data_t.last_RX_DMA_length = temp;
-
-        /*calculate the length of the RX_buffer */
-        len = uart_data_t.rx_write - uart_data_t.rx_read;
-
-        /* RX_buffer is full */
-        if(len > UART_RX_DMA_SIZE)
+        if(temp < uart_data_t.last_RX_DMA_length)
         {
-            printf("uart2 RX DMA Buff is full!\r\n");
-            len = 0;
-            uart_data_t.rx_read = 0;
-            uart_data_t.rx_write = 0;
-            uart_data_t.last_RX_DMA_length = 0;
+            len = uart_data_t.last_RX_DMA_length - temp;
         }
-
-        /* send data starting from rx_read to RX_buffer end */
-        len_1 = MIN(len,UART_RX_DMA_SIZE-(uart_data_t.rx_read&(UART_RX_DMA_SIZE-1)));
-
-        if(len_1 != 0)
-        {
-            ret = WCHNET_SocketSend(SocketId, &uart_data_t.RX_buffer[uart_data_t.rx_read&(UART_RX_DMA_SIZE-1)], &len_1);
-            if (ret == 0)
-            {
-                uart_data_t.rx_read += len_1;
-            }
+        else {
+            len = uart_data_t.last_RX_DMA_length;
         }
-
-        /* send the rest of the data(if any) at beginning of RX_buffer  */
-        if( (len-len_1) != 0)
-        {
-            len_1 = len-len_1;
-            ret = WCHNET_SocketSend(SocketId, &uart_data_t.RX_buffer[0], &len_1);
-            if (ret == 0)
-            {
-                uart_data_t.rx_read += len_1;
-            }
-        }
+        readindex = UART_RX_DMA_SIZE - uart_data_t.last_RX_DMA_length;
+        p = &uart_data_t.RX_buffer[readindex];
+        WCHNET_SocketSend(SocketId, p, &len);
+        uart_data_t.last_RX_DMA_length -= len;
+        if(uart_data_t.last_RX_DMA_length == 0)
+            uart_data_t.last_RX_DMA_length = UART_RX_DMA_SIZE;
     }
-
 }
 
 /*********************************************************************
@@ -174,16 +144,13 @@ void uartRxAndSendDataToETH(void)
  */
 void uartTx(void)
 {
-    uint16_t read_buf = 0;
-
     if(uart_data_t.uart_tx_dma_state == IDLE)
     {
         /* eth has received data  */
         if(uart_data_t.tx_remainBuffNum < UART_TX_BUF_NUM)
         {
-            read_buf = (uart_data_t.tx_read)%UART_TX_BUF_NUM;
-            DMA1_Channel7->MADDR = (uint32_t) &uart_data_t.TX_buffer[read_buf];
-            DMA1_Channel7->CNTR = uart_data_t.TX_data_length[read_buf];
+            DMA1_Channel7->MADDR = (uint32_t) &uart_data_t.TX_buffer[uart_data_t.tx_read];
+            DMA1_Channel7->CNTR = uart_data_t.TX_data_length[uart_data_t.tx_read];
             uart_data_t.uart_tx_dma_state = BUSY;
             DMA_Cmd(DMA1_Channel7,ENABLE);
         }
@@ -202,21 +169,21 @@ void uartTx(void)
 void ETHRx(u8 socketid)
 {
     u32 len;
-    uint8_t write_buf = 0;
     int8_t receive_state = -1;
 
     len = WCHNET_SocketRecvLen(socketid, NULL);                               /* query length */
 
     if( uart_data_t.tx_remainBuffNum > 0)
     {
-        write_buf = (uart_data_t.tx_write)%UART_TX_BUF_NUM;
         /* socket receive */
-        receive_state = WCHNET_SocketRecv(socketid, uart_data_t.TX_buffer[write_buf], &len);
+        receive_state = WCHNET_SocketRecv(socketid, uart_data_t.TX_buffer[uart_data_t.tx_write], &len);
         if(receive_state == WCHNET_ERR_SUCCESS)
         {
-            uart_data_t.TX_data_length[write_buf] = len;
+            uart_data_t.TX_data_length[uart_data_t.tx_write] = len;
 
             uart_data_t.tx_write++;
+            /* Prevent access from out-of-bounds */
+            uart_data_t.tx_write = (uart_data_t.tx_write)%UART_TX_BUF_NUM;
 
             uart_data_t.tx_remainBuffNum--;
         }
@@ -316,19 +283,19 @@ int main(void)
 	Delay_Init();
 	USART_Printf_Init(115200);                                              //USART initialize
 	printf("ETH_UART\r\n");	
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-    printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-      printf("version error.\n");
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+    printf("net version:%x\n", WCHNET_GetVer());
+    if(WCHNET_LIB_VER != WCHNET_GetVer()){
+        printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                             //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
+        printf("%x ", MACAddr[i]);
     printf("\n");
     TIM2_Init();
-    BSP_Uart_Init();                                                        //USART2 initialize
+    BSP_Uart_Init(BAUD_RATE);                                               //USART2 initialize 
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                        //Ethernet library initialize
     mStopIfError(i);
     if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
@@ -339,7 +306,7 @@ int main(void)
 	{
         /*Ethernet library main task function,
          * which needs to be called cyclically*/
-        WCHNET_MainTask();
+	    WCHNET_MainTask();
         /*Query the Ethernet global interrupt,
          * if there is an interrupt, call the global interrupt handler*/
         if(WCHNET_QueryGlobalInt())

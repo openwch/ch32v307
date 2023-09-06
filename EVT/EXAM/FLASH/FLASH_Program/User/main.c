@@ -71,13 +71,6 @@ u32 buf[64];
 void Flash_Test(void)
 {
     printf("FLASH Test\n");
-    /*When the main frequency exceeds 120MHz, attention should be paid when
-     *operating FLASH: dividing HCLK by two will result in the related peripheral
-     *clock of HCLK being divided by two. Attention should be paid when using.
-     */
-    RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
-    __disable_irq();
-    USART_Printf_Init(115200);
 
     FLASH_Unlock();
 
@@ -92,6 +85,7 @@ void Flash_Test(void)
         if(FLASHStatus != FLASH_COMPLETE)
         {
             printf("FLASH Erase Fail\r\n");
+            return;
         }
         printf("FLASH Erase Suc\r\n");
     }
@@ -127,9 +121,6 @@ void Flash_Test(void)
 
     FLASH_Lock();
 
-    RCC->CFGR0 &= ~(uint32_t)RCC_HPRE_DIV2;
-    __enable_irq();
-    USART_Printf_Init(115200);
 }
 
 /*********************************************************************
@@ -226,6 +217,7 @@ void Flash_Test_Fast(void)
     printf("\n");
 
     FLASH_Lock_Fast();
+    FLASH_Lock();
 }
 
 /*********************************************************************

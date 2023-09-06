@@ -112,6 +112,7 @@ void DBGMCU_Config(uint32_t DBGMCU_Periph, FunctionalState NewState)
  *          CH32V303VCT6-0x303005x4
  *          CH32V305FBP6-0x305205x8
  *          CH32V305RBT6-0x305005x8
+ *          CH32V305GBU6-0x305B05x8
  *          CH32V307WCU6-0x307305x8
  *          CH32V307FBP6-0x307205x8
  *          CH32V307RCT6-0x307105x8

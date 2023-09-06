@@ -18,36 +18,34 @@ For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
 #include "string.h"
-#include "debug.h"
-#include "wchnet.h"
 #include "eth_driver.h"
 #include "MQTTPacket.h"
 
-u8 MACAddr[6];                                     //MAC address
-u8 IPAddr[4]   = {192,168,1,10};                   //IP address
-u8 GWIPAddr[4] = {192,168,1,1};                    //Gateway IP address
-u8 IPMask[4]   = {255,255,255,0};                  //subnet mask
-u8 DESIP[4]    = {0};                              //MQTT server IP address,!!need to be modified manually
+u8 MACAddr[6];                                      //MAC address
+u8 IPAddr[4]   = {192, 168, 1, 10};                 //IP address
+u8 GWIPAddr[4] = {192, 168, 1, 1};                  //Gateway IP address
+u8 IPMask[4]   = {255, 255, 255, 0};                //subnet mask
+u8 DESIP[4]    = {0};                               //MQTT server IP address,!!need to be modified manually
 
-u8 SocketId;                                       //socket id
-u8 SocketRecvBuf[RECE_BUF_LEN];                    //socket receive buffer
+u8 SocketId;                                        //socket id
+u8 SocketRecvBuf[RECE_BUF_LEN];                     //socket receive buffer
 u8 MyBuf[RECE_BUF_LEN];
-u16 desport = 1883;                                //MQTT server port
-u16 srcport = 4200;                                //source port
+u16 desport = 1883;                                 //MQTT server port
+u16 srcport = 4200;                                 //source port
 
-char *username  = "user1";                         //Device name, unique for each device, available "/" for classification
-char *password  = "user1";                         //Server login password
-char *sub_topic = "topic/1";                       //subscribed session name
-char *pub_topic = "topic/1";                       //Published session name
-int pub_qos = 0;                                   //Publish quality of service
-int sub_qos = 0;                                   //Subscription quality of service
-char *payload = "WCHNET MQTT";                     //Publish content
+char *username  = "user1";                          //Device name, unique for each device, available "/" for classification
+char *password  = "user1";                          //Server login password
+char *sub_topic = "topic/1";                        //subscribed session name
+char *pub_topic = "topic/1";                        //Published session name
+int pub_qos = 0;                                    //Publish quality of service
+int sub_qos = 0;                                    //Subscription quality of service
+char *payload = "WCHNET MQTT";                      //Publish content
 
-u8 con_flag  = 0;                                  //Connect MQTT server flag
-u8 pub_flag  = 0;                                  //Publish session message flag/
-u8 sub_flag  = 0;                                  //Subscription session flag
-u8 tout_flag = 0;                                  //time-out flag
-u16 packetid = 5;                                  //package id
+u8 con_flag  = 0;                                   //Connect MQTT server flag
+u8 pub_flag  = 0;                                   //Publish session message flag/
+u8 sub_flag  = 0;                                   //Subscription session flag
+u8 tout_flag = 0;                                   //time-out flag
+u16 packetid = 5;                                   //package id
 
 /*********************************************************************
  * @fn      mStopIfError
@@ -77,7 +75,7 @@ void TIM2_Init( void )
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -143,7 +141,7 @@ u8 Transport_Close(void)
 void Transport_SendPacket(u8 *buf, u32 len)
 {
     WCHNET_SocketSend(SocketId, buf, &len);
-    printf("%d bytes uploaded!",len);
+    printf("%d bytes uploaded!\r\n",len);
 }
 
 /*********************************************************************
@@ -285,10 +283,9 @@ void msgDeal(unsigned char *msg, int len)
     unsigned char *ptr = msg;
     printf("payload len = %d\r\n",len);
     printf("payload: ");
-    for(u8 i = 0; i < len; i++)
+    for(int i = 0; i < len; i++)
     {
-        printf("%c ",(u16)*ptr);
-        ptr++;
+        printf("%c ", *ptr++);
     }
     printf("\r\n");
 }
@@ -412,11 +409,11 @@ int main(void)
     SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                               //USART initialize
-    printf("MQTT\r\n");   	
+    printf("MQTT Test\r\n");
     printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
     printf("net version:%x\n",WCHNET_GetVer());
-    if( WCHNET_LIB_VER != WCHNET_GetVer() ){
+    if(WCHNET_LIB_VER != WCHNET_GetVer()){
         printf("version error.\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                              //get the chip MAC address
