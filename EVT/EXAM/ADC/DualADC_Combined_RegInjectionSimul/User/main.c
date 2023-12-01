@@ -163,7 +163,7 @@ void DMA_Tx_Init( DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufsi
  */
 u16 Get_ConversionVal1(s16 val)
 {
-	if((val+Calibrattion_Val1)<0) return 0;
+	if((val+Calibrattion_Val1)<0|| val==0) return 0;
 	if((Calibrattion_Val1+val)>4095||val==4095) return 4095;
 	return (val+Calibrattion_Val1);
 }

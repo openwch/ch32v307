@@ -26,7 +26,10 @@ typedef enum
   FLASH_ERROR_PG,
   FLASH_ERROR_WRP,
   FLASH_COMPLETE,
-  FLASH_TIMEOUT
+  FLASH_TIMEOUT,
+  FLASH_OP_RANGE_ERROR = 0xFD,
+  FLASH_ALIGN_ERROR = 0xFE,
+  FLASH_ADR_RANGE_ERROR = 0xFF,
 }FLASH_Status;
 
 
@@ -134,6 +137,8 @@ void FLASH_LockBank1(void);
 FLASH_Status FLASH_EraseAllBank1Pages(void);
 FLASH_Status FLASH_GetBank1Status(void);
 FLASH_Status FLASH_WaitForLastBank1Operation(uint32_t Timeout);
+FLASH_Status FLASH_ROM_ERASE(uint32_t StartAddr, uint32_t Length);
+FLASH_Status FLASH_ROM_WRITE(uint32_t StartAddr, uint32_t *pbuf, uint32_t Length);
 
 #ifdef __cplusplus
 }

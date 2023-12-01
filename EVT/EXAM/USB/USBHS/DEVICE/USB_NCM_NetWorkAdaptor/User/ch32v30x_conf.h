@@ -36,7 +36,7 @@
 #include "ch32v30x_wwdg.h"
 #include "ch32v30x_misc.h"
 #include "ch32v30x_eth.h"
-
+#include "ch32v30x_usb.h"
 
 
 #endif /* __CH32V30x_CONF_H */

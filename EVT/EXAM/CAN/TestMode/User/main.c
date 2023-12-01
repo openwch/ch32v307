@@ -13,7 +13,8 @@
 /*
  *@Note
  CAN test mode, including silent mode, loopback mode and loopback silent mode:
- CAN_Tx(PB9),CAN_Rx(PB8)
+ CAN1-CAN_Tx(PB9),CAN_Rx(PB8)
+ CAN2-CAN_Tx(PB13),CAN_Rx(PB12)
  Standard_Frame: includes a 32bit filter mask bit pattern.
 
 */
@@ -56,7 +57,11 @@ void CAN_Test_Mode_Init( u8 tsjw, u8 tbs2, u8 tbs1, u16 brp, u8 mode )
 	
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOB, ENABLE ); 
 	RCC_APB1PeriphClockCmd( RCC_APB1Periph_CAN1, ENABLE );	
-	
+
+#if defined  (CH32V30x_D8C)
+	RCC_APB1PeriphClockCmd( RCC_APB1Periph_CAN2, ENABLE );
+#endif
+
 	GPIO_PinRemapConfig( GPIO_Remap1_CAN1, ENABLE);	
 	
 	GPIO_InitSturcture.GPIO_Pin = GPIO_Pin_9;
@@ -68,6 +73,17 @@ void CAN_Test_Mode_Init( u8 tsjw, u8 tbs2, u8 tbs1, u16 brp, u8 mode )
 	GPIO_InitSturcture.GPIO_Mode = GPIO_Mode_IPU;	
 	GPIO_Init( GPIOB, &GPIO_InitSturcture);
 	
+#if defined  (CH32V30x_D8C)
+    GPIO_InitSturcture.GPIO_Pin = GPIO_Pin_13;
+    GPIO_InitSturcture.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitSturcture.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init( GPIOB, &GPIO_InitSturcture);
+
+    GPIO_InitSturcture.GPIO_Pin = GPIO_Pin_12;
+    GPIO_InitSturcture.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init( GPIOB, &GPIO_InitSturcture);
+#endif
+
 	CAN_InitSturcture.CAN_TTCM = DISABLE;		
 	CAN_InitSturcture.CAN_ABOM = DISABLE;		
 	CAN_InitSturcture.CAN_AWUM = DISABLE;		
@@ -81,6 +97,10 @@ void CAN_Test_Mode_Init( u8 tsjw, u8 tbs2, u8 tbs1, u16 brp, u8 mode )
 	CAN_InitSturcture.CAN_Prescaler = brp;			
 	CAN_Init( CAN1, &CAN_InitSturcture );
 	
+#if defined  (CH32V30x_D8C)
+    CAN_Init( CAN2, &CAN_InitSturcture );
+#endif
+
 	CAN_FilterInitSturcture.CAN_FilterNumber = 0;		
 	CAN_FilterInitSturcture.CAN_FilterMode = CAN_FilterMode_IdMask;		
 	CAN_FilterInitSturcture.CAN_FilterScale = CAN_FilterScale_32bit;	
@@ -91,7 +111,20 @@ void CAN_Test_Mode_Init( u8 tsjw, u8 tbs2, u8 tbs1, u16 brp, u8 mode )
 	CAN_FilterInitSturcture.CAN_FilterFIFOAssignment = CAN_Filter_FIFO1;
 	CAN_FilterInitSturcture.CAN_FilterActivation = ENABLE;		
 	CAN_FilterInit( &CAN_FilterInitSturcture );
-		
+
+#if defined  (CH32V30x_D8C)
+    CAN_FilterInitSturcture.CAN_FilterNumber = 10;
+    CAN_FilterInitSturcture.CAN_FilterMode = CAN_FilterMode_IdMask;
+    CAN_FilterInitSturcture.CAN_FilterScale = CAN_FilterScale_32bit;
+    CAN_FilterInitSturcture.CAN_FilterIdHigh = 0;
+    CAN_FilterInitSturcture.CAN_FilterIdLow = 0;
+    CAN_FilterInitSturcture.CAN_FilterMaskIdHigh =0;
+    CAN_FilterInitSturcture.CAN_FilterMaskIdLow = 0x0006;
+    CAN_FilterInitSturcture.CAN_FilterFIFOAssignment = CAN_Filter_FIFO1;
+    CAN_FilterInitSturcture.CAN_FilterActivation = ENABLE;
+    CAN_FilterInit( &CAN_FilterInitSturcture );
+	CAN_SlaveStartBank(9);
+#endif
 }
 
 /*********************************************************************
@@ -172,6 +205,86 @@ u8 CAN_Receive_Msg( u8 *buf )
 	return CanRxStructure.DLC;	
 }
 
+#if defined  (CH32V30x_D8C)
+/*********************************************************************
+ * @fn      CAN2_Send_Msg
+ *
+ * @brief   CAN2 Transmit function.
+ *
+ * @param   msg - Transmit data buffer.
+ *          len - Data length.
+ *
+ * @return  0 - Send successful.
+ *          1 - Send failed.
+ */
+u8 CAN2_Send_Msg( u8 *msg, u8 len )
+{
+    u8 mbox;
+    u16 i = 0;
+
+    CanTxMsg CanTxStructure;
+
+    CanTxStructure.StdId = 0x317;
+    CanTxStructure.IDE = CAN_Id_Standard;
+    CanTxStructure.RTR = CAN_RTR_Data;
+    CanTxStructure.DLC = len;
+
+    for( i=0; i<len; i++ )
+    {
+        CanTxStructure.Data[i] = msg[i];
+    }
+
+    mbox = CAN_Transmit(CAN2, &CanTxStructure);
+
+    i = 0;
+
+    while( ( CAN_TransmitStatus( CAN2, mbox ) != CAN_TxStatus_Ok ) && (i < 0xFFF) )
+    {
+        i++;
+    }
+
+    if( i == 0xFFF )
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+/*********************************************************************
+ * @fn      CAN2_Receive_Msg
+ *
+ * @brief   CAN2 Receive function.
+ *
+ * @param   buf - Receive data buffer.
+ *          len - Data length.
+ *
+ * @return  CanRxStructure.DLC - Receive data length.
+ */
+u8 CAN2_Receive_Msg( u8 *buf )
+{
+    u8 i;
+
+    CanRxMsg CanRxStructure;
+
+    if( CAN_MessagePending( CAN2, CAN_FIFO1 ) == 0)
+    {
+        return 0;
+    }
+
+    CAN_Receive( CAN2, CAN_FIFO1, &CanRxStructure );
+
+    for( i=0; i<8; i++ )
+    {
+        buf[i] = CanRxStructure.Data[i];
+    }
+
+    return CanRxStructure.DLC;
+}
+#endif
+
 /*********************************************************************
  * @fn      main
  *
@@ -219,12 +332,12 @@ int main(void)
 		
 		if( tx )	
 		{
-			printf( "Send Failed\r\n" );
+			printf( "CAN1 Send Failed\r\n" );
 		}
 		else	
 		{
-			printf( "Send Success\r\n" );
-			printf( "Send Data:\r\n" );
+			printf( "CAN1 Send Success\r\n" );
+			printf( "CAN1 Send Data:\r\n" );
 			
 			for(i=0; i<8; i++)
 			{
@@ -236,7 +349,7 @@ int main(void)
 		
 		if( rx )
 		{
-			printf( "Receive Data:\r\n" );
+			printf( "CAN1 Receive Data:\r\n" );
 			
 			for(i=0; i<8; i++)
 			{
@@ -245,9 +358,48 @@ int main(void)
 		}
 		else	
 		{
-			printf( "No Receive Data\r\n" );
+			printf( "CAN1 No Receive Data\r\n" );
 		}
 		
+#if defined  (CH32V30x_D8C)
+        for(i=0; i<8; i++)
+        {
+            txbuf[i] = cnt+i;
+        }
+
+        tx = CAN2_Send_Msg( txbuf, 8 );
+
+        if( tx )
+        {
+            printf( "CAN2 Send Failed\r\n" );
+        }
+        else
+        {
+            printf( "CAN2 Send Success\r\n" );
+            printf( "CAN2 Send Data:\r\n" );
+
+            for(i=0; i<8; i++)
+            {
+                printf( "%02x\r\n", txbuf[i] );
+            }
+        }
+
+        rx = CAN2_Receive_Msg( rxbuf );
+
+        if( rx )
+        {
+            printf( "CAN2 Receive Data:\r\n" );
+
+            for(i=0; i<8; i++)
+            {
+                printf( "%02x\r\n", txbuf[i] );
+            }
+        }
+        else
+        {
+            printf( "CAN2 No Receive Data\r\n" );
+        }
+#endif
 		Delay_Ms(1000);
 		cnt++;
 		if( cnt == 0xFF)

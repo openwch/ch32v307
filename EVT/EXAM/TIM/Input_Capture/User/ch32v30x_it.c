@@ -52,7 +52,6 @@ void TIM1_CC_IRQHandler(void)
 	if( TIM_GetITStatus( TIM1, TIM_IT_CC1 ) != RESET )
 	{
 		printf( "CH1_Val:%d\r\n", TIM_GetCapture1( TIM1 ) );
-		TIM_SetCounter( TIM1, 0 );
 	}
 
 	if( TIM_GetITStatus( TIM1, TIM_IT_CC2 ) != RESET )

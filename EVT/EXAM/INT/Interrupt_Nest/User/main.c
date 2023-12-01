@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2023/11/07
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -21,7 +21,7 @@
   the global when the hardware push overflows Interrupt (configure CSR (0x804) in the startup
   file, the configuration value is changed from 0x1f to 0x0b)
 
-  3. If you don��t use hardware push stack, configure bit0 of CSR (0x804) to clear to 0,
+  3. If you do not use hardware push stack, configure bit0 of CSR (0x804) to clear to 0,
   and remove the interrupt function declaration "WCH-Interrupt-fast" keyword
 
 */
@@ -191,7 +191,7 @@ void RTC_IRQHandler(void)
 void FLASH_IRQHandler(void)
 {
     step++;
-    printf(" 5.RTC_IRQHandler");
+    printf(" 5.FLASH_IRQHandler");
     printf("  step:%d\r\n",step);
 
     NVIC_SetPendingIRQ(RCC_IRQn);

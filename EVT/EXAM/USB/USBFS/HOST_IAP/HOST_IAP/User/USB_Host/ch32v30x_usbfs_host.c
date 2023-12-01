@@ -76,9 +76,7 @@ void USBFS_Host_Init( FunctionalState sta )
         USBOTG_H_FS->HOST_RX_CTRL = 0;
         USBOTG_H_FS->HOST_TX_CTRL = 0;
         USBOTG_H_FS->BASE_CTRL = USBFS_UC_HOST_MODE | USBFS_UC_INT_BUSY | USBFS_UC_DMA_EN;
-
         USBOTG_H_FS->INT_FG = 0xFF;
-
         USBOTG_H_FS->INT_EN = USBFS_UIE_TRANSFER | USBFS_UIE_DETECT;
     }
     else

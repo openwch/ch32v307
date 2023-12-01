@@ -290,7 +290,7 @@ typedef volatile unsigned long  *PUINT32V;
 #define USBHS_MAX_PACK_SIZE 64
 #endif
 /******************************************************************************/
-/* USB�豸������غ궨�� */
+/* Definition of USB device configuration */
 // USB CONTROL
 #define USBHS_DMA_EN        (1<<0)
 #define USBHS_ALL_CLR       (1<<1)
@@ -604,42 +604,41 @@ typedef volatile unsigned long  *PUINT32V;
 #define DEF_IC_PRG_VER2            0x00
 /******************************************************************************/
 
-extern __attribute__ ((aligned(4))) UINT8 Ep0Buffer[ USBHS_UEP0_SIZE ]; /* �˵�0�����շ������� */
-extern __attribute__ ((aligned(4))) UINT8 Ep1Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* �˵�1���ݽ��ջ����� */
-extern __attribute__ ((aligned(4))) UINT8 Ep2Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* �˵�1���ݷ��ͻ����� */
-extern __attribute__ ((aligned(4))) UINT8 Ep3Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* �˵�2���ݽ��ջ����� */
+extern __attribute__ ((aligned(4))) UINT8 Ep0Buffer[ USBHS_UEP0_SIZE ];       /* Data sending and receiving buffer of endpoint 0 */
+extern __attribute__ ((aligned(4))) UINT8 Ep1Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data sending buffer of endpoint 1 */
+extern __attribute__ ((aligned(4))) UINT8 Ep2Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data receiving buffer of endpoint 2 */
+extern __attribute__ ((aligned(4))) UINT8 Ep3Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data sending buffer of endpoint 2 */
 extern const UINT8 *pDescr;
-extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USB2.0�����豸Setup�������� */
-extern volatile UINT16 USBHS_Dev_SetupReqLen;                                   /* USB2.0�����豸Setup������ */
-extern volatile UINT8  USBHS_Dev_SetupReqValueH;                                /* USB2.0�����豸Setup��Value���ֽ� */
-extern volatile UINT8  USBHS_Dev_Config;                                        /* USB2.0�����豸����ֵ */
-extern volatile UINT8  USBHS_Dev_Address;                                       /* USB2.0�����豸��ֵַ */
-extern volatile UINT8  USBHS_Dev_SleepStatus;                                   /* USB2.0�����豸˯��״̬ */
-extern volatile UINT8  USBHS_Dev_EnumStatus;                                    /* USB2.0�����豸ö��״̬ */
-extern volatile UINT8  USBHS_Dev_Endp0_Tog;                                     /* USB2.0�����豸�˵�0ͬ����־ */
+extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USBHS device Setup package command code */
+extern volatile UINT16 USBHS_Dev_SetupReqLen;                                   /* USBHS device Setup packet length */
+extern volatile UINT8  USBHS_Dev_SetupReqValueH;                                /* USBHS device Setup package Value high byte */
+extern volatile UINT8  USBHS_Dev_Config;                                        /* USBHS device configuration values */
+extern volatile UINT8  USBHS_Dev_Address;                                       /* USBHS device address value */
+extern volatile UINT8  USBHS_Dev_SleepStatus;                                   /* USBHS device sleep state */
+extern volatile UINT8  USBHS_Dev_EnumStatus;                                    /* USBHS device enumeration status */
+extern volatile UINT8  USBHS_Dev_Endp0_Tog;                                     /* USBHS device endpoint 0 sync flag */
 
-extern volatile UINT16 USBHS_Endp1_Up_Flag;                                     /* USB2.0�����豸�˵�1�����ϴ�״̬: 0:����; 1:�����ϴ�; */
-extern volatile UINT8  USBHS_Endp1_Down_Flag;                                   /* USB2.0�����豸�˵�1�´��ɹ���־ */
-extern volatile UINT8  USBHS_Endp1_Down_Len;                                    /* USB2.0�����豸�˵�1�´����� */
+extern volatile UINT16 USBHS_Endp1_Up_Flag;                                     /* USBHS device data upload status of endpoint 1: 0: idle; 1: uploading; */
+extern volatile UINT8  USBHS_Endp1_Down_Flag;                                   /* USBHS device download success flag of endpoint 1 */
+extern volatile UINT8  USBHS_Endp1_Down_Len;                                    /* USBHS device download length of endpoint 1 */
 
-extern volatile UINT16 USBHS_Endp2_Up_Flag;                                     /* USB2.0�����豸�˵�2�����ϴ�״̬: 0:����; 1:�����ϴ�; */
-extern volatile UINT16 USBHS_Endp2_Up_LoadPtr;                                  /* USB2.0�����豸�˵�2�����ϴ�װ��ƫ�� */
-extern volatile UINT8  USBHS_Endp2_Down_Flag;                                   /* USB2.0�����豸�˵�2�´��ɹ���־ */
+extern volatile UINT16 USBHS_Endp2_Up_Flag;                                     /* USBHS device data upload status of endpoint 2: 0: idle; 1: uploading; */
+extern volatile UINT16 USBHS_Endp2_Up_LoadPtr;                                  /* USBHS device Data Upload Load Offset of endpoint 2 */
+extern volatile UINT8  USBHS_Endp2_Down_Flag;                                   /* USBHS device download success flag of endpoint 2 */
 extern u8 Endp1Busy;
 extern u8 EP1_OUT_Flag;
 extern u8 EP2_OUT_Flag;
 extern u8 Endp3Busy;
 extern u8 Flag_LED;
 /********************************************************************************/
-/* �������� */
-extern void USBHS_RCC_Init( void );                                             /* USB2.0�����豸RCC��ʼ�� */
-extern void USBHS_Device_Endp_Init ( void );                                    /* USB2.0�����豸�˵��ʼ�� */
-extern void USBHS_Device_Init ( FunctionalState sta );                          /* USB2.0�����豸��ʼ�� */
+extern void USBHS_RCC_Init( void );                                             /* USBHS device RCC initialization */
+extern void USBHS_Device_Endp_Init ( void );                                    /* USBHS device endpoint initialization */
+extern void USBHS_Device_Init ( FunctionalState sta );                          /* USBHS device initialization */
 void DevEPhs_IN_Deal(UINT8 l);
 void DevEPhs_OUT_Deal(UINT8 l);
-extern void USBHS_Device_SetAddress( UINT32 address );                          /* USB2.0�����豸�����豸��ַ */
-extern void USBHS_IRQHandler( void );                                           /* USB2.0�����豸�жϷ������ */
-extern void USBHS_Sleep_WakeUp_Cfg( void );                                     /* USB2.0�����豸˯�߻������� */
+extern void USBHS_Device_SetAddress( UINT32 address );                          /* USBHS device set device address */
+extern void USBHS_IRQHandler( void );                                           /* USBHS device interrupt service routine */
+extern void USBHS_Sleep_WakeUp_Cfg( void );                                     /* USBHS device sleep and wake configuration */
 
 #ifdef __cplusplus
 }

@@ -66,6 +66,8 @@ int main(void)
         printf( "%x ",MACAddr[ i ] );
     }
     printf("\r\n");
+    /* change mac-addr to ecm/ncm format */
+    MACAddr_Change_To_SNDesc( MACAddr );
 
     /* USB initialize */
     USBHS_RCC_Init( );

@@ -24,7 +24,6 @@ extern "C" {
 #include "debug.h"
 #include "ch32v30x_usb.h"
 #include "ch32v30x_usbfs_host.h"
-#include "ch32v30x_usbhs_host.h"
 #include "usb_host_hid.h"
 #include "usb_host_hub.h"
 #include "app_km.h"

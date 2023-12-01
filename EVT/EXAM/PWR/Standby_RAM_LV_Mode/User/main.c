@@ -102,8 +102,6 @@ int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure={0};
     SystemCoreClockUpdate();
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
     /* Configure unused GPIO as IPD to reduce power consumption */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|

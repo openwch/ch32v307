@@ -14,3 +14,4 @@ Description=ROM(byte): 256K, SRAM(byte): 64K, CHIP PINS: 64, GPIO PORTS: 51.\nWC
 PeripheralVersion=1.4
 Target Path=obj\SimulateCDC.hex
 MCU=CH32V307RVT6
+CLKSpeed=1

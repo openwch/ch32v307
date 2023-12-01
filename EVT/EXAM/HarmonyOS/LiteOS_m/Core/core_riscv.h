@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : core_riscv.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
-* Description        : RISC-V Core Peripheral Access Layer Header File for CH32V30x
+* Version            : V1.0.1
+* Date               : 2023/11/11
+* Description        : RISC-V V4 Core Peripheral Access Layer Header File for CH32V30x
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -104,10 +104,10 @@ typedef struct{
 /* memory mapped structure for SysTick */
 typedef struct
 {
-    __IO u32 CTLR;
-    __IO u32 SR;
-    __IO u64 CNT;
-    __IO u64 CMP;
+    __IO uint32_t CTLR;
+    __IO uint32_t SR;
+    __IO uint64_t CNT;
+    __IO uint64_t CMP;
 }SysTick_Type;
 
 
@@ -128,7 +128,7 @@ typedef struct
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __enable_irq()
 {
-  __asm volatile ("csrw 0x800, %0" : : "r" (0x6088) );
+  __asm volatile ("csrs 0x800, %0" : : "r" (0x88) );
 }
 
 /*********************************************************************
@@ -140,7 +140,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __enable_irq()
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __disable_irq()
 {
-  __asm volatile ("csrw 0x800, %0" : : "r" (0x6000) );
+  __asm volatile ("csrc 0x800, %0" : : "r" (0x88) );
 }
 
 /*********************************************************************
@@ -160,7 +160,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __NOP()
  *
  * @brief   Enable Interrupt
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
  * @return  none
  */
@@ -174,7 +174,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_EnableIRQ(IRQn_Typ
  *
  * @brief   Disable Interrupt
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
  * @return  none
  */
@@ -188,7 +188,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_DisableIRQ(IRQn_Ty
  *
  * @brief   Get Interrupt Enable State
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
  * @return  1 - Interrupt Enable
  *          0 - Interrupt Disable
@@ -203,7 +203,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE uint32_t NVIC_GetStatusIRQ(I
  *
  * @brief   Get Interrupt Pending State
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
  * @return  1 - Interrupt Pending Enable
  *          0 - Interrupt Pending Disable
@@ -218,9 +218,9 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE uint32_t NVIC_GetPendingIRQ(
  *
  * @brief   Set Interrupt Pending
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
- * @return  None
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_SetPendingIRQ(IRQn_Type IRQn)
 {
@@ -232,9 +232,9 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_SetPendingIRQ(IRQn
  *
  * @brief   Clear Interrupt Pending
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
- * @return  None
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_ClearPendingIRQ(IRQn_Type IRQn)
 {
@@ -246,7 +246,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_ClearPendingIRQ(IR
  *
  * @brief   Get Interrupt Active State
  *
- * @param   IRQn: Interrupt Numbers
+ * @param   IRQn - Interrupt Numbers
  *
  * @return  1 - Interrupt Active
  *          0 - Interrupt No Active
@@ -262,10 +262,22 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE uint32_t NVIC_GetActive(IRQn
  * @brief   Set Interrupt Priority
  *
  * @param   IRQn - Interrupt Numbers
- *          priority -
- *              bit[7] - pre-emption priority
- *              bit[6:5] - subpriority
- * @return  None
+ *          interrupt nesting enable(CSR-0x804 bit1 = 1 bit[3:2] = 3)
+ *            priority - bit[7:5] - Preemption Priority
+ *                       bit[4] - Sub priority
+ *                       bit[3:0] - Reserve
+ *          interrupt nesting enable(CSR-0x804 bit1 = 1 bit[3:2] = 2)
+ *            priority - bit[7:6] - Preemption Priority
+ *                       bit[5:4] - Sub priority
+ *                       bit[3:0] - Reserve
+ *          interrupt nesting enable(CSR-0x804 bit1 = 1 bit[3:2] = 1)
+ *            priority - bit[7] - Preemption Priority
+ *                       bit[6:4] - Sub priority
+ *                       bit[3:0] - Reserve
+ *          interrupt nesting disable(CSR-0x804 bit1 = 0 bit[3:2] = 0)
+ *            priority - bit[7:4] - Sub priority
+ *                       bit[3:0] - Reserve
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_SetPriority(IRQn_Type IRQn, uint8_t priority)
 {
@@ -277,7 +289,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_SetPriority(IRQn_T
  *
  * @brief   Wait for Interrupt
  *
- * @return  None
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __WFI(void)
 {
@@ -319,7 +331,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void _WFE(void)
  *
  * @brief   Wait for Events
  *
- * @return  None
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __WFE(void)
 {
@@ -337,9 +349,11 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __WFE(void)
  *          IRQn -Interrupt Numbers
  *          num - VTF Interrupt Numbers
  *          NewState - DISABLE or ENABLE
- * @return  None
+ *
+ * @return  none
  */
-__attribute__( ( always_inline ) ) RV_STATIC_INLINE void SetVTFIRQ(uint32_t addr, IRQn_Type IRQn, uint8_t num, FunctionalState NewState){
+__attribute__( ( always_inline ) ) RV_STATIC_INLINE void SetVTFIRQ(uint32_t addr, IRQn_Type IRQn, uint8_t num, FunctionalState NewState)
+{
   if(num > 3)  return ;
 
   if (NewState != DISABLE)
@@ -347,7 +361,8 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void SetVTFIRQ(uint32_t addr
       NVIC->VTFIDR[num] = IRQn;
       NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)|0x1);
   }
-  else{
+  else
+  {
       NVIC->VTFIDR[num] = IRQn;
       NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)&(~0x1));
   }
@@ -358,7 +373,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void SetVTFIRQ(uint32_t addr
  *
  * @brief   Initiate a system reset request
  *
- * @return  None
+ * @return  none
  */
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_SystemReset(void)
 {
