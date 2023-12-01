@@ -104,7 +104,12 @@ void USBFS_Device_Endp_Init( void )
     USBOTG_FS->UEP0_RX_CTRL = USBFS_UEP_R_RES_ACK;
     USBOTG_FS->UEP1_RX_CTRL = USBFS_UEP_R_RES_ACK;
     USBOTG_FS->UEP2_TX_CTRL = USBFS_UEP_T_RES_NAK;
-	USBFS_Endp_Busy[ 2 ] = 0;
+
+    /* Clear End-points Busy Status */
+    for(uint8_t i=0; i<DEF_UEP_NUM; i++ )
+    {
+        USBFS_Endp_Busy[ i ] = 0;
+    }
 }
 
 /*********************************************************************
@@ -670,6 +675,7 @@ void OTG_FS_IRQHandler( void )
         USBFS_DevAddr = 0;
         USBFS_DevSleepStatus = 0;
         USBFS_DevEnumStatus = 0;
+
         USBOTG_FS->DEV_ADDR = 0;
         USBFS_Device_Endp_Init( );
         USBOTG_FS->INT_FG = USBFS_UIF_BUS_RST;

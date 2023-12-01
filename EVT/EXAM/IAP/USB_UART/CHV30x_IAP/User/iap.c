@@ -101,6 +101,9 @@ u8 RecData_Deal(void)
         Verity_Star_flag = 0;
         End_Flag = 1;
         s = ERR_End;
+        FLASH->CTLR |= ((uint32_t)0x00008000);
+        FLASH->CTLR |= ((uint32_t)0x00000080);
+
         break;
 
     default:

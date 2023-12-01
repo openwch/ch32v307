@@ -75,6 +75,8 @@ int main(void)
         printf( "%x ",MACAddr[ i ] );
     }
     printf("\r\n");
+    /* change mac-addr to ecm/ncm format */
+    MACAddr_Change_To_SNDesc( MACAddr );
 
     /* USB initialize */
     USBHS_RCC_Init( );
@@ -84,6 +86,7 @@ int main(void)
     {
         if( USBHS_DevEnumStatus && ( PhyInit_Flag == 0 ) )
         {
+            printf( "Reset\r\n" );
             /* MAC&Phy Initialize  */
             PhyInit_Flag = 1;
             ETH_NETWork_Status = 0;

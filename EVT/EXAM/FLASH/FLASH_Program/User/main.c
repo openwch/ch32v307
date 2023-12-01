@@ -59,7 +59,10 @@ uint32_t              NbrOfPage;
 volatile FLASH_Status FLASHStatus = FLASH_COMPLETE;
 volatile TestStatus MemoryProgramStatus = PASSED;
 volatile TestStatus MemoryEraseStatus = PASSED;
-u32 buf[64];
+
+#define Fadr    (0x08020000)
+#define Fsize   ((((256*4))>>2))
+u32 buf[Fsize];
 
 /*********************************************************************
  * @fn      Flash_Test
@@ -132,92 +135,59 @@ void Flash_Test(void)
  */
 void Flash_Test_Fast(void)
 {
-    u16 i, j, flag;
+    u32 i;
+    u8 Verify_Flag = 0;
+    FLASH_Status s;
 
-    for(i = 0; i < 64; i++)
-    {
+    for(i = 0; i < Fsize; i++){
         buf[i] = i;
     }
 
-    printf("FLASH Fast Mode Test\n");
-
-    FLASH_Unlock_Fast();
-
-    FLASH_EraseBlock_64K_Fast(FAST_FLASH_PROGRAM_START_ADDR);
-
-    FLASH_ProgramPage_Fast(FAST_FLASH_PROGRAM_START_ADDR, buf);
-
-    printf("Program 64KByte start\n");
-    for(i = 0; i < 256; i++)
-    {
-        FLASH_ProgramPage_Fast(FAST_FLASH_PROGRAM_START_ADDR + 256 * i, buf);
+    printf("Read flash\r\n");
+    for(i=0; i<Fsize; i++){
+        printf("adr-%08x v-%08x\r\n", Fadr +4*i, *(u32*)(Fadr +4*i));
     }
 
-    for(i = 0; i < 256; i++)
+    s = FLASH_ROM_ERASE(Fadr, Fsize*4);
+    if(s != FLASH_COMPLETE)
     {
-        for(j = 0; j < 64; j++)
+        printf("check FLASH_ADR_RANGE_ERROR FLASH_ALIGN_ERROR or FLASH_OP_RANGE_ERROR\r\n");
+        return;
+    }
+
+    printf("Erase flash\r\n");
+    for(i=0; i<Fsize; i++){
+        printf("adr-%08x v-%08x\r\n", Fadr +4*i, *(u32*)(Fadr +4*i));
+    }
+
+    s = FLASH_ROM_WRITE(Fadr,  buf, Fsize*4);
+    if(s != FLASH_COMPLETE)
+    {
+        printf("check FLASH_ADR_RANGE_ERROR FLASH_ALIGN_ERROR or FLASH_OP_RANGE_ERROR\r\n");
+        return;
+    }
+
+    printf("Write flash\r\n");
+    for(i=0; i<Fsize; i++){
+        printf("adr-%08x v-%08x\r\n", Fadr +4*i, *(u32*)(Fadr +4*i));
+    }
+
+    for(i = 0; i < Fsize; i++){
+        if(buf[i] == *(u32 *)(Fadr + 4 * i))
         {
-            if(*(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 256 * i + 4 * j) != j)
-            {
-                flag = 0;
-                break;
-            }
-            else
-            {
-                flag = 1;
-            }
+            Verify_Flag = 0;
+        }
+        else
+        {
+            Verify_Flag = 1;
+            break;
         }
     }
 
-    if(flag)
-    {
-        printf("Program 64KByte suc\n");
-    }
+    if(Verify_Flag)
+        printf("%d Byte Verify Fail\r\n", (Fsize*4));
     else
-        printf("Program fail\n");
-
-    printf("Erase 256Byte...\n");
-    FLASH_ErasePage_Fast(FAST_FLASH_PROGRAM_START_ADDR);
-
-    printf("Read 4KByte...\n");
-    for(i = 0; i < 1024; i++)
-    {
-        printf("%08x ", *(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 4 * i));
-    }
-    printf("\n");
-
-    printf("Erase 4KByte...\n");
-    FLASH_ErasePage(FAST_FLASH_PROGRAM_START_ADDR);
-
-    printf("Read 8KByte...\n");
-    for(i = 0; i < 2048; i++)
-    {
-        printf("%08x ", *(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 4 * i));
-    }
-    printf("\n");
-
-    printf("Erase 32KByte...\n");
-    FLASH_EraseBlock_32K_Fast(FAST_FLASH_PROGRAM_START_ADDR);
-
-    printf("Read 36KByte...\n");
-    for(i = 0; i < (1024 * 9); i++)
-    {
-        printf("%08x ", *(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 4 * i));
-    }
-    printf("\n");
-
-    printf("Erase 64KByte...\n");
-    FLASH_EraseBlock_64K_Fast(FAST_FLASH_PROGRAM_START_ADDR);
-
-    printf("Read 64KByte...\n");
-    for(i = 0; i < (1024 * 16); i++)
-    {
-        printf("%08x ", *(u32 *)(FAST_FLASH_PROGRAM_START_ADDR + 4 * i));
-    }
-    printf("\n");
-
-    FLASH_Lock_Fast();
-    FLASH_Lock();
+        printf("%d Byte Verify Suc\r\n", (Fsize*4));
 }
 
 /*********************************************************************
@@ -232,7 +202,7 @@ int main(void)
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);	
+    USART_Printf_Init(921600);
     printf("SystemClk:%d\r\n", SystemCoreClock);
     printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("Flash Program Test\r\n");

@@ -2,7 +2,7 @@
  * File Name          : ch32v30x_usbhs_device.c
  * Author             : WCH
  * Version            : V1.0.0
- * Date               : 2022/08/18
+ * Date               : 2023/11/20
  * Description        : ch32v30x series usb interrupt processing.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -68,6 +68,12 @@
 #define USBHSD_UEP_TXBUF( N )       ( (uint8_t *)(*((volatile uint32_t *)( USBHSD_UEP_TXDMA_BASE + ( N - 1 ) * 0x04 ) ) ) + 0x20000000 )
 #define USBHSD_UEP_TLEN( N )        ( *((volatile uint16_t *)( USBHSD_UEP_TXLEN_BASE + ( N - 1 ) * 0x04 ) ) )
 
+/* Test mode */
+#define TEST_MASK       0x03
+#define TEST_SE0        0x00
+#define TEST_PACKET     0x01
+#define TEST_J          0x02
+#define TEST_K          0x03
 /******************************************************************************/
 /* Variable Declaration */
 

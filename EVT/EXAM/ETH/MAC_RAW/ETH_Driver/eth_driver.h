@@ -18,19 +18,8 @@
 
 #include "debug.h"
 
-/* Internal 10M PHY */
-#define USE_10M_BASE                            1
-/* The chips supported by the MII/RMII driver are: CH182/RTL8201F, etc. */
-#define USE_MAC_MII                             2
-#define USE_MAC_RMII                            3
-#define USE_MAC_RGMII                           4
-
-#ifndef PHY_MODE
-#define PHY_MODE                                USE_10M_BASE
-#endif
-
  /* 1: interrupt 0: polling in RMII or RGMII mode */
-#define LINK_STAT_ACQUISITION_METHOD            1
+#define LINK_STAT_ACQUISITION_METHOD            0
 
 #define PHY_ADDRESS                             1
 
@@ -69,11 +58,6 @@
   GPIO_Init(a, &GPIO_InitStructure)
 
 #define QUERY_STAT_FLAG  ((LastQueryPhyTime == (LocalTime / 1000)) ? 0 : 1)
-
-#define ENABLE_POLLING_TO_QUERY_PHY_LINK_STAT   ((PHY_MODE == USE_MAC_MII) || \
-                                                (((PHY_MODE == USE_MAC_RMII) || \
-                                                  (PHY_MODE == USE_MAC_RGMII)) && \
-                                                   !LINK_STAT_ACQUISITION_METHOD))
 
 #define ACCELERATE_LINK_PROCESS() do{\
     if((TRDetectStep < 2) && (ETH_ReadPHYRegister(gPHYAddress, PHY_ANLPAR) & PHY_ANLPAR_SELECTOR_FIELD))\
@@ -118,17 +102,20 @@
 }while(0)
 
 #define PHY_TR_REVERSE()       do{\
-    RegVal = ETH_ReadPHYRegister(gPHYAddress, PHY_MDIX);\
-    if(RegVal & 0x01)\
+    if(phyStatus)\
     {\
-        RegVal &= ~0x03;\
-        RegVal |= 1 << 1;\
+        RegVal = ETH_ReadPHYRegister(gPHYAddress, PHY_MDIX);\
+        if(RegVal & 0x01)\
+        {\
+            RegVal &= ~0x03;\
+            RegVal |= 1 << 1;\
+        }\
+        else{\
+            RegVal &= ~0x03;\
+            RegVal |= 1 << 0;\
+        }\
+        ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, RegVal);\
     }\
-    else{\
-        RegVal &= ~0x03;\
-        RegVal |= 1 << 0;\
-    }\
-    ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, RegVal);\
 }while(0)
 
 #define PHY_PN_SWITCH(PNMode)   do{\

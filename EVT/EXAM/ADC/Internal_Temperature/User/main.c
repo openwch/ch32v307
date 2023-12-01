@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2023/11/17
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -33,15 +33,9 @@ s16 Calibrattion_Val = 0;
 void ADC_Function_Init(void)
 {
 	ADC_InitTypeDef ADC_InitStructure={0};
-	GPIO_InitTypeDef GPIO_InitStructure={0};
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE );
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE );
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	ADC_DeInit(ADC1);
 	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
@@ -162,7 +156,7 @@ u16 Get_ADC_Average(u8 ch,u8 times)
  */
 u16 Get_ConversionVal(s16 val)
 {
-	if((val+Calibrattion_Val)<0) return 0;
+	if((val+Calibrattion_Val)<0|| val==0) return 0;
 	if((Calibrattion_Val+val)>4095||val==4095) return 4095;
 	return (val+Calibrattion_Val);
 }

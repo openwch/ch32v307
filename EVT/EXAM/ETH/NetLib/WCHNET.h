@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : wchnet.h
  * Author             : WCH
- * Version            : V1.80
+ * Version            : V1.90
  * Date               : 2023/05/12
  * Description        : This file contains the headers of 
 *                    the Ethernet protocol stack library.
@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x18              //the library version number
+#define WCHNET_LIB_VER                  0x19              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */

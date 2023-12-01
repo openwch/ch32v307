@@ -651,8 +651,6 @@ void ETH_DriverInit( uint8_t *addr )
 {
     uint8_t i;
 
-    /* change mac-addr to ecm/ncm format */
-    MACAddr_Change_To_SNDesc( addr );
     /* Ring buffer init */
     RB_Init( );
     /* Used for Time Base */

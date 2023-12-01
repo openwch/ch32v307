@@ -44,7 +44,7 @@ int main( void )
     
     printf( "SystemClk:%d\r\n", SystemCoreClock );
     printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-    printf( "USBFS HOST KM Test\r\n" );
+    printf( "USBFS HOST MTPTest\r\n" );
 
     /* Initialize USBHS host */
     /* Note: Only CH32V305/CH32V307 support USB high-speed port. */

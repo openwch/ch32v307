@@ -584,6 +584,7 @@ void GPIO_IPD_Unused(void)
     chip =  *( uint32_t * )0x1FFFF704 & (~0x000000F0);
     switch(chip)
     {
+#ifdef CH32V30x_D8
         case 0x30330504:     //CH32V303CBT6
         {
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
@@ -665,6 +666,11 @@ void GPIO_IPD_Unused(void)
             GPIO_Init(GPIOE, &GPIO_InitStructure);
             break;
         }
+        case 0x30300504:     //CH32V303VCT6
+        {        
+            break;
+        }
+#elif defined  (CH32V30x_D8C)
         case 0x30520508:     //CH32V305FBP6
         {
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_2\
@@ -735,7 +741,7 @@ void GPIO_IPD_Unused(void)
             GPIO_Init(GPIOE, &GPIO_InitStructure);
             break;
         }
-          case 0x30710508:     //CH32V307RCT6
+        case 0x30710508:     //CH32V307RCT6
         {
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
                                           |GPIO_Pin_3|GPIO_Pin_4\
@@ -786,15 +792,10 @@ void GPIO_IPD_Unused(void)
         {        
             break;
         }
-        case 0x30300504:     //CH32V303VCT6
-        {        
-            break;
-        }
+#endif
         default:
         {
             break;
         }
-
     }
-
 }

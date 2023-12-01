@@ -72,20 +72,33 @@ void RTC_ExitConfigMode(void)
  */
 uint32_t RTC_GetCounter(void)
 {
-    uint16_t high1 = 0, high2 = 0, low = 0;
+    uint16_t high1a = 0, high1b = 0, high2a = 0, high2b = 0;
+    uint16_t low1 = 0, low2 = 0;
 
-    high1 = RTC->CNTH;
-    low = RTC->CNTL;
-    high2 = RTC->CNTH;
+    do{
+        high1a = RTC->CNTH;
+        high1b = RTC->CNTH;
+    }while( high1a != high1b );
 
-    if(high1 != high2)
+    do{
+        low1 = RTC->CNTL;
+        low2 = RTC->CNTL;
+    }while( low1 != low2 );
+
+    do{
+        high2a = RTC->CNTH;
+        high2b = RTC->CNTH;
+    }while( high2a != high2b );
+
+    if(high1b != high2b)
     {
-        return (((uint32_t)high2 << 16) | RTC->CNTL);
+        do{
+            low1 = RTC->CNTL;
+            low2 = RTC->CNTL;
+        }while( low1 != low2 );
     }
-    else
-    {
-        return (((uint32_t)high1 << 16) | low);
-    }
+
+    return (((uint32_t)high2b << 16) | low2);
 }
 
 /*********************************************************************
@@ -148,10 +161,33 @@ void RTC_SetAlarm(uint32_t AlarmValue)
  */
 uint32_t RTC_GetDivider(void)
 {
-    uint32_t tmp = 0x00;
-    tmp = ((uint32_t)RTC->DIVH & (uint32_t)0x000F) << 16;
-    tmp |= RTC->DIVL;
-    return tmp;
+    uint16_t high1a = 0, high1b = 0, high2a = 0, high2b = 0;
+    uint16_t low1 = 0, low2 = 0;
+
+    do{
+        high1a = RTC->DIVH;
+        high1b = RTC->DIVH;
+    }while( high1a != high1b );
+
+    do{
+        low1 = RTC->DIVL;
+        low2 = RTC->DIVL;
+    }while( low1 != low2 );
+
+    do{
+        high2a = RTC->DIVH;
+        high2b = RTC->DIVH;
+    }while( high2a != high2b );
+
+    if(high1b != high2b)
+    {
+        do{
+            low1 = RTC->DIVL;
+            low2 = RTC->DIVL;
+        }while( low1 != low2 );
+    }
+
+    return ((((uint32_t)high2b & (uint32_t)0x000F) << 16) | low2);
 }
 
 /*********************************************************************

@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2023/11/17
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,7 +13,7 @@
 /*
  *@Note 
   Dual ADC fast interleaved sampling routine:
- ADC1 channel 2 (PA2), ADC2 channel 2 (PA2)), the rule group channel obtains dual ADC conversion
+ ADC1 channel 1 (PA1), ADC2 channel 1 (PA1)), the rule group channel obtains dual ADC conversion
  data through ADC interrupt.
 */
 
@@ -109,7 +109,7 @@ void  ADC_Function_Init(void)
  */
 u16 Get_ConversionVal1(s16 val)
 {
-	if((val+Calibrattion_Val1)<0) return 0;
+	if((val+Calibrattion_Val1)<0|| val==0) return 0;
 	if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
 	return (val+Calibrattion_Val1);
 }

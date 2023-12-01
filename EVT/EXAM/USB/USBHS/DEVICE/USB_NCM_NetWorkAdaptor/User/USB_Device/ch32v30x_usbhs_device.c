@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_usbhs_device.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2022/08/20
+* Date               : 2023/11/20
 * Description        : This file provides all the USBHS firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,7 +13,21 @@
 
 /******************************************************************************/
 /* Variable Definition */
-const uint8_t    *pUSBHS_Descr;
+/* test mode */
+volatile uint8_t  USBHS_Test_Flag;
+__attribute__ ((aligned(4))) uint8_t IFTest_Buf[ 53 ] =
+{
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
+    0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE,
+    0xFE,//26
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,//37
+    0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD,//44
+    0xFC, 0x7E, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0x7E//53
+};
+
+/* Global */
+const    uint8_t  *pUSBHS_Descr;
 
 /* Setup Request */
 volatile uint8_t  USBHS_SetupReqCode;
@@ -43,6 +57,53 @@ volatile uint8_t  USBHS_Endp_Busy[ DEF_UEP_NUM ];
 /******************************************************************************/
 /* Interrupt Service Routine Declaration*/
 void USBHS_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+
+/*********************************************************************
+ * @fn      USB_TestMode_Deal
+ *
+ * @brief   Eye Diagram Test Function Processing.
+ *
+ * @return  none
+ *
+ */
+void USB_TestMode_Deal( void )
+{
+    /* start test */
+    USBHS_Test_Flag &= ~0x80;
+    if( USBHS_SetupReqIndex == 0x0100 )
+    {
+        /* Test_J */
+        USBHSD->SUSPEND &= ~TEST_MASK;
+        USBHSD->SUSPEND |= TEST_J;
+    }
+    else if( USBHS_SetupReqIndex == 0x0200 )
+    {
+        /* Test_K */
+        USBHSD->SUSPEND &= ~TEST_MASK;
+        USBHSD->SUSPEND |= TEST_K;
+    }
+    else if( USBHS_SetupReqIndex == 0x0300 )
+    {
+        /* Test_SE0_NAK */
+        USBHSD->SUSPEND &= ~TEST_MASK;
+        USBHSD->SUSPEND |= TEST_SE0;
+    }
+    else if( USBHS_SetupReqIndex == 0x0400 )
+    {
+        /* Test_Packet */
+        USBHSD->SUSPEND &= ~TEST_MASK;
+        USBHSD->SUSPEND |= TEST_PACKET;
+
+        USBHSD->CONTROL |= USBHS_UC_HOST_MODE;
+        USBHSH->HOST_EP_CONFIG = USBHS_UH_EP_TX_EN | USBHS_UH_EP_RX_EN;
+        USBHSH->HOST_EP_TYPE |= 0xff;
+
+        USBHSH->HOST_TX_DMA = (uint32_t)(&IFTest_Buf[ 0 ]);
+        USBHSH->HOST_TX_LEN = 53;
+        USBHSH->HOST_EP_PID = ( USB_PID_SETUP << 4 );
+        USBHSH->INT_FG = USBHS_UIF_TRANSFER;
+    }
+}
 
 /*********************************************************************
  * @fn      USBHS_RCC_Init
@@ -267,7 +328,12 @@ void USBHS_IRQHandler( void )
                              }
                          }
 
-                            break;
+                         /* test mode */
+                         if( USBHS_Test_Flag & 0x80 )
+                         {
+                             USB_TestMode_Deal( );
+                         }
+                         break;
 
                     default:
                         errflag = 0xFF;
@@ -608,6 +674,18 @@ void USBHS_IRQHandler( void )
                             else
                             {
                                 errflag = 0xFF;
+                            }
+                        }
+                        else if( (uint8_t)(USBHS_SetupReqValue&0xFF) == 0x02 )
+                        {
+                            /* test mode deal */
+                            if( ( USBHS_SetupReqIndex == 0x0100 ) ||
+                                ( USBHS_SetupReqIndex == 0x0200 ) ||
+                                ( USBHS_SetupReqIndex == 0x0300 ) ||
+                                ( USBHS_SetupReqIndex == 0x0400 ) )
+                            {
+                                /* Set the flag and wait for the status to be uploaded before proceeding with the actual operation */
+                                USBHS_Test_Flag |= 0x80;
                             }
                         }
                         else
