@@ -10,7 +10,7 @@ The CH32V305 and CH32V307 are interconnected microcontrollers, based on 32-bit R
 <img src="image/frame.jpg" alt="frame" style="zoom:50%;" />
  
 ### Features
-- RISC-V4F processor, max 144MHz system clock frequency;
+- RISC-V4F processor, max 144MHz system clock frequency, RV32IMAFC instruction set;
 - Single-cycle multiplication and hardware division, hardware float point unit (FPU) ;
 - 64KB SRAM，256KB Flash;
 - Supply voltage: 2.5V/3.3V, GPIO unit is supplied independently;
