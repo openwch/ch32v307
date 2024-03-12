@@ -658,7 +658,7 @@ void MS_Scan_Handle( void )
 }
 
 /*********************************************************************
- * @fn      USBHD_Sleep_Wakeup_CFG
+ * @fn      USB_Sleep_Wakeup_CFG
  *
  * @brief   Configure USB wake up mode
  *
@@ -676,7 +676,7 @@ void USB_Sleep_Wakeup_CFG( void )
 }
 
 /*********************************************************************
- * @fn      USBHD_Sleep_Wakeup_Operate
+ * @fn      MCU_Sleep_Wakeup_Operate
  *
  * @brief   Perform sleep operation
  *
@@ -690,6 +690,14 @@ void MCU_Sleep_Wakeup_Operate( void )
     EXTI_ClearFlag( EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15 );
     EXTI_ClearFlag( EXTI_Line4 | EXTI_Line5 | EXTI_Line6 | EXTI_Line7 );
 
+    _SEV( );
+    _WFE( );
+    if( USBHSD->SUSPEND & USBHS_USB_WAKEUP_ST )
+    {
+        USBHSD->HOST_CTRL |= USBHS_UH_PHY_SUSPENDM;
+        __enable_irq( );
+        return;
+    }
     PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFE);
 
     SystemInit();

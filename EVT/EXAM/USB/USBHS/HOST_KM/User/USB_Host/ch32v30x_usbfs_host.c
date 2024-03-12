@@ -42,19 +42,19 @@ void USBFS_RCC_Init( void )
 #else
     if( SystemCoreClock == 144000000 )
     {
-        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div3 );
+        RCC_USBFSCLKConfig( RCC_USBFSCLKSource_PLLCLK_Div3 );
     }
     else if( SystemCoreClock == 96000000 )
     {
-        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div2 );
+        RCC_USBFSCLKConfig( RCC_USBFSCLKSource_PLLCLK_Div2 );
     }
     else if( SystemCoreClock == 48000000 )
     {
-        RCC_OTGFSCLKConfig( RCC_OTGFSCLKSource_PLLCLK_Div1 );
+        RCC_USBFSCLKConfig( RCC_USBFSCLKSource_PLLCLK_Div1 );
     }
 #endif
     
-    RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS, ENABLE );
+    RCC_AHBPeriphClockCmd( RCC_AHBPeriph_USBFS, ENABLE );
 }
 /*********************************************************************
  * @fn      USBFS_Host_Init
@@ -70,21 +70,21 @@ void USBFS_Host_Init( FunctionalState sta )
     if( sta == ENABLE )
     {
         /* Reset USB module */
-        USBOTG_H_FS->BASE_CTRL = USBFS_UC_RESET_SIE | USBFS_UC_CLR_ALL;
+        USBFSH->BASE_CTRL = USBFS_UC_RESET_SIE | USBFS_UC_CLR_ALL;
         Delay_Us( 10 );
-        USBOTG_H_FS->BASE_CTRL = 0;
+        USBFSH->BASE_CTRL = 0;
 
         /* Initialize USB host configuration */
-        USBOTG_H_FS->BASE_CTRL = USBFS_UC_HOST_MODE | USBFS_UC_INT_BUSY | USBFS_UC_DMA_EN;
-        USBOTG_H_FS->HOST_EP_MOD = USBFS_UH_EP_TX_EN | USBFS_UH_EP_RX_EN;
-        USBOTG_H_FS->HOST_RX_DMA = (uint32_t)USBFS_RX_Buf;
-        USBOTG_H_FS->HOST_TX_DMA = (uint32_t)USBFS_TX_Buf;
+        USBFSH->BASE_CTRL = USBFS_UC_HOST_MODE | USBFS_UC_INT_BUSY | USBFS_UC_DMA_EN;
+        USBFSH->HOST_EP_MOD = USBFS_UH_EP_TX_EN | USBFS_UH_EP_RX_EN;
+        USBFSH->HOST_RX_DMA = (uint32_t)USBFS_RX_Buf;
+        USBFSH->HOST_TX_DMA = (uint32_t)USBFS_TX_Buf;
     }
     else
     {
-        USBOTG_H_FS->BASE_CTRL = USBFS_UC_RESET_SIE | USBFS_UC_CLR_ALL;
+        USBFSH->BASE_CTRL = USBFS_UC_RESET_SIE | USBFS_UC_CLR_ALL;
         Delay_Us( 10 );
-        USBOTG_H_FS->BASE_CTRL = 0;
+        USBFSH->BASE_CTRL = 0;
     }
 }
 
@@ -100,11 +100,11 @@ void USBFS_Host_Init( FunctionalState sta )
  */
 uint8_t USBFSH_CheckRootHubPortStatus( uint8_t dev_sta )
 {
-    if( USBOTG_H_FS->INT_FG & USBFS_UIF_DETECT ) // Check that there is a device connection or disconnection event on the port
+    if( USBFSH->INT_FG & USBFS_UIF_DETECT ) // Check that there is a device connection or disconnection event on the port
     {
-        USBOTG_H_FS->INT_FG = USBFS_UIF_DETECT; // Clear flag
+        USBFSH->INT_FG = USBFS_UIF_DETECT; // Clear flag
         
-        if( USBOTG_H_FS->MIS_ST & USBFS_UMS_DEV_ATTACH ) // Check that there is a device connection to the port
+        if( USBFSH->MIS_ST & USBFS_UMS_DEV_ATTACH ) // Check that there is a device connection to the port
         {
             if( ( dev_sta == ROOT_DEV_DISCONNECT ) || ( ( dev_sta != ROOT_DEV_FAILED ) && ( USBFSH_CheckRootHubPortEnable( ) == 0x00 ) ) )
             {
@@ -136,7 +136,7 @@ uint8_t USBFSH_CheckRootHubPortStatus( uint8_t dev_sta )
  */
 uint8_t USBFSH_CheckRootHubPortEnable( void )
 {
-    return ( USBOTG_H_FS->HOST_CTRL & USBFS_UH_PORT_EN );
+    return ( USBFSH->HOST_CTRL & USBFS_UH_PORT_EN );
 }
 
 /*********************************************************************
@@ -148,7 +148,7 @@ uint8_t USBFSH_CheckRootHubPortEnable( void )
  */
 uint8_t USBFSH_CheckRootHubPortSpeed( void )
 {
-    return ( USBOTG_H_FS->MIS_ST & USBFS_UMS_DM_LEVEL? USB_LOW_SPEED: USB_FULL_SPEED );
+    return ( USBFSH->MIS_ST & USBFS_UMS_DM_LEVEL? USB_LOW_SPEED: USB_FULL_SPEED );
 }
 
 /*********************************************************************
@@ -162,7 +162,7 @@ uint8_t USBFSH_CheckRootHubPortSpeed( void )
  */
 void USBFSH_SetSelfAddr( uint8_t addr )
 {
-    USBOTG_H_FS->DEV_ADDR = ( USBOTG_H_FS->DEV_ADDR & USBFS_UDA_GP_BIT ) | ( addr & USBFS_USB_ADDR_MASK );
+    USBFSH->DEV_ADDR = ( USBFSH->DEV_ADDR & USBFS_UDA_GP_BIT ) | ( addr & USBFS_USB_ADDR_MASK );
 }
 
 /*********************************************************************
@@ -178,15 +178,15 @@ void USBFSH_SetSelfSpeed( uint8_t speed )
 {
     if( speed == USB_FULL_SPEED )
     {
-        USBOTG_H_FS->BASE_CTRL &= ~USBFS_UC_LOW_SPEED;
-        USBOTG_H_FS->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
-        USBOTG_H_FS->HOST_SETUP &= ~USBFS_UH_PRE_PID_EN;
+        USBFSH->BASE_CTRL &= ~USBFS_UC_LOW_SPEED;
+        USBFSH->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
+        USBFSH->HOST_SETUP &= ~USBFS_UH_PRE_PID_EN;
     }
     else
     {
-        USBOTG_H_FS->BASE_CTRL |= USBFS_UC_LOW_SPEED;
-        USBOTG_H_FS->HOST_CTRL |= USBFS_UH_LOW_SPEED;
-        USBOTG_H_FS->HOST_SETUP |= USBFS_UH_PRE_PID_EN;
+        USBFSH->BASE_CTRL |= USBFS_UC_LOW_SPEED;
+        USBFSH->HOST_CTRL |= USBFS_UH_LOW_SPEED;
+        USBFSH->HOST_SETUP |= USBFS_UH_PRE_PID_EN;
     }
 }
 
@@ -209,7 +209,7 @@ void USBFSH_ResetRootHubPort( uint8_t mode )
     
     if( mode <= 1 )
     {
-        USBOTG_H_FS->HOST_CTRL |= USBFS_UH_BUS_RESET; // Start reset
+        USBFSH->HOST_CTRL |= USBFS_UH_BUS_RESET; // Start reset
     }
     if( mode == 0 )
     {
@@ -217,15 +217,15 @@ void USBFSH_ResetRootHubPort( uint8_t mode )
     }
     if( mode != 1 )
     {
-        USBOTG_H_FS->HOST_CTRL &= ~USBFS_UH_BUS_RESET; // End reset
+        USBFSH->HOST_CTRL &= ~USBFS_UH_BUS_RESET; // End reset
     }
     Delay_Ms( 2 );
 
-    if( USBOTG_H_FS->INT_FG & USBFS_UIF_DETECT )
+    if( USBFSH->INT_FG & USBFS_UIF_DETECT )
     {
-        if( USBOTG_H_FS->MIS_ST & USBFS_UMS_DEV_ATTACH )
+        if( USBFSH->MIS_ST & USBFS_UMS_DEV_ATTACH )
         {
-            USBOTG_H_FS->INT_FG = USBFS_UIF_DETECT;
+            USBFSH->INT_FG = USBFS_UIF_DETECT;
         }
     }
 }
@@ -241,7 +241,7 @@ void USBFSH_ResetRootHubPort( uint8_t mode )
  */
 uint8_t USBFSH_EnableRootHubPort( uint8_t *pspeed )
 {
-    if( USBOTG_H_FS->MIS_ST & USBFS_UMS_DEV_ATTACH )
+    if( USBFSH->MIS_ST & USBFS_UMS_DEV_ATTACH )
     {
         if( USBFSH_CheckRootHubPortEnable( ) == 0x00 )
         { 
@@ -251,8 +251,8 @@ uint8_t USBFSH_EnableRootHubPort( uint8_t *pspeed )
                 USBFSH_SetSelfSpeed( USB_LOW_SPEED );
             }
         }
-        USBOTG_H_FS->HOST_CTRL |= USBFS_UH_PORT_EN;
-        USBOTG_H_FS->HOST_SETUP |= USBFS_UH_SOF_EN;
+        USBFSH->HOST_CTRL |= USBFS_UH_PORT_EN;
+        USBFSH->HOST_SETUP |= USBFS_UH_SOF_EN;
 
         return ERR_SUCCESS;
     }
@@ -276,30 +276,30 @@ uint8_t USBFSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
     uint8_t  r, trans_retry;
     uint16_t i;
 
-    USBOTG_H_FS->HOST_TX_CTRL = USBOTG_H_FS->HOST_RX_CTRL = endp_tog;
+    USBFSH->HOST_TX_CTRL = USBFSH->HOST_RX_CTRL = endp_tog;
     trans_retry = 0;
     do
     {
-        USBOTG_H_FS->HOST_EP_PID = endp_pid; // Specify token PID and endpoint number
-        USBOTG_H_FS->INT_FG = USBFS_UIF_TRANSFER; // Allow transfer
-        for( i = DEF_WAIT_USB_TRANSFER_CNT; ( i != 0 ) && ( ( USBOTG_H_FS->INT_FG & USBFS_UIF_TRANSFER ) == 0 ); i-- )
+        USBFSH->HOST_EP_PID = endp_pid; // Specify token PID and endpoint number
+        USBFSH->INT_FG = USBFS_UIF_TRANSFER; // Allow transfer
+        for( i = DEF_WAIT_USB_TRANSFER_CNT; ( i != 0 ) && ( ( USBFSH->INT_FG & USBFS_UIF_TRANSFER ) == 0 ); i-- )
         {
             Delay_Us( 1 ); // Delay for USB transfer
         }
-        USBOTG_H_FS->HOST_EP_PID = 0x00; // Stop transfer
+        USBFSH->HOST_EP_PID = 0x00; // Stop transfer
         
-        if( ( USBOTG_H_FS->INT_FG & USBFS_UIF_TRANSFER ) == 0 )
+        if( ( USBFSH->INT_FG & USBFS_UIF_TRANSFER ) == 0 )
         {
             return ERR_USB_UNKNOWN;
         }
         else // Complete transfer 
         {
-            if( USBOTG_H_FS->INT_ST & USBFS_UIS_TOG_OK )
+            if( USBFSH->INT_ST & USBFS_UIS_TOG_OK )
             {
                 return ERR_SUCCESS;
             }
             
-            r = USBOTG_H_FS->INT_ST & USBFS_UIS_H_RES_MASK; // Response status of current USB transaction 
+            r = USBFSH->INT_ST & USBFS_UIS_H_RES_MASK; // Response status of current USB transaction 
 
             if( r == USB_PID_STALL )
             {
@@ -345,7 +345,7 @@ uint8_t USBFSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
         }
         Delay_Us( 20 );
         
-        if( USBOTG_H_FS->INT_FG & USBFS_UIF_DETECT )
+        if( USBFSH->INT_FG & USBFS_UIF_DETECT )
         {
             Delay_Us( 200 );
 
@@ -355,7 +355,7 @@ uint8_t USBFSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
             }
             else
             {
-                USBOTG_H_FS->INT_FG = USBFS_UIF_DETECT;
+                USBFSH->INT_FG = USBFS_UIF_DETECT;
             }
         }
     }while( ++trans_retry < 10 );
@@ -384,7 +384,7 @@ uint8_t USBFSH_CtrlTransfer( uint8_t ep0_size, uint8_t *pbuf, uint16_t *plen )
     {
         *plen = 0;
     }
-    USBOTG_H_FS->HOST_TX_LEN = sizeof( USB_SETUP_REQ );
+    USBFSH->HOST_TX_LEN = sizeof( USB_SETUP_REQ );
 
     s = USBFSH_Transact( ( USB_PID_SETUP << 4 ) | 0x00, 0x00, DEF_CTRL_TRANS_TIMEOVER_CNT ); // SETUP stage
     if( s != ERR_SUCCESS )
@@ -392,7 +392,7 @@ uint8_t USBFSH_CtrlTransfer( uint8_t ep0_size, uint8_t *pbuf, uint16_t *plen )
         return s;
     }
     
-    USBOTG_H_FS->HOST_TX_CTRL = USBOTG_H_FS->HOST_RX_CTRL = USBFS_UH_T_TOG | USBFS_UH_R_TOG; // Default DATA1
+    USBFSH->HOST_TX_CTRL = USBFSH->HOST_RX_CTRL = USBFS_UH_T_TOG | USBFS_UH_R_TOG; // Default DATA1
     rem_len = pUSBFS_SetupRequest->wLength;
     if( rem_len && pbuf )
     {
@@ -402,14 +402,14 @@ uint8_t USBFSH_CtrlTransfer( uint8_t ep0_size, uint8_t *pbuf, uint16_t *plen )
             while( rem_len )
             {
                 Delay_Us( 100 );
-                s = USBFSH_Transact( ( USB_PID_IN << 4 ) | 0x00, USBOTG_H_FS->HOST_RX_CTRL, DEF_CTRL_TRANS_TIMEOVER_CNT );  // IN
+                s = USBFSH_Transact( ( USB_PID_IN << 4 ) | 0x00, USBFSH->HOST_RX_CTRL, DEF_CTRL_TRANS_TIMEOVER_CNT );  // IN
                 if( s != ERR_SUCCESS )
                 {
                     return s;
                 }
-                USBOTG_H_FS->HOST_RX_CTRL ^= USBFS_UH_R_TOG;
+                USBFSH->HOST_RX_CTRL ^= USBFS_UH_R_TOG;
                 
-                rx_len = ( USBOTG_H_FS->RX_LEN < rem_len )? USBOTG_H_FS->RX_LEN : rem_len;
+                rx_len = ( USBFSH->RX_LEN < rem_len )? USBFSH->RX_LEN : rem_len;
                 rem_len -= rx_len;
                 if( plen )
                 {
@@ -421,12 +421,12 @@ uint8_t USBFSH_CtrlTransfer( uint8_t ep0_size, uint8_t *pbuf, uint16_t *plen )
                     pbuf++;
                 }
 
-                if( ( USBOTG_H_FS->RX_LEN == 0 ) || ( USBOTG_H_FS->RX_LEN & ( ep0_size - 1 ) ) )
+                if( ( USBFSH->RX_LEN == 0 ) || ( USBFSH->RX_LEN & ( ep0_size - 1 ) ) )
                 {
                     break; // Short package
                 }
             }
-            USBOTG_H_FS->HOST_TX_LEN = 0; // Status stage is OUT
+            USBFSH->HOST_TX_LEN = 0; // Status stage is OUT
         }
         else
         {
@@ -434,39 +434,39 @@ uint8_t USBFSH_CtrlTransfer( uint8_t ep0_size, uint8_t *pbuf, uint16_t *plen )
             while( rem_len )
             {
                 Delay_Us( 100 );
-                USBOTG_H_FS->HOST_TX_LEN = ( rem_len >= ep0_size )? ep0_size : rem_len;
-                for( tx_cnt = 0; tx_cnt != USBOTG_H_FS->HOST_TX_LEN; tx_cnt++ )
+                USBFSH->HOST_TX_LEN = ( rem_len >= ep0_size )? ep0_size : rem_len;
+                for( tx_cnt = 0; tx_cnt != USBFSH->HOST_TX_LEN; tx_cnt++ )
                 {
                     USBFS_TX_Buf[ tx_cnt ] = *pbuf;
                     pbuf++;
                 }
-                s = USBFSH_Transact( USB_PID_OUT << 4 | 0x00, USBOTG_H_FS->HOST_TX_CTRL, DEF_CTRL_TRANS_TIMEOVER_CNT ); // OUT
+                s = USBFSH_Transact( USB_PID_OUT << 4 | 0x00, USBFSH->HOST_TX_CTRL, DEF_CTRL_TRANS_TIMEOVER_CNT ); // OUT
                 if( s != ERR_SUCCESS )
                 {
                     return s;
                 }
-                USBOTG_H_FS->HOST_TX_CTRL ^= USBFS_UH_T_TOG;
+                USBFSH->HOST_TX_CTRL ^= USBFS_UH_T_TOG;
                 
-                rem_len -= USBOTG_H_FS->HOST_TX_LEN;
+                rem_len -= USBFSH->HOST_TX_LEN;
                 if( plen )
                 {
-                    *plen += USBOTG_H_FS->HOST_TX_LEN; // The total length of the actual successful transmission and reception
+                    *plen += USBFSH->HOST_TX_LEN; // The total length of the actual successful transmission and reception
                 }
             }
         }
     }
 
     Delay_Us( 100 );
-    s = USBFSH_Transact( ( USBOTG_H_FS->HOST_TX_LEN )? ( USB_PID_IN << 4 | 0x00 ) : ( USB_PID_OUT << 4 | 0x00 ), USBFS_UH_R_TOG | USBFS_UH_T_TOG, DEF_CTRL_TRANS_TIMEOVER_CNT ); // STATUS stage
+    s = USBFSH_Transact( ( USBFSH->HOST_TX_LEN )? ( USB_PID_IN << 4 | 0x00 ) : ( USB_PID_OUT << 4 | 0x00 ), USBFS_UH_R_TOG | USBFS_UH_T_TOG, DEF_CTRL_TRANS_TIMEOVER_CNT ); // STATUS stage
     if( s != ERR_SUCCESS )
     {
         return s;
     }
-    if( USBOTG_H_FS->HOST_TX_LEN == 0 )
+    if( USBFSH->HOST_TX_LEN == 0 )
     {
         return ERR_SUCCESS;
     }
-    if( USBOTG_H_FS->RX_LEN == 0 )
+    if( USBFSH->RX_LEN == 0 )
     {
         return ERR_SUCCESS;
     }
@@ -659,7 +659,7 @@ uint8_t USBFSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
     s = USBFSH_Transact( ( USB_PID_IN << 4 ) | endp_num, *pendp_tog, 0 );
     if( s == ERR_SUCCESS )
     {
-        *plen = USBOTG_H_FS->RX_LEN;
+        *plen = USBFSH->RX_LEN;
         memcpy( pbuf, USBFS_RX_Buf, *plen );
 
         *pendp_tog ^= USBFS_UH_R_TOG;
@@ -685,7 +685,7 @@ uint8_t USBFSH_SendEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf
     uint8_t  s;
     
     memcpy( USBFS_TX_Buf, pbuf, len );
-    USBOTG_H_FS->HOST_TX_LEN = len;
+    USBFSH->HOST_TX_LEN = len;
     s = USBFSH_Transact( ( USB_PID_OUT << 4 ) | endp_num, *pendp_tog, 0 );
     if( s == ERR_SUCCESS )
     {

@@ -29,6 +29,9 @@ void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
  */
 void NMI_Handler(void)
 {
+  while (1)
+  {
+  }
 }
 
 /*********************************************************************

@@ -350,8 +350,8 @@ void UART2_DataTx_Deal( void )
 
             Uart.Tx_Flag = 0x00;
 
-            NVIC_DisableIRQ( OTG_FS_IRQn );
-            NVIC_DisableIRQ( OTG_FS_IRQn );
+            NVIC_DisableIRQ( USBFS_IRQn );
+            NVIC_DisableIRQ( USBFS_IRQn );
 
             /* Calculate the variables of last data */
             count = Uart.Tx_CurPackLen - DEF_UART2_TX_DMA_CH->CNTR;
@@ -371,12 +371,12 @@ void UART2_DataTx_Deal( void )
             /* If the current serial port has suspended the downlink, restart the driver downlink */
             if( ( Uart.USB_Down_StopFlag == 0x01 ) && ( Uart.Tx_RemainNum < 2 ) )
             {
-                USBOTG_FS->UEP2_RX_CTRL &= ~USBFS_UEP_R_RES_MASK;
-                USBOTG_FS->UEP2_RX_CTRL |= USBFS_UEP_R_RES_ACK;
+                USBFSD->UEP2_RX_CTRL &= ~USBFS_UEP_R_RES_MASK;
+                USBFSD->UEP2_RX_CTRL |= USBFS_UEP_R_RES_ACK;
                 Uart.USB_Down_StopFlag = 0x00;
             }
 
-            NVIC_EnableIRQ( OTG_FS_IRQn );
+            NVIC_EnableIRQ( USBFS_IRQn );
         }
     }
     else
@@ -416,8 +416,8 @@ void UART2_DataRx_Deal( void )
     uint16_t packlen;
 
     /* Serial port 1 data DMA receive processing */
-    NVIC_DisableIRQ( OTG_FS_IRQn );
-    NVIC_DisableIRQ( OTG_FS_IRQn );
+    NVIC_DisableIRQ( USBFS_IRQn );
+    NVIC_DisableIRQ( USBFS_IRQn );
     UARTx_Rx_DMACurCount = DEF_UART2_RX_DMA_CH->CNTR;
     if( UARTx_Rx_DMALastCount != UARTx_Rx_DMACurCount )
 
@@ -446,7 +446,7 @@ void UART2_DataRx_Deal( void )
         /* Setting reception status */
         Uart.Rx_TimeOut = 0x00;
     }
-    NVIC_EnableIRQ( OTG_FS_IRQn );
+    NVIC_EnableIRQ( USBFS_IRQn );
 
     /*****************************************************************/
     /* Serial port 1 data processing via USB upload and reception */
@@ -476,8 +476,8 @@ void UART2_DataRx_Deal( void )
             /* Upload serial data via usb */
             if( packlen )
             {
-                NVIC_DisableIRQ( OTG_FS_IRQn );
-                NVIC_DisableIRQ( OTG_FS_IRQn );
+                NVIC_DisableIRQ( USBFS_IRQn );
+                NVIC_DisableIRQ( USBFS_IRQn );
                 Uart.USB_Up_IngFlag = 0x01;
                 Uart.USB_Up_TimeOut = 0x00;
                 USBFS_Endp_DataUp( DEF_UEP3, (uint8_t *)&UART2_Rx_Buf[ Uart.Rx_DealPtr ], packlen, DEF_UEP_CPY_LOAD );
@@ -494,7 +494,7 @@ void UART2_DataRx_Deal( void )
                 {
                     Uart.USB_Up_Pack0_Flag = 0x01;
                 }
-                NVIC_EnableIRQ( OTG_FS_IRQn );
+                NVIC_EnableIRQ( USBFS_IRQn );
             }
         }
         else
@@ -516,16 +516,16 @@ void UART2_DataRx_Deal( void )
         {
             if( Uart.USB_Up_TimeOut >= ( DEF_UARTx_RX_TIMEOUT * 20 ) )
             {
-                NVIC_DisableIRQ( OTG_FS_IRQn );
-                NVIC_DisableIRQ( OTG_FS_IRQn );
+                NVIC_DisableIRQ( USBFS_IRQn );
+                NVIC_DisableIRQ( USBFS_IRQn );
                 Uart.USB_Up_IngFlag = 0x01;
                 Uart.USB_Up_TimeOut = 0x00;
-                USBOTG_FS->UEP3_TX_LEN = 0;
-                USBOTG_FS->UEP3_TX_CTRL &= ~USBFS_UEP_T_RES_MASK;
-                USBOTG_FS->UEP3_TX_CTRL |= USBFS_UEP_T_RES_ACK;
+                USBFSD->UEP3_TX_LEN = 0;
+                USBFSD->UEP3_TX_CTRL &= ~USBFS_UEP_T_RES_MASK;
+                USBFSD->UEP3_TX_CTRL |= USBFS_UEP_T_RES_ACK;
                 Uart.USB_Up_IngFlag = 0;
                 Uart.USB_Up_Pack0_Flag = 0x00;
-                NVIC_EnableIRQ( OTG_FS_IRQn );
+                NVIC_EnableIRQ( USBFS_IRQn );
             }
         }
     }

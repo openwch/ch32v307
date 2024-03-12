@@ -2,7 +2,7 @@
 * File Name          : nand_flash.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/05
 * Description        : This file contains the headers of the NANDFLASH.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,6 +15,8 @@
 #include "debug.h"
 
 #define NAND_ECC_SECTOR_SIZE        512
+#define Bank_NAND_ADDR     FSMC_Bank2_NAND
+#define  ROW_ADDRESS  ((Address.Page+Address.Block*NAND_BLOCK_SIZE)*NAND_ECC_SECTOR_SIZE)
 
 //NANDFLASH parameter
 typedef struct
@@ -28,13 +30,15 @@ typedef struct
     u32 id;
 }nand_attriute;
 
+
 extern nand_attriute nand_dev;
 
 #define NAND_ADDRESS            0X70000000
 #define NAND_CMD                1<<16
 #define NAND_ADDR               1<<17
+#define DATA_AREA              ((u32)0x00000000)
 
-//NAND FLASH����
+//NAND FLASH CMD
 #define NAND_READID             0X90
 #define NAND_RESET              0XFF
 #define NAND_READSTA            0X70
@@ -49,10 +53,11 @@ extern nand_attriute nand_dev;
 #define NSTA_READY              0X40
 #define NSTA_ERROR              0X01
 #define NSTA_TIMEOUT            0X02
+#define NAND_VALID_ADDRESS    ((u32)0x00000100)
 
 
 //NANDFLASH ID
-#define FS33ND01GS108TF             0xF1009542 //  0x429500F1
+#define W29N01HV             0xF1009500
 
 
 u8 NAND_Init(void);
@@ -65,5 +70,7 @@ void NAND_Delay(vu32 i);
 u8 NAND_ReadPage(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToRead);
 u8 NAND_WritePage(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToWrite);
 u8 NAND_EraseBlock(u32 BlockNum);
-
+u32 CheckEcc( u32  data);
+u8 NAND_WritePagewithEcc(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToWrite);
+u8 NAND_ReadPageWithEcc(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToRead);
 #endif 

@@ -119,7 +119,6 @@ extern void USBHS_Device_Init ( FunctionalState sta );
 extern void USBHS_Device_SetAddress( uint32_t address );
 extern void USBHS_IRQHandler( void );
 extern void USBHS_Sleep_WakeUp_Cfg( void );
-extern void USBHD_Sleep_Wakeup_Operate( void );
 extern uint8_t USBHS_Endp_DataUp( uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod );
 
 #ifdef __cplusplus

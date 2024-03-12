@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_rcc.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : This file provides all the RCC firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -212,10 +212,14 @@ typedef struct
 
 #endif
 
-/* USB_OTG_FS_clock_source */
-#define RCC_OTGFSCLKSource_PLLCLK_Div1   ((uint8_t)0x00)
-#define RCC_OTGFSCLKSource_PLLCLK_Div2   ((uint8_t)0x01)
-#define RCC_OTGFSCLKSource_PLLCLK_Div3   ((uint8_t)0x02)
+/* USBFS_clock_source */
+#define RCC_USBFSCLKSource_PLLCLK_Div1   ((uint8_t)0x00)
+#define RCC_USBFSCLKSource_PLLCLK_Div2   ((uint8_t)0x01)
+#define RCC_USBFSCLKSource_PLLCLK_Div3   ((uint8_t)0x02)
+
+#define RCC_OTGFSCLKSource_PLLCLK_Div1   RCC_USBFSCLKSource_PLLCLK_Div1
+#define RCC_OTGFSCLKSource_PLLCLK_Div2   RCC_USBFSCLKSource_PLLCLK_Div2
+#define RCC_OTGFSCLKSource_PLLCLK_Div3   RCC_USBFSCLKSource_PLLCLK_Div3
 
 /* I2S2_clock_source */
 #ifdef CH32V30x_D8C
@@ -256,11 +260,12 @@ typedef struct
 #define RCC_AHBPeriph_RNG                ((uint32_t)0x00000200)
 #define RCC_AHBPeriph_SDIO               ((uint32_t)0x00000400)
 #define RCC_AHBPeriph_USBHS              ((uint32_t)0x00000800)
-#define RCC_AHBPeriph_OTG_FS             ((uint32_t)0x00001000)
+#define RCC_AHBPeriph_USBFS              ((uint32_t)0x00001000)
 #define RCC_AHBPeriph_DVP                ((uint32_t)0x00002000)
 #define RCC_AHBPeriph_ETH_MAC            ((uint32_t)0x00004000)
 #define RCC_AHBPeriph_ETH_MAC_Tx         ((uint32_t)0x00008000)
 #define RCC_AHBPeriph_ETH_MAC_Rx         ((uint32_t)0x00010000)
+#define RCC_AHBPeriph_OTG_FS             RCC_AHBPeriph_USBFS
 
 /* APB2_peripheral */
 #define RCC_APB2Periph_AFIO              ((uint32_t)0x00000001)
@@ -423,8 +428,9 @@ void RCC_ClearFlag(void);
 ITStatus RCC_GetITStatus(uint8_t RCC_IT);
 void RCC_ClearITPendingBit(uint8_t RCC_IT);
 void RCC_ADCCLKADJcmd(FunctionalState NewState);
-void RCC_OTGFSCLKConfig(uint32_t RCC_OTGFSCLKSource);
+void RCC_USBFSCLKConfig(uint32_t RCC_USBFSCLKSource);
 void RCC_USBCLK48MConfig(uint32_t RCC_USBCLK48MSource);
+#define RCC_OTGFSCLKConfig  RCC_USBFSCLKConfig
 
 #ifdef CH32V30x_D8C
 void RCC_PREDIV1Config(uint32_t RCC_PREDIV1_Source, uint32_t RCC_PREDIV1_Div);

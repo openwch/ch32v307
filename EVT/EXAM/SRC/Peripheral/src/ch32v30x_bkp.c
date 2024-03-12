@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_bkp.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : This file provides all the BKP firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -128,7 +128,7 @@ void BKP_RTCOutputConfig(uint16_t BKP_RTCOutputSource)
  * @brief   Sets RTC Clock Calibration value.
  *
  * @param   CalibrationValue - specifies the RTC Clock Calibration value.
- *            This parameter must be a number between 0 and 0x1F.
+ *            This parameter must be a number between 0 and 0x7F.
  *
  * @return  none
  */

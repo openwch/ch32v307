@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_flash.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : This file provides all the FLASH firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -57,7 +57,7 @@
 #define EraseTimeout               ((uint32_t)0x000B0000)
 #define ProgramTimeout             ((uint32_t)0x00005000)
 
-/* Flash Program Vaild Address */
+/* Flash Program Valid Address */
 #define ValidAddrStart             (FLASH_BASE)
 #define ValidAddrEnd               (FLASH_BASE + 0x78000)
 

@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -37,7 +37,7 @@ int main(void)
     GPIO_InitTypeDef  GPIO_InitStructure={0};
     RCC_ClocksTypeDef RCC_ClocksStatus={0};
 
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     USART_Printf_Init(115200);	
     SystemCoreClockUpdate();	
     printf("SystemClk:%d\r\n",SystemCoreClock);

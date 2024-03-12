@@ -69,7 +69,7 @@ int main(void)
 		
 	printf( "SystemClk:%d\r\n", SystemCoreClock );
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf( "USBHD Compatibility HID Example\r\n" );
+	printf( "USBFS Compatibility HID Example\r\n" );
 	Delay_Ms(10);
 
 	/* Variables init */
@@ -82,7 +82,7 @@ int main(void)
     /* Usb Init */
 	USBFS_RCC_Init();
 	USBFS_Device_Init(ENABLE);
-    NVIC_EnableIRQ(OTG_FS_IRQn);
+    NVIC_EnableIRQ(USBFS_IRQn);
 
     /* Timer init */
     TIM2_Init();

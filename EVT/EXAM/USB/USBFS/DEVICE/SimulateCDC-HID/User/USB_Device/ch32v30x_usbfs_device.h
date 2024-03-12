@@ -4,7 +4,7 @@
 * Version            : V1.0.0
 * Date               : 2022/08/20
 * Description        : This file contains all the functions prototypes for the
-*                      USBOTG firmware library.
+*                      USBFS firmware library.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 

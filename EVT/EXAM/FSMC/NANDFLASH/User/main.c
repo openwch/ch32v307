@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/01/05
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,7 +13,7 @@
 /*
  *@Note
    FSMC routine to operate NANDFLASH:
-      This routine demonstrates the operation of FS33ND01GS108TF model NANFLASH erase-read-write-read through the FSMC interface, and in the process of reading and writing
+      This routine demonstrates the operation of W29N01HV model NANFLASH erase-read-write-read through the FSMC interface, and in the process of reading and writing
   ECC check.
   PIN:
     FSMC_NOE--PD4  (RE)
@@ -37,8 +37,9 @@
 #include "string.h"
 
 
-u8 buf[NAND_ECC_SECTOR_SIZE];
-u8 pbuf[NAND_ECC_SECTOR_SIZE];
+u8 writebuf[2048];
+u8 readbuf[2048];
+
 
 /*********************************************************************
  * @fn      main
@@ -59,18 +60,17 @@ int main(void)
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
-	memset(buf, 0, NAND_ECC_SECTOR_SIZE);
-	printf("clear buf \n");
-    for(i=0; i<NAND_ECC_SECTOR_SIZE; i++){
-      printf("%02x ", buf[i]);
+	memset(readbuf, 0, 2048);
+	memset(writebuf, 0, 2048);
+	printf("clear  \n");
+    printf("\n");
 
-    }printf("\n");
+
 
     while(NAND_Init())
     {
         printf("NAND Error!\n");
         Delay_Ms(500);
-
         printf("Please Check\n");
         Delay_Ms(500);
     }
@@ -78,60 +78,76 @@ int main(void)
 
     /* Erase */
     t = NAND_EraseBlock(0);
+    if(t)
+    {
+        printf("Erase fail\n");
+    }
+    else
+    {
+        printf("Erase success\n");
+    }
 
-    if(t) printf("Erase fail\n");
-    else printf("Erase suc\n");
-
-    /* Read */
-    t = NAND_ReadPage( 0, 0,buf,NAND_ECC_SECTOR_SIZE);
-
-    if(t){
+  /* Read */
+    printf("read data\n");
+    t = NAND_ReadPage( 0, 0,readbuf,2048);
+    if(t)
+    {
         printf("read fail\n");
         printf("Err %02x\n", t);
     }
-    else{
-        printf("1***read data:\n");
-
-        for(i=0; i<NAND_ECC_SECTOR_SIZE; i++){
-          printf("%02x ", buf[i]);
-
-        }printf("\n");
+    else
+    {
+        for(i=0; i<2048; i++)
+        {
+            printf("%02x ", readbuf[i]);
+        }
+        printf("\n");
     }
 
     /* Write */
     printf("Write data:\n");
-    pbuf[0] = 0X10;
-    printf("%02x ", pbuf[0]);
-    for(i=1;  i<NAND_ECC_SECTOR_SIZE; i++){
-        pbuf[i] = 0X11;
-        printf("%02x ", pbuf[i]);
+    for(i=1; i<2048; i++)
+    {
+        writebuf[i]=0x11;
     }
+    writebuf[0] = 0X15;
+    writebuf[512] = 0X13;
+    writebuf[1024] = 0X14;
+    writebuf[1536] = 0X18;
 
+    for(i=0;  i<2048; i++)
+    {
+        printf("%02x ", writebuf[i]);
+    }
     printf("\r\n");
-
-    t = NAND_WritePage(0,0,pbuf,NAND_ECC_SECTOR_SIZE);
-
-    if(t){
+//    t = NAND_WritePage(0,0,writebuf,1024);
+    t = NAND_WritePagewithEcc(0,0,writebuf,2048);
+    if(t)
+    {
         printf("write fail\n");
     }
-    else{
-        printf("write suc\n");
+    else
+    {
+        printf("write success\n");
     }
 
     /* Read */
-    t = NAND_ReadPage( 0, 0,buf,NAND_ECC_SECTOR_SIZE);
-
-    if(t){
-        printf("read fail\n");
-        printf("Err %02x\n", t);
-    }
-    else{
-        printf("2***read data:\n");
-        for(i=0; i<NAND_ECC_SECTOR_SIZE; i++){
-          printf("%02x ", buf[i]);
-        }printf("\r\n");
-    }
-
+    printf("read data\n");
+//    t = NAND_ReadPage( 0,0,readbuf,1024);
+     t = NAND_ReadPageWithEcc( 0,0,readbuf,2048);
+         if(t)
+         {
+             printf("read fail\n");
+             printf("Err %02x\n", t);
+           }
+         else
+         {
+             for(i=0; i<2048; i++)
+             {
+                 printf("%x ", readbuf[i]);
+             }
+             printf("\r\n");
+         }
 
     while(1);
 

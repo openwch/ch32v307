@@ -768,12 +768,12 @@ uint8_t MTP_SendData( uint8_t usb_port, uint8_t *pbuf, uint32_t len )
         {
             if( len > HostCtl[ index ].Interface[ 0 ].OutEndpSize[ 0 ] )
             {
-                USBOTG_H_FS->HOST_TX_LEN = HostCtl[ index ].Interface[ 0 ].OutEndpSize[ 0 ];
+                USBFSH->HOST_TX_LEN = HostCtl[ index ].Interface[ 0 ].OutEndpSize[ 0 ];
                 memcpy( USBFS_TX_Buf, pbuf, HostCtl[ index ].Interface[ 0 ].OutEndpSize[ 0 ] );
             }
             else
             {
-                USBOTG_H_FS->HOST_TX_LEN = len;
+                USBFSH->HOST_TX_LEN = len;
                 memcpy( USBFS_TX_Buf, pbuf, len );
             }
 
@@ -860,7 +860,7 @@ uint8_t MTP_RecvData( uint8_t usb_port, uint8_t *pbuf, uint32_t *plen )
         {
             HostCtl[ index ].Interface[ 0 ].InEndpTog[ 0 ] ^= USBFS_UH_R_TOG;
 
-            *plen = USBOTG_H_FS->RX_LEN;
+            *plen = USBFSH->RX_LEN;
             memcpy( pbuf, USBFS_RX_Buf, *plen );
         }
     }

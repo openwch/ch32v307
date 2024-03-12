@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : ch32v30x_usbotg_host.h
+* File Name          : ch32v30x_usbfs_host.h
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2021/06/06
-* Description        : USBOTG full speed host header file
+* Description        : USBFSH full speed host header file
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 

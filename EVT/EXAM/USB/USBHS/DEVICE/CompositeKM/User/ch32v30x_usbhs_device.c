@@ -189,7 +189,7 @@ void USBHS_Device_Init( FunctionalState sta )
 /*********************************************************************
  * @fn      USBHS_Endp_DataUp
  *
- * @brief   usbhd-hs device data upload
+ * @brief   usbhs device data upload
  *
  * @para    endp: end-point numbers
  *          pubf: data buffer
@@ -869,7 +869,7 @@ void USBHS_IRQHandler( void )
     else if( intflag & USBHS_UIF_SUSPEND )
     {
         USBHSD->INT_FG = USBHS_UIF_SUSPEND;
-
+        Delay_Us(10);
         /* usb suspend interrupt processing */
         if( USBHSD->MIS_ST & USBHS_UMS_SUSPEND )
         {

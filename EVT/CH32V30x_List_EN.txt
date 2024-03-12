@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2021.06
+Nanjing Qinheng Microelectronics Co., Ltd. 2024.02
 
 https://wch-ic.com
 
@@ -34,8 +34,8 @@ Directory
   |      |      |      |      |-- DualADC_SlowInterleaved: dual ADC slow interleaved sampling routine  
   |      |      |      |      |-- ExtLines_Trigger: external lines trigger ADC conversion routine
   |      |      |      |      |-- Internal_Temperature: internal temperature sensor routine 
-  |      |      |      |      |-- TIM Trigger:TIM trigger ADC conversion routine 
-  |      |      |      |      |-- Temperature-External channel:Temperature-External channel Injection alternating inversion routine 
+  |      |      |      |      |-- TIM_Trigger:TIM trigger ADC conversion routine 
+  |      |      |      |      |-- Temperature_External_channel:Temperature-External channel Injection alternating inversion routine 
   |      |      |      |-- APPLICATION
   |      |      |      |      |-- WS2812_LED
   |      |      |      |      |      |-- WS2812_LED：SPI\PWM Operates WS2812_LED routine 
@@ -122,19 +122,27 @@ Directory
   |      |      |      |      |-- Stop_Mode: low power, stop mode routine
   |      |      |      |      |-- Standby_RAM_LV_Mode: when LV is enabled in standby mode, RAM 2k and 30K low-power data holding routines
   |      |      |      |      |-- Standby_RAM_Mode:when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
+  |      |      |      |      |-- PVD_Wakeup：STOP mode PVD wakeup MCU Routine
+  |      |      |      |      |-- PVD_VoltageJudger：PVD voltage Judger Routine
+  |      |      |      |-- PMP
+  |      |      |      |      |-- PMP：Physical memory protection Routine
   |      |      |      |-- RCC
   |      |      |      |      |-- Get_CLK:Get system-HCLK-AHB1-AHB2 clock routine  
   |      |      |      |      |-- MCO: MCO pin clock output routine
   |      |      |      |      |-- HSI_PLL_Source:HSI or HSI/2 as PLL input clock routine  
   |      |      |      |      |-- HSE_CLK:HSE frequency check routine 
+  |      |      |      |      |-- HSI_Calibration：HSI calibrate routine
+  |      |      |      |      |-- LSI_Calibration：LSI calibrate routine
   |      |      |      |-- RNG   
   |      |      |      |      |-- RNG：：Random number generator routine   
   |      |      |      |-- RTC
   |      |      |      |      |-- RTC_Calendar:Calendar Routines  
+  |      |      |      |      |-- RTC_Calibration：RTC calibrate Routines 
   |      |      |      |-- RT-Thread
   |      |      |      |      |-- RT_Thread_Core:RT-Thread migration routine  
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO routine to operate SD card
+  |      |      |      |      |-- SDIO_EMMC：SDIO routine to operate eMMC card
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex: single wire half duplex mode, master/slave mode, data transceiver
   |      |      |      |      |-- 2Lines_FullDuplex: two-wire full duplex mode, master/slave mode, data transceiver
@@ -160,6 +168,7 @@ Directory
   |      |      |      |      |-- Synchro_ExtTrigger:slave mode routine, including reset mode, gating mode and trigger mode
   |      |      |      |      |-- Synchro_Timer:timer synchronization mode
   |      |      |      |      |-- TIM_DMA: timer DMA routines
+  |      |      |      |      |-- Encode:Timer encoder mode routines
   |      |      |      |-- TOUCHKEY
   |      |      |      |      |-- TKey:TouchKey Detection Routine 
   |      |      |      |-- USART

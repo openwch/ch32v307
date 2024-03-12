@@ -25,6 +25,9 @@ void TIM2_IRQHandler( void )__attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void NMI_Handler(void)
 {
+  while (1)
+  {
+  }
 }
 
 /*********************************************************************

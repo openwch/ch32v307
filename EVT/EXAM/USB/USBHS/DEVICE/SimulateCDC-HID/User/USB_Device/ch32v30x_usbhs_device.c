@@ -215,7 +215,7 @@ void USBHS_Device_Init ( FunctionalState sta )
 /*********************************************************************
  * @fn      USBHS_Endp_DataUp
  *
- * @brief   usbhd-hs device data upload
+ * @brief   usbhs device data upload
  *          input: endp  - end-point numbers
  *                 *pubf - data buffer
  *                 len   - load data length
@@ -444,14 +444,14 @@ void USBHS_IRQHandler( void )
                                      Uart.Com_Cfg[ 6 ] = USBHS_EP0_Buf[ 6 ];
                                      Uart.Com_Cfg[ 7 ] = DEF_UARTx_RX_TIMEOUT;
 
-                                     /* 保存当前串口的波特率 */
+                                     /* save bauds */
                                      baudrate = USBHS_EP0_Buf[ 0 ];
                                      baudrate += ((uint32_t)USBHS_EP0_Buf[ 1 ] << 8 );
                                      baudrate += ((uint32_t)USBHS_EP0_Buf[ 2 ] << 16 );
                                      baudrate += ((uint32_t)USBHS_EP0_Buf[ 3 ] << 24 );
                                      Uart.Com_Cfg[ 7 ] = Uart.Rx_TimeOutMax;
 
-                                     /* 串口初始化操作 */
+                                     /* Uart2 usb init */
                                      UART2_USB_Init( );
                                  }
                                  else if( USBHS_SetupReqCode == HID_SET_REPORT )
@@ -1101,6 +1101,7 @@ void USBHS_IRQHandler( void )
     else if( intflag & USBHS_UIF_SUSPEND )
     {
         USBHSD->INT_FG = USBHS_UIF_SUSPEND;
+        Delay_Us(10);
         /* usb suspend interrupt processing */
         if ( USBHSD->MIS_ST & USBHS_UMS_SUSPEND  )
         {
@@ -1123,13 +1124,13 @@ void USBHS_IRQHandler( void )
 }
 
 /*********************************************************************
- * @fn      USBHD_Send_Resume
+ * @fn      USBHS_Send_Resume
  *
- * @brief   USBHD device sends wake-up signal to host
+ * @brief   USBHS device sends wake-up signal to host
  *
  * @return  none
  */
-void USBHD_Send_Resume(void)
+void USBHS_Send_Resume(void)
 {
 
 }

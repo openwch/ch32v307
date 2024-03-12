@@ -2,7 +2,7 @@
 * File Name          : system_ch32v30x.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : CH32V30x Device Peripheral Access Layer System Source File.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -54,15 +54,11 @@ void SystemInit (void)
 {
   RCC->CTLR |= (uint32_t)0x00000001;
 
-#ifdef CH32V30x_D8C
-  RCC->CFGR0 &= (uint32_t)0xF8FF0000;
-#else
   RCC->CFGR0 &= (uint32_t)0xF0FF0000;
-#endif 
 
   RCC->CTLR &= (uint32_t)0xFEF6FFFF;
   RCC->CTLR &= (uint32_t)0xFFFBFFFF;
-  RCC->CFGR0 &= (uint32_t)0xFF80FFFF;
+  RCC->CFGR0 &= (uint32_t)0xFF00FFFF;
 
 #ifdef CH32V30x_D8C
   RCC->CTLR &= (uint32_t)0xEBFFFFFF;

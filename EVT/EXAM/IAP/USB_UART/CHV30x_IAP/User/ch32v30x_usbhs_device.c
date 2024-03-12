@@ -2,8 +2,8 @@
  * File Name          : ch32v30x_usbhs_device.c
  * Author             : WCH
  * Version            : V1.0.0
- * Date               : 2021/06/06
- * Description        : USB高速操作相关文件
+ * Date               : 2024/03/05
+ * Description        : USBHS
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 

@@ -12,7 +12,7 @@
 
 /*
  *@Note
-  This routine demonstrates the use of the USBHD-FS to emulate a custom device(CH372 like device),
+  This routine demonstrates the use of the USBFS to emulate a custom device(CH372 like device),
   with endpoints 1/3/5 downlinking data and uploading it via endpoints 2/4/6 respectively
   where endpoint 1/2 is implemented via a ring buffer and data is not inverted,
   and endpoints 3/4 and 5/6 are directly copied and inverted for upload
@@ -38,10 +38,10 @@ int main(void)
 		
 	printf( "SystemClk:%d\r\n", SystemCoreClock );
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf( "CH372Device Running On USBOTG-FS Controller\n" );
+	printf( "CH372Device Running On usbfs-FS Controller\n" );
 	Delay_Ms(10);
 
-	/* USBOTG_FS device init */
+	/* USBFSD device init */
 	USBFS_RCC_Init( );
 	USBFS_Device_Init( ENABLE );
 
@@ -56,14 +56,14 @@ int main(void)
                 ret = USBFS_Endp_DataUp(DEF_UEP2, &Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_FS_PACK_SIZE], RingBuffer_Comm.PackLen[RingBuffer_Comm.DealPtr], DEF_UEP_DMA_LOAD);
                 if( ret == 0 )
                 {
-                    NVIC_DisableIRQ(OTG_FS_IRQn);
+                    NVIC_DisableIRQ(USBFS_IRQn);
                     RingBuffer_Comm.RemainPack--;
                     RingBuffer_Comm.DealPtr++;
                     if(RingBuffer_Comm.DealPtr == DEF_Ring_Buffer_Max_Blks)
                     {
                         RingBuffer_Comm.DealPtr = 0;
                     }
-                    NVIC_EnableIRQ(OTG_FS_IRQn);
+                    NVIC_EnableIRQ(USBFS_IRQn);
                 }
             }
 
@@ -73,7 +73,7 @@ int main(void)
                 if(RingBuffer_Comm.StopFlag)
                 {
                     RingBuffer_Comm.StopFlag = 0;
-                    USBOTG_FS->UEP1_RX_CTRL = (USBOTG_FS->UEP1_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_ACK;
+                    USBFSD->UEP1_RX_CTRL = (USBFSD->UEP1_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_ACK;
                 }
             }
         }

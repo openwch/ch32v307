@@ -2,7 +2,7 @@
 * File Name          : startup_ch32v30x.s
 * Author             : WCH
 * Version            : V1.0.1
-* Date               : 203/11/13
+* Date               : 2024/03/06
 * Description        : CH32V307x-CH32V305x vector table for eclipse toolchain.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -85,7 +85,7 @@ _vector_base:
     .word   TIM8_TRG_COM_IRQHandler    /* TIM8 Trigger and Commutation */
     .word   TIM8_CC_IRQHandler         /* TIM8 Capture Compare */
     .word   RNG_IRQHandler             /* RNG */
-    .word   FSMC_IRQHandler            /* FSMC */
+    .word   0
     .word   SDIO_IRQHandler            /* SDIO */
     .word   TIM5_IRQHandler            /* TIM5 */
     .word   SPI3_IRQHandler            /* SPI3 */
@@ -104,7 +104,7 @@ _vector_base:
     .word   CAN2_RX0_IRQHandler        /* CAN2 RX0 */
     .word   CAN2_RX1_IRQHandler        /* CAN2 RX1 */
     .word   CAN2_SCE_IRQHandler        /* CAN2 SCE */
-    .word   OTG_FS_IRQHandler          /* OTGFS */
+    .word   USBFS_IRQHandler           /* USBFS */
     .word   USBHSWakeup_IRQHandler     /* USBHS Wakeup */
     .word   USBHS_IRQHandler           /* USBHS */
     .word   DVP_IRQHandler             /* DVP */
@@ -184,7 +184,6 @@ _vector_base:
     .weak   TIM8_TRG_COM_IRQHandler    /* TIM8 Trigger and Commutation */
     .weak   TIM8_CC_IRQHandler         /* TIM8 Capture Compare */
     .weak   RNG_IRQHandler             /* RNG */
-    .weak   FSMC_IRQHandler            /* FSMC */
     .weak   SDIO_IRQHandler            /* SDIO */
     .weak   TIM5_IRQHandler            /* TIM5 */
     .weak   SPI3_IRQHandler            /* SPI3 */
@@ -203,7 +202,7 @@ _vector_base:
     .weak   CAN2_RX0_IRQHandler        /* CAN2 RX0 */
     .weak   CAN2_RX1_IRQHandler        /* CAN2 RX1 */
     .weak   CAN2_SCE_IRQHandler        /* CAN2 SCE */
-    .weak   OTG_FS_IRQHandler          /* OTGFS */
+    .weak   USBFS_IRQHandler           /* USBFS */
     .weak   USBHSWakeup_IRQHandler     /* USBHS Wakeup */
     .weak   USBHS_IRQHandler           /* USBHS */
     .weak   DVP_IRQHandler             /* DVP */
@@ -280,7 +279,6 @@ TIM8_UP_IRQHandler:
 TIM8_TRG_COM_IRQHandler:
 TIM8_CC_IRQHandler:
 RNG_IRQHandler:
-FSMC_IRQHandler:
 SDIO_IRQHandler:
 TIM5_IRQHandler:
 SPI3_IRQHandler:
@@ -299,7 +297,7 @@ CAN2_TX_IRQHandler:
 CAN2_RX0_IRQHandler:
 CAN2_RX1_IRQHandler:
 CAN2_SCE_IRQHandler:
-OTG_FS_IRQHandler:
+USBFS_IRQHandler:
 USBHSWakeup_IRQHandler:
 USBHS_IRQHandler:
 DVP_IRQHandler:

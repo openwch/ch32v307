@@ -56,7 +56,7 @@ int main(void)
     Udisk_Capability = Flash_Sector_Count;
     Udisk_Status |= DEF_UDISK_EN_FLAG;
 
-	/* USBOTG_FS device init */
+	/* USBFSD device init */
 	USBFS_RCC_Init( );
 	USBFS_Device_Init( ENABLE );
 

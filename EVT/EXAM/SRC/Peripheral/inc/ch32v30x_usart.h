@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_usart.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : This file contains all the functions prototypes for the 
 *                      USART firmware library.
 *********************************************************************************
@@ -174,8 +174,6 @@ void USART_SetPrescaler(USART_TypeDef* USARTx, uint8_t USART_Prescaler);
 void USART_SmartCardCmd(USART_TypeDef* USARTx, FunctionalState NewState);
 void USART_SmartCardNACKCmd(USART_TypeDef* USARTx, FunctionalState NewState);
 void USART_HalfDuplexCmd(USART_TypeDef* USARTx, FunctionalState NewState);
-void USART_OverSampling8Cmd(USART_TypeDef* USARTx, FunctionalState NewState);
-void USART_OneBitMethodCmd(USART_TypeDef* USARTx, FunctionalState NewState);
 void USART_IrDAConfig(USART_TypeDef* USARTx, uint16_t USART_IrDAMode);
 void USART_IrDACmd(USART_TypeDef* USARTx, FunctionalState NewState);
 FlagStatus USART_GetFlagStatus(USART_TypeDef* USARTx, uint16_t USART_FLAG);

@@ -28,16 +28,16 @@ extern "C" {
 /* File Descripton */
 /*
  *@Note
-  适用于CH32系列的单片机，包括risc-v内核的CH32V系列和cortex-m3内核的CH32F系列
-  iap_flash.c/iap_flash.h文件包括iap和app需要的iap区域代码起止定义，app区域代码起止定义，
-  芯片flash的操作函数。
-  ***2022年6月13日***
-     1，版本0.1，
-  完整的代码包括flash字，半字，字节读，iap特化的flash擦除，写入，编程，读取，校验。
-  所有涉及flash读写，擦除的操作均使用DEF_FLASH_OPERATION_KEY_CODE保护，DEF_FLASH_OPERATION_KEY_CODE_0
-  在主函数开始时写入，DEF_FLASH_OPERATION_KEY_CODE_1在每次操作flash前写入。
-  使用宏定义区分iap代码和app代码，将iap和app对flash操作的代码统一到一个文件内
- iap代码开放所有函数调用，app代码仅开放IAP_VerifyCode_Erase(); 函数。
+    Suitable for CH32 series microcontrollers, including CH32V series with risc-v core and CH32F series with Cortex-m3 core
+    The iap flash. c/iap flash. h file includes the start and end definitions of iap region codes required for iap and apps, as well as the start and end definitions of app region codes,
+    The operation function of chip flash.
+    ***June 13, 2022***
+    1. Version 0.1,
+    The complete code includes flash words, half words, byte reads, iap specific flash erasure, writing, programming, reading, and verification.
+    All operations involving flash reading, writing, and erasing are protected with DEF-FLASHT-OPERATION_KEY-CODE, DEF-FLASHT-OPERATION_KEY-CODE-0
+    Write at the beginning of the main function, and DEF-FLASHT-OPERATION_KEY-CODE_1 is written before each flash operation.
+    Use macro definitions to distinguish between iap code and app code, and unify the code for flash operations in iap and app into one file
+    IAP code opens all function calls, while app code only opens IAP_VerifyCode-Erase(); Function.
 */
 
 /*******************************************************************************/
@@ -88,8 +88,6 @@ extern "C" {
 /* Flash Operation Key Variables, Operation with DEF_FLASH_OPERATION_KEY_CODE_x to ensure the correctness of flash operation*/
 extern volatile uint32_t Flash_Operation_Key0;                                   /* IAP Flash operation Key-code Variables 0 */
 extern volatile uint32_t Flash_Operation_Key1;                                   /* IAP Flash operation Key-code Variables 1 */
-extern __attribute__((aligned(4))) uint8_t  USBHD_TX_Buf[ MAX_PACKET_SIZE ] ;  // IN, must even address
-extern __attribute__((aligned(4))) uint8_t  USBHD_RX_Buf[ MAX_PACKET_SIZE ] ;  // OUT, must even address
 
 /*******************************************************************************/
 /* Data Structures */

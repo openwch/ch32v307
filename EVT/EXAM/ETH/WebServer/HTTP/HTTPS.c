@@ -2340,6 +2340,28 @@ char * DataLocate(char *buf, char *name)
 }
 
 /*********************************************************************
+ * @fn      atoh
+ *
+ * @brief   Converting character to hexadecimal number
+ *
+ * @param   src - character
+ *
+ * @return  hexadecimal number
+ */
+uint8_t atoh(uint8_t *src)
+{
+    uint8_t desc=0;
+
+    if((*src >= '0') && (*src <= '9'))
+    desc = *src - 0x30;
+    else if((*src >= 'a') && (*src <= 'f'))
+    desc = *src - 0x57;
+    else if((*src >= 'A') && (*src <= 'F'))
+    desc = *src - 0x37;
+
+    return desc;
+}
+/*********************************************************************
  * @fn      Refresh_Basic
  *
  * @brief   Parse the basic interface configuration parameters from
@@ -2368,10 +2390,10 @@ void Refresh_Basic(u8 *buf)
         if(q == NULL) return;
         memcpy(temp, p, (q - p));
         p = strtok(temp, ".");
-        BasicCfg.mac[0] = atoi(p);
+        (strlen(p) == 1) ? (BasicCfg.mac[0] = atoh(p)) : (BasicCfg.mac[0] = atoh(p) << 4 | atoh(p + 1));
         for (i = 1; i < 6; i++) {
             p = strtok(NULL, ".");
-            BasicCfg.mac[i] = atoi(p);
+            (strlen(p) == 1) ? (BasicCfg.mac[i] = atoh(p)) : (BasicCfg.mac[i] = atoh(p) << 4 | atoh(p + 1));
         }
     }
     else return;
@@ -2790,11 +2812,11 @@ void Init_Para_Tab(void)
 
     Para_Basic[0].para = "__AMAC";
     memset(s, 0, 30);
-    snprintf(s, 30, "%d.%d.%d.%d.%d.%d", Basic_CfgBuf.mac[0], Basic_CfgBuf.mac[1],
+    snprintf(s, 30, "%x.%x.%x.%x.%x.%x", Basic_CfgBuf.mac[0], Basic_CfgBuf.mac[1],
             Basic_CfgBuf.mac[2], Basic_CfgBuf.mac[3], Basic_CfgBuf.mac[4],
             Basic_CfgBuf.mac[5]);
     strcpy(Para_Basic[0].value, s);
-    printf("__ASIP = %s\n", Para_Basic[0].value);
+    printf("__ASMAC = %s\n", Para_Basic[0].value);
 
     Para_Basic[1].para = "__ASIP";
     memset(s, 0, 30);

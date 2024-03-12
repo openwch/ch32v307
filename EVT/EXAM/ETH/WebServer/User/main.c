@@ -150,6 +150,7 @@ void WCHNET_CreateCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport)
  */
 void WCHNET_RestoreDefaults(void)                                       /*WCHNET restore default settings*/
 {
+    WCHNET_GetMacAddr(&Basic_Default[2]);
     WEB_ERASE( PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE * 3);
     WEB_WRITE( BASIC_CFG_ADDR, Basic_Default, BASIC_CFG_LEN);
     WEB_WRITE( PORT_CFG_ADDR, Port_Default, PORT_CFG_LEN);
@@ -286,17 +287,12 @@ int main(void)
     WEB_READ( BASIC_CFG_ADDR, (u8 *)&Basic_CfgBuf, BASIC_CFG_LEN );                //Read configuration information
     WEB_READ( PORT_CFG_ADDR, (u8 *)&Port_CfgBuf, PORT_CFG_LEN );
     WEB_READ( LOGIN_CFG_ADDR, (u8 *)&Login_CfgBuf, LOGIN_CFG_LEN );
-    if((Basic_CfgBuf.flag[0] != 0x57) || (Basic_CfgBuf.flag[1] != 0xAB)){       //Determine network configuration information flags
+    /*Determine configuration information*/
+    if(((Basic_CfgBuf.flag[0] != 0x57) || (Basic_CfgBuf.flag[1] != 0xAB)) ||\
+       ((Port_CfgBuf.flag[0] != 0x57) || (Port_CfgBuf.flag[1] != 0xAB)) ||\
+       ((Login_CfgBuf.flag[0] != 0x57) || (Login_CfgBuf.flag[1] != 0xAB)))
+    {
         WCHNET_RestoreDefaults();
-    }
-    else {
-        if((Port_CfgBuf.flag[0] != 0x57) || (Port_CfgBuf.flag[1] != 0xAB)){     //Determine password configuration information
-            WCHNET_RestoreDefaults();
-        }
-        else {
-            if((Login_CfgBuf.flag[0] != 0x57) || (Login_CfgBuf.flag[1] != 0xAB)) //Determine password configuration information
-                WCHNET_RestoreDefaults();
-        }
     }
     memcpy(MACAddr, Basic_CfgBuf.mac, 6);
     memcpy(IPAddr, Basic_CfgBuf.ip, 4);

@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_fsmc.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : This file contains all the functions prototypes for the FSMC
 *                      firmware library.
 *********************************************************************************
@@ -254,15 +254,6 @@ typedef struct
 #define FSMC_ECCPageSize_4096Bytes                      ((uint32_t)0x00080000)
 #define FSMC_ECCPageSize_8192Bytes                      ((uint32_t)0x000A0000)
 
-/* FSMC_Interrupt_sources */
-#define FSMC_IT_RisingEdge                              ((uint32_t)0x00000008)
-#define FSMC_IT_Level                                   ((uint32_t)0x00000010)
-#define FSMC_IT_FallingEdge                             ((uint32_t)0x00000020)
-
-/* FSMC_Flags */
-#define FSMC_FLAG_RisingEdge                            ((uint32_t)0x00000001)
-#define FSMC_FLAG_Level                                 ((uint32_t)0x00000002)
-#define FSMC_FLAG_FallingEdge                           ((uint32_t)0x00000004)
 #define FSMC_FLAG_FEMPT                                 ((uint32_t)0x00000040)
 
 
@@ -276,11 +267,7 @@ void FSMC_NORSRAMCmd(uint32_t FSMC_Bank, FunctionalState NewState);
 void FSMC_NANDCmd(uint32_t FSMC_Bank, FunctionalState NewState);
 void FSMC_NANDECCCmd(uint32_t FSMC_Bank, FunctionalState NewState);
 uint32_t FSMC_GetECC(uint32_t FSMC_Bank);
-void FSMC_ITConfig(uint32_t FSMC_Bank, uint32_t FSMC_IT, FunctionalState NewState);
 FlagStatus FSMC_GetFlagStatus(uint32_t FSMC_Bank, uint32_t FSMC_FLAG);
-void FSMC_ClearFlag(uint32_t FSMC_Bank, uint32_t FSMC_FLAG);
-ITStatus FSMC_GetITStatus(uint32_t FSMC_Bank, uint32_t FSMC_IT);
-void FSMC_ClearITPendingBit(uint32_t FSMC_Bank, uint32_t FSMC_IT);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
 * File Name          : lcd.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/01/06
 * Description        : This file contains the headers of the TFTLCD.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -303,13 +303,13 @@ void LCD_Init(void)
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
  	GPIO_Init(GPIOE, &GPIO_InitStructure); 
 
-    /*   RS��PG0����PD12  */
+    /*   RS: PG0___PD12  */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-    /* CS: PG12����PD11*/
+    /* CS: PG12___PD11*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -320,8 +320,6 @@ void LCD_Init(void)
     readWriteTiming.FSMC_AddressHoldTime = 0x00;
     readWriteTiming.FSMC_DataSetupTime = 0x0f;
     readWriteTiming.FSMC_BusTurnAroundDuration = 0x00;
-    readWriteTiming.FSMC_CLKDivision = 0x00;
-    readWriteTiming.FSMC_DataLatency = 0x00;
     readWriteTiming.FSMC_AccessMode = FSMC_AccessMode_A;
 
     writeTiming.FSMC_AddressSetupTime = 0x00;

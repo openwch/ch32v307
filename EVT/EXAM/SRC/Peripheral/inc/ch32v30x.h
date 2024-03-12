@@ -2,7 +2,7 @@
 * File Name          : ch32v30x.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : CH32V30x Device Peripheral Access Layer Header File.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -34,7 +34,7 @@
 
 /* CH32V30x Standard Peripheral Library version number */
 #define __CH32V30x_STDPERIPH_VERSION_MAIN   (0x02) /* [15:8] main version */
-#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x03) /* [7:0] sub version */
+#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x04) /* [7:0] sub version */
 #define __CH32V30x_STDPERIPH_VERSION        ( (__CH32V30x_STDPERIPH_VERSION_MAIN << 8)\
                                              |(__CH32V30x_STDPERIPH_VERSION_SUB << 0))
 
@@ -101,7 +101,6 @@ typedef enum IRQn
   TIM8_TRG_COM_IRQn           = 61,      /* TIM8 Trigger and Commutation Interrupt               */
   TIM8_CC_IRQn                = 62,      /* TIM8 Capture Compare Interrupt                       */
   RNG_IRQn                    = 63,      /* RNG global Interrupt                                 */
-  FSMC_IRQn                   = 64,      /* FSMC global Interrupt                                */
   SDIO_IRQn                   = 65,      /* SDIO global Interrupt                                */
   TIM5_IRQn                   = 66,      /* TIM5 global Interrupt                                */
   SPI3_IRQn                   = 67,      /* SPI3 global Interrupt                                */
@@ -114,7 +113,7 @@ typedef enum IRQn
   DMA2_Channel3_IRQn          = 74,      /* DMA2 Channel 3 global Interrupt                      */
   DMA2_Channel4_IRQn          = 75,      /* DMA2 Channel 4 global Interrupt                      */
   DMA2_Channel5_IRQn          = 76,      /* DMA2 Channel 5 global Interrupt                      */
-  OTG_FS_IRQn                 = 83,      /* OTGFS global Interrupt                               */
+  USBFS_IRQn                   = 83,      /* USBFS global Interrupt                               */
   UART6_IRQn                  = 87,      /* UART6 global Interrupt                               */
   UART7_IRQn                  = 88,      /* UART7 global Interrupt                               */
   UART8_IRQn                  = 89,      /* UART8 global Interrupt                               */
@@ -140,7 +139,6 @@ typedef enum IRQn
   TIM8_TRG_COM_IRQn           = 61,      /* TIM8 Trigger and Commutation Interrupt               */
   TIM8_CC_IRQn                = 62,      /* TIM8 Capture Compare Interrupt                       */
   RNG_IRQn                    = 63,      /* RNG global Interrupt                                 */
-  FSMC_IRQn                   = 64,      /* FSMC global Interrupt                                */
   SDIO_IRQn                   = 65,      /* SDIO global Interrupt                                */
   TIM5_IRQn                   = 66,      /* TIM5 global Interrupt                                */
   SPI3_IRQn                   = 67,      /* SPI3 global Interrupt                                */
@@ -159,7 +157,7 @@ typedef enum IRQn
   CAN2_RX0_IRQn               = 80,      /* CAN2 RX0 Interrupts                                  */
   CAN2_RX1_IRQn               = 81,      /* CAN2 RX1 Interrupt                                   */
   CAN2_SCE_IRQn               = 82,      /* CAN2 SCE Interrupt                                   */
-  OTG_FS_IRQn                 = 83,      /* OTGFS global Interrupt                               */
+  USBFS_IRQn                  = 83,      /* USBFS global Interrupt                               */
   USBHSWakeup_IRQn            = 84,      /* USBHS WakeUp Interrupt                               */
   USBHS_IRQn                  = 85,      /* USBHS global Interrupt                               */
   DVP_IRQn                    = 86,      /* DVP global Interrupt                                 */
@@ -184,9 +182,16 @@ typedef enum IRQn
 #endif
 } IRQn_Type;
 
-#define HardFault_IRQn   EXC_IRQn
-#define ADC1_2_IRQn      ADC_IRQn
+#define HardFault_IRQn      EXC_IRQn
+#define ADC1_2_IRQn         ADC_IRQn
 
+#define OTG_FS_IRQn         USBFS_IRQn
+#define OTG_FS_IRQHandler   USBFS_IRQHandler
+
+#define USBHD_IRQHandler    USBFS_IRQHandler 
+
+#define USBOTG_FS           USBFSD
+#define USBOTG_H_FS         USBFSH
 
 #include <stdint.h>
 #include "core_riscv.h"
@@ -1009,7 +1014,7 @@ typedef struct
    __IO uint32_t Reserve2;
    __IO uint32_t OTG_CR;
    __IO uint32_t OTG_SR;
-}USBOTG_FS_TypeDef;
+}USBFSD_TypeDef;
 
 typedef struct  __attribute__((packed))
 {
@@ -1051,7 +1056,7 @@ typedef struct  __attribute__((packed))
    __IO uint32_t  Reserve19;
    __IO uint32_t  OTG_CR;
    __IO uint32_t  OTG_SR;
-}USBOTGH_FS_TypeDef;
+}USBFSH_TypeDef;
 
 /* Ethernet MAC */
 typedef struct
@@ -1308,8 +1313,8 @@ typedef struct
 #define CRC                 ((CRC_TypeDef *) CRC_BASE)
 #define USBHSD              ((USBHSD_TypeDef *) USBHS_BASE)
 #define USBHSH              ((USBHSH_TypeDef *) USBHS_BASE)
-#define USBOTG_FS           ((USBOTG_FS_TypeDef *)USBFS_BASE)
-#define USBOTG_H_FS         ((USBOTGH_FS_TypeDef *)USBFS_BASE)
+#define USBFSD              ((USBFSD_TypeDef *)USBFS_BASE)
+#define USBFSH              ((USBFSH_TypeDef *)USBFS_BASE)
 #define EXTEN               ((EXTEN_TypeDef *) EXTEN_BASE)
 #define OPA                 ((OPA_TypeDef *) OPA_BASE)
 #define RNG                 ((RNG_TypeDef *) RNG_BASE)
@@ -1369,6 +1374,13 @@ typedef struct
 #define  ADC_JAWDEN                     ((uint32_t)0x00400000)        /* Analog watchdog enable on injected channels */
 #define  ADC_AWDEN                      ((uint32_t)0x00800000)        /* Analog watchdog enable on regular channels */
 
+#define  ADC_TKENABLE                   ((uint32_t)0x01000000)        /*TKEY enable*/
+#define  ADC_TKITUNE                    ((uint32_t)0x02000000)        
+#define  ADC_BUFEN                      ((uint32_t)0x04000000)        
+
+#define  ADC_PGA                        ((uint32_t)0x18000000)        
+#define  ADC_PGA_0                      ((uint32_t)0x08000000)        
+#define  ADC_PGA_1                      ((uint32_t)0x10000000)        
 /*******************  Bit definition for ADC_CTLR2 register  ********************/
 #define  ADC_ADON                       ((uint32_t)0x00000001)        /* A/D Converter ON / OFF */
 #define  ADC_CONT                       ((uint32_t)0x00000002)        /* Continuous Conversion */
@@ -1835,6 +1847,7 @@ typedef struct
 #define  CAN_CTLR_ABOM                       ((uint16_t)0x0040)            /* Automatic Bus-Off Management */
 #define  CAN_CTLR_TTCM                       ((uint16_t)0x0080)            /* Time Triggered Communication Mode */
 #define  CAN_CTLR_RESET                      ((uint16_t)0x8000)            /* CAN software master reset */
+#define  CAN_CTLR_DBF                        ((uint32_t)0x10000)
 
 /*******************  Bit definition for CAN_STATR register  ********************/
 #define  CAN_STATR_INAK                      ((uint16_t)0x0001)            /* Initialization Acknowledge */
@@ -1916,13 +1929,13 @@ typedef struct
 #define  CAN_ERRSR_TEC                       ((uint32_t)0x00FF0000)        /* Least significant byte of the 9-bit Transmit Error Counter */
 #define  CAN_ERRSR_REC                       ((uint32_t)0xFF000000)        /* Receive Error Counter */
 
-/*******************  Bit definition for CAN_BTIMR register  ********************/
-#define  CAN_BTIMR_BRP                       ((uint32_t)0x000003FF)        /* Baud Rate Prescaler */
-#define  CAN_BTIMR_TS1                       ((uint32_t)0x000F0000)        /* Time Segment 1 */
-#define  CAN_BTIMR_TS2                       ((uint32_t)0x00700000)        /* Time Segment 2 */
-#define  CAN_BTIMR_SJW                       ((uint32_t)0x03000000)        /* Resynchronization Jump Width */
-#define  CAN_BTIMR_LBKM                      ((uint32_t)0x40000000)        /* Loop Back Mode (Debug) */
-#define  CAN_BTIMR_SILM                      ((uint32_t)0x80000000)        /* Silent Mode */
+/*******************  Bit definition for CAN_TTCTLR register  ********************/
+#define  CAN_TTCTLR_TIMCMV                   ((uint32_t)0x0000FFFF)        
+#define  CAN_TTCTLR_TIMRST                   ((uint32_t)0x00010000)        
+#define  CAN_TTCTLR_MODE                     ((uint32_t)0x00020000)        
+
+/*******************  Bit definition for CAN_TTCNT register  ********************/
+#define  CAN_TTCNT_TIMCNT                    ((uint32_t)0x0000FFFF)        
 
 /******************  Bit definition for CAN_TXMI0R register  ********************/
 #define  CAN_TXMI0R_TXRQ                     ((uint32_t)0x00000001)        /* Transmit Mailbox Request */
@@ -2044,6 +2057,7 @@ typedef struct
 
 /*******************  Bit definition for CAN_FCTLR register  ********************/
 #define  CAN_FCTLR_FINIT                     ((uint8_t)0x01)               /* Filter Init Mode */
+#define  CAN_FCTLR_CAN2SB                    ((uint16_t)0x3F00) 
 
 /*******************  Bit definition for CAN_FMCFGR register  *******************/
 #define  CAN_FMCFGR_FBM                      ((uint16_t)0x3FFF)            /* Filter Mode */
@@ -2061,6 +2075,20 @@ typedef struct
 #define  CAN_FMCFGR_FBM11                    ((uint16_t)0x0800)            /* Filter Init Mode bit 11 */
 #define  CAN_FMCFGR_FBM12                    ((uint16_t)0x1000)            /* Filter Init Mode bit 12 */
 #define  CAN_FMCFGR_FBM13                    ((uint16_t)0x2000)            /* Filter Init Mode bit 13 */
+#define  CAN_FMCFGR_FBM14                    ((uint16_t)0x4000)            /* Filter Init Mode bit 14 */
+#define  CAN_FMCFGR_FBM15                    ((uint16_t)0x8000)            /* Filter Init Mode bit 15 */
+#define  CAN_FMCFGR_FBM16                    ((uint32_t)0x10000)           /* Filter Init Mode bit 16 */
+#define  CAN_FMCFGR_FBM17                    ((uint32_t)0x20000)           /* Filter Init Mode bit 17 */
+#define  CAN_FMCFGR_FBM18                    ((uint32_t)0x40000)           /* Filter Init Mode bit 18 */
+#define  CAN_FMCFGR_FBM19                    ((uint32_t)0x80000)           /* Filter Init Mode bit 19 */
+#define  CAN_FMCFGR_FBM20                    ((uint32_t)0x100000)          /* Filter Init Mode bit 20 */
+#define  CAN_FMCFGR_FBM21                    ((uint32_t)0x200000)          /* Filter Init Mode bit 21 */
+#define  CAN_FMCFGR_FBM22                    ((uint32_t)0x400000)          /* Filter Init Mode bit 22 */
+#define  CAN_FMCFGR_FBM23                    ((uint32_t)0x800000)          /* Filter Init Mode bit 23 */
+#define  CAN_FMCFGR_FBM24                    ((uint32_t)0x1000000)         /* Filter Init Mode bit 24 */
+#define  CAN_FMCFGR_FBM25                    ((uint32_t)0x2000000)         /* Filter Init Mode bit 25 */
+#define  CAN_FMCFGR_FBM26                    ((uint32_t)0x4000000)         /* Filter Init Mode bit 26 */
+#define  CAN_FMCFGR_FBM27                    ((uint32_t)0x8000000)         /* Filter Init Mode bit 27 */
 
 /*******************  Bit definition for CAN_FSCFGR register  *******************/
 #define  CAN_FSCFGR_FSC                      ((uint16_t)0x3FFF)            /* Filter Scale Configuration */
@@ -2078,6 +2106,20 @@ typedef struct
 #define  CAN_FSCFGR_FSC11                    ((uint16_t)0x0800)            /* Filter Scale Configuration bit 11 */
 #define  CAN_FSCFGR_FSC12                    ((uint16_t)0x1000)            /* Filter Scale Configuration bit 12 */
 #define  CAN_FSCFGR_FSC13                    ((uint16_t)0x2000)            /* Filter Scale Configuration bit 13 */
+#define  CAN_FSCFGR_FSC14                    ((uint16_t)0x4000)            /* Filter Scale Configuration bit 14 */
+#define  CAN_FSCFGR_FSC15                    ((uint16_t)0x8000)            /* Filter Scale Configuration bit 15 */
+#define  CAN_FSCFGR_FSC16                    ((uint32_t)0x10000)           /* Filter Scale Configuration bit 16 */
+#define  CAN_FSCFGR_FSC17                    ((uint32_t)0x20000)           /* Filter Scale Configuration bit 17 */
+#define  CAN_FSCFGR_FSC18                    ((uint32_t)0x40000)           /* Filter Scale Configuration bit 18 */
+#define  CAN_FSCFGR_FSC19                    ((uint32_t)0x80000)           /* Filter Scale Configuration bit 19 */
+#define  CAN_FSCFGR_FSC20                    ((uint32_t)0x100000)          /* Filter Scale Configuration bit 20 */
+#define  CAN_FSCFGR_FSC21                    ((uint32_t)0x200000)          /* Filter Scale Configuration bit 21 */
+#define  CAN_FSCFGR_FSC22                    ((uint32_t)0x400000)          /* Filter Scale Configuration bit 22 */
+#define  CAN_FSCFGR_FSC23                    ((uint32_t)0x800000)          /* Filter Scale Configuration bit 23 */
+#define  CAN_FSCFGR_FSC24                    ((uint32_t)0x1000000)         /* Filter Scale Configuration bit 24 */
+#define  CAN_FSCFGR_FSC25                    ((uint32_t)0x2000000)         /* Filter Scale Configuration bit 25 */
+#define  CAN_FSCFGR_FSC26                    ((uint32_t)0x4000000)         /* Filter Scale Configuration bit 26 */
+#define  CAN_FSCFGR_FSC27                    ((uint32_t)0x8000000)         /* Filter Scale Configuration bit 27 */
 
 /******************  Bit definition for CAN_FAFIFOR register  *******************/
 #define  CAN_FAFIFOR_FFA                     ((uint16_t)0x3FFF)            /* Filter FIFO Assignment */
@@ -2095,6 +2137,20 @@ typedef struct
 #define  CAN_FAFIFOR_FFA11                   ((uint16_t)0x0800)            /* Filter FIFO Assignment for Filter 11 */
 #define  CAN_FAFIFOR_FFA12                   ((uint16_t)0x1000)            /* Filter FIFO Assignment for Filter 12 */
 #define  CAN_FAFIFOR_FFA13                   ((uint16_t)0x2000)            /* Filter FIFO Assignment for Filter 13 */
+#define  CAN_FAFIFOR_FFA14                   ((uint32_t)0x4000)            /* Filter FIFO Assignment for Filter 14 */
+#define  CAN_FAFIFOR_FFA15                   ((uint32_t)0x8000)            /* Filter FIFO Assignment for Filter 15 */
+#define  CAN_FAFIFOR_FFA16                   ((uint32_t)0x10000)           /* Filter FIFO Assignment for Filter 16 */
+#define  CAN_FAFIFOR_FFA17                   ((uint32_t)0x20000)           /* Filter FIFO Assignment for Filter 17 */
+#define  CAN_FAFIFOR_FFA18                   ((uint32_t)0x40000)           /* Filter FIFO Assignment for Filter 18 */
+#define  CAN_FAFIFOR_FFA19                   ((uint32_t)0x80000)           /* Filter FIFO Assignment for Filter 19 */
+#define  CAN_FAFIFOR_FFA20                   ((uint32_t)0x100000)          /* Filter FIFO Assignment for Filter 20 */
+#define  CAN_FAFIFOR_FFA21                   ((uint32_t)0x200000)          /* Filter FIFO Assignment for Filter 21 */
+#define  CAN_FAFIFOR_FFA22                   ((uint32_t)0x400000)          /* Filter FIFO Assignment for Filter 22 */
+#define  CAN_FAFIFOR_FFA23                   ((uint32_t)0x800000)          /* Filter FIFO Assignment for Filter 23 */
+#define  CAN_FAFIFOR_FFA24                   ((uint32_t)0x1000000)         /* Filter FIFO Assignment for Filter 24 */
+#define  CAN_FAFIFOR_FFA25                   ((uint32_t)0x2000000)         /* Filter FIFO Assignment for Filter 25 */
+#define  CAN_FAFIFOR_FFA26                   ((uint32_t)0x4000000)         /* Filter FIFO Assignment for Filter 26 */
+#define  CAN_FAFIFOR_FFA27                   ((uint32_t)0x8000000)         /* Filter FIFO Assignment for Filter 27 */
 
 /*******************  Bit definition for CAN_FWR register  *******************/
 #define  CAN_FWR_FACT                        ((uint16_t)0x3FFF)            /* Filter Active */
@@ -2112,6 +2168,20 @@ typedef struct
 #define  CAN_FWR_FACT11                      ((uint16_t)0x0800)            /* Filter 11 Active */
 #define  CAN_FWR_FACT12                      ((uint16_t)0x1000)            /* Filter 12 Active */
 #define  CAN_FWR_FACT13                      ((uint16_t)0x2000)            /* Filter 13 Active */
+#define  CAN_FWR_FACT14                      ((uint16_t)0x4000)            /* Filter 14 Active */
+#define  CAN_FWR_FACT15                      ((uint16_t)0x8000)            /* Filter 15 Active */
+#define  CAN_FWR_FACT16                      ((uint32_t)0x10000)           /* Filter 16 Active */
+#define  CAN_FWR_FACT17                      ((uint32_t)0x20000)           /* Filter 17 Active */
+#define  CAN_FWR_FACT18                      ((uint32_t)0x40000)           /* Filter 18 Active */
+#define  CAN_FWR_FACT19                      ((uint32_t)0x80000)           /* Filter 19 Active */
+#define  CAN_FWR_FACT20                      ((uint32_t)0x100000)          /* Filter 20 Active */
+#define  CAN_FWR_FACT21                      ((uint32_t)0x200000)          /* Filter 21 Active */
+#define  CAN_FWR_FACT22                      ((uint32_t)0x400000)          /* Filter 22 Active */
+#define  CAN_FWR_FACT23                      ((uint32_t)0x800000)          /* Filter 23 Active */
+#define  CAN_FWR_FACT24                      ((uint32_t)0x1000000)         /* Filter 24 Active */
+#define  CAN_FWR_FACT25                      ((uint32_t)0x2000000)         /* Filter 25 Active */
+#define  CAN_FWR_FACT26                      ((uint32_t)0x4000000)         /* Filter 26 Active */
+#define  CAN_FWR_FACT27                      ((uint32_t)0x8000000)         /* Filter 27 Active */
 
 /*******************  Bit definition for CAN_F0R1 register  *******************/
 #define  CAN_F0R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
@@ -2589,6 +2659,483 @@ typedef struct
 #define  CAN_F13R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
 #define  CAN_F13R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
 
+/*******************  Bit definition for CAN_F14R1 register  ******************/
+#define  CAN_F14R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F14R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F14R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F14R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F14R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F14R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F14R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F14R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F14R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F14R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F14R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F14R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F14R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F14R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F14R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F14R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F14R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F14R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F14R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F14R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F14R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F14R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F14R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F14R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F14R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F14R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F14R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F14R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F14R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F14R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F14R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F14R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+
+/*******************  Bit definition for CAN_F15R1 register  *******************/
+#define  CAN_F15R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F15R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F15R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F15R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F15R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F15R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F15R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F15R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F15R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F15R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F15R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F15R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F15R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F15R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F15R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F15R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F15R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F15R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F15R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F15R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F15R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F15R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F15R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F15R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F15R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F15R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F15R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F15R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F15R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F15R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F15R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F15R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F16R1 register  *******************/
+#define  CAN_F16R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F16R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F16R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F16R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F16R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F16R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F16R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F16R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F16R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F16R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F16R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F16R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F16R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F16R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F16R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F16R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F16R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F16R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F16R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F16R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F16R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F16R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F16R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F16R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F16R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F16R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F16R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F16R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F16R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F16R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F16R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F16R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F17R1 register  *******************/
+#define  CAN_F17R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F17R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F17R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F17R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F17R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F17R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F17R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F17R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F17R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F17R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F17R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F17R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F17R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F17R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F17R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F17R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F17R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F17R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F17R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F17R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F17R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F17R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F17R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F17R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F17R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F17R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F17R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F17R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F17R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F17R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F17R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F17R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F18R1 register  *******************/
+#define  CAN_F18R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F18R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F18R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F18R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F18R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F18R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F18R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F18R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F18R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F18R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F18R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F18R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F18R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F18R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F18R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F18R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F18R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F18R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F18R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F18R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F18R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F18R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F18R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F18R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F18R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F18R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F18R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F18R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F18R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F18R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F18R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F18R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F19R1 register  *******************/
+#define  CAN_F19R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F19R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F19R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F19R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F19R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F19R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F19R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F19R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F19R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F19R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F19R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F19R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F19R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F19R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F19R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F19R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F19R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F19R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F19R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F19R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F19R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F19R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F19R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F19R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F19R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F19R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F19R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F19R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F19R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F19R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F19R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F19R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F20R1 register  *******************/
+#define  CAN_F20R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F20R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F20R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F20R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F20R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F20R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F20R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F20R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F20R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F20R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F20R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F20R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F20R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F20R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F20R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F20R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F20R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F20R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F20R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F20R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F20R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F20R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F20R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F20R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F20R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F20R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F20R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F20R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F20R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F20R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F20R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F20R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F21R1 register  *******************/
+#define  CAN_F21R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F21R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F21R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F21R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F21R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F21R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F21R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F21R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F21R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F21R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F21R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F21R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F21R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F21R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F21R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F21R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F21R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F21R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F21R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F21R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F21R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F21R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F21R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F21R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F21R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F21R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F21R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F21R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F21R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F21R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F21R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F21R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F22R1 register  *******************/
+#define  CAN_F22R1_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F22R1_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F22R1_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F22R1_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F22R1_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F22R1_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F22R1_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F22R1_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F22R1_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F22R1_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F22R1_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F22R1_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F22R1_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F22R1_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F22R1_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F22R1_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F22R1_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F22R1_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F22R1_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F22R1_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F22R1_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F22R1_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F22R1_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F22R1_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F22R1_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F22R1_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F22R1_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F22R1_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F22R1_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F22R1_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F22R1_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F22R1_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F23R1 register  ******************/
+#define  CAN_F23R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F23R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F23R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F23R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F23R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F23R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F23R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F23R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F23R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F23R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F23R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F23R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F23R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F23R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F23R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F23R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F23R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F23R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F23R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F23R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F23R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F23R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F23R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F23R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F23R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F23R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F23R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F23R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F23R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F23R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F23R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F23R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F24R1 register  ******************/
+#define  CAN_F24R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F24R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F24R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F24R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F24R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F24R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F24R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F24R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F24R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F24R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F24R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F24R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F24R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F24R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F24R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F24R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F24R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F24R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F24R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F24R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F24R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F24R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F24R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F24R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F24R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F24R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F24R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F24R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F24R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F24R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F24R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F24R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F25R1 register  ******************/
+#define  CAN_F25R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F25R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F25R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F25R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F25R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F25R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F25R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F25R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F25R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F25R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F25R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F25R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F25R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F25R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F25R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F25R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F25R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F25R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F25R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F25R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F25R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F25R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F25R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F25R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F25R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F25R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F25R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F25R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F25R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F25R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F25R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F25R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F26R1 register  ******************/
+#define  CAN_F26R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F26R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F26R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F26R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F26R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F26R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F26R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F26R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F26R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F26R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F26R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F26R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F26R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F26R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F26R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F26R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F26R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F26R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F26R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F26R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F26R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F26R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F26R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F26R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F26R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F26R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F26R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F26R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F26R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F26R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F26R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F26R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F27R1 register  ******************/
+#define  CAN_F27R1_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F27R1_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F27R1_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F27R1_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F27R1_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F27R1_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F27R1_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F27R1_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F27R1_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F27R1_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F27R1_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F27R1_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F27R1_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F27R1_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F27R1_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F27R1_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F27R1_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F27R1_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F27R1_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F27R1_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F27R1_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F27R1_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F27R1_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F27R1_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F27R1_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F27R1_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F27R1_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F27R1_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F27R1_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F27R1_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F27R1_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F27R1_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
 /*******************  Bit definition for CAN_F0R2 register  *******************/
 #define  CAN_F0R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
 #define  CAN_F0R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
@@ -3065,7 +3612,481 @@ typedef struct
 #define  CAN_F13R2_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
 #define  CAN_F13R2_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
 
+/*******************  Bit definition for CAN_F14R2 register  *******************/
+#define  CAN_F14R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F14R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F14R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F14R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F14R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F14R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F14R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F14R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F14R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F14R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F14R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F14R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F14R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F14R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F14R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F14R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F14R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F14R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F14R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F14R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F14R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F14R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F14R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F14R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F14R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F14R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F14R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F14R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F14R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F14R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F14R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F14R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
 
+/*******************  Bit definition for CAN_F15R2 register  *******************/
+#define  CAN_F15R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F15R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F15R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F15R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F15R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F15R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F15R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F15R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F15R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F15R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F15R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F15R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F15R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F15R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F15R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F15R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F15R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F15R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F15R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F15R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F15R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F15R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F15R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F15R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F15R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F15R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F15R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F15R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F15R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F15R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F15R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F15R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F16R2 register  *******************/
+#define  CAN_F16R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F16R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F16R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F16R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F16R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F16R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F16R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F16R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F16R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F16R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F16R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F16R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F16R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F16R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F16R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F16R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F16R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F16R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F16R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F16R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F16R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F16R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F16R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F16R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F16R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F16R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F16R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F16R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F16R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F16R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F16R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F16R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F17R2 register  *******************/
+#define  CAN_F17R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F17R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F17R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F17R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F17R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F17R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F17R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F17R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F17R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F17R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F17R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F17R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F17R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F17R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F17R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F17R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F17R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F17R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F17R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F17R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F17R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F17R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F17R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F17R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F17R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F17R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F17R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F17R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F17R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F17R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F17R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F17R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F18R2 register  *******************/
+#define  CAN_F18R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F18R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F18R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F18R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F18R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F18R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F18R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F18R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F18R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F18R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F18R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F18R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F18R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F18R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F18R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F18R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F18R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F18R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F18R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F18R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F18R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F18R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F18R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F18R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F18R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F18R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F18R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F18R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F18R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F18R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F18R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F18R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F19R2 register  *******************/
+#define  CAN_F19R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F19R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F19R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F19R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F19R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F19R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F19R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F19R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F19R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F19R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F19R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F19R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F19R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F19R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F19R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F19R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F19R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F19R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F19R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F19R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F19R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F19R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F19R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F19R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F19R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F19R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F19R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F19R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F19R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F19R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F19R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F19R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F20R2 register  *******************/
+#define  CAN_F20R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F20R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F20R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F20R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F20R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F20R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F20R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F20R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F20R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F20R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F20R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F20R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F20R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F20R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F20R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F20R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F20R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F20R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F20R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F20R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F20R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F20R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F20R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F20R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F20R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F20R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F20R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F20R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F20R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F20R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F20R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F20R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F21R2 register  *******************/
+#define  CAN_F21R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F21R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F21R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F21R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F21R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F21R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F21R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F21R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F21R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F21R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F21R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F21R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F21R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F21R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F21R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F21R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F21R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F21R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F21R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F21R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F21R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F21R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F21R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F21R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F21R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F21R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F21R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F21R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F21R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F21R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F21R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F21R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F22R2 register  *******************/
+#define  CAN_F22R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F22R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F22R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F22R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F22R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F22R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F22R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F22R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F22R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F22R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F22R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F22R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F22R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F22R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F22R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F22R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F22R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F22R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F22R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F22R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F22R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F22R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F22R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F22R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F22R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F22R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F22R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F22R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F22R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F22R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F22R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F22R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F23R2 register  *******************/
+#define  CAN_F23R2_FB0                        ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F23R2_FB1                        ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F23R2_FB2                        ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F23R2_FB3                        ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F23R2_FB4                        ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F23R2_FB5                        ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F23R2_FB6                        ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F23R2_FB7                        ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F23R2_FB8                        ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F23R2_FB9                        ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F23R2_FB10                       ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F23R2_FB11                       ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F23R2_FB12                       ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F23R2_FB13                       ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F23R2_FB14                       ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F23R2_FB15                       ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F23R2_FB16                       ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F23R2_FB17                       ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F23R2_FB18                       ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F23R2_FB19                       ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F23R2_FB20                       ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F23R2_FB21                       ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F23R2_FB22                       ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F23R2_FB23                       ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F23R2_FB24                       ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F23R2_FB25                       ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F23R2_FB26                       ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F23R2_FB27                       ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F23R2_FB28                       ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F23R2_FB29                       ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F23R2_FB30                       ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F23R2_FB31                       ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F24R2 register  ******************/
+#define  CAN_F24R2_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F24R2_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F24R2_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F24R2_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F24R2_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F24R2_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F24R2_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F24R2_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F24R2_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F24R2_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F24R2_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F24R2_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F24R2_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F24R2_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F24R2_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F24R2_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F24R2_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F24R2_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F24R2_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F24R2_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F24R2_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F24R2_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F24R2_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F24R2_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F24R2_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F24R2_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F24R2_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F24R2_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F24R2_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F24R2_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F24R2_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F24R2_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F25R2 register  ******************/
+#define  CAN_F25R2_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F25R2_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F25R2_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F25R2_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F25R2_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F25R2_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F25R2_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F25R2_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F25R2_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F25R2_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F25R2_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F25R2_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F25R2_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F25R2_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F25R2_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F25R2_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F25R2_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F25R2_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F25R2_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F25R2_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F25R2_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F25R2_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F25R2_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F25R2_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F25R2_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F25R2_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F25R2_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F25R2_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F25R2_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F25R2_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F25R2_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F25R2_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F26R2 register  ******************/
+#define  CAN_F26R2_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F26R2_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F26R2_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F26R2_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F26R2_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F26R2_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F26R2_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F26R2_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F26R2_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F26R2_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F26R2_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F26R2_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F26R2_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F26R2_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F26R2_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F26R2_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F26R2_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F26R2_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F26R2_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F26R2_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F26R2_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F26R2_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F26R2_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F26R2_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F26R2_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F26R2_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F26R2_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F26R2_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F26R2_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F26R2_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F26R2_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F26R2_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
+
+/*******************  Bit definition for CAN_F27R2 register  ******************/
+#define  CAN_F27R2_FB0                       ((uint32_t)0x00000001)        /* Filter bit 0 */
+#define  CAN_F27R2_FB1                       ((uint32_t)0x00000002)        /* Filter bit 1 */
+#define  CAN_F27R2_FB2                       ((uint32_t)0x00000004)        /* Filter bit 2 */
+#define  CAN_F27R2_FB3                       ((uint32_t)0x00000008)        /* Filter bit 3 */
+#define  CAN_F27R2_FB4                       ((uint32_t)0x00000010)        /* Filter bit 4 */
+#define  CAN_F27R2_FB5                       ((uint32_t)0x00000020)        /* Filter bit 5 */
+#define  CAN_F27R2_FB6                       ((uint32_t)0x00000040)        /* Filter bit 6 */
+#define  CAN_F27R2_FB7                       ((uint32_t)0x00000080)        /* Filter bit 7 */
+#define  CAN_F27R2_FB8                       ((uint32_t)0x00000100)        /* Filter bit 8 */
+#define  CAN_F27R2_FB9                       ((uint32_t)0x00000200)        /* Filter bit 9 */
+#define  CAN_F27R2_FB10                      ((uint32_t)0x00000400)        /* Filter bit 10 */
+#define  CAN_F27R2_FB11                      ((uint32_t)0x00000800)        /* Filter bit 11 */
+#define  CAN_F27R2_FB12                      ((uint32_t)0x00001000)        /* Filter bit 12 */
+#define  CAN_F27R2_FB13                      ((uint32_t)0x00002000)        /* Filter bit 13 */
+#define  CAN_F27R2_FB14                      ((uint32_t)0x00004000)        /* Filter bit 14 */
+#define  CAN_F27R2_FB15                      ((uint32_t)0x00008000)        /* Filter bit 15 */
+#define  CAN_F27R2_FB16                      ((uint32_t)0x00010000)        /* Filter bit 16 */
+#define  CAN_F27R2_FB17                      ((uint32_t)0x00020000)        /* Filter bit 17 */
+#define  CAN_F27R2_FB18                      ((uint32_t)0x00040000)        /* Filter bit 18 */
+#define  CAN_F27R2_FB19                      ((uint32_t)0x00080000)        /* Filter bit 19 */
+#define  CAN_F27R2_FB20                      ((uint32_t)0x00100000)        /* Filter bit 20 */
+#define  CAN_F27R2_FB21                      ((uint32_t)0x00200000)        /* Filter bit 21 */
+#define  CAN_F27R2_FB22                      ((uint32_t)0x00400000)        /* Filter bit 22 */
+#define  CAN_F27R2_FB23                      ((uint32_t)0x00800000)        /* Filter bit 23 */
+#define  CAN_F27R2_FB24                      ((uint32_t)0x01000000)        /* Filter bit 24 */
+#define  CAN_F27R2_FB25                      ((uint32_t)0x02000000)        /* Filter bit 25 */
+#define  CAN_F27R2_FB26                      ((uint32_t)0x04000000)        /* Filter bit 26 */
+#define  CAN_F27R2_FB27                      ((uint32_t)0x08000000)        /* Filter bit 27 */
+#define  CAN_F27R2_FB28                      ((uint32_t)0x10000000)        /* Filter bit 28 */
+#define  CAN_F27R2_FB29                      ((uint32_t)0x20000000)        /* Filter bit 29 */
+#define  CAN_F27R2_FB30                      ((uint32_t)0x40000000)        /* Filter bit 30 */
+#define  CAN_F27R2_FB31                      ((uint32_t)0x80000000)        /* Filter bit 31 */
 
 /******************************************************************************/
 /*                          CRC Calculation Unit                              */
@@ -3248,6 +4269,10 @@ typedef struct
 #define  DMA_CTCIF7                         ((uint32_t)0x02000000)        /* Channel 7 Transfer Complete clear */
 #define  DMA_CHTIF7                         ((uint32_t)0x04000000)        /* Channel 7 Half Transfer clear */
 #define  DMA_CTEIF7                         ((uint32_t)0x08000000)        /* Channel 7 Transfer Error clear */
+#define  DMA_CGIF8                          ((uint32_t)0x10000000)        /* Channel 8 Global interrupt clear */
+#define  DMA_CTCIF8                         ((uint32_t)0x20000000)        /* Channel 8 Transfer Complete clear */
+#define  DMA_CHTIF8                         ((uint32_t)0x40000000)        /* Channel 8 Half Transfer clear */
+#define  DMA_CTEIF8                         ((uint32_t)0x80000000)        /* Channel 8 Transfer Error clear */
 
 /*******************  Bit definition for DMA_CFGR1 register  *******************/
 #define  DMA_CFGR1_EN                       ((uint16_t)0x0001)            /* Channel enable*/
@@ -3438,6 +4463,9 @@ typedef struct
 /******************  Bit definition for DMA_CNTR7 register  ******************/
 #define  DMA_CNTR7_NDT                      ((uint16_t)0xFFFF)            /* Number of data to Transfer */
 
+/******************  Bit definition for DMA_CNTR8 register  ******************/
+#define  DMA_CNTR8_NDT                      ((uint16_t)0xFFFF)            /* Number of data to Transfer */
+
 /******************  Bit definition for DMA_PADDR1 register  *******************/
 #define  DMA_PADDR1_PA                      ((uint32_t)0xFFFFFFFF)        /* Peripheral Address */
 
@@ -3458,6 +4486,9 @@ typedef struct
 
 /******************  Bit definition for DMA_PADDR7 register  *******************/
 #define  DMA_PADDR7_PA                      ((uint32_t)0xFFFFFFFF)        /* Peripheral Address */
+
+/******************  Bit definition for DMA_PADDR8 register  *******************/
+#define  DMA_PADDR8_PA                      ((uint32_t)0xFFFFFFFF)        /* Peripheral Address */
 
 /******************  Bit definition for DMA_MADDR1 register  *******************/
 #define  DMA_MADDR1_MA                      ((uint32_t)0xFFFFFFFF)        /* Memory Address */
@@ -3480,6 +4511,8 @@ typedef struct
 /******************  Bit definition for DMA_MADDR7 register  *******************/
 #define  DMA_MADDR7_MA                      ((uint32_t)0xFFFFFFFF)        /* Memory Address */
 
+/******************  Bit definition for DMA_MADDR8 register  *******************/
+#define  DMA_MADDR8_MA                      ((uint32_t)0xFFFFFFFF)        /* Memory Address */
 
 /******************************************************************************/
 /*                    External Interrupt/Event Controller                     */
@@ -3506,6 +4539,7 @@ typedef struct
 #define  EXTI_INTENR_MR17                       ((uint32_t)0x00020000)        /* Interrupt Mask on line 17 */
 #define  EXTI_INTENR_MR18                       ((uint32_t)0x00040000)        /* Interrupt Mask on line 18 */
 #define  EXTI_INTENR_MR19                       ((uint32_t)0x00080000)        /* Interrupt Mask on line 19 */
+#define  EXTI_INTENR_MR20                       ((uint32_t)0x00100000)        /* Interrupt Mask on line 20 */
 
 /*******************  Bit definition for EXTI_EVENR register  *******************/
 #define  EXTI_EVENR_MR0                         ((uint32_t)0x00000001)        /* Event Mask on line 0 */
@@ -3528,6 +4562,7 @@ typedef struct
 #define  EXTI_EVENR_MR17                        ((uint32_t)0x00020000)        /* Event Mask on line 17 */
 #define  EXTI_EVENR_MR18                        ((uint32_t)0x00040000)        /* Event Mask on line 18 */
 #define  EXTI_EVENR_MR19                        ((uint32_t)0x00080000)        /* Event Mask on line 19 */
+#define  EXTI_EVENR_MR20                        ((uint32_t)0x00100000)        /* Event Mask on line 20 */
 
 /******************  Bit definition for EXTI_RTENR register  *******************/
 #define  EXTI_RTENR_TR0                         ((uint32_t)0x00000001)        /* Rising trigger event configuration bit of line 0 */
@@ -3550,6 +4585,7 @@ typedef struct
 #define  EXTI_RTENR_TR17                        ((uint32_t)0x00020000)        /* Rising trigger event configuration bit of line 17 */
 #define  EXTI_RTENR_TR18                        ((uint32_t)0x00040000)        /* Rising trigger event configuration bit of line 18 */
 #define  EXTI_RTENR_TR19                        ((uint32_t)0x00080000)        /* Rising trigger event configuration bit of line 19 */
+#define  EXTI_RTENR_TR20                        ((uint32_t)0x00100000)        /* Rising trigger event configuration bit of line 20 */
 
 /******************  Bit definition for EXTI_FTENR register  *******************/
 #define  EXTI_FTENR_TR0                         ((uint32_t)0x00000001)        /* Falling trigger event configuration bit of line 0 */
@@ -3572,6 +4608,7 @@ typedef struct
 #define  EXTI_FTENR_TR17                        ((uint32_t)0x00020000)        /* Falling trigger event configuration bit of line 17 */
 #define  EXTI_FTENR_TR18                        ((uint32_t)0x00040000)        /* Falling trigger event configuration bit of line 18 */
 #define  EXTI_FTENR_TR19                        ((uint32_t)0x00080000)        /* Falling trigger event configuration bit of line 19 */
+#define  EXTI_FTENR_TR20                        ((uint32_t)0x00100000)        /* Falling trigger event configuration bit of line 20 */
 
 /******************  Bit definition for EXTI_SWIEVR register  ******************/
 #define  EXTI_SWIEVR_SWIEVR0                    ((uint32_t)0x00000001)        /* Software Interrupt on line 0 */
@@ -3594,6 +4631,7 @@ typedef struct
 #define  EXTI_SWIEVR_SWIEVR17                   ((uint32_t)0x00020000)        /* Software Interrupt on line 17 */
 #define  EXTI_SWIEVR_SWIEVR18                   ((uint32_t)0x00040000)        /* Software Interrupt on line 18 */
 #define  EXTI_SWIEVR_SWIEVR19                   ((uint32_t)0x00080000)        /* Software Interrupt on line 19 */
+#define  EXTI_SWIEVR_SWIEVR20                   ((uint32_t)0x00100000)        /* Software Interrupt on line 20 */
 
 /*******************  Bit definition for EXTI_INTFR register  ********************/
 #define  EXTI_INTF_INTF0                        ((uint32_t)0x00000001)        /* Pending bit for line 0 */
@@ -3616,6 +4654,7 @@ typedef struct
 #define  EXTI_INTF_INTF17                       ((uint32_t)0x00020000)        /* Pending bit for line 17 */
 #define  EXTI_INTF_INTF18                       ((uint32_t)0x00040000)        /* Pending bit for line 18 */
 #define  EXTI_INTF_INTF19                       ((uint32_t)0x00080000)        /* Pending bit for line 19 */
+#define  EXTI_INTF_INTF20                       ((uint32_t)0x00100000)        /* Pending bit for line 20 */
 
 /******************************************************************************/
 /*                      FLASH and Option Bytes Registers                      */
@@ -3626,15 +4665,18 @@ typedef struct
 
 /******************  Bit definition for FLASH_KEYR register  ******************/
 #define  FLASH_KEYR_FKEYR                      ((uint32_t)0xFFFFFFFF)        /* FPEC Key */
+#define  FLASH_KEYR_KEY1                       ((uint32_t)0x45670123)
+#define  FLASH_KEYR_KEY2                       ((uint32_t)0xCDEF89AB)
 
 /*****************  Bit definition for FLASH_OBKEYR register  ****************/
 #define  FLASH_OBKEYR_OBKEYR                   ((uint32_t)0xFFFFFFFF)        /* Option Byte Key */
 
 /******************  Bit definition for FLASH_STATR register  *******************/
 #define  FLASH_STATR_BSY                       ((uint8_t)0x01)               /* Busy */
-#define  FLASH_STATR_PGERR                     ((uint8_t)0x04)               /* Programming Error */
+#define  FLASH_STATR_WRBSY                     ((uint8_t)0x02)               
 #define  FLASH_STATR_WRPRTERR                  ((uint8_t)0x10)               /* Write Protection Error */
 #define  FLASH_STATR_EOP                       ((uint8_t)0x20)               /* End of operation */
+#define  FLASH_STATR_EHMODS                    ((uint8_t)0x80)               
 
 /*******************  Bit definition for FLASH_CTLR register  *******************/
 #define  FLASH_CTLR_PG                         ((uint32_t)0x00000001)        /* Programming */
@@ -3653,6 +4695,9 @@ typedef struct
 #define  FLASH_CTLR_PAGE_BER32                 ((uint32_t)0x00040000)        /* Block Erase 32K */
 #define  FLASH_CTLR_PAGE_BER64                 ((uint32_t)0x00080000)        /* Block Erase 64K */
 #define  FLASH_CTLR_PG_STRT                    ((uint32_t)0x00200000)        /* Page Programming Start */
+#define  FLASH_CTLR_RSENACT                    ((uint32_t)0x00400000)
+#define  FLASH_CTLR_EHMOD                      ((uint32_t)0x01000000)
+#define  FLASH_CTLR_SCKMOD                     ((uint32_t)0x02000000)
 
 /*******************  Bit definition for FLASH_ADDR register  *******************/
 #define  FLASH_ADDR_FAR                        ((uint32_t)0xFFFFFFFF)        /* Flash Address */
@@ -3665,10 +4710,16 @@ typedef struct
 #define  FLASH_OBR_WDG_SW                      ((uint16_t)0x0004)            /* WDG_SW */
 #define  FLASH_OBR_nRST_STOP                   ((uint16_t)0x0008)            /* nRST_STOP */
 #define  FLASH_OBR_nRST_STDBY                  ((uint16_t)0x0010)            /* nRST_STDBY */
-#define  FLASH_OBR_BFB2                        ((uint16_t)0x0020)            /* BFB2 */
+#define  FLASH_OBR_RAM_CODE_MOD                ((uint16_t)0x0300)            
+#define  FLASH_OBR_RAM_CODE_MOD_BIT1           ((uint16_t)0x0100)
+#define  FLASH_OBR_RAM_CODE_MOD_BIT2           ((uint16_t)0x0200)
 
 /******************  Bit definition for FLASH_WPR register  ******************/
 #define  FLASH_WPR_WRP                         ((uint32_t)0xFFFFFFFF)        /* Write Protect */
+
+/******************  Bit definition for FLASH_MODEKEYR register  ******************/
+#define  FLASH_MODEKEYR_KEY1                   ((uint32_t)0x45670123)        
+#define  FLASH_MODEKEYR_KEY2                   ((uint32_t)0xCDEF89AB)        
 
 /******************  Bit definition for FLASH_RDPR register  *******************/
 #define  FLASH_RDPR_RDPR                       ((uint32_t)0x000000FF)        /* Read protection option byte */
@@ -4001,7 +5052,8 @@ typedef struct
 #define AFIO_PCFR1_USART3_REMAP_1              ((uint32_t)0x00000020)        /* Bit 1 */
 
 #define AFIO_PCFR1_USART3_REMAP_NOREMAP        ((uint32_t)0x00000000)        /* No remap (TX/PB10, RX/PB11, CK/PB12, CTS/PB13, RTS/PB14) */
-#define AFIO_PCFR1_USART3_REMAP_PARTIALREMAP   ((uint32_t)0x00000010)        /* Partial remap (TX/PC10, RX/PC11, CK/PC12, CTS/PB13, RTS/PB14) */
+#define AFIO_PCFR1_USART3_REMAP_PARTIALREMAP1  ((uint32_t)0x00000010)        /* Partial remap (TX/PC10, RX/PC11, CK/PC12, CTS/PB13, RTS/PB14) */
+#define AFIO_PCFR1_USART3_REMAP_PARTIALREMAP2  ((uint32_t)0x00000020)
 #define AFIO_PCFR1_USART3_REMAP_FULLREMAP      ((uint32_t)0x00000030)        /* Full remap (TX/PD8, RX/PD9, CK/PD10, CTS/PD11, RTS/PD12) */
 
 #define AFIO_PCFR1_TIM1_REMAP                  ((uint32_t)0x000000C0)        /* TIM1_REMAP[1:0] bits (TIM1 remapping) */
@@ -4046,6 +5098,12 @@ typedef struct
 #define AFIO_PCFR1_ADC2_ETRGINJ_REMAP          ((uint32_t)0x00080000)        /* ADC 2 External Trigger Injected Conversion remapping */
 #define AFIO_PCFR1_ADC2_ETRGREG_REMAP          ((uint32_t)0x00100000)        /* ADC 2 External Trigger Regular Conversion remapping */
 
+#define AFIO_PCFR1_ETH_REMAP                   ((uint32_t)0x00200000)
+
+#define AFIO_PCFR1_CAN2_REMAP                  ((uint32_t)0x00400000)
+
+#define AFIO_PCFR1_MII_RMII_REMAP              ((uint32_t)0x00800000)
+
 #define AFIO_PCFR1_SWJ_CFG                     ((uint32_t)0x07000000)        /* SWJ_CFG[2:0] bits (Serial Wire JTAG configuration) */
 #define AFIO_PCFR1_SWJ_CFG_0                   ((uint32_t)0x01000000)        /* Bit 0 */
 #define AFIO_PCFR1_SWJ_CFG_1                   ((uint32_t)0x02000000)        /* Bit 1 */
@@ -4055,6 +5113,12 @@ typedef struct
 #define AFIO_PCFR1_SWJ_CFG_NOJNTRST            ((uint32_t)0x01000000)        /* Full SWJ (JTAG-DP + SW-DP) but without JNTRST */
 #define AFIO_PCFR1_SWJ_CFG_JTAGDISABLE         ((uint32_t)0x02000000)        /* JTAG-DP Disabled and SW-DP Enabled */
 #define AFIO_PCFR1_SWJ_CFG_DISABLE             ((uint32_t)0x04000000)        /* JTAG-DP Disabled and SW-DP Disabled */
+
+#define AFIO_PCFR1_SPI3_REMAP                  ((uint32_t)0x10000000)
+
+#define AFIO_PCFR1_TIM2ITR1_REMAP              ((uint32_t)0x20000000)
+
+#define AFIO_PCFR1_PTP_PPS_REMAP               ((uint32_t)0x40000000)
 
 /*****************  Bit definition for AFIO_EXTICR1 register  *****************/
 #define AFIO_EXTICR1_EXTI0                     ((uint16_t)0x000F)            /* EXTI 0 configuration */
@@ -4067,32 +5131,24 @@ typedef struct
 #define AFIO_EXTICR1_EXTI0_PC                  ((uint16_t)0x0002)            /* PC[0] pin */
 #define AFIO_EXTICR1_EXTI0_PD                  ((uint16_t)0x0003)            /* PD[0] pin */
 #define AFIO_EXTICR1_EXTI0_PE                  ((uint16_t)0x0004)            /* PE[0] pin */
-#define AFIO_EXTICR1_EXTI0_PF                  ((uint16_t)0x0005)            /* PF[0] pin */
-#define AFIO_EXTICR1_EXTI0_PG                  ((uint16_t)0x0006)            /* PG[0] pin */
 
 #define AFIO_EXTICR1_EXTI1_PA                  ((uint16_t)0x0000)            /* PA[1] pin */
 #define AFIO_EXTICR1_EXTI1_PB                  ((uint16_t)0x0010)            /* PB[1] pin */
 #define AFIO_EXTICR1_EXTI1_PC                  ((uint16_t)0x0020)            /* PC[1] pin */
 #define AFIO_EXTICR1_EXTI1_PD                  ((uint16_t)0x0030)            /* PD[1] pin */
 #define AFIO_EXTICR1_EXTI1_PE                  ((uint16_t)0x0040)            /* PE[1] pin */
-#define AFIO_EXTICR1_EXTI1_PF                  ((uint16_t)0x0050)            /* PF[1] pin */
-#define AFIO_EXTICR1_EXTI1_PG                  ((uint16_t)0x0060)            /* PG[1] pin */
  
 #define AFIO_EXTICR1_EXTI2_PA                  ((uint16_t)0x0000)            /* PA[2] pin */
 #define AFIO_EXTICR1_EXTI2_PB                  ((uint16_t)0x0100)            /* PB[2] pin */
 #define AFIO_EXTICR1_EXTI2_PC                  ((uint16_t)0x0200)            /* PC[2] pin */
 #define AFIO_EXTICR1_EXTI2_PD                  ((uint16_t)0x0300)            /* PD[2] pin */
 #define AFIO_EXTICR1_EXTI2_PE                  ((uint16_t)0x0400)            /* PE[2] pin */
-#define AFIO_EXTICR1_EXTI2_PF                  ((uint16_t)0x0500)            /* PF[2] pin */
-#define AFIO_EXTICR1_EXTI2_PG                  ((uint16_t)0x0600)            /* PG[2] pin */
 
 #define AFIO_EXTICR1_EXTI3_PA                  ((uint16_t)0x0000)            /* PA[3] pin */
 #define AFIO_EXTICR1_EXTI3_PB                  ((uint16_t)0x1000)            /* PB[3] pin */
 #define AFIO_EXTICR1_EXTI3_PC                  ((uint16_t)0x2000)            /* PC[3] pin */
 #define AFIO_EXTICR1_EXTI3_PD                  ((uint16_t)0x3000)            /* PD[3] pin */
 #define AFIO_EXTICR1_EXTI3_PE                  ((uint16_t)0x4000)            /* PE[3] pin */
-#define AFIO_EXTICR1_EXTI3_PF                  ((uint16_t)0x5000)            /* PF[3] pin */
-#define AFIO_EXTICR1_EXTI3_PG                  ((uint16_t)0x6000)            /* PG[3] pin */
 
 /*****************  Bit definition for AFIO_EXTICR2 register  *****************/
 #define AFIO_EXTICR2_EXTI4                     ((uint16_t)0x000F)            /* EXTI 4 configuration */
@@ -4105,32 +5161,24 @@ typedef struct
 #define AFIO_EXTICR2_EXTI4_PC                  ((uint16_t)0x0002)            /* PC[4] pin */
 #define AFIO_EXTICR2_EXTI4_PD                  ((uint16_t)0x0003)            /* PD[4] pin */
 #define AFIO_EXTICR2_EXTI4_PE                  ((uint16_t)0x0004)            /* PE[4] pin */
-#define AFIO_EXTICR2_EXTI4_PF                  ((uint16_t)0x0005)            /* PF[4] pin */
-#define AFIO_EXTICR2_EXTI4_PG                  ((uint16_t)0x0006)            /* PG[4] pin */
 
 #define AFIO_EXTICR2_EXTI5_PA                  ((uint16_t)0x0000)            /* PA[5] pin */
 #define AFIO_EXTICR2_EXTI5_PB                  ((uint16_t)0x0010)            /* PB[5] pin */
 #define AFIO_EXTICR2_EXTI5_PC                  ((uint16_t)0x0020)            /* PC[5] pin */
 #define AFIO_EXTICR2_EXTI5_PD                  ((uint16_t)0x0030)            /* PD[5] pin */
 #define AFIO_EXTICR2_EXTI5_PE                  ((uint16_t)0x0040)            /* PE[5] pin */
-#define AFIO_EXTICR2_EXTI5_PF                  ((uint16_t)0x0050)            /* PF[5] pin */
-#define AFIO_EXTICR2_EXTI5_PG                  ((uint16_t)0x0060)            /* PG[5] pin */
 
 #define AFIO_EXTICR2_EXTI6_PA                  ((uint16_t)0x0000)            /* PA[6] pin */
 #define AFIO_EXTICR2_EXTI6_PB                  ((uint16_t)0x0100)            /* PB[6] pin */
 #define AFIO_EXTICR2_EXTI6_PC                  ((uint16_t)0x0200)            /* PC[6] pin */
 #define AFIO_EXTICR2_EXTI6_PD                  ((uint16_t)0x0300)            /* PD[6] pin */
 #define AFIO_EXTICR2_EXTI6_PE                  ((uint16_t)0x0400)            /* PE[6] pin */
-#define AFIO_EXTICR2_EXTI6_PF                  ((uint16_t)0x0500)            /* PF[6] pin */
-#define AFIO_EXTICR2_EXTI6_PG                  ((uint16_t)0x0600)            /* PG[6] pin */
 
 #define AFIO_EXTICR2_EXTI7_PA                  ((uint16_t)0x0000)            /* PA[7] pin */
 #define AFIO_EXTICR2_EXTI7_PB                  ((uint16_t)0x1000)            /* PB[7] pin */
 #define AFIO_EXTICR2_EXTI7_PC                  ((uint16_t)0x2000)            /* PC[7] pin */
 #define AFIO_EXTICR2_EXTI7_PD                  ((uint16_t)0x3000)            /* PD[7] pin */
 #define AFIO_EXTICR2_EXTI7_PE                  ((uint16_t)0x4000)            /* PE[7] pin */
-#define AFIO_EXTICR2_EXTI7_PF                  ((uint16_t)0x5000)            /* PF[7] pin */
-#define AFIO_EXTICR2_EXTI7_PG                  ((uint16_t)0x6000)            /* PG[7] pin */
 
 /*****************  Bit definition for AFIO_EXTICR3 register  *****************/
 #define AFIO_EXTICR3_EXTI8                     ((uint16_t)0x000F)            /* EXTI 8 configuration */
@@ -4143,32 +5191,24 @@ typedef struct
 #define AFIO_EXTICR3_EXTI8_PC                  ((uint16_t)0x0002)            /* PC[8] pin */
 #define AFIO_EXTICR3_EXTI8_PD                  ((uint16_t)0x0003)            /* PD[8] pin */
 #define AFIO_EXTICR3_EXTI8_PE                  ((uint16_t)0x0004)            /* PE[8] pin */
-#define AFIO_EXTICR3_EXTI8_PF                  ((uint16_t)0x0005)            /* PF[8] pin */
-#define AFIO_EXTICR3_EXTI8_PG                  ((uint16_t)0x0006)            /* PG[8] pin */
 
 #define AFIO_EXTICR3_EXTI9_PA                  ((uint16_t)0x0000)            /* PA[9] pin */
 #define AFIO_EXTICR3_EXTI9_PB                  ((uint16_t)0x0010)            /* PB[9] pin */
 #define AFIO_EXTICR3_EXTI9_PC                  ((uint16_t)0x0020)            /* PC[9] pin */
 #define AFIO_EXTICR3_EXTI9_PD                  ((uint16_t)0x0030)            /* PD[9] pin */
 #define AFIO_EXTICR3_EXTI9_PE                  ((uint16_t)0x0040)            /* PE[9] pin */
-#define AFIO_EXTICR3_EXTI9_PF                  ((uint16_t)0x0050)            /* PF[9] pin */
-#define AFIO_EXTICR3_EXTI9_PG                  ((uint16_t)0x0060)            /* PG[9] pin */
  
 #define AFIO_EXTICR3_EXTI10_PA                 ((uint16_t)0x0000)            /* PA[10] pin */
 #define AFIO_EXTICR3_EXTI10_PB                 ((uint16_t)0x0100)            /* PB[10] pin */
 #define AFIO_EXTICR3_EXTI10_PC                 ((uint16_t)0x0200)            /* PC[10] pin */
 #define AFIO_EXTICR3_EXTI10_PD                 ((uint16_t)0x0300)            /* PD[10] pin */
 #define AFIO_EXTICR3_EXTI10_PE                 ((uint16_t)0x0400)            /* PE[10] pin */
-#define AFIO_EXTICR3_EXTI10_PF                 ((uint16_t)0x0500)            /* PF[10] pin */
-#define AFIO_EXTICR3_EXTI10_PG                 ((uint16_t)0x0600)            /* PG[10] pin */
 
 #define AFIO_EXTICR3_EXTI11_PA                 ((uint16_t)0x0000)            /* PA[11] pin */
 #define AFIO_EXTICR3_EXTI11_PB                 ((uint16_t)0x1000)            /* PB[11] pin */
 #define AFIO_EXTICR3_EXTI11_PC                 ((uint16_t)0x2000)            /* PC[11] pin */
 #define AFIO_EXTICR3_EXTI11_PD                 ((uint16_t)0x3000)            /* PD[11] pin */
 #define AFIO_EXTICR3_EXTI11_PE                 ((uint16_t)0x4000)            /* PE[11] pin */
-#define AFIO_EXTICR3_EXTI11_PF                 ((uint16_t)0x5000)            /* PF[11] pin */
-#define AFIO_EXTICR3_EXTI11_PG                 ((uint16_t)0x6000)            /* PG[11] pin */
 
 /*****************  Bit definition for AFIO_EXTICR4 register  *****************/
 #define AFIO_EXTICR4_EXTI12                    ((uint16_t)0x000F)            /* EXTI 12 configuration */
@@ -4181,32 +5221,88 @@ typedef struct
 #define AFIO_EXTICR4_EXTI12_PC                 ((uint16_t)0x0002)            /* PC[12] pin */
 #define AFIO_EXTICR4_EXTI12_PD                 ((uint16_t)0x0003)            /* PD[12] pin */
 #define AFIO_EXTICR4_EXTI12_PE                 ((uint16_t)0x0004)            /* PE[12] pin */
-#define AFIO_EXTICR4_EXTI12_PF                 ((uint16_t)0x0005)            /* PF[12] pin */
-#define AFIO_EXTICR4_EXTI12_PG                 ((uint16_t)0x0006)            /* PG[12] pin */
 
 #define AFIO_EXTICR4_EXTI13_PA                 ((uint16_t)0x0000)            /* PA[13] pin */
 #define AFIO_EXTICR4_EXTI13_PB                 ((uint16_t)0x0010)            /* PB[13] pin */
 #define AFIO_EXTICR4_EXTI13_PC                 ((uint16_t)0x0020)            /* PC[13] pin */
 #define AFIO_EXTICR4_EXTI13_PD                 ((uint16_t)0x0030)            /* PD[13] pin */
 #define AFIO_EXTICR4_EXTI13_PE                 ((uint16_t)0x0040)            /* PE[13] pin */
-#define AFIO_EXTICR4_EXTI13_PF                 ((uint16_t)0x0050)            /* PF[13] pin */
-#define AFIO_EXTICR4_EXTI13_PG                 ((uint16_t)0x0060)            /* PG[13] pin */
 
 #define AFIO_EXTICR4_EXTI14_PA                 ((uint16_t)0x0000)            /* PA[14] pin */
 #define AFIO_EXTICR4_EXTI14_PB                 ((uint16_t)0x0100)            /* PB[14] pin */
 #define AFIO_EXTICR4_EXTI14_PC                 ((uint16_t)0x0200)            /* PC[14] pin */
 #define AFIO_EXTICR4_EXTI14_PD                 ((uint16_t)0x0300)            /* PD[14] pin */
-#define AFIO_EXTICR4_EXTI14_PE                 ((uint16_t)0x0400)            /* PE[14] pin */
-#define AFIO_EXTICR4_EXTI14_PF                 ((uint16_t)0x0500)            /* PF[14] pin */
-#define AFIO_EXTICR4_EXTI14_PG                 ((uint16_t)0x0600)            /* PG[14] pin */
+#define AFIO_EXTICR4_EXTI14_PE                 ((uint16_t)0x0400)            /* PE[14] pin *//
 
 #define AFIO_EXTICR4_EXTI15_PA                 ((uint16_t)0x0000)            /* PA[15] pin */
 #define AFIO_EXTICR4_EXTI15_PB                 ((uint16_t)0x1000)            /* PB[15] pin */
 #define AFIO_EXTICR4_EXTI15_PC                 ((uint16_t)0x2000)            /* PC[15] pin */
 #define AFIO_EXTICR4_EXTI15_PD                 ((uint16_t)0x3000)            /* PD[15] pin */
 #define AFIO_EXTICR4_EXTI15_PE                 ((uint16_t)0x4000)            /* PE[15] pin */
-#define AFIO_EXTICR4_EXTI15_PF                 ((uint16_t)0x5000)            /* PF[15] pin */
-#define AFIO_EXTICR4_EXTI15_PG                 ((uint16_t)0x6000)            /* PG[15] pin */
+
+/******************  Bit definition for AFIO_PCFR2register  *******************/
+#define AFIO_PCFR2_TIM8_REMAP                  ((uint32_t)0x00000004)        
+
+#define AFIO_PCFR2_TIM9_REMAP                  ((uint32_t)0x00000018)        
+#define AFIO_PCFR2_TIM9_REMAP_0                ((uint32_t)0x00000008)
+#define AFIO_PCFR2_TIM9_REMAP_1                ((uint32_t)0x00000010)
+
+#define AFIO_PCFR2_TIM9_REMAP_NOREMAP          ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_TIM9_REMAP_PARTIALREMAP     ((uint32_t)0x00000008)        
+#define AFIO_PCFR2_TIM9_REMAP_FULLREMAP        ((uint32_t)0x00000010)        
+
+#define AFIO_PCFR2_TIM10_REMAP                 ((uint32_t)0x00000060)        
+#define AFIO_PCFR2_TIM10_REMAP_0               ((uint32_t)0x00000020)
+#define AFIO_PCFR2_TIM10_REMAP_1               ((uint32_t)0x00000040)
+
+#define AFIO_PCFR2_TIM10_REMAP_NOREMAP         ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_TIM10_REMAP_PARTIALREMAP    ((uint32_t)0x00000020)        
+#define AFIO_PCFR2_TIM10_REMAP_FULLREMAP       ((uint32_t)0x00000040)        
+
+#define AFIO_PCFR2_FSMC_NADV_REMAP             ((uint32_t)0x00000400)
+
+
+#define AFIO_PCFR2_USART4_REMAP                ((uint32_t)0x00030000)        
+#define AFIO_PCFR2_USART4_REMAP_0              ((uint32_t)0x00010000)
+#define AFIO_PCFR2_USART4_REMAP_1              ((uint32_t)0x00020000)
+
+#define AFIO_PCFR2_USART4_REMAP_NOREMAP        ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_USART4_REMAP_PARTIALREMAP   ((uint32_t)0x00010000)        
+#define AFIO_PCFR2_USART4_REMAP_FULLREMAP      ((uint32_t)0x00020000)        
+
+#define AFIO_PCFR2_USART5_REMAP                ((uint32_t)0x000C0000)        
+#define AFIO_PCFR2_USART5_REMAP_0              ((uint32_t)0x00040000)
+#define AFIO_PCFR2_USART5_REMAP_1              ((uint32_t)0x00080000)
+
+#define AFIO_PCFR2_USART5_REMAP_NOREMAP        ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_USART5_REMAP_PARTIALREMAP   ((uint32_t)0x00040000)        
+#define AFIO_PCFR2_USART5_REMAP_FULLREMAP      ((uint32_t)0x00080000)        
+
+#define AFIO_PCFR2_USART6_REMAP                ((uint32_t)0x00300000)        
+#define AFIO_PCFR2_USART6_REMAP_0              ((uint32_t)0x00100000)
+#define AFIO_PCFR2_USART6_REMAP_1              ((uint32_t)0x00200000)
+
+#define AFIO_PCFR2_USART6_REMAP_NOREMAP        ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_USART6_REMAP_PARTIALREMAP   ((uint32_t)0x00100000)        
+#define AFIO_PCFR2_USART6_REMAP_FULLREMAP      ((uint32_t)0x00200000)        
+
+#define AFIO_PCFR2_USART7_REMAP                ((uint32_t)0x00C00000)        
+#define AFIO_PCFR2_USART7_REMAP_0              ((uint32_t)0x00400000)
+#define AFIO_PCFR2_USART7_REMAP_1              ((uint32_t)0x00800000)
+
+#define AFIO_PCFR2_USART7_REMAP_NOREMAP        ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_USART7_REMAP_PARTIALREMAP   ((uint32_t)0x00400000)        
+#define AFIO_PCFR2_USART7_REMAP_FULLREMAP      ((uint32_t)0x00800000)        
+
+#define AFIO_PCFR2_USART8_REMAP                ((uint32_t)0x03000000)        
+#define AFIO_PCFR2_USART8_REMAP_0              ((uint32_t)0x01000000)
+#define AFIO_PCFR2_USART8_REMAP_1              ((uint32_t)0x02000000)
+
+#define AFIO_PCFR2_USART8_REMAP_NOREMAP        ((uint32_t)0x00000000)        
+#define AFIO_PCFR2_USART8_REMAP_PARTIALREMAP   ((uint32_t)0x01000000)        
+#define AFIO_PCFR2_USART8_REMAP_FULLREMAP      ((uint32_t)0x02000000)        
+
+#define AFIO_PCFR2_USART1_REMAP                ((uint32_t)0x04000000)        
 
 /******************************************************************************/
 /*                           Independent WATCHDOG                             */
@@ -4264,6 +5360,7 @@ typedef struct
 #define  I2C_CTLR2_LAST                        ((uint16_t)0x1000)            /* DMA Last Transfer */
 
 /*******************  Bit definition for I2C_OADDR1 register  *******************/
+#define  I2C_OADDR1_ADD0                       ((uint16_t)0x0001)
 #define  I2C_OADDR1_ADD1_7                     ((uint16_t)0x00FE)            /* Interface Address */
 #define  I2C_OADDR1_ADD8_9                     ((uint16_t)0x0300)            /* Interface Address */
 
@@ -4349,6 +5446,11 @@ typedef struct
 
 #define  PWR_CTLR_DBP                          ((uint16_t)0x0100)     /* Disable Backup Domain write protection */
 
+#define  PWR_CTLR_R2KSTY                       ((uint32_t)0x10000)
+#define  PWR_CTLR_R30KSTY                      ((uint32_t)0x20000)
+#define  PWR_CTLR_R2KVBAT                      ((uint32_t)0x40000)
+#define  PWR_CTLR_R30KVBAT                     ((uint32_t)0x80000)
+#define  PWR_CTLR_RAMLV                        ((uint32_t)0x100000)
 
 /*******************  Bit definition for PWR_CSR register  ********************/
 #define  PWR_CSR_WUF                           ((uint16_t)0x0001)     /* Wakeup Flag */
@@ -4373,7 +5475,10 @@ typedef struct
 #define  RCC_CSSON                       ((uint32_t)0x00080000)        /* Clock Security System enable */
 #define  RCC_PLLON                       ((uint32_t)0x01000000)        /* PLL enable */
 #define  RCC_PLLRDY                      ((uint32_t)0x02000000)        /* PLL clock ready flag */
-
+#define  RCC_PLL2ON                      ((uint32_t)0x04000000)
+#define  RCC_PLL2RDY                     ((uint32_t)0x08000000)
+#define  RCC_PLL3ON                      ((uint32_t)0x10000000)
+#define  RCC_PLL3RDY                     ((uint32_t)0x20000000)
 
 /*******************  Bit definition for RCC_CFGR0 register  *******************/
 #define  RCC_SW                          ((uint32_t)0x00000003)        /* SW[1:0] bits (System clock Switch) */
@@ -4492,16 +5597,24 @@ typedef struct
 
 #define  RCC_USBPRE                      ((uint32_t)0x00400000)        /* USB Device prescaler */
 
-#define  RCC_CFGR0_MCO                   ((uint32_t)0x07000000)        /* MCO[2:0] bits (Microcontroller Clock Output) */
+#define  RCC_CFGR0_MCO                   ((uint32_t)0x0F000000)        /* MCO[3:0] bits (Microcontroller Clock Output) */
 #define  RCC_MCO_0                       ((uint32_t)0x01000000)        /* Bit 0 */
 #define  RCC_MCO_1                       ((uint32_t)0x02000000)        /* Bit 1 */
 #define  RCC_MCO_2                       ((uint32_t)0x04000000)        /* Bit 2 */
+#define  RCC_MCO_3                       ((uint32_t)0x08000000)        /* Bit 3 */
 
 #define  RCC_MCO_NOCLOCK                 ((uint32_t)0x00000000)        /* No clock */
 #define  RCC_CFGR0_MCO_SYSCLK            ((uint32_t)0x04000000)        /* System clock selected as MCO source */
 #define  RCC_CFGR0_MCO_HSI               ((uint32_t)0x05000000)        /* HSI clock selected as MCO source */
 #define  RCC_CFGR0_MCO_HSE               ((uint32_t)0x06000000)        /* HSE clock selected as MCO source  */
 #define  RCC_CFGR0_MCO_PLL               ((uint32_t)0x07000000)        /* PLL clock divided by 2 selected as MCO source */
+#define  RCC_CFGR0_MCO_PLL2              ((uint32_t)0x08000000)
+#define  RCC_CFGR0_MCO_PLL3D2            ((uint32_t)0x09000000)        /* PLL3 clock divided by 2 selected as MCO source */
+#define  RCC_CFGR0_MCO_XT1               ((uint32_t)0x0A000000)
+#define  RCC_CFGR0_MCO_PLL3              ((uint32_t)0x0B000000)
+
+#define  RCC_CFGR0_ETHPRE                ((uint32_t)0x10000000)
+#define  RCC_CFGR0_ADCDUTY               ((uint32_t)0x80000000)
 
 /*******************  Bit definition for RCC_INTR register  ********************/
 #define  RCC_LSIRDYF                     ((uint32_t)0x00000001)        /* LSI Ready Interrupt flag */
@@ -4509,19 +5622,24 @@ typedef struct
 #define  RCC_HSIRDYF                     ((uint32_t)0x00000004)        /* HSI Ready Interrupt flag */
 #define  RCC_HSERDYF                     ((uint32_t)0x00000008)        /* HSE Ready Interrupt flag */
 #define  RCC_PLLRDYF                     ((uint32_t)0x00000010)        /* PLL Ready Interrupt flag */
+#define  RCC_PLL2RDYF                    ((uint32_t)0x00000020)
+#define  RCC_PLL3RDYF                    ((uint32_t)0x00000040)
 #define  RCC_CSSF                        ((uint32_t)0x00000080)        /* Clock Security System Interrupt flag */
 #define  RCC_LSIRDYIE                    ((uint32_t)0x00000100)        /* LSI Ready Interrupt Enable */
 #define  RCC_LSERDYIE                    ((uint32_t)0x00000200)        /* LSE Ready Interrupt Enable */
 #define  RCC_HSIRDYIE                    ((uint32_t)0x00000400)        /* HSI Ready Interrupt Enable */
 #define  RCC_HSERDYIE                    ((uint32_t)0x00000800)        /* HSE Ready Interrupt Enable */
 #define  RCC_PLLRDYIE                    ((uint32_t)0x00001000)        /* PLL Ready Interrupt Enable */
+#define  RCC_PLL2RDYIE                   ((uint32_t)0x00002000)
+#define  RCC_PLL3RDYIE                   ((uint32_t)0x00004000)
 #define  RCC_LSIRDYC                     ((uint32_t)0x00010000)        /* LSI Ready Interrupt Clear */
 #define  RCC_LSERDYC                     ((uint32_t)0x00020000)        /* LSE Ready Interrupt Clear */
 #define  RCC_HSIRDYC                     ((uint32_t)0x00040000)        /* HSI Ready Interrupt Clear */
 #define  RCC_HSERDYC                     ((uint32_t)0x00080000)        /* HSE Ready Interrupt Clear */
 #define  RCC_PLLRDYC                     ((uint32_t)0x00100000)        /* PLL Ready Interrupt Clear */
+#define  RCC_PLL2RDYC                    ((uint32_t)0x00200000)
+#define  RCC_PLL3RDYC                    ((uint32_t)0x00400000)
 #define  RCC_CSSC                        ((uint32_t)0x00800000)        /* Clock Security System Interrupt Clear */
-
 
 /*****************  Bit definition for RCC_APB2PRSTR register  *****************/
 #define  RCC_AFIORST                     ((uint32_t)0x00000001)        /* Alternate Function I/O reset */
@@ -4529,45 +5647,58 @@ typedef struct
 #define  RCC_IOPBRST                     ((uint32_t)0x00000008)        /* I/O port B reset */
 #define  RCC_IOPCRST                     ((uint32_t)0x00000010)        /* I/O port C reset */
 #define  RCC_IOPDRST                     ((uint32_t)0x00000020)        /* I/O port D reset */
+#define  RCC_IOPERST                     ((uint32_t)0x00000040)
 #define  RCC_ADC1RST                     ((uint32_t)0x00000200)        /* ADC 1 interface reset */
-
-
 #define  RCC_ADC2RST                     ((uint32_t)0x00000400)        /* ADC 2 interface reset */
-
-
 #define  RCC_TIM1RST                     ((uint32_t)0x00000800)        /* TIM1 Timer reset */
 #define  RCC_SPI1RST                     ((uint32_t)0x00001000)        /* SPI 1 reset */
+#define  RCC_TIM8RST                     ((uint32_t)0x00002000)
 #define  RCC_USART1RST                   ((uint32_t)0x00004000)        /* USART1 reset */
-
-#define  RCC_IOPERST                     ((uint32_t)0x00000040)        /* I/O port E reset */
+#define  RCC_TIM9RST                     ((uint32_t)0x00080000)
+#define  RCC_TIM10RST                    ((uint32_t)0x00100000)
 
 /*****************  Bit definition for RCC_APB1PRSTR register  *****************/
 #define  RCC_TIM2RST                     ((uint32_t)0x00000001)        /* Timer 2 reset */
 #define  RCC_TIM3RST                     ((uint32_t)0x00000002)        /* Timer 3 reset */
+#define  RCC_TIM4RST                     ((uint32_t)0x00000004)        /* Timer 4 reset */
+#define  RCC_TIM5RST                     ((uint32_t)0x00000008)        /* Timer 5 reset */
+#define  RCC_TIM6RST                     ((uint32_t)0x00000010)        /* Timer 6 reset */
+#define  RCC_TIM7RST                     ((uint32_t)0x00000020)        /* Timer 7 reset */
+#define  RCC_USART6RST                   ((uint32_t)0x00000040)        /* USART 2 reset */
+#define  RCC_USART7RST                   ((uint32_t)0x00000080)        /* USART 2 reset */
+#define  RCC_USART8RST                   ((uint32_t)0x00000100)        /* USART 2 reset */
 #define  RCC_WWDGRST                     ((uint32_t)0x00000800)        /* Window Watchdog reset */
+#define  RCC_SPI2RST                     ((uint32_t)0x00004000)        /* SPI 2 reset */
+#define  RCC_SPI3RST                     ((uint32_t)0x00008000)        /* SPI 3 reset */
 #define  RCC_USART2RST                   ((uint32_t)0x00020000)        /* USART 2 reset */
+#define  RCC_USART3RST                   ((uint32_t)0x00040000)        /* USART 3 reset */
+#define  RCC_USART4RST                   ((uint32_t)0x00080000)        /* USART 4 reset */
+#define  RCC_USART5RST                   ((uint32_t)0x00100000)        /* USART 5 reset */
 #define  RCC_I2C1RST                     ((uint32_t)0x00200000)        /* I2C 1 reset */
-  
+#define  RCC_I2C2RST                     ((uint32_t)0x00400000)        /* I2C 2 reset */ 
+#define  RCC_USBRST                      ((uint32_t)0x00800000)        /* USB Device reset */
 #define  RCC_CAN1RST                     ((uint32_t)0x02000000)        /* CAN1 reset */
-
-
+#define  RCC_CAN2RST                     ((uint32_t)0x04000000)        /* CAN2 reset */
 #define  RCC_BKPRST                      ((uint32_t)0x08000000)        /* Backup interface reset */
 #define  RCC_PWRRST                      ((uint32_t)0x10000000)        /* Power interface reset */
-
-
-#define  RCC_TIM4RST                     ((uint32_t)0x00000004)        /* Timer 4 reset */
-#define  RCC_SPI2RST                     ((uint32_t)0x00004000)        /* SPI 2 reset */
-#define  RCC_USART3RST                   ((uint32_t)0x00040000)        /* USART 3 reset */
-#define  RCC_I2C2RST                     ((uint32_t)0x00400000)        /* I2C 2 reset */
-
-#define  RCC_USBRST                      ((uint32_t)0x00800000)        /* USB Device reset */
+#define  RCC_DACRST                      ((uint32_t)0x20000000)        /* DAC reset */
 
 /******************  Bit definition for RCC_AHBPCENR register  ******************/
 #define  RCC_DMA1EN                      ((uint16_t)0x0001)            /* DMA1 clock enable */
+#define  RCC_DMA2EN                      ((uint16_t)0x0002)
 #define  RCC_SRAMEN                      ((uint16_t)0x0004)            /* SRAM interface clock enable */
-#define  RCC_FLITFEN                     ((uint16_t)0x0010)            /* FLITF clock enable */
 #define  RCC_CRCEN                       ((uint16_t)0x0040)            /* CRC clock enable */
-#define  RCC_USBHD                       ((uint16_t)0x1000)
+#define  RCC_FSMCEN                      ((uint16_t)0x0100)
+#define  RCC_RNGEN                       ((uint16_t)0x0200)
+#define  RCC_SDIOEN                      ((uint16_t)0x0400)
+#define  RCC_USBHSEN                     ((uint16_t)0x0800)
+#define  RCC_OTGFSEN                     ((uint16_t)0x1000)
+#define  RCC_DVPEN                       ((uint16_t)0x2000)
+#define  RCC_ETHMACEN                    ((uint16_t)0x4000)
+#define  RCC_ETHMACTXEN                  ((uint16_t)0x8000)
+#define  RCC_ETHMACRXEN                  ((uint32_t)0x10000)
+#define  RCC_BLEC                        ((uint32_t)0x10000)
+#define  RCC_BLES                        ((uint32_t)0x20000)
 
 /******************  Bit definition for RCC_APB2PCENR register  *****************/
 #define  RCC_AFIOEN                      ((uint32_t)0x00000001)         /* Alternate Function I/O clock enable */
@@ -4575,27 +5706,41 @@ typedef struct
 #define  RCC_IOPBEN                      ((uint32_t)0x00000008)         /* I/O port B clock enable */
 #define  RCC_IOPCEN                      ((uint32_t)0x00000010)         /* I/O port C clock enable */
 #define  RCC_IOPDEN                      ((uint32_t)0x00000020)         /* I/O port D clock enable */
+#define  RCC_IOPEEN                      ((uint32_t)0x00000040)
 #define  RCC_ADC1EN                      ((uint32_t)0x00000200)         /* ADC 1 interface clock enable */
-
 #define  RCC_ADC2EN                      ((uint32_t)0x00000400)         /* ADC 2 interface clock enable */
-
-
 #define  RCC_TIM1EN                      ((uint32_t)0x00000800)         /* TIM1 Timer clock enable */
 #define  RCC_SPI1EN                      ((uint32_t)0x00001000)         /* SPI 1 clock enable */
+#define  RCC_TIM8EN                      ((uint32_t)0x00002000)
 #define  RCC_USART1EN                    ((uint32_t)0x00004000)         /* USART1 clock enable */
+#define  RCC_TIM9EN                      ((uint32_t)0x00080000)
+#define  RCC_TIM10EN                     ((uint32_t)0x00100000)
 
 /*****************  Bit definition for RCC_APB1PCENR register  ******************/
 #define  RCC_TIM2EN                      ((uint32_t)0x00000001)        /* Timer 2 clock enabled*/
 #define  RCC_TIM3EN                      ((uint32_t)0x00000002)        /* Timer 3 clock enable */
+#define  RCC_TIM4EN                      ((uint32_t)0x00000004)
+#define  RCC_TIM5EN                      ((uint32_t)0x00000008)
+#define  RCC_TIM6EN                      ((uint32_t)0x00000010)
+#define  RCC_TIM7EN                      ((uint32_t)0x00000020)
+#define  RCC_USART6EN                    ((uint32_t)0x00000040)
+#define  RCC_USART7EN                    ((uint32_t)0x00000080)
+#define  RCC_USART8EN                    ((uint32_t)0x00000100)
 #define  RCC_WWDGEN                      ((uint32_t)0x00000800)        /* Window Watchdog clock enable */
+#define  RCC_SPI2EN                      ((uint32_t)0x00004000)
+#define  RCC_SPI3EN                      ((uint32_t)0x00008000)
 #define  RCC_USART2EN                    ((uint32_t)0x00020000)        /* USART 2 clock enable */
+#define  RCC_USART3EN                    ((uint32_t)0x00040000)
+#define  RCC_USART4EN                    ((uint32_t)0x00080000)
+#define  RCC_USART5EN                    ((uint32_t)0x00100000)
 #define  RCC_I2C1EN                      ((uint32_t)0x00200000)        /* I2C 1 clock enable */
-
+#define  RCC_I2C2EN                      ((uint32_t)0x00400000)
+#define  RCC_USBEN                       ((uint32_t)0x00800000)        /* USB Device clock enable */
+#define  RCC_CAN1EN                      ((uint32_t)0x02000000)
+#define  RCC_CAN2EN                      ((uint32_t)0x04000000)
 #define  RCC_BKPEN                       ((uint32_t)0x08000000)        /* Backup interface clock enable */
 #define  RCC_PWREN                       ((uint32_t)0x10000000)        /* Power interface clock enable */
-
-
-#define  RCC_USBEN                       ((uint32_t)0x00800000)        /* USB Device clock enable */
+#define  RCC_DACEN                       ((uint32_t)0x20000000)
 
 /*******************  Bit definition for RCC_BDCTLR register  *******************/
 #define  RCC_LSEON                       ((uint32_t)0x00000001)        /* External Low Speed oscillator enable */
@@ -4984,7 +6129,6 @@ typedef struct
 #define  TIM_CC3NP                       ((uint16_t)0x0800)            /* Capture/Compare 3 Complementary output Polarity */
 #define  TIM_CC4E                        ((uint16_t)0x1000)            /* Capture/Compare 4 output enable */
 #define  TIM_CC4P                        ((uint16_t)0x2000)            /* Capture/Compare 4 output Polarity */
-#define  TIM_CC4NP                       ((uint16_t)0x8000)            /* Capture/Compare 4 Complementary output Polarity */
 
 /*******************  Bit definition for TIM_CNT register  ********************/
 #define  TIM_CNT                         ((uint16_t)0xFFFF)            /* Counter Value */
@@ -5187,7 +6331,7 @@ typedef struct
 #define  EXTEN_LDO_TRIM                        ((uint32_t)0x00000C00)         /* LDO_TRIM[1:0] bits */
 #define  EXTEN_LDO_TRIM0                       ((uint32_t)0x00000400)         /* Bit 0 */
 #define  EXTEN_LDO_TRIM1                       ((uint32_t)0x00000800)         /* Bit 1 */
-
+#define  EXTEN_HSEKPLP                         ((uint32_t)0x00001000)
 
 /******************************************************************************/
 /*                                  DVP                                       */
@@ -5236,6 +6380,74 @@ typedef struct
 #define RB_DVP_FIFO_OV			0x04					// RO, DVP receive fifo overflow
 #define RB_DVP_MSK_FIFO_CNT		0x70					// RO, DVP receive fifo count
 
+/*******************  Bit definition for DVP_ROW_CNT register  ********************/
+#define RB_DVP_ROW_CNT			((uint16_t)0xFF					
+
+/*******************  Bit definition for DVP_HOFFCNT register  ********************/
+#define RB_DVP_HOFFCNT			((uint16_t)0xFF					
+
+/*******************  Bit definition for DVP_VST register  ********************/
+#define RB_DVP_VST     			((uint16_t)0xFF				
+
+/*******************  Bit definition for DVP_CAPCNT register  ********************/
+#define RB_DVP_CAPCNT     	((uint16_t)0xFF				
+
+/*******************  Bit definition for DVP_VLINE register  ********************/
+#define RB_DVP_VLINE       	((uint16_t)0xFF				
+
+/*******************  Bit definition for DVP_DR register  ********************/
+#define RB_DVP_DR         	((uint16_t)0xFF				
+
+/******************************************************************************/
+/*                                  TKEY                                       */
+/******************************************************************************/
+
+/*******************  Bit definition for TKEY_CHARGE1 register  *******************/
+#define  TKEY_CHARGE1_TKCG10                          ((uint32_t)0x0007)            
+#define  TKEY_CHARGE1_TKCG10_1C5                      ((uint32_t)0x0000)
+#define  TKEY_CHARGE1_TKCG10_7C5                      ((uint32_t)0x0001)
+#define  TKEY_CHARGE1_TKCG10_13C5                     ((uint32_t)0x0002)
+#define  TKEY_CHARGE1_TKCG10_28C5                     ((uint32_t)0x0003)
+#define  TKEY_CHARGE1_TKCG10_41C5                     ((uint32_t)0x0004)
+#define  TKEY_CHARGE1_TKCG10_55C5                     ((uint32_t)0x0005)
+#define  TKEY_CHARGE1_TKCG10_71C5                     ((uint32_t)0x0006)
+#define  TKEY_CHARGE1_TKCG10_239C5                    ((uint32_t)0x0007)
+
+#define  TKEY_CHARGE1_TKCG11                          ((uint32_t)0x0038)            
+#define  TKEY_CHARGE1_TKCG11_1C5                      ((uint32_t)0x0000)
+#define  TKEY_CHARGE1_TKCG11_7C5                      ((uint32_t)0x0008)
+#define  TKEY_CHARGE1_TKCG11_13C5                     ((uint32_t)0x0010)
+#define  TKEY_CHARGE1_TKCG11_28C5                     ((uint32_t)0x0018)
+#define  TKEY_CHARGE1_TKCG11_41C5                     ((uint32_t)0x0020)
+#define  TKEY_CHARGE1_TKCG11_55C5                     ((uint32_t)0x0028)
+#define  TKEY_CHARGE1_TKCG11_71C5                     ((uint32_t)0x0030)
+#define  TKEY_CHARGE1_TKCG11_239C5                    ((uint32_t)0x0038)
+
+#define  TKEY_CHARGE1_TKCG12                          ((uint32_t)0x01C0)            
+#define  TKEY_CHARGE1_TKCG12_1C5                      ((uint32_t)0x0000)
+#define  TKEY_CHARGE1_TKCG12_7C5                      ((uint32_t)0x0040)
+#define  TKEY_CHARGE1_TKCG12_13C5                     ((uint32_t)0x0080)
+#define  TKEY_CHARGE1_TKCG12_28C5                     ((uint32_t)0x00C0)
+#define  TKEY_CHARGE1_TKCG12_41C5                     ((uint32_t)0x0100)
+#define  TKEY_CHARGE1_TKCG12_55C5                     ((uint32_t)0x0140)
+#define  TKEY_CHARGE1_TKCG12_71C5                     ((uint32_t)0x0180)
+#define  TKEY_CHARGE1_TKCG12_239C5                    ((uint32_t)0x01C0)
+
+#define  TKEY_CHARGE1_TKCG13                          ((uint32_t)0x0E00)            
+#define  TKEY_CHARGE1_TKCG13_1C5                      ((uint32_t)0x0000)
+#define  TKEY_CHARGE1_TKCG13_7C5                      ((uint32_t)0x0200)
+#define  TKEY_CHARGE1_TKCG13_13C5                     ((uint32_t)0x0400)
+#define  TKEY_CHARGE1_TKCG13_28C5                     ((uint32_t)0x0600)
+#define  TKEY_CHARGE1_TKCG13_41C5                     ((uint32_t)0x0800)
+#define  TKEY_CHARGE1_TKCG13_55C5                     ((uint32_t)0x0A00)
+#define  TKEY_CHARGE1_TKCG13_71C5                     ((uint32_t)0x0C00)
+#define  TKEY_CHARGE1_TKCG13_239C5                    ((uint32_t)0x0E00)
+
+#define  TKEY_CHARGE1_TKCG14                          ((uint32_t)0x7000)            
+
+#define  TKEY_CHARGE1_TKCG15                          ((uint32_t)0x38000)            
+#define  TKEY_CHARGE1_TKCG16                          ((uint32_t)0x1C0000)            
+#define  TKEY_CHARGE1_TKCG17                          ((uint32_t)0xE00000)            
 
 
 #include "ch32v30x_conf.h"

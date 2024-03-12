@@ -73,7 +73,7 @@ int main( void )
 	TIM3_Init( 1, SystemCoreClock / 10000 - 1 );
 	printf( "TIM3 Init OK!\r\n" );
 
-	/* Initialize USBHD interface to communicate with the host  */
+	/* Initialize USBHS interface to communicate with the host  */
 	USBHS_RCC_Init( );
 	USBHS_Device_Init( ENABLE );
 	USB_Sleep_Wakeup_CFG( );

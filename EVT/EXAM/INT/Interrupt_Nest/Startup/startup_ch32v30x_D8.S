@@ -2,7 +2,7 @@
 * File Name          : startup_ch32v30x_D8.s
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/06
 * Description        : CH32V303x vector table for eclipse toolchain.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -97,7 +97,7 @@ _vector_base:
     .word   TIM8_TRG_COM_IRQHandler    /* TIM8 Trigger and Commutation */
     .word   TIM8_CC_IRQHandler         /* TIM8 Capture Compare */
     .word   RNG_IRQHandler             /* RNG */
-    .word   FSMC_IRQHandler            /* FSMC */
+    .word   0
     .word   SDIO_IRQHandler            /* SDIO */
     .word   TIM5_IRQHandler            /* TIM5 */
     .word   SPI3_IRQHandler            /* SPI3 */
@@ -116,7 +116,7 @@ _vector_base:
     .word   0
     .word   0
     .word   0
-    .word   OTG_FS_IRQHandler          /* OTGFS */
+    .word   USBFS_IRQHandler          /* USBFS */
     .word   0
     .word   0
     .word   0
@@ -195,7 +195,6 @@ _vector_base:
     .weak   TIM8_TRG_COM_IRQHandler    /* TIM8 Trigger and Commutation */
     .weak   TIM8_CC_IRQHandler         /* TIM8 Capture Compare */
     .weak   RNG_IRQHandler             /* RNG */
-    .weak   FSMC_IRQHandler            /* FSMC */
     .weak   SDIO_IRQHandler            /* SDIO */
     .weak   TIM5_IRQHandler            /* TIM5 */
     .weak   SPI3_IRQHandler            /* SPI3 */
@@ -208,7 +207,7 @@ _vector_base:
     .weak   DMA2_Channel3_IRQHandler   /* DMA2 Channel 3 */
     .weak   DMA2_Channel4_IRQHandler   /* DMA2 Channel 4 */
     .weak   DMA2_Channel5_IRQHandler   /* DMA2 Channel 5 */
-    .weak   OTG_FS_IRQHandler          /* OTGFS */
+    .weak   USBFS_IRQHandler           /* USBFS */
     .weak   UART6_IRQHandler           /* UART6 */
     .weak   UART7_IRQHandler           /* UART7 */
     .weak   UART8_IRQHandler           /* UART8 */
@@ -281,7 +280,6 @@ TIM8_UP_IRQHandler:  1:  j 1b
 TIM8_TRG_COM_IRQHandler:  1:  j 1b
 TIM8_CC_IRQHandler:  1:  j 1b
 RNG_IRQHandler:  1:  j 1b
-FSMC_IRQHandler:  1:  j 1b
 SDIO_IRQHandler:  1:  j 1b
 TIM5_IRQHandler:  1:  j 1b
 SPI3_IRQHandler:  1:  j 1b
@@ -294,7 +292,7 @@ DMA2_Channel2_IRQHandler:  1:  j 1b
 DMA2_Channel3_IRQHandler:  1:  j 1b
 DMA2_Channel4_IRQHandler:  1:  j 1b
 DMA2_Channel5_IRQHandler:  1:  j 1b
-OTG_FS_IRQHandler:  1:  j 1b
+USBFS_IRQHandler:  1:  j 1b
 UART6_IRQHandler:  1:  j 1b
 UART7_IRQHandler:  1:  j 1b
 UART8_IRQHandler:  1:  j 1b

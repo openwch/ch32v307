@@ -567,9 +567,7 @@ void ReInitMACReg(void)
     ETH_InitStructure.ETH_DeferralCheck);
     /* Write MAC Control Register */
     ETH->MACCR = (uint32_t)tmpreg;
-    #if( PHY_MODE == USE_10M_BASE )
     ETH->MACCR |= ETH_Internal_Pull_Up_Res_Enable;  /*Turn on the internal pull-up resistor*/
-    #endif
     ETH->MACFFR = (uint32_t)(ETH_InitStructure.ETH_ReceiveAll |
     ETH_InitStructure.ETH_SourceAddrFilter |
     ETH_InitStructure.ETH_PassControlFrames |

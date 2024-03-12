@@ -112,15 +112,11 @@ void SystemInit (void)
 {
   RCC->CTLR |= (uint32_t)0x00000001;
 
-#ifdef CH32V30x_D8C
-  RCC->CFGR0 &= (uint32_t)0xF8FF0000;
-#else
   RCC->CFGR0 &= (uint32_t)0xF0FF0000;
-#endif 
 
   RCC->CTLR &= (uint32_t)0xFEF6FFFF;
   RCC->CTLR &= (uint32_t)0xFFFBFFFF;
-  RCC->CFGR0 &= (uint32_t)0xFF80FFFF;
+  RCC->CFGR0 &= (uint32_t)0xFF00FFFF;
 
 #ifdef CH32V30x_D8C
   RCC->CTLR &= (uint32_t)0xEBFFFFFF;

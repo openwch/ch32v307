@@ -2049,7 +2049,7 @@ void USBH_MainDeal( void )
                                 USBFSH_SetSelfSpeed( RootHubDev[ usb_port ].Device[ hub_port ].bSpeed );
                                 if( RootHubDev[ usb_port ].bSpeed != USB_LOW_SPEED )
                                 {
-                                    USBOTG_H_FS->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
+                                    USBFSH->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
                                 }
 
                                 /* Enumerate the USB device of the current HUB port */
@@ -2125,7 +2125,7 @@ void USBH_MainDeal( void )
                                         USBFSH_SetSelfSpeed( RootHubDev[ usb_port ].Device[ hub_port ].bSpeed );
                                         if( RootHubDev[ usb_port ].bSpeed != USB_LOW_SPEED )
                                         {
-                                            USBOTG_H_FS->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
+                                            USBFSH->HOST_CTRL &= ~USBFS_UH_LOW_SPEED;
                                         }
 
                                         /* Get endpoint data */

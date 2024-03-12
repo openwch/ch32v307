@@ -184,13 +184,13 @@ void UDISK_CMD_Deal_Fail( void )
     if( Udisk_Transfer_Status & DEF_UDISK_BLUCK_UP_FLAG )
     {
         /* EP2 -> STALL */
-        USBOTG_FS->UEP2_TX_CTRL = ( USBOTG_FS->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK ) | USBFS_UEP_T_RES_STALL;
+        USBFSD->UEP2_TX_CTRL = ( USBFSD->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK ) | USBFS_UEP_T_RES_STALL;
         Udisk_Transfer_Status &= ~DEF_UDISK_BLUCK_UP_FLAG;
     }
     if( Udisk_Transfer_Status & DEF_UDISK_BLUCK_DOWN_FLAG )
     {
         /* EP3 -> STALL */
-        USBOTG_FS->UEP3_RX_CTRL = ( USBOTG_FS->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK ) | USBFS_UEP_R_RES_STALL;
+        USBFSD->UEP3_RX_CTRL = ( USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK ) | USBFS_UEP_R_RES_STALL;
         Udisk_Transfer_Status &= ~DEF_UDISK_BLUCK_DOWN_FLAG;
     }
 }

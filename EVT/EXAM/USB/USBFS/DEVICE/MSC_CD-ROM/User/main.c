@@ -50,7 +50,7 @@ int main(void)
     CDROM_Capability = Flash_Sector_Count;
     CDROM_Status |= DEF_CDROM_EN_FLAG;
 
-	/* USBOTG_FS device init */
+	/* USBFSD device init */
 	USBFS_RCC_Init( );
 	USBFS_Device_Init( ENABLE );
 

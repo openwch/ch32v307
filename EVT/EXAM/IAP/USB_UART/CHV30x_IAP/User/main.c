@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/05
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,7 +24,7 @@ frequency of IAP be below 100Mhz
 */
 
 #include "debug.h"
-#include "ch32v30x_usbotg_device.h"
+#include "ch32v30x_usbfs_device.h"
 #include "ch32v30x_usbhs_device.h"
 #include "ch32v30x_gpio.h"
 #include "iap.h"
@@ -47,8 +47,8 @@ void IAP_2_APP(void)
     USBHSD->CONTROL&=~USBHS_DEV_PU_EN;
     USBHSD->CONTROL|=USBHS_ALL_CLR|USBHS_FORCE_RST;
     USBHSD->CONTROL=0x00;
-    USBOTG_FS->BASE_CTRL=0x06;
-    USBOTG_FS->INT_EN=0x00;
+    USBFSD->BASE_CTRL=0x06;
+    USBFSD->INT_EN=0x00;
     Delay_Ms(50);
     printf("jump APP\r\n");
     GPIO_DeInit(GPIOA);
@@ -58,9 +58,9 @@ void IAP_2_APP(void)
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB,DISABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,DISABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USBHS, DISABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, DISABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USBFS, DISABLE);
     Delay_Ms(10);
-    NVIC_DisableIRQ(OTG_FS_IRQn);
+    NVIC_DisableIRQ(USBFS_IRQn);
     NVIC_EnableIRQ(Software_IRQn);
     NVIC_SetPendingIRQ(Software_IRQn);
 }
@@ -90,7 +90,7 @@ int main(void)
     USBHS_Device_Init( ENABLE );
     NVIC_EnableIRQ( USBHS_IRQn );
 
-    USBOTG_Init( );
+    USBFS_Init( );
 	while(1)
 	{
 

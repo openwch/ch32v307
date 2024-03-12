@@ -2,7 +2,7 @@
  * File Name          : iap.h
  * Author             : WCH
  * Version            : V1.0.0
- * Date               : 2020/12/16
+ * Date               : 2024/03/05
  * Description        : IAP
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -14,7 +14,7 @@
 
 #include "ch32v30x.h"
 #include "stdio.h"
-#include "ch32v30x_usbotg_device.h"
+#include "ch32v30x_usbfs_device.h"
 #include "ch32v30x_usbhs_device.h"
 #define PRINT     0
 

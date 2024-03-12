@@ -39,13 +39,13 @@ void UDisk_USBH_ByteOperation( void )
         UDisk_Opeation_Flag = 0;
         printf("CHRV3DiskStatus:%02x\r\n",CHRV3DiskStatus);
         /* 读文件 */
-        strcpy( (char *)mCmdParam.Open.mPathName, "/C51/NEWFILE.C" ); //设置将要操作的文件路径和文件名/C51/NEWFILE.C
+        strcpy( (char *)mCmdParam.Open.mPathName, "/NEWFILE.C" ); //设置将要操作的文件路径和文件名/NEWFILE.C
         ret = CHRV3FileOpen( );                                       //打开文件
         if ( ret == ERR_MISS_DIR || ret == ERR_MISS_FILE )            //没有找到文件
         {
             //创建文件演示
             printf( "Find No File And Create\r\n" );
-            strcpy( (char *)mCmdParam.Create.mPathName, "/C51/NEWFILE.C" );  //新文件名,在根目录下,中文文件名
+            strcpy( (char *)mCmdParam.Create.mPathName, "/NEWFILE.C" );  //新文件名,在根目录下,中文文件名
             ret = CHRV3FileCreate( );                                        //新建文件并打开,如果文件已经存在则先删除后再新建
             mStopIfError( ret );
             printf( "ByteWrite\r\n" );
@@ -95,7 +95,7 @@ void UDisk_USBH_ByteOperation( void )
             }
             /* 二、读取文件前N字节 */
             TotalCount = 60;                                                  //设置准备读取总长度100字节
-            strcpy( (char *)mCmdParam.Open.mPathName, "/C51/NEWFILE.C" );     //设置将要操作的文件路径和文件名/C51/NEWFILE.C
+            strcpy( (char *)mCmdParam.Open.mPathName, "/NEWFILE.C" );     //设置将要操作的文件路径和文件名/NEWFILE.C
             CHRV3FileOpen( );                                                 //打开文件
             printf( "读出的前%d个字符是:\r\n",TotalCount );
             while ( TotalCount )

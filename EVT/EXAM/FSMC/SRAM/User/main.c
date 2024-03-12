@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2021/06/06
+* Date               : 2024/03/05
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -89,8 +89,6 @@ void FSMC_SRAM_Init(void)
     readWriteTiming.FSMC_AddressHoldTime = 0x00;
     readWriteTiming.FSMC_DataSetupTime = 0x03;
     readWriteTiming.FSMC_BusTurnAroundDuration = 0x00;
-    readWriteTiming.FSMC_CLKDivision = 0x00;
-    readWriteTiming.FSMC_DataLatency = 0x00;
     readWriteTiming.FSMC_AccessMode = FSMC_AccessMode_A;
 
     FSMC_NORSRAMInitStructure.FSMC_Bank = FSMC_Bank1_NORSRAM1;

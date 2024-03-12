@@ -54,7 +54,7 @@ int main( void )
 		
 	printf( "SystemClk:%d\r\n", SystemCoreClock );
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf("USBHD Composite KM Device Test\r\n");
+	printf("USBFS Composite KM Device Test\r\n");
 
 	/* Initialize USART2 for receiving the specified keyboard data */
 	USART2_Init( 115200 );
@@ -74,7 +74,7 @@ int main( void )
 	TIM3_Init( 1, SystemCoreClock / 10000 - 1 );
 	printf( "TIM3 Init OK!\r\n" );
 
-	/* Initialize USBHD interface to communicate with the host  */
+	/* Initialize USBFS interface to communicate with the host  */
 	USBFS_RCC_Init( );
 	USBFS_Device_Init( ENABLE );
 	USB_Sleep_Wakeup_CFG( );
