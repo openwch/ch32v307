@@ -2,7 +2,7 @@
 * File Name          : sdio.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/01/02
+* Date               : 2024/03/15
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -113,7 +113,7 @@ SD_Error eMMC_Init( void )
         }
         else
         {
-            clkdiv = SDIO_TRANSFER_CLK_DIV+2;   //SDIO_CLK=HCLK/(clkdiv+2)
+            clkdiv = SDIO_TRANSFER_CLK_DIV+1;   //SDIO_CLK=HCLK/(clkdiv+2)
         }
         SDIO_Clock_Set( clkdiv );
         errorstatus = SD_SetDeviceMode( SD_DMA_MODE );

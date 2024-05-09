@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_gpio.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/03/06
+* Date               : 2024/05/06
 * Description        : This file provides all the GPIO firmware functions.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -402,6 +402,7 @@ void GPIO_EventOutputCmd(FunctionalState NewState)
  *
  * @param   GPIO_Remap - selects the pin to remap.
  *            GPIO_Remap_SPI1 - SPI1 Alternate Function mapping
+ *            GPIO_Remap_SPI3 - SPI3 Alternate Function mapping(CH32V30X_D8,CH32V30X_D8C)
  *            GPIO_Remap_I2C1 - I2C1 Alternate Function mapping
  *            GPIO_Remap_USART1 - USART1 Alternate Function mapping
  *            GPIO_Remap_USART2 - USART2 Alternate Function mapping
@@ -678,8 +679,11 @@ void GPIO_IPD_Unused(void)
                                          |GPIO_Pin_12|GPIO_Pin_15;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
             GPIO_Init(GPIOA, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+            GPIO_Init(GPIOB, &GPIO_InitStructure);
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
-                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_3\
                                          |GPIO_Pin_4|GPIO_Pin_5\
                                          |GPIO_Pin_8|GPIO_Pin_9;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;

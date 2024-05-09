@@ -93,7 +93,7 @@ int main(void)
     printf("Fall asleep...\r\n");
     Delay_Ms(100);
     PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
-    printf("Woke up!!\r\n");
+    printf("Wake up!!\r\n");
 
     while (1)
     {
