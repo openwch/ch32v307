@@ -15,6 +15,11 @@
  *  This code emulates a Remote NDIS compliant 10M/100M/1G Ethernet adapter for windows10/11 or linux if driver supported, Using the CH32V307 series
  *  monolithic i.e. built-in USBHS controller and 10M/100M/1G MAC. The Ethernet MAC of CH32V307 series monolithic i.e. has
  *  built-in 10Megabit MAC+PHY, 10M/100M/1G MAC with RMII or MII Interface and 1G MAC with RGMII Interface.
+ *  !!!!!Important!!!!!
+ *  This Project Must Be Set To FLASH-192K + RAM-128K,
+ *  Link.ld File Needs To Be Changed To
+ *  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 192K
+ *  RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
  *USB Features:
  *  1,Update ETH status every 200ms, load status via REMOTE_NDIS_INDICATE_STATUS_MSG.
  *  2,Uploading data received from the MAC via endpoint 2 in Remote NDIS format.

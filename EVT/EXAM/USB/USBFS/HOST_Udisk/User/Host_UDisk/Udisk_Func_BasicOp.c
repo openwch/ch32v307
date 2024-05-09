@@ -93,6 +93,20 @@ void UDisk_USBH_ByteOperation( void )
                 mStopIfError( ret );
                 printf("成功写入 %02X次\r\n",(uint16_t)t);
             }
+
+            //演示修改文件属性
+            printf( "Modify\r\n" );
+            mCmdParam.Modify.mFileAttr = 0xff;   //输入参数: 新的文件属性,为0FFH则不修改
+            mCmdParam.Modify.mFileTime = 0xffff;   //输入参数: 新的文件时间,为0FFFFH则不修改,使用新建文件产生的默认时间
+            mCmdParam.Modify.mFileDate = MAKE_FILE_DATE( 2015, 5, 18 );  //输入参数: 新的文件日期: 2015.05.18
+            mCmdParam.Modify.mFileSize = 0xffffffff;  // 输入参数: 新的文件长度,以字节为单位写文件应该由程序库关闭文件时自动更新长度,所以此处不修改
+            i = CHRV3FileModify( );   //修改当前文件的信息,修改日期
+            mStopIfError( i );
+            printf( "Close\r\n" );
+            mCmdParam.Close.mUpdateLen = 1;     //自动计算文件长度,以字节为单位写文件,建议让程序库关闭文件以便自动更新文件长度
+            i = CHRV3FileClose( );
+            mStopIfError( i );
+
             /* 二、读取文件前N字节 */
             TotalCount = 60;                                                  //设置准备读取总长度100字节
             strcpy( (char *)mCmdParam.Open.mPathName, "/NEWFILE.C" );     //设置将要操作的文件路径和文件名/NEWFILE.C

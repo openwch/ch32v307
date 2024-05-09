@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2024.02
+Nanjing Qinheng Microelectronics Co., Ltd. 2024.03
 
 https://wch-ic.com
 
@@ -92,6 +92,7 @@ Directory
   |      |      |      |      |-- LCD: FSMC routine to operate TFTLCD
   |      |      |      |      |-- NANDFLASH: FSMC routine to operate NANDFLASH 
   |      |      |      |      |-- SRAM: FSMC routine to operate NOR_ SRAM 
+  |      |      |      |      |-- NORFLASH: FSMC routine to operate NORFLASH 
   |      |      |      |-- GPIO
   |      |      |      |      |-- GPIO_Toggle:GPIO routines 
   |      |      |      |-- HarmonyOS

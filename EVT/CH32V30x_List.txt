@@ -1,5 +1,5 @@
 
-南京沁恒微电子股份有限公司 2024.02
+南京沁恒微电子股份有限公司 2024.03
 最新资料请到我们的网站上查询
 https://wch.cn
 
@@ -92,6 +92,7 @@ https://wch.cn
   |      |      |      |      |-- LCD：FSMC操作TFTLCD例程
   |      |      |      |      |-- NANDFLASH：FSMC操作NANDFLASH例程
   |      |      |      |      |-- SRAM：FSMC操作NOR_SRAM例程  
+  |      |      |      |      |-- NORFLASH：FSMC操作NORFLASH例程
   |      |      |      |-- GPIO
   |      |      |      |      |-- GPIO_Toggle：GPIO例程 
   |      |      |      |-- HarmonyOS
