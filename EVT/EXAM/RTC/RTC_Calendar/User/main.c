@@ -12,12 +12,12 @@
 
 /*
  *@Note
- Calendar routine:
- This routine demonstrates that the initial time is 13:58:55 on October 8, 2019,
- real-time timing, every 1S through the serial port
- Print the real-time clock value.
-
-*/
+ *Calendar routine:
+ *This routine demonstrates that the initial time is 13:58:55 on October 8, 2019,
+ *real-time timing, every 1S through the serial port
+ *Print the real-time clock value.
+ *
+ */
 
 #include "debug.h"
 

@@ -22,12 +22,6 @@
 */
 #include "debug.h"
 
-#define HSI      0   //HSI
-#define HSI_1_2  1   //HSI/2
-
-#define PLL_Source   HSI
-//#define PLL_Source   HSI_1_2
-
 /*********************************************************************
  * @fn      main
  *

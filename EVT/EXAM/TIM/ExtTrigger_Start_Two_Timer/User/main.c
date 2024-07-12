@@ -40,8 +40,6 @@ void ExtTrigger_Start_Two_TIM( u16 arr, u16 psc )
 	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_TIM1, ENABLE );
 	RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM2, ENABLE );
 
-	TIM_CounterModeConfig( TIM2, TIM_CounterMode_Up );
-
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init( GPIOA, &GPIO_InitStructure);
@@ -52,6 +50,7 @@ void ExtTrigger_Start_Two_TIM( u16 arr, u16 psc )
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInitStructure.TIM_RepetitionCounter =  0x00;
 	TIM_TimeBaseInit( TIM1, &TIM_TimeBaseInitStructure);
+	TIM_TimeBaseInit( TIM2, &TIM_TimeBaseInitStructure);
 
 	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;

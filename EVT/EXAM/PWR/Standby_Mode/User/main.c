@@ -12,14 +12,14 @@
 
 /*
  *@Note
- low power, standby mode routine:
- WKUP(PA0)
- This routine demonstrates that WFI enters the standby mode, the rising edge of the WKUP (PA0) pin
- exits the standby mode,Program reset after wake-up.
- Note: In order to reduce power consumption as much as possible, it is recommended to
- set the unused GPIO to pull-down mode.
-
-*/
+ *low power, standby mode routine:
+ *WKUP(PA0)
+ *This routine demonstrates that WFI enters the standby mode, the rising edge of the WKUP (PA0) pin
+ *exits the standby mode,Program reset after wake-up.
+ *Note: In order to reduce power consumption as much as possible, it is recommended to
+ *set the unused GPIO to pull-down mode.
+ *
+ */
 
 #include "debug.h"
 

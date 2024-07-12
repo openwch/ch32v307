@@ -12,12 +12,12 @@
 
 /*
  *@Note
- normal output routine:
-DAC channel 0 (PA4) output
- Turn off the trigger function, and by writing to the data holding register,
- PA4 outputs the corresponding voltage.
-
-*/
+ *normal output routine:
+ *DAC channel 0 (PA4) output
+ *Turn off the trigger function, and by writing to the data holding register,
+ *PA4 outputs the corresponding voltage.
+ *
+ */
 
 #include "debug.h"
 

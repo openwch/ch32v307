@@ -12,10 +12,10 @@
 
 /*
  *@Note
- Automatic injection mode routine:
- ADC channel 1 (PA1) - regular group channel, channel 3 (PA3) - injection group channel
-
-*/
+ *Automatic injection mode routine:
+ *ADC channel 1 (PA1) - regular group channel, channel 3 (PA3) - injection group channel
+ *
+ */
 
 #include "debug.h"
 

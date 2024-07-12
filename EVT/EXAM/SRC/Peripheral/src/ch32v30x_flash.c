@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_flash.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/04/06
+* Date               : 2024/05/24
 * Description        : This file provides all the FLASH firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -838,18 +838,13 @@ void FLASH_Lock_Fast(void)
  * @fn      FLASH_ErasePage_Fast
  *
  * @brief   Erases a specified FLASH page (1page = 256Byte).
- *            (CH32V317 no support)
  *
  * @param   Page_Address - The page address to be erased.
  *
  * @return  none
  */
-FLASH_Status FLASH_ErasePage_Fast(uint32_t Page_Address)
+void FLASH_ErasePage_Fast(uint32_t Page_Address)
 {
-    if((( *( uint32_t * )0x1FFFF704 ) & 0xFFF00000) == 0x31700000)
-    {
-        return FLASH_FP_ERROR;
-    }
     Page_Address &= 0xFFFFFF00;
 
     FLASH->CTLR |= CR_PAGE_ER;
@@ -858,8 +853,6 @@ FLASH_Status FLASH_ErasePage_Fast(uint32_t Page_Address)
     while(FLASH->STATR & SR_BSY)
         ;
     FLASH->CTLR &= ~CR_PAGE_ER;
-    
-    return FLASH_COMPLETE;
 }
 
 /*********************************************************************
@@ -985,20 +978,15 @@ void FLASH_Enhance_Mode(FunctionalState NewState)
  *
  * @brief   Select erases a specified FLASH .
  *
- * @param   StartAddr - CH32V317 - Erases Flash start address(StartAddr%4096 == 0)
- *                    - Others - Erases Flash start address(StartAddr%256 == 0).
+ * @param   StartAddr - Erases Flash start address(StartAddr%256 == 0).
  *          Cnt - Erases count.
  *          Erase_Size - Erases size select.The returned value can be:
- *          Size_32KB, Size_4KB, Size_256B(CH32V317 no support).
+ *          Size_32KB, Size_4KB, Size_256B.
  *
  * @return  none.
  */
 static void ROM_ERASE(uint32_t StartAddr, uint32_t Cnt, uint32_t Erase_Size)
 {
-    if(((( *( uint32_t * )0x1FFFF704 ) & 0xFFF00000) == 0x31700000) && (Erase_Size == Size_256B))
-    {
-        return;
-    }
     do{
         if(Erase_Size == Size_32KB)
         {
@@ -1041,11 +1029,8 @@ static void ROM_ERASE(uint32_t StartAddr, uint32_t Cnt, uint32_t Erase_Size)
  *
  * @brief   Erases a specified FLASH .
  *
- * @param   StartAddr - CH32V317 - Erases Flash start address(StartAddr%4096 == 0)
- *                    - Others - Erases Flash start address(StartAddr%256 == 0).
- *
- *          Length - CH32V317 - Erases Flash start Length(Length%4096 == 0).
- *                 - Others - Erases Flash start Length(Length%256 == 0).
+ * @param   StartAddr - Erases Flash start address(StartAddr%256 == 0).
+ *          Length - Erases Flash start Length(Length%256 == 0).
  *
  * @return  FLASH Status - The returned value can be: FLASH_ADR_RANGE_ERROR,
  *        FLASH_ALIGN_ERROR, FLASH_OP_RANGE_ERROR or FLASH_COMPLETE.
@@ -1055,11 +1040,6 @@ FLASH_Status FLASH_ROM_ERASE(uint32_t StartAddr, uint32_t Length)
     uint32_t Addr0 = 0, Addr1 = 0, Length0 = 0, Length1 = 0;
 
     FLASH_Status status = FLASH_COMPLETE;
-
-    if(((( *( uint32_t * )0x1FFFF704 ) & 0xFFF00000) == 0x31700000) && ((((Length + StartAddr)%Size_4KB) != 0) || ((( StartAddr)%Size_4KB) != 0)))
-    {
-        return FLASH_FP_ERROR;
-    }
 
     if((StartAddr < ValidAddrStart) || (StartAddr >= ValidAddrEnd))
     {

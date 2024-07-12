@@ -12,15 +12,15 @@
 
 /*
  *@Note
- FPU hardware floating point operation routine:
-   This example demonstrates hardware floating-point arithmetic.
-
-       Enable hardware floating point M-RS configuration reference This example configuration
-    Specific configuration-Properties -> C/C++ Build -> Setting -> Target Processor
-    -> The Floating point option is configured as Single precision extension (RVF)
-       Floating point ABI option configured as Single precision(f)
-
-*/
+ *FPU hardware floating point operation routine:
+ *This example demonstrates hardware floating-point arithmetic.
+ *
+ *Enable hardware floating point M-RS configuration reference This example configuration
+ *Specific configuration-Properties -> C/C++ Build -> Setting -> Target Processor
+ *-> The Floating point option is configured as Single precision extension (RVF)
+ *Floating point ABI option configured as Single precision(f)
+ *
+ */
 
 #include "debug.h"
 

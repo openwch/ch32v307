@@ -12,9 +12,9 @@
 
 /*
  *@Note 
-  Dual ADC injection simultaneous sampling routine:
- ADC1 channel 1 (PA1), ADC2 channel 2 (PA3).
-*/
+ *Dual ADC injection simultaneous sampling routine:
+ *ADC1 channel 1 (PA1), ADC2 channel 2 (PA3).
+ */
 
 #include "debug.h"
 
@@ -114,7 +114,7 @@ u16 Get_ConversionVal1(s16 val)
  */
 u16 Get_ConversionVal2(s16 val)
 {
-    if((val+Calibrattion_Val2)<0) return 0;
+    if((val+Calibrattion_Val2)<0|| val==0) return 0;
     if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
     return (val+Calibrattion_Val2);
 }

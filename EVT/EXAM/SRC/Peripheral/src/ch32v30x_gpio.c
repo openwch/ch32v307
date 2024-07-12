@@ -790,7 +790,67 @@ void GPIO_IPD_Unused(void)
             GPIO_Init(GPIOE, &GPIO_InitStructure);
             break;
         }
+        case 0x3173B508:     //CH32V317WCU6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7\
+                                          |GPIO_Pin_8|GPIO_Pin_9;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_2\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x3175B508:     //CH32V317TCU6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_10;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOA, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOB, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7|GPIO_Pin_8\
+                                          |GPIO_Pin_9|GPIO_Pin_10\
+                                          |GPIO_Pin_11|GPIO_Pin_12\
+                                          |GPIO_Pin_13;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9\
+                                          |GPIO_Pin_10|GPIO_Pin_11\
+                                          |GPIO_Pin_12|GPIO_Pin_13\
+                                          |GPIO_Pin_14|GPIO_Pin_15\
+                                          |GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6\
+                                          |GPIO_Pin_7;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2\
+                                          |GPIO_Pin_3|GPIO_Pin_4\
+                                          |GPIO_Pin_5|GPIO_Pin_6;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
         case 0x30700508:     //CH32V307VCT6
+        {        
+            break;
+        }
+        case 0x3170B508:     //CH32V317VCT6
         {        
             break;
         }

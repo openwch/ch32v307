@@ -12,12 +12,12 @@
 
 /*
  *@Note
- when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines:
- This routine demonstrates writing data at the specified location of 2K RAM and 30K RAM, and then WFI enters
- STANDBY sleep mode, through the PA0 (wakeup) pin Input high level to exit standby mode, print RAM data after
- waking up, and test whether RAM is maintained data.
-
-*/
+ *when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines:
+ *This routine demonstrates writing data at the specified location of 2K RAM and 30K RAM, and then WFI enters
+ *STANDBY sleep mode, through the PA0 (wakeup) pin Input high level to exit standby mode, print RAM data after
+ *waking up, and test whether RAM is maintained data.
+ *
+ */
 
 #include "debug.h"
 
@@ -123,16 +123,12 @@ int main(void)
 
     /* Delay 1.5s to avoid entering low power mode immediately after reset*/
     Delay_Ms(1500);
-    while(1)
-    {
-        TestDataRead();
-        printf("3.Stop RAM LV Mode Test\r\n");
-        TestDataWrite();
-        PWR_WakeUpPinCmd(ENABLE);
-        PWR_EnterSTANDBYMode_RAM();
-        printf("\r\n3.Out \r\n");
-        printf("\r\n ########## \r\n");
 
-    }
+    TestDataRead();
+    printf("Standby Mode RAM Mode Test\r\n");
+    TestDataWrite();
+    PWR_WakeUpPinCmd(ENABLE);
+    PWR_EnterSTANDBYMode_RAM();
+    while(1);
 }
 

@@ -112,8 +112,8 @@ void WCHNET_CreateUdpSocket(void)
     memset((void *) &TmpSocketInf, 0, sizeof(SOCK_INF));
     TmpSocketInf.SourPort = srcport;
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
-    TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf;
     TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
+    TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf;
     TmpSocketInf.AppCallBack = WCHNET_UdpServerRecv;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
     printf("SocketId %d\r\n", SocketId);

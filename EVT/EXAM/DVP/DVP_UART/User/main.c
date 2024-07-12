@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/03/05
+* Date               : 2024/06/06
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -14,33 +14,34 @@
 
 /*
  *@Note
-  DVP routine to operate OV2640 camera JPEG mode:
-    Output picture data through UART2 (PA2), display pictures through serial port image software,
-    or take 0xFF from a frame of data, starting with 0xD8;0xFF, data at the end of 0xD9, modify the
-    file format to display pictures.
-  DVP--PIN:
-    D10--PD6
-    D11--PD2
-    D8--PC10
-    D9--PC12
-    DPWDN--PC3
-    DPCLK--PA6
-    D7--PB9
-    D6--PB8
-    D5--PB6
-    D4--PC11
-    D3--PC9
-    D2--PC8
-    D1--PA10
-    D0--PA9
-    RESET--PC13
-    SDA--PB11
-    HERF--PA4
-    SDCLK--PB10
-    SYNC--PA5
-
-    Use UART2 (PA2) serial port output, #define DEBUG DEBUG_UART2 in debug.h
-    UART1(PA9) is occupied by DVP
+ * DVP routine to operate OV2640 camera JPEG mode:
+ *   Output picture data through UART2 (PA2), display pictures through serial port image software,
+ *   or take 0xFF from a frame of data, starting with 0xD8;0xFF, data at the end of 0xD9, modify the
+ *   file format to display pictures.
+ * DVP--PIN:
+ *   D10--PD6
+ *   D11--PD2
+ *   D8--PC10
+ *   D9--PC12
+ *   DPWDN--PC3
+ *   DPCLK--PA6
+ *   D7--PB9
+ *   D6--PB8
+ *   D5--PB6
+ *   D4--PC11
+ *   D3--PC9
+ *   D2--PC8
+ *   D1--PA10
+ *   D0--PA9
+ *   RESET--PC13
+ *   SDA--PB11
+ *   HERF--PA4
+ *   SDCLK--PB10
+ *   SYNC--PA5
+ *
+ *  Use UART2 (PA2) serial port output, #define DEBUG DEBUG_UART2 in debug.h
+ *  UART1(PA9) is occupied by DVP
+ *  Note:FLASH-192K + RAM-128K
  */
 
 
@@ -93,7 +94,7 @@ void DVP_Init(void)
     DVP->CR0 &= ~RB_DVP_MSK_DAT_MOD;
 
 #if (DVP_Work_Mode == JPEG_MODE)
-    /* VSYNC��HSYNC - High level active */
+    /* VSYNC\HSYNC - High level active */
     DVP->CR0 |= RB_DVP_D8_MOD | RB_DVP_V_POLAR | RB_DVP_JPEG;
     DVP->CR1 &= ~(RB_DVP_ALL_CLR| RB_DVP_RCV_CLR);
 

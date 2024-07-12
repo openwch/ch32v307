@@ -12,10 +12,10 @@
 
 /*
  *@Note
- MCO pin clock output routine:
- MCO(PA8)
-This example demonstrates that the MCO(PA8) pin outputs the system clock.
-
+ *MCO pin clock output routine:
+ *MCO(PA8)
+ *This example demonstrates that the MCO(PA8) pin outputs the system clock.
+ *
 */
 
 #include "debug.h"

@@ -205,7 +205,8 @@ int main(void)
     USARTx_CFG(115200);
     DMA_INIT();
     printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("This is an example\r\n");
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("USART Idle Recv\r\n");
 
     while (1)
     {

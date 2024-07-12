@@ -12,10 +12,10 @@
 
 /*
  *@Note
-  Dual DAC output triangular wave routine:
- DAC outputs from PA4 and PA5 respectively
-   Output two triangular waves with different amplitudes and frequencies
-*/
+ *Dual DAC output triangular wave routine:
+ *DAC outputs from PA4 and PA5 respectively
+ *Output two triangular waves with different amplitudes and frequencies
+ */
 
 #include "debug.h"
 

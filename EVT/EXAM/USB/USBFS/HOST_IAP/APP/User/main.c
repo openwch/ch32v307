@@ -13,7 +13,7 @@
 /*
  *@Note
   *This routine is used in conjunction with HOST_IAP, as the APP demonstration code, and prints  
-  *“This is a APP code for a IAP application” after jumping ,
+  *This is a APP code for a IAP application.
  *PA0 pulls the erase flag low, and jumps to IAP after soft reset.
 */
 

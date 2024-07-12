@@ -12,8 +12,8 @@
 
 /*
  *@Note
- task1 and task2 alternate printing
-*/
+ *task1 and task2 alternate printing
+ */
 
 #include "debug.h"
 #include "FreeRTOS.h"

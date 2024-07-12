@@ -217,6 +217,16 @@ typedef struct
 #define SDIO_ReadWaitMode_CLK               ((uint32_t)0x00000001)
 #define SDIO_ReadWaitMode_DATA2             ((uint32_t)0x00000000)
 
+#define SDIO_DataControl_DTEN               ((uint32_t)0x00000001)
+#define SDIO_DataControl_DTDIR              ((uint32_t)0x00000002)
+#define SDIO_DataControl_DTMODE             ((uint32_t)0x00000004)
+#define SDIO_DataControl_DMAEN              ((uint32_t)0x00000008)
+#define SDIO_DataControl_DBLOCKSIZE         ((uint32_t)0x000000F0)
+#define SDIO_DataControl_RWSTART            ((uint32_t)0x00000100)
+#define SDIO_DataControl_RWSTOP             ((uint32_t)0x00000200)
+#define SDIO_DataControl_RWMOD              ((uint32_t)0x00000400)
+#define SDIO_DataControl_SDIOEN             ((uint32_t)0x00000800)
+
 
 void SDIO_DeInit(void);
 void SDIO_Init(SDIO_InitTypeDef* SDIO_InitStruct);

@@ -2,7 +2,7 @@
 * File Name          : system_ch32v30x.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/03/06
+* Date               : 2024/06/26
 * Description        : CH32V30x Device Peripheral Access Layer System Source File.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -14,6 +14,12 @@
 /* 
 * Uncomment the line corresponding to the desired System clock (SYSCLK) frequency (after 
 */
+
+#define HSI      0   //HSI
+#define HSI_1_2  1   //HSI/2
+
+//#define PLL_Source   HSI
+#define PLL_Source   HSI_1_2
 
 //#define SYSCLK_FREQ_24MHz  24000000
 //#define SYSCLK_FREQ_48MHz  48000000
@@ -203,11 +209,6 @@ static void SetSysClockTo24(void)
 
 #endif
 
- 
-    
-
-    
-
     /* HCLK = SYSCLK */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1;   
     /* PCLK2 = HCLK */
@@ -270,10 +271,6 @@ static void SetSysClockTo48(void)
   EXTEN->EXTEN_CTR |= EXTEN_PLL_HSI_PRE;
 
 #endif
- 
-    
-
-    
 
     /* HCLK = SYSCLK */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1;    
@@ -334,10 +331,6 @@ static void SetSysClockTo72(void)
   EXTEN->EXTEN_CTR |= EXTEN_PLL_HSI_PRE;
 
 #endif
- 
-    
-
-   
 
     /* HCLK = SYSCLK */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1; 

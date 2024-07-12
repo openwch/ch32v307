@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2024.03
+Nanjing Qinheng Microelectronics Co., Ltd. 2024.07
 
 https://wch-ic.com
 
@@ -7,7 +7,7 @@ https://wch-ic.com
 Directory
   |
   |-- CH32V30x: RISC-V MCU
-  |      |-- EVT: CH32V30xEVT Evaluation Board and CH32V30x related software routines
+  |      |-- EVT: CH32V30xEVT Evaluation Board and CH32V30x CH32V317 related software routines
   |      |      |-- PUB: 
   |      |      |      |-- CH32V30xEVT Evaluation Board Manual.pdf: CH32V30xEVT evaluation board introduction and project creation description
   |      |      |      |-- CH32V30xSCH.pdf: Schematic of CH32V307EVT evaluation board
@@ -20,7 +20,7 @@ Directory
   |      |      |      |      |-- Peripheral: basic peripheral driver source file and header file
   |      |      |      |      |-- Startup: startup file. For different devices selected by users, the following 2 startup files are provided, and the matched device definition is selected in the ch32v30x.h file.
   |      |      |      |      |      |-- startup_ch32v30x_D8.S: applied to the CH32V303
-  |      |      |      |      |      |-- startup_ch32v30x_D8C.S: applied to the CH32V307 and the CH32V305  
+  |      |      |      |      |      |-- startup_ch32v30x_D8C.S: applied to the CH32V307 CH32V317 and the CH32V305  
   |      |      |      |-- ADC
   |      |      |      |      |-- ADC_DMA: ADC DMA sampling routines
   |      |      |      |      |-- AnalogWatchdog: analog watchdog routine
@@ -123,8 +123,10 @@ Directory
   |      |      |      |      |-- Stop_Mode: low power, stop mode routine
   |      |      |      |      |-- Standby_RAM_LV_Mode: when LV is enabled in standby mode, RAM 2k and 30K low-power data holding routines
   |      |      |      |      |-- Standby_RAM_Mode:when LV is not enabled in standby mode, RAM 2k and 30K low-power data holding routines
+  |      |      |      |      |-- Standby_RAM_Application：When MCU in standby mode, RAM 2k and 30K low-power data holding application routine
   |      |      |      |      |-- PVD_Wakeup：STOP mode PVD wakeup MCU Routine
   |      |      |      |      |-- PVD_VoltageJudger：PVD voltage Judger Routine
+  |      |      |      |      |-- CH32V317_LP_Mode：CH32V317 low power Routine
   |      |      |      |-- PMP
   |      |      |      |      |-- PMP：Physical memory protection Routine
   |      |      |      |-- RCC
@@ -144,6 +146,7 @@ Directory
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO routine to operate SD card
   |      |      |      |      |-- SDIO_EMMC：SDIO routine to operate eMMC card
+  |      |      |      |      |-- SDIO_Mode：SDIO Host/Slave mode transceiver routine
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex: single wire half duplex mode, master/slave mode, data transceiver
   |      |      |      |      |-- 2Lines_FullDuplex: two-wire full duplex mode, master/slave mode, data transceiver

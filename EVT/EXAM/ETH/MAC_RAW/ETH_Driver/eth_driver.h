@@ -147,7 +147,6 @@
     PHY_NEGOTIATION_PARAM_INIT();\
 }while(0)
 
-#define PHY_ADDRESS                             1
 #define ETH_TXBUFNB                             2
 #define ETH_RXBUFNB                             4
 #define ETH_RX_BUF_SZE                          ETH_MAX_PACKET_SIZE

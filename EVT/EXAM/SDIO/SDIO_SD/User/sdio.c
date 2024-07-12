@@ -125,7 +125,7 @@ SD_Error SD_Init( void )
  *
  * @param  clkdiv - Clock divide factor
  *              
- * @return  SD_Error -  ERR code
+ * @return  None
  */
 void SDIO_Clock_Set( u8 clkdiv )
 {
@@ -1975,7 +1975,7 @@ SD_Error FindSCR( u16 rca, u32 *pscr )
  *
  * @param   NumberOfBytes - byte number
  *              
- * @return  SD_Error -  ERR code
+ * @return  Count
  */
 u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes )
 {
@@ -1996,7 +1996,7 @@ u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes )
  * @param   mbuf - Storage address
  *             bufsize - data size
  *
- * @return  SD_Error -  ERR code
+ * @return  None
  */
 void SD_DMA_Config( u32 *mbuf, u32 bufsize, u32 DMA_DIR )
 {
@@ -2032,7 +2032,7 @@ void SD_DMA_Config( u32 *mbuf, u32 bufsize, u32 DMA_DIR )
  *            sector - sector addr
  *            cnt - sector number
  *
- * @return  SD_Error -  ERR code
+ * @return  Sta
  */
 u8 SD_ReadDisk( u8 *buf, u32 sector, u8 cnt )
 {
@@ -2072,7 +2072,7 @@ u8 SD_ReadDisk( u8 *buf, u32 sector, u8 cnt )
  *            sector - sector addr
  *            cnt - sector number
  *
- * @return  SD_Error -  ERR code
+ * @return  Sta
  */
 u8 SD_WriteDisk( u8 *buf, u32 sector, u8 cnt )
 {

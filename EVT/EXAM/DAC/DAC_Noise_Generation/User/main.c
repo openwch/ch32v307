@@ -12,11 +12,11 @@
 
 /*
  *@Note
- Noise waveform generation routine:
-DAC channel 0 (PA4) output
- A DAC conversion is triggered by software, and PA4 outputs a noise waveform.
-
-*/
+ *Noise waveform generation routine:
+ *DAC channel 0 (PA4) output
+ *A DAC conversion is triggered by software, and PA4 outputs a noise waveform.
+ *
+ */
 
 #include "debug.h"
 

@@ -12,12 +12,12 @@
 
 /*
  *@Note
- DAC DMA conversion routines:
- DAC channel 0 (PA4) output
- DMA is configured in cyclic mode, a DAC conversion is triggered by a TIM8_TRGO event, and PA4 outputs
- the corresponding voltage.
-
-*/
+ *DAC DMA conversion routines:
+ *DAC channel 0 (PA4) output
+ *DMA is configured in cyclic mode, a DAC conversion is triggered by a TIM8_TRGO event, and PA4 outputs
+ *the corresponding voltage.
+ *
+ */
 
 #include "debug.h"
 

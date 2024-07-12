@@ -12,11 +12,11 @@
 
 /*
  *@Note
- Internal temperature sensor routine:
- Through the ADC channel 16, the output voltage value and temperature value of the internal
- temperature sensor are collected.
-
-*/
+ *Internal temperature sensor routine:
+ *Through the ADC channel 16, the output voltage value and temperature value of the internal
+ *temperature sensor are collected.
+ *
+ */
 
 #include "debug.h"
 
