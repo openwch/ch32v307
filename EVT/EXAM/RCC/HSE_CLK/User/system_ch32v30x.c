@@ -5,8 +5,10 @@
  * Date               : 2021/06/06
  * Description        : CH32V30x Device Peripheral Access Layer System Source File.
  *                      For HSE = 8Mhz
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *********************************************************************************/
 #include "ch32v30x.h" 
 

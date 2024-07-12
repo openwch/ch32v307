@@ -12,10 +12,10 @@
 
 /*
  *@Note
- Dual DAC output sine wave routine:
- DAC outputs from PA4 and PA5 respectively
-  Outputs exactly the same sine wave
-*/
+ *Dual DAC output sine wave routine:
+ *DAC outputs from PA4 and PA5 respectively
+ *Outputs exactly the same sine wave
+ */
 
 #include "debug.h"
 

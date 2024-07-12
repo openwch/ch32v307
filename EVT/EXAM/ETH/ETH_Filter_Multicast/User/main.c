@@ -101,10 +101,10 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.DesPort = desport;
     TmpSocketInf.SourPort = srcport++;
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
-    TmpSocketInf.RecvStartPoint = (u32) SocketRecvBuf[SocketId];
     TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
-    printf("WCHNET_SocketCreat %d\r\n", SocketId);
+    printf("SocketId %d\r\n", SocketId);
+    WCHNET_ModifyRecvBuf(SocketId, (u32) SocketRecvBuf[SocketId], UDP_RECE_BUF_LEN);
     mStopIfError(i);
 }
 

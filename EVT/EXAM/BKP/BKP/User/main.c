@@ -12,11 +12,11 @@
 
 /*
  *@Note
- BKP routine:
- Intrusion detection pin (PC13), when an intrusion detection event occurs, all data backup register contents are cleared,
-   And trigger the intrusion detection interrupt.
-
-*/
+ *BKP routine:
+ *Intrusion detection pin (PC13), when an intrusion detection event occurs, all data backup register contents are cleared,
+ *And trigger the intrusion detection interrupt.
+ *
+ */
 
 #include "debug.h"
 
@@ -45,7 +45,7 @@ void BKP_Tamper_Init(void)
 	printf( "BKP_DR1:%08x\r\n", BKP->DATAR1 );
 	printf( "BKP_DR2:%08x\r\n", BKP->DATAR2 );
 	printf( "BKP_DR3:%08x\r\n", BKP->DATAR3 );
-    printf( "BKP_DR4:%08x\r\n", BKP->DATAR4 );
+	printf( "BKP_DR4:%08x\r\n", BKP->DATAR4 );
 
 	BKP_TamperPinLevelConfig( BKP_TamperPinLevel_High );  //TPAL:0-PC13 set input-pull-down
 //	BKP_TamperPinLevelConfig( BKP_TamperPinLevel_Low );	 //TPAL:1-PC13 input-pull-up

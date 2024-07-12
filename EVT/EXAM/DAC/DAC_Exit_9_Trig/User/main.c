@@ -12,11 +12,11 @@
 
 /*
  *@Note
-External trigger DAC conversion routine:
- DAC channel 0 (PA4) output
- A DAC conversion is triggered by the EXTI_9 (PB9) event, and PA4 outputs the corresponding voltage.
-
-*/
+ *External trigger DAC conversion routine:
+ *DAC channel 0 (PA4) output
+ *A DAC conversion is triggered by the EXTI_9 (PB9) event, and PA4 outputs the corresponding voltage.
+ *
+ */
 
 #include "debug.h"
 

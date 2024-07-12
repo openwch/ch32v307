@@ -12,12 +12,12 @@
 
 /*
  *@Note
- Discontinuous mode routine:
- ADC channel 1 (PA1) - injection group channel, channel 3 (PA3) - injection group channel, channel 4 (PA4) - injection
- group channel, this mode Next, an ADC conversion is triggered by the TIM1_CC4 event, and the above-mentioned 1 injection
- group channel is converted in sequence each time.
-
-*/
+ *Discontinuous mode routine:
+ *ADC channel 1 (PA1) - injection group channel, channel 3 (PA3) - injection group channel, channel 4 (PA4) - injection
+ *group channel, this mode Next, an ADC conversion is triggered by the TIM1_CC4 event, and the above-mentioned 1 injection
+ *group channel is converted in sequence each time.
+ *
+ */
 
 #include "debug.h"
 s16 Calibrattion_Val = 0;

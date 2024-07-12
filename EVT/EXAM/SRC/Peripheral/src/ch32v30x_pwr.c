@@ -81,14 +81,14 @@ void PWR_PVDCmd(FunctionalState NewState)
  *        Detector(PVD).
  *
  * @param   PWR_PVDLevel - specifies the PVD detection level
- *            PWR_PVDLevel_2V2 - PVD detection level set to 2.2V
- *            PWR_PVDLevel_2V3 - PVD detection level set to 2.3V
- *            PWR_PVDLevel_2V4 - PVD detection level set to 2.4V
- *            PWR_PVDLevel_2V5 - PVD detection level set to 2.5V
- *            PWR_PVDLevel_2V6 - PVD detection level set to 2.6V
- *            PWR_PVDLevel_2V7 - PVD detection level set to 2.7V
- *            PWR_PVDLevel_2V8 - PVD detection level set to 2.8V
- *            PWR_PVDLevel_2V9 - PVD detection level set to 2.9V
+ *            PWR_PVDLevel_MODE0 - PVD detection level set to mode 0.
+ *            PWR_PVDLevel_MODE1 - PVD detection level set to mode 1.
+ *            PWR_PVDLevel_MODE2 - PVD detection level set to mode 2.
+ *            PWR_PVDLevel_MODE3 - PVD detection level set to mode 3.
+ *            PWR_PVDLevel_MODE4 - PVD detection level set to mode 4.
+ *            PWR_PVDLevel_MODE5 - PVD detection level set to mode 5.
+ *            PWR_PVDLevel_MODE6 - PVD detection level set to mode 6.
+ *            PWR_PVDLevel_MODE7 - PVD detection level set to mode 7.
  *
  * @return  none
  */

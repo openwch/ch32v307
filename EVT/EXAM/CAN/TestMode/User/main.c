@@ -12,12 +12,12 @@
 
 /*
  *@Note
- CAN test mode, including silent mode, loopback mode and loopback silent mode:
- CAN1-CAN_Tx(PB9),CAN_Rx(PB8)
- CAN2-CAN_Tx(PB13),CAN_Rx(PB12)
- Standard_Frame: includes a 32bit filter mask bit pattern.
-
-*/
+ *CAN test mode, including silent mode, loopback mode and loopback silent mode:
+ *CAN1-CAN_Tx(PB9),CAN_Rx(PB8)
+ *CAN2-CAN_Tx(PB13),CAN_Rx(PB12)
+ *Standard_Frame: includes a 32bit filter mask bit pattern.
+ *
+ */
 
 #include "debug.h"
 

@@ -12,12 +12,12 @@
 
 /*
  *@Note
- low power, sleep mode routine:
- EXTI_Line0(PA0)
- This routine demonstrates WFI enters sleep mode, PA0 pin input low level triggers external interrupt
- EXTI_Line0 to exit sleep mode,Program execution continues after wake-up.
-
-*/
+ *low power, sleep mode routine:
+ *EXTI_Line0(PA0)
+ *This routine demonstrates WFI enters sleep mode, PA0 pin input low level triggers external interrupt
+ *EXTI_Line0 to exit sleep mode,Program execution continues after wake-up.
+ *
+ */
 
 #include "debug.h"
 

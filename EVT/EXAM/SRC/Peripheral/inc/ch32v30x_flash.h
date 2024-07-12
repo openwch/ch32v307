@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_flash.h
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/04/14
+* Date               : 2024/05/24
 * Description        : This file contains all the functions prototypes for the FLASH  
 *                      firmware library.
 *********************************************************************************
@@ -27,7 +27,6 @@ typedef enum
   FLASH_ERROR_WRP,
   FLASH_COMPLETE,
   FLASH_TIMEOUT,
-  FLASH_FP_ERROR = 0xFC,
   FLASH_OP_RANGE_ERROR = 0xFD,
   FLASH_ALIGN_ERROR = 0xFE,
   FLASH_ADR_RANGE_ERROR = 0xFF,
@@ -125,7 +124,7 @@ FLASH_Status FLASH_GetStatus(void);
 FLASH_Status FLASH_WaitForLastOperation(uint32_t Timeout);
 void FLASH_Unlock_Fast(void);
 void FLASH_Lock_Fast(void);
-FLASH_Status FLASH_ErasePage_Fast(uint32_t Page_Address);
+void FLASH_ErasePage_Fast(uint32_t Page_Address);
 void FLASH_EraseBlock_32K_Fast(uint32_t Block_Address);
 void FLASH_EraseBlock_64K_Fast(uint32_t Block_Address);
 void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t* pbuf);

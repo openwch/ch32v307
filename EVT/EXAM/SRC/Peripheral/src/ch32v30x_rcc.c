@@ -2,7 +2,7 @@
 * File Name          : ch32v30x_rcc.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/03/06
+* Date               : 2024/05/28
 * Description        : This file provides all the RCC firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -1136,7 +1136,7 @@ void RCC_PREDIV2Config(uint32_t RCC_PREDIV2_Div)
  * @brief   Configures the PLL2 multiplication factor.
  *
  * @param   RCC_PLL2Mul - specifies the PLL2 multiplication factor.
- *            This parameter can be RCC_PLL2Mul_x where x:{[8,14], 16, 20}
+ *            This parameter can be RCC_PLL2Mul_x where x:{[4,16], 2.5, 12.5, 20}
  *          Note-
  *          - This function must be used only when the PLL2 is disabled.
  *
@@ -1182,8 +1182,8 @@ void RCC_PLL2Cmd(FunctionalState NewState)
  *
  * @brief   Configures the PLL3 multiplication factor.
  *
- * @param   RCC_PLL3Mul - specifies the PLL2 multiplication factor.
- *            This parameter can be RCC_PLL2Mul_x where x:{[8,14], 16, 20}
+ * @param   RCC_PLL3Mul - specifies the PLL3 multiplication factor.
+ *            This parameter can be RCC_PLL3Mul_x where x:{[4,16], 2.5, 12.5, 20}
  *          Note- 
  *          - This function must be used only when the PLL3 is disabled.
  *

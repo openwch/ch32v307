@@ -12,11 +12,11 @@
 
 /*
  *@Note
- Analog watchdog routine:
- ADC channel 1 (PA1), detect that the ADC conversion data on the rule group channel is outside 2000 - 3500 and trigger the simulation
- Watchdog interrupt.
-
-*/
+ *Analog watchdog routine:
+ *ADC channel 1 (PA1), detect that the ADC conversion data on the rule group channel is outside 2000 - 3500 and trigger the simulation
+ *Watchdog interrupt.
+ *
+ */
 
 #include "debug.h"
 

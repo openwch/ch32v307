@@ -39,7 +39,7 @@
 
 /* Global Variable */
 u8 TxData[Size] = { 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 };
-u8 RxData[Size] = {0};
+vu8 RxData[Size] = {0};
 
 /*
  * 0 - start

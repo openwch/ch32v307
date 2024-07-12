@@ -12,9 +12,9 @@
 
 /*
  *@Note
- CRC routine:
- Use CRC-32 polynomial 0x4C11DB7.
-
+ *CRC routine:
+ *Use CRC-32 polynomial 0x4C11DB7.
+ *
  */
 
 #include "debug.h"

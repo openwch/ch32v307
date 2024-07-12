@@ -122,7 +122,9 @@ void TIM_TimSynchroMode4_Init(void)
     TIM_CounterModeConfig(TIM1, TIM_CounterMode_Up);
     TIM_CounterModeConfig(TIM2, TIM_CounterMode_Up);
     TIM_SetAutoreload(TIM1, 0xFFFF);
+    TIM_SetAutoreload(TIM2, 0xFFFF);
     TIM_PrescalerConfig(TIM1, 48000 - 1, TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM2, 48000 - 1, TIM_PSCReloadMode_Immediate);
 
     TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;

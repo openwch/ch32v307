@@ -1,5 +1,5 @@
 
-南京沁恒微电子股份有限公司 2024.03
+南京沁恒微电子股份有限公司 2024.07
 最新资料请到我们的网站上查询
 https://wch.cn
 
@@ -7,7 +7,7 @@ https://wch.cn
 文件目录
   |
   |-- CH32V30x：RISC-V内核微控制器
-  |      |-- EVT: CH32V30x评估板和CH32V30x相关例程
+  |      |-- EVT: CH32V30x 评估板和CH32V30x CH32V317相关例程
   |      |      |-- PUB: 
   |      |      |      |-- CH32V30x评估板说明书.pdf：CH32V30x评估板说明及工程创建说明
   |      |      |      |-- CH32V30xSCH.pdf：CH32V30x评估板原理图
@@ -20,7 +20,7 @@ https://wch.cn
   |      |      |      |      |-- Peripheral：基本外设驱动源文件及头文件
   |      |      |      |      |-- Startup：启动文件。针对用户使用芯片型号包含下列相应的启动文件，同时在ch32v30x.h文件中选择匹配芯片型号定义
   |      |      |      |      |      |-- startup_ch32v30x_D8.S：适用于CH32V303系列
-  |      |      |      |      |      |-- startup_ch32v30x_D8C.S：适用于CH32V307-CH32V305系列  
+  |      |      |      |      |      |-- startup_ch32v30x_D8C.S：适用于CH32V307-CH32V305-CH32V317系列  
   |      |      |      |-- ADC
   |      |      |      |      |-- ADC_DMA：ADC使用DMA采样例程
   |      |      |      |      |-- AnalogWatchdog：模拟看门狗例程
@@ -123,8 +123,10 @@ https://wch.cn
   |      |      |      |      |-- Stop_Mode：低功耗，停机模式例程
   |      |      |      |      |-- Standby_RAM_LV_Mode：待机模式开启LV时，RAM 2K、30K低功耗数据保持例程
   |      |      |      |      |-- Standby_RAM_Mode：待机模式不开启LV时，RAM 2K、30K低功耗数据保持例程
+  |      |      |      |      |-- Standby_RAM_Application：待机模式，RAM 2K、30K低功耗数据保持应用例程
   |      |      |      |      |-- PVD_Wakeup：STOP模式PVD中断唤醒例程
   |      |      |      |      |-- PVD_VoltageJudger：PVD电压判定例程
+  |      |      |      |      |-- CH32V317_LP_Mode：CH32V317低功耗例程
   |      |      |      |-- PMP
   |      |      |      |      |-- PMP：物理内存保护例程
   |      |      |      |-- RCC
@@ -144,6 +146,7 @@ https://wch.cn
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO操作SD卡例程
   |      |      |      |      |-- SDIO_EMMC：SDIO操作eMMC卡例程
+  |      |      |      |      |-- SDIO_Mode：SDIO 主机/从机 模式收发例程
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex：单线半双工模式，Master/Slave 模式数据收发
   |      |      |      |      |-- 2Lines_FullDuplex：双线全双工模式，Master/Slave 模式数据收发

@@ -12,12 +12,12 @@
 
 /*
  *@Note
- CAN time triggered communication mode:
- CAN_Tx(PB9),CAN_Rx(PB8)
- In the Extended_Frame, 1 32bit filter mask bit communication configuration, the
- demonstration time triggers the communication mode.
-
-*/
+ *CAN time triggered communication mode:
+ *CAN_Tx(PB9),CAN_Rx(PB8)
+ *In the Extended_Frame, 1 32bit filter mask bit communication configuration, the
+ *demonstration time triggers the communication mode.
+ *
+ */
 
 #include "debug.h"
 

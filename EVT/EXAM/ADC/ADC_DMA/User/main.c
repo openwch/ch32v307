@@ -12,11 +12,11 @@
 
 /*
  *@Note 
- ADC DMA sampling routines:
- ADC channel 1 (PA1), the rule group channel obtains ADC
- conversion data for 1024 consecutive times through DMA.
- 
-*/
+ *ADC DMA sampling routines:
+ *ADC channel 1 (PA1), the rule group channel obtains ADC
+ *conversion data for 1024 consecutive times through DMA.
+ *
+ */
 
 #include "debug.h"
 

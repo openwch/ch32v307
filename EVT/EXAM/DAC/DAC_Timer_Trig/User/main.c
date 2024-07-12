@@ -12,11 +12,11 @@
 
 /*
  *@Note
- Timer trigger DAC conversion routine:
-DAC channel 0 (PA4) output
- A DAC conversion is triggered by the TIM8_TRGO event, and PA4 outputs the corresponding voltage.
-
-*/
+ *Timer trigger DAC conversion routine:
+ *DAC channel 0 (PA4) output
+ *A DAC conversion is triggered by the TIM8_TRGO event, and PA4 outputs the corresponding voltage.
+ *
+ */
 
 #include "debug.h"
 

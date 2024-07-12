@@ -128,7 +128,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Ld"/>
-						<entry excluding="eth_driver_RMII.c|eth_driver_RGMII.c|eth_driver_MII.c|libwchnet_float.a" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="NetLib"/>
+						<entry excluding="eth_driver_CH32V317.c|eth_driver_RMII.c|eth_driver_RGMII.c|eth_driver_MII.c|libwchnet_float.a" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="NetLib"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Peripheral"/>
 						<entry excluding="startup_ch32v30x.S|startup_ch32v30x_D8.S" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 					</sourceEntries>

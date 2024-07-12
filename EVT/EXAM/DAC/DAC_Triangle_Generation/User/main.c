@@ -12,11 +12,11 @@
 
 /*
  *@Note
- Triangular waveform generation routine:
- DAC channel 0 (PA4) output
- A DAC conversion is triggered by software, and PA4 outputs a triangle wave.
-
-*/
+ *Triangular waveform generation routine:
+ *DAC channel 0 (PA4) output
+ *A DAC conversion is triggered by software, and PA4 outputs a triangle wave.
+ *
+ */
 
 #include "debug.h"
 

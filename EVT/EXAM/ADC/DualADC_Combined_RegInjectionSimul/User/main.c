@@ -12,11 +12,11 @@
 
 /*
  *@Note 
-  Dual ADC combined regular + injection + simultaneous sampling routine:
-  Rule group ADC1 channel 2 (PA2), ADC2 channel 4 (PA4), injection group ADC1 channel 3 (PA3) ADC2 channel 5 (PA5))
-  The rule group injection groups are all triggered by software, and the dual ADC rule group data is obtained through
-  the DMA interrupt, and the dual ADC injection group data is obtained through the ADC interrupt.
-*/
+ *Dual ADC combined regular + injection + simultaneous sampling routine:
+ *Rule group ADC1 channel 2 (PA2), ADC2 channel 4 (PA4), injection group ADC1 channel 3 (PA3) ADC2 channel 5 (PA5))
+ *The rule group injection groups are all triggered by software, and the dual ADC rule group data is obtained through
+ *the DMA interrupt, and the dual ADC injection group data is obtained through the ADC interrupt.
+ */
 
 #include "debug.h"
 
@@ -179,7 +179,7 @@ u16 Get_ConversionVal1(s16 val)
  */
 u16 Get_ConversionVal2(s16 val)
 {
-    if((val+Calibrattion_Val2)<0) return 0;
+    if((val+Calibrattion_Val2)<0|| val==0) return 0;
     if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
     return (val+Calibrattion_Val2);
 }

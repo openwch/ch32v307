@@ -12,14 +12,14 @@
 
 /*
  *@Note
- CAN normal mode, standard frame and expanded frame data transceiver:
- CAN_Tx(PB9),CAN_Rx(PB8)
- This routine requires an external CAN transceiver to demonstrate Standard_Frame and Extended_Frame.
- Standard_Frame: including 1 32bit filter mask bit pattern, 2 16bit filter mask bit patterns,
- 1 32bit identifier list mode, 2 16bit identifier list modes;
- Extended_Frame: 1 32bit filter mask bit pattern.
-
-*/
+ *CAN normal mode, standard frame and expanded frame data transceiver:
+ *CAN_Tx(PB9),CAN_Rx(PB8)
+ *This routine requires an external CAN transceiver to demonstrate Standard_Frame and Extended_Frame.
+ *Standard_Frame: including 1 32bit filter mask bit pattern, 2 16bit filter mask bit patterns,
+ *1 32bit identifier list mode, 2 16bit identifier list modes;
+ *Extended_Frame: 1 32bit filter mask bit pattern.
+ *
+ */
 
 #include "debug.h"
 

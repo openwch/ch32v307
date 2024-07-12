@@ -52,7 +52,7 @@ void PVD_Init(void)
     EXIT_InitStructure.EXTI_Line = EXTI_Line16;
     EXIT_InitStructure.EXTI_LineCmd = ENABLE;
     EXIT_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXIT_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; // 4.2V
+    EXIT_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; 
     EXTI_Init(&EXIT_InitStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = PVD_IRQn;
@@ -61,7 +61,7 @@ void PVD_Init(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    PWR_PVDLevelConfig(PWR_PVDLevel_2V2);
+    PWR_PVDLevelConfig(PWR_PVDLevel_MODE0);
 
     PWR_PVDCmd(ENABLE);
 }
