@@ -25,7 +25,9 @@
 #define __MPU_PRESENT             0 /* Other CH32 devices does not provide an MPU */
 #define __Vendor_SysTickConfig    0 /* Set to 1 if different SysTick Config is used */	 
 	 
+#ifndef HSE_VALUE
 #define HSE_VALUE    ((uint32_t)8000000) /* Value of the External oscillator in Hz */
+#endif
 
 /* In the following line adjust the External High Speed oscillator (HSE) Startup Timeout value */
 #define HSE_STARTUP_TIMEOUT   ((uint16_t)0x1000) /* Time out for HSE start up */
@@ -34,7 +36,7 @@
 
 /* CH32V30x Standard Peripheral Library version number */
 #define __CH32V30x_STDPERIPH_VERSION_MAIN   (0x02) /* [15:8] main version */
-#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x06) /* [7:0] sub version */
+#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x07) /* [7:0] sub version */
 #define __CH32V30x_STDPERIPH_VERSION        ( (__CH32V30x_STDPERIPH_VERSION_MAIN << 8)\
                                              |(__CH32V30x_STDPERIPH_VERSION_SUB << 0))
 
@@ -6513,6 +6515,7 @@ typedef struct
 #define  EXTEN_CTLR2_OPA4_HSMD                 ((uint32_t)0x00000008)         
 
 /****************************  Enhanced FEATURE_SIGN register  *****************************/
+
 #define  FEATURE_SIGN_VLEVEL                   ((uint32_t)0x00000001)
 
 /******************************************************************************/

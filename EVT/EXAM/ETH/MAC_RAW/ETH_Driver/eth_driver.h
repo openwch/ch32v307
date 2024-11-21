@@ -147,6 +147,9 @@
     PHY_NEGOTIATION_PARAM_INIT();\
 }while(0)
 
+#define LAST_NEGO_STAT      1   //0:auto-negotiate  1:Parallel detection
+#define TURN_PN_POLARITY    (1<<1)   //0:P polarity  1:N polarity
+
 #define ETH_TXBUFNB                             2
 #define ETH_RXBUFNB                             4
 #define ETH_RX_BUF_SZE                          ETH_MAX_PACKET_SIZE

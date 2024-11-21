@@ -230,7 +230,7 @@ static void SetSysClockTo24(void)
 #else
   /*  PLL configuration: PLLCLK = HSI/2 * 6 = 24 MHz */
   if(((*(uint32_t*)0x1FFFF70C) & (1<<14)) != (1<<14)){
-      RCC->CFGR0 |= (uint32_t)(RRCC_PLLSRC_HSI_Div2 | RCC_PLLMULL6);
+      RCC->CFGR0 |= (uint32_t)(RCC_PLLSRC_HSI_Div2 | RCC_PLLMULL6);
   }
   else{
       RCC->CFGR0 |= (uint32_t)(RCC_PLLSRC_HSI_Div2 | RCC_PLLMULL6_EXTEN);

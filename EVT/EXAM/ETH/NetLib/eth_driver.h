@@ -20,7 +20,7 @@
 #include "wchnet.h"
 
  /* 1: interrupt 0: polling in RMII or RGMII mode */
-#define LINK_STAT_ACQUISITION_METHOD            0
+#define LINK_STAT_ACQUISITION_METHOD            1
 
 #define PHY_ADDRESS                             1
 
@@ -147,6 +147,9 @@
     ETH_WritePHYRegister(gPHYAddress, PHY_BCR, PHY_Reset);\
     PHY_NEGOTIATION_PARAM_INIT();\
 }while(0)
+
+#define LAST_NEGO_STAT      1   //0:auto-negotiate  1:Parallel detection
+#define TURN_PN_POLARITY    (1<<1)   //0:P polarity  1:N polarity
 
 extern ETH_DMADESCTypeDef *DMATxDescToSet;
 extern ETH_DMADESCTypeDef *DMARxDescToGet;

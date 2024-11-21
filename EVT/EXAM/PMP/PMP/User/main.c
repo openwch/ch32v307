@@ -181,7 +181,7 @@ int main(void)
     for (uint32_t z = (uint32_t)&ProtectSec[sizeof(ProtectSec) / sizeof(*ProtectSec) - 1];
          z > (uint32_t)ProtectSec; z -= 1)
     {
-        FinalOprateAddress = z;
+        FinalOprateAddress = *(uint8_t *)z;
         *(uint8_t *)z = 0;
     }
 

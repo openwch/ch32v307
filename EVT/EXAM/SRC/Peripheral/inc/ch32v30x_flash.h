@@ -34,38 +34,38 @@ typedef enum
 
 
 /* Write Protect */
-#define FLASH_WRProt_Sectors0        ((uint32_t)0x00000001) /* Write protection of setor 0  */
-#define FLASH_WRProt_Sectors1        ((uint32_t)0x00000002) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors2        ((uint32_t)0x00000004) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors3        ((uint32_t)0x00000008) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors4        ((uint32_t)0x00000010) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors5        ((uint32_t)0x00000020) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors6        ((uint32_t)0x00000040) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors7        ((uint32_t)0x00000080) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors8        ((uint32_t)0x00000100) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors9        ((uint32_t)0x00000200) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors10       ((uint32_t)0x00000400) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors11       ((uint32_t)0x00000800) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors12       ((uint32_t)0x00001000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors13       ((uint32_t)0x00002000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors14       ((uint32_t)0x00004000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors15       ((uint32_t)0x00008000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors16       ((uint32_t)0x00010000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors17       ((uint32_t)0x00020000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors18       ((uint32_t)0x00040000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors19       ((uint32_t)0x00080000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors20       ((uint32_t)0x00100000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors21       ((uint32_t)0x00200000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors22       ((uint32_t)0x00400000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors23       ((uint32_t)0x00800000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors24       ((uint32_t)0x01000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors25       ((uint32_t)0x02000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors26       ((uint32_t)0x04000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors27       ((uint32_t)0x08000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors28       ((uint32_t)0x10000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors29       ((uint32_t)0x20000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors30       ((uint32_t)0x40000000) /* Write protection of setor 0 */
-#define FLASH_WRProt_Sectors31to127  ((uint32_t)0x80000000) /* Write protection of page 62 to 255 */
+#define FLASH_WRProt_Sectors0        ((uint32_t)0x00000001) /* Write protection of setor 0 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors1        ((uint32_t)0x00000002) /* Write protection of setor 1 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors2        ((uint32_t)0x00000004) /* Write protection of setor 2 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors3        ((uint32_t)0x00000008) /* Write protection of setor 3 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors4        ((uint32_t)0x00000010) /* Write protection of setor 4 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors5        ((uint32_t)0x00000020) /* Write protection of setor 5 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors6        ((uint32_t)0x00000040) /* Write protection of setor 6 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors7        ((uint32_t)0x00000080) /* Write protection of setor 7 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors8        ((uint32_t)0x00000100) /* Write protection of setor 8 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors9        ((uint32_t)0x00000200) /* Write protection of setor 9 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors10       ((uint32_t)0x00000400) /* Write protection of setor 10 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors11       ((uint32_t)0x00000800) /* Write protection of setor 11 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors12       ((uint32_t)0x00001000) /* Write protection of setor 12 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors13       ((uint32_t)0x00002000) /* Write protection of setor 13 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors14       ((uint32_t)0x00004000) /* Write protection of setor 14 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors15       ((uint32_t)0x00008000) /* Write protection of setor 15 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors16       ((uint32_t)0x00010000) /* Write protection of setor 16 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors17       ((uint32_t)0x00020000) /* Write protection of setor 17 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors18       ((uint32_t)0x00040000) /* Write protection of setor 18 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors19       ((uint32_t)0x00080000) /* Write protection of setor 19 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors20       ((uint32_t)0x00100000) /* Write protection of setor 20 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors21       ((uint32_t)0x00200000) /* Write protection of setor 21 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors22       ((uint32_t)0x00400000) /* Write protection of setor 22 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors23       ((uint32_t)0x00800000) /* Write protection of setor 23 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors24       ((uint32_t)0x01000000) /* Write protection of setor 24 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors25       ((uint32_t)0x02000000) /* Write protection of setor 25 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors26       ((uint32_t)0x04000000) /* Write protection of setor 26 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors27       ((uint32_t)0x08000000) /* Write protection of setor 27 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors28       ((uint32_t)0x10000000) /* Write protection of setor 28 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors29       ((uint32_t)0x20000000) /* Write protection of setor 29 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors30       ((uint32_t)0x40000000) /* Write protection of setor 30 ,4K bytes/sector */
+#define FLASH_WRProt_Sectors31to127  ((uint32_t)0x80000000) /* Write protection of page 31 to 127 */
 
 #define FLASH_WRProt_AllSectors      ((uint32_t)0xFFFFFFFF) /* Write protection of all Sectors */
 
@@ -126,7 +126,6 @@ void FLASH_Unlock_Fast(void);
 void FLASH_Lock_Fast(void);
 void FLASH_ErasePage_Fast(uint32_t Page_Address);
 void FLASH_EraseBlock_32K_Fast(uint32_t Block_Address);
-void FLASH_EraseBlock_64K_Fast(uint32_t Block_Address);
 void FLASH_ProgramPage_Fast(uint32_t Page_Address, uint32_t* pbuf);
 void FLASH_Access_Clock_Cfg(uint32_t FLASH_Access_CLK);
 void FLASH_Enhance_Mode(FunctionalState NewState);

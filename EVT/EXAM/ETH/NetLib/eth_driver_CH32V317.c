@@ -47,8 +47,16 @@ uint32_t volatile LocalTime;
 
 ETH_DMADESCTypeDef *pDMARxSet;
 ETH_DMADESCTypeDef *pDMATxSet;
+
+volatile uint8_t LinkSta = 0;  //0:Link down 1:Link up
+uint8_t LinkVaildFlag = 0;  //0:invalid 1:valid
+uint8_t AccelerateLinkFlag = 0; //0:invalid 1:valid
+uint8_t LinkProcessingStep = 0;
+uint32_t LinkProcessingTime = 0;
+uint32_t TaskExecutionTime = 0;
 u16 LastPhyStat = 0;
 u32 LastQueryPhyTime = 0;
+void ETH_LinkDownCfg(void);
 /*********************************************************************
  * @fn      WCHNET_GetMacAddr
  *
@@ -59,7 +67,7 @@ u32 LastQueryPhyTime = 0;
 void WCHNET_GetMacAddr( uint8_t *p )
 {
     uint8_t i;
-    uint8_t *macaddr=(uint8_t *)(ROM_CFG_USERADR_ID+5);
+    uint8_t *macaddr = (uint8_t *)(ROM_CFG_USERADR_ID+5);
 
     for(i=0;i<6;i++)
     {
@@ -88,7 +96,6 @@ void WCHNET_TimeIsr( uint16_t timperiod )
  *
  * @return  none.
  */
-
 void WCHNET_QueryPhySta(void)
 {
     u16 phy_stat;
@@ -97,6 +104,156 @@ void WCHNET_QueryPhySta(void)
         phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );
         if(phy_stat != LastPhyStat){
             ETH_PHYLink();
+        }
+    }
+}
+
+/*********************************************************************
+ * @fn      WCHNET_CheckPHYPN
+ *
+ * @brief   check PHY PN polarity
+ *
+ * @return  none.
+ */
+void WCHNET_CheckPHYPN(uint16_t time)
+{
+    u16 phy_stat;
+
+    //check PHY PN
+    if((LinkProcessingStep == 0)||(LocalTime >= LinkProcessingTime))
+    {
+        ETH_WritePHYRegister(gPHYAddress, 0x1F, 0x0 );
+        phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x10);
+        if(phy_stat & (1<<12))
+        {
+            if(LinkProcessingStep == 0)
+            {
+                LinkProcessingStep = 1;
+                LinkProcessingTime = LocalTime + time;
+            }
+            else {
+                LinkProcessingStep = 0;
+                LinkProcessingTime = 0;
+                phy_stat = ETH_ReadPHYRegister( gPHYAddress, PHY_ANER);
+                if((time == 200) || ((phy_stat & 1) == 0))
+                {
+                    ETH_WritePHYRegister(gPHYAddress, 0x1F, 0x0 );
+                    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x16);
+                    phy_stat |= 1<<5;
+                    ETH_WritePHYRegister(gPHYAddress, 0x16, phy_stat );
+
+                    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x16);
+                    phy_stat &= ~(1<<5);
+                    ETH_WritePHYRegister(gPHYAddress, 0x16, phy_stat );
+
+                    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x1E);   /* Clear the Interrupt status */
+                }
+            }
+        }
+        else {
+            LinkProcessingStep = 0;
+            LinkProcessingTime = 0;
+        }
+    }
+}
+
+/*********************************************************************
+ * @fn      WCHNET_AccelerateLink
+ *
+ * @brief   accelerate Link processing
+ *
+ * @return  none.
+ */
+void WCHNET_AccelerateLink(void)
+{
+    uint16_t phy_stat;
+    if(AccelerateLinkFlag == 0)
+    {
+        ETH_WritePHYRegister(gPHYAddress, 0x1F, 99 );
+        phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x19);
+        if((phy_stat & 0xf) == 3)
+        {
+            AccelerateLinkFlag = 1;
+            ETH_WritePHYRegister(gPHYAddress, 0x1F, 0x0 );
+            phy_stat = 0x4;
+            ETH_WritePHYRegister(gPHYAddress, 0x13, phy_stat );
+        }
+    }
+}
+
+/*********************************************************************
+ * @fn      WCHNET_CheckLinkVaild
+ *
+ * @brief   check whether Link is valid
+ *
+ * @return  none.
+ */
+void WCHNET_CheckLinkVaild(void)
+{
+    uint16_t phy_stat, phy_bcr;
+
+    if(LinkVaildFlag == 0)
+    {
+        phy_bcr = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR);
+        if((phy_bcr & (1<<13)) == 0)   //Do nothing if Link mode is 10M.
+        {
+            LinkVaildFlag = 1;
+            LinkProcessingTime = 0;
+            return;
+        }
+        ETH_WritePHYRegister(gPHYAddress, 0x1F, 0 );
+        phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x10);
+        if((phy_stat & (1<<9)) == 0)
+        {
+            LinkProcessingTime++;
+            if(LinkProcessingTime == 5)
+            {
+                LinkProcessingTime = 0;
+                phy_stat = ETH_ReadPHYRegister(gPHYAddress, PHY_BCR);
+                ETH_WritePHYRegister(gPHYAddress, PHY_BCR, PHY_Reset );
+                Delay_Us(100);
+                ETH_WritePHYRegister(gPHYAddress, PHY_BCR, phy_stat );
+                ETH_LinkDownCfg();
+            }
+        }
+        else {
+            LinkVaildFlag = 1;
+            LinkProcessingTime = 0;
+        }
+    }
+}
+
+/*********************************************************************
+ * @fn      WCHNET_LinkProcessing
+ *
+ * @brief   process Link stage task
+ *
+ * @return  none.
+ */
+void WCHNET_LinkProcessing(void)
+{
+    u16 phy_bcr;
+
+    if(LocalTime >= TaskExecutionTime)
+    {
+        TaskExecutionTime = LocalTime + 10;         //execution cycle:10ms
+        if(LinkSta == 0)                            //Link down
+        {
+            phy_bcr = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR);
+            if(phy_bcr & PHY_AutoNegotiation)       //auto-negotiation is enabled
+            {
+                WCHNET_CheckPHYPN(300);             //check PHY PN
+                WCHNET_AccelerateLink();            //accelerate Link processing
+            }
+            else {                                  //auto-negotiation is disabled
+                if((phy_bcr & (1<<13)) == 0)        // 10M
+                {
+                    WCHNET_CheckPHYPN(200);         //check PHY PN
+                }
+            }
+        }
+        else {                                      //Link up
+            WCHNET_CheckLinkVaild();                //check whether Link is valid
         }
     }
 }
@@ -115,6 +272,7 @@ void WCHNET_MainTask(void)
     WCHNET_NetInput( );                     /* Ethernet data input */
     WCHNET_PeriodicHandle( );               /* Protocol stack time-related task processing */
     WCHNET_QueryPhySta();                   /* Query external PHY status */
+    WCHNET_LinkProcessing();                /* process Link stage task */
 }
 
 /*********************************************************************
@@ -168,6 +326,66 @@ void ETH_RMIIPinInit(void)
 }
 
 /*********************************************************************
+ * @fn      ETH_LinkUpCfg
+ *
+ * @brief   When the PHY is connected, configure the relevant functions.
+ *
+ * @param   none.
+ *
+ * @return  none.
+ */
+void ETH_LinkUpCfg(void)
+{
+    uint16_t phy_stat;
+
+    phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR );
+    /* PHY negotiation result */
+    if(phy_stat & (1<<13))                                  /* 100M */
+    {
+        ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
+        ETH->MACCR |= ETH_Speed_100M;
+    }
+    else                                                    /* 10M */
+    {
+        ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
+    }
+    if(phy_stat & (1<<8))                                   /* full duplex */
+    {
+        ETH->MACCR |= ETH_Mode_FullDuplex;
+    }
+    else                                                    /* half duplex */
+    {
+        ETH->MACCR &= ~ETH_Mode_FullDuplex;
+    }
+
+    LinkSta = 1;
+    AccelerateLinkFlag = 0;
+    LinkProcessingStep = 0;
+    LinkProcessingTime = 0;
+    ETH_Start( );
+
+    ETH_WritePHYRegister(gPHYAddress, 0x1F, 0x0 );
+    phy_stat = 0x0;
+    ETH_WritePHYRegister(gPHYAddress, 0x13, phy_stat );
+}
+
+/*********************************************************************
+ * @fn      ETH_LinkDownCfg
+ *
+ * @brief   When the PHY is disconnected, configure the relevant functions.
+ *
+ * @param   none.
+ *
+ * @return  none.
+ */
+void ETH_LinkDownCfg(void)
+{
+    LinkSta = 0;
+    LinkVaildFlag = 0;
+    LinkProcessingTime = 0;
+}
+
+/*********************************************************************
  * @fn      ETH_PHYLink
  *
  * @brief   Configure MAC parameters after the PHY Link is successful.
@@ -178,36 +396,37 @@ void ETH_RMIIPinInit(void)
  */
 void ETH_PHYLink( void )
 {
-    u32 phy_stat;
+    u32 phy_stat, phy_anlpar, phy_bcr;
 
-    ETH_WritePHYRegister(gPHYAddress, 0x1F, 0x00 );
     phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );
+    phy_anlpar = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_ANLPAR);
+    phy_bcr = ETH_ReadPHYRegister( gPHYAddress, PHY_BCR);
     LastPhyStat = phy_stat;
+
     WCHNET_PhyStatus( phy_stat );
-    if( (phy_stat & PHY_Linked_Status) && (phy_stat & PHY_AutoNego_Complete) )
+    if(phy_stat & PHY_Linked_Status)   //LinkUp
     {
-        phy_stat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BCR );
-        /* PHY negotiation result */
-        if(phy_stat & (1<<13))                                  /* 100M */
+        if(phy_bcr & PHY_AutoNegotiation)
         {
-            ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
-            ETH->MACCR |= ETH_Speed_100M;
+            if(phy_anlpar == 0)
+            {
+                ETH_LinkUpCfg();
+            }
+            else {
+                if(phy_stat & PHY_AutoNego_Complete)
+                {
+                    ETH_LinkUpCfg();
+                }
+            }
         }
-        else                                                    /* 10M */
-        {
-            ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
+        else {
+            ETH_LinkUpCfg();
         }
-        if(phy_stat & (1<<8))                                   /* full duplex */
-        {
-            ETH->MACCR |= ETH_Mode_FullDuplex;
-        }
-        else                                                    /* half duplex */
-        {
-            ETH->MACCR &= ~ETH_Mode_FullDuplex;
-        }
-        ETH_Start( );
     }
-    phy_stat = ETH_ReadPHYRegister( gPHYAddress, 0x1E);   /* Clear the Interrupt status */
+    else {                              //LinkDown
+        /*Link down*/
+        ETH_LinkDownCfg();
+    }
 }
 
 /*********************************************************************
@@ -281,6 +500,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
 
     /* Reset the physical layer */
     ETH_WritePHYRegister(PHYAddress, PHY_BCR, PHY_Reset);
+    Delay_Ms(1);
     return ETH_SUCCESS;
 }
 
@@ -382,7 +602,6 @@ void ETH_Configuration( uint8_t *macAddr )
     regval &= ~(0x0f<<4);
     regval |= 0x04<<4;
     ETH_WritePHYRegister(gPHYAddress, 16, regval );
-
 
     /*Reads the default value of the PHY_BSR register*/
     LastPhyStat = ETH_ReadPHYRegister( PHY_ADDRESS, PHY_BSR );

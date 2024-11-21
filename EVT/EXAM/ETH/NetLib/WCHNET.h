@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x19              //the library version number
+#define WCHNET_LIB_VER                  0x1A              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */

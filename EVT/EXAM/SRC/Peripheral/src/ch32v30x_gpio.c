@@ -419,7 +419,7 @@ void GPIO_EventOutputCmd(FunctionalState NewState)
  *            GPIO_Remap_TIM4 - TIM4 Alternate Function mapping
  *            GPIO_Remap1_CAN1 - CAN1 Alternate Function mapping
  *            GPIO_Remap2_CAN1 - CAN1 Alternate Function mapping
- *            GPIO_Remap_PD01 - PD01 Alternate Function mapping
+ *            GPIO_Remap_PD0PD1 - PD0 and PD1 Alternate Function mapping
  *            GPIO_Remap_ADC1_ETRGINJ - ADC1 External Trigger Injected Conversion remapping
  *            GPIO_Remap_ADC1_ETRGREG - ADC1 External Trigger Regular Conversion remapping
  *            GPIO_Remap_ADC2_ETRGINJ - ADC2 External Trigger Injected Conversion remapping
@@ -694,6 +694,38 @@ void GPIO_IPD_Unused(void)
                                          |GPIO_Pin_10|GPIO_Pin_11\
                                          |GPIO_Pin_12|GPIO_Pin_13\
                                          |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOC, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_6|GPIO_Pin_7\
+                                         |GPIO_Pin_8|GPIO_Pin_9\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_13\
+                                         |GPIO_Pin_14|GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
+                                         |GPIO_Pin_2|GPIO_Pin_3\
+                                         |GPIO_Pin_4|GPIO_Pin_5\
+                                         |GPIO_Pin_6|GPIO_Pin_7\
+                                         |GPIO_Pin_8|GPIO_Pin_9\
+                                         |GPIO_Pin_10|GPIO_Pin_11\
+                                         |GPIO_Pin_12|GPIO_Pin_13\
+                                         |GPIO_Pin_14|GPIO_Pin_15;
+
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            break;
+        }
+        case 0x305C0508:     //CH32V305CCT6
+        {
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7|GPIO_Pin_8\
+                                         |GPIO_Pin_9|GPIO_Pin_10\
+                                         |GPIO_Pin_11|GPIO_Pin_12\
+                                         |GPIO_Pin_13|GPIO_Pin_14\
+                                         |GPIO_Pin_15;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
             GPIO_Init(GPIOC, &GPIO_InitStructure);
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1\
