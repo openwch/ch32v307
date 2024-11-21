@@ -173,6 +173,7 @@ https://wch.cn
   |      |      |      |      |-- Synchro_Timer：定时器同步模式
   |      |      |      |      |-- TIM_DMA：定时器使用DMA例程
   |      |      |      |      |-- Encoder：定时器编码器例程
+  |      |      |      |      |-- TIM_INT：定时器中断例程
   |      |      |      |-- TOUCHKEY
   |      |      |      |      |-- TKey：TouchKey检测例程  
   |      |      |      |-- USART

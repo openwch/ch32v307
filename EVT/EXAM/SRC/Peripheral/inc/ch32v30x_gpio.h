@@ -96,7 +96,7 @@ typedef enum
 #define GPIO_Remap_TIM4             ((uint32_t)0x00001000)  /* TIM4 Alternate Function mapping */
 #define GPIO_Remap1_CAN1            ((uint32_t)0x001D4000)  /* CAN1 Alternate Function mapping */
 #define GPIO_Remap2_CAN1            ((uint32_t)0x001D6000)  /* CAN1 Alternate Function mapping */
-#define GPIO_Remap_PD01             ((uint32_t)0x00008000)  /* PD01 Alternate Function mapping */
+#define GPIO_Remap_PD0PD1           ((uint32_t)0x00008000)  /* PD0 and PD1 Alternate Function mapping */
 #define GPIO_Remap_TIM5CH4_LSI      ((uint32_t)0x00200001)  /* LSI connected to TIM5 Channel4 input capture for calibration */
 #define GPIO_Remap_ADC1_ETRGINJ     ((uint32_t)0x00200002)  /* ADC1 External Trigger Injected Conversion remapping */
 #define GPIO_Remap_ADC1_ETRGREG     ((uint32_t)0x00200004)  /* ADC1 External Trigger Regular Conversion remapping */
@@ -111,6 +111,7 @@ typedef enum
                                                                to TIM2 Internal Trigger 1 for calibration
                                                                (only for Connectivity line devices) */
 #define GPIO_Remap_PTP_PPS          ((uint32_t)0x00204000)  /* Ethernet MAC PPS_PTS output on PB05 (only for Connectivity line devices) */
+#define GPIO_Remap_PD01             GPIO_Remap_PD0PD1
 
 /* PCFR2 */
 #define GPIO_Remap_TIM8             ((uint32_t)0x80000004)  /* TIM8 Alternate Function mapping */

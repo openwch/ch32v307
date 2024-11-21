@@ -13,8 +13,7 @@ MEMORY
 /*
 	FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 128K
 	RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 32K
-*/
-    
+*/   
 /* CH32V30x_D8C - CH32V307VC-CH32V307WC-CH32V307RC
    CH32V30x_D8 - CH32V303VC-CH32V303RC
    FLASH + RAM supports the following configuration
@@ -25,10 +24,9 @@ MEMORY
    FLASH-288K + RAM-32K  
    FLASH-128K + RAM-192K  
 */
-	FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 256K
-	KEEP1_RAM(xrw): ORIGIN = 0x20000000, LENGTH = 2K
-	KEEP2_RAM(xrw): ORIGIN = 0x20000800, LENGTH = 30K
-	RAM (xrw) : ORIGIN = 0x20008000, LENGTH = 32K
+   FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 288K
+   RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 32K
+	
 }
 
 
@@ -60,28 +58,6 @@ SECTIONS
 		*(.gnu.linkonce.t.*)
 		. = ALIGN(4);
 	} >FLASH AT>FLASH 
-
-
-	.bbinit (NOLOAD):
-    { 
-      . = ALIGN(4);
-      KEEP(*(SORT_NONE(.bxx)))
-        . = ALIGN(4);
-        *(.Bcode);
-        *(.Bcode.*);
-      . = ALIGN(4);
-    } >KEEP1_RAM 
-    
-    .ccinit (NOLOAD):
-    { 
-      . = ALIGN(4);
-      KEEP(*(SORT_NONE(.cxx)))
-        . = ALIGN(4);
-        *(.Ccode);
-        *(.Ccode.*);
-      . = ALIGN(4);
-    } >KEEP2_RAM 
-
 
 	.fini :
 	{
@@ -145,7 +121,23 @@ SECTIONS
 	  KEEP (*(SORT(.dtors.*)))
 	  KEEP (*(.dtors))
 	} >FLASH AT>FLASH 
-
+	
+	.keep_2kram ORIGIN(RAM) (NOLOAD):{
+		. = ALIGN(4);
+  	    *(.keep_2kram.*)
+  	    *(.keep_2kram)
+        ASSERT(SIZEOF(.keep_2kram) <= 2048, "keep_2kram too large!");
+        . = ALIGN(4);  
+	}>RAM 
+		
+	.keep_30kram ORIGIN(RAM)+2048 (NOLOAD):{
+		. = ALIGN(4);
+  	    *(.keep_30kram.*)
+  	    *(.keep_30kram)
+        ASSERT(SIZEOF(.keep_30kram) <= 28672, "keep_30kram too large!");
+        . = ALIGN(4);  
+	}>RAM 	
+	
 	.dalign :
 	{
 		. = ALIGN(4);

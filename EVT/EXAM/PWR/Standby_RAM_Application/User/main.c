@@ -18,16 +18,15 @@
  * This example demonstrates the RAM data holding in standby mode (chip VDD power supply or VBAT power
  * supply,and RAM work at different voltages). Write data to 2K RAM and 30K RAM respectively, then
  * execute WFI to enter STANDBY mode, exit STANDBY mode by inputting a high level to the PA0 (wake-up)
- * pin, print RAM data after waking up, and test whether RAM retains data. This routine supports
- * CH32V303VC-CH32V303RC CH32V307VC-CH32V307RC-CH32V307WC,If you have requirements for other products,
- * you need to modify the Link.ld file.
+ * pin, print RAM data after waking up, and test whether RAM retains data.
+ *
  */
 
 #include "debug.h"
 
 
-#define _KEEP_2KRAM   __attribute__((section(".Bcode"))) //Address space for  2K bytes of RAM.
-#define _KEEP_30KRAM  __attribute__((section(".Ccode"))) //Address space for 30K bytes of RAM.
+#define KEEP_2kRAM   __attribute__((section(".keep_2kram"))) //Address space for  2K bytes of RAM.
+#define KEEP_30kRAM  __attribute__((section(".keep_30kram")))//Address space for 30K bytes of RAM.
 
 /* Power supply mode definition */
 #define  VDD_POWER_MODE  0
@@ -40,8 +39,8 @@
 
 
 /* Global Variable */
-_KEEP_2KRAM   u32 DataBuf0[256];
-_KEEP_30KRAM  u32 DataBuf1[1024];
+KEEP_2kRAM   u32 DataBuf0[256];
+KEEP_30kRAM  u32 DataBuf1[1024];
 
 
 /*********************************************************************

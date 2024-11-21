@@ -67,6 +67,12 @@ uint8_t ReInitMACFlag = 0;
 uint8_t DuplexMode = 0;
 uint8_t PhyPolarityDetect = 0;
 uint32_t LinkSuccTime = 0;
+
+/*Parameters used when connecting to
+ * devices that do not support auto-negotiation.*/
+uint8_t phyNegoStat = 0;
+uint32_t phyNegoLinkTime = 0;
+
 extern u8 MACAddr[6];
 void ReInitMACReg(void);
 
@@ -469,12 +475,27 @@ void ETH_PHYLink( void )
                 {
                     ETH->MACCR &= ~ETH_Mode_FullDuplex;
                     ETH_LinkUpCfg(phy_bsr);
+                    if((ChipId & 0xf0) == 0x20)
+                    {
+                        if(phyNegoStat & TURN_PN_POLARITY)
+                        {
+                            //select N polarity
+                            ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, PHY_PN_SWITCH_N);
+                        }
+                        else {
+                            //select P polarity
+                            ETH_WritePHYRegister(gPHYAddress, PHY_MDIX, PHY_PN_SWITCH_P);
+                            phyNegoStat |= LAST_NEGO_STAT;
+                        }
+                        phyNegoLinkTime = LocalTime;
+                    }
                 }
                 else{
                     PHY_LINK_RESET();
                 }
             }
             else {
+                phyNegoStat = 0;
                 if(phy_bsr & PHY_AutoNego_Complete)
                 {
                     phy_stat = ETH_ReadPHYRegister( gPHYAddress, PHY_STATUS );
@@ -513,6 +534,19 @@ void ETH_PHYLink( void )
         EXTEN->EXTEN_CTR &= ~EXTEN_ETH_10M_EN;
         phyLinkReset = 1;
         phyLinkTime = LocalTime;
+        if((ChipId & 0xf0) == 0x20)
+        {
+            if(phyNegoStat & LAST_NEGO_STAT)
+            {
+                if(LocalTime - phyNegoLinkTime < 100)
+                {
+                    phyNegoLinkTime = 0;
+                    //Clear any existing error count values.
+                    ETH->DMAMFBOCR;
+                    phyNegoStat ^= TURN_PN_POLARITY;
+                }
+            }
+        }
     }
     DuplexMode = (ETH->MACCR >> 11) & 0x01;  /* Record duplex mode*/
 }
