@@ -662,7 +662,6 @@ uint8_t USBFSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
     {
         *plen = USBFSH->RX_LEN;
         memcpy( pbuf, USBFS_RX_Buf, *plen );
-
         *pendp_tog ^= USBFS_UH_R_TOG;
     }
     

@@ -1,13 +1,23 @@
-
 Vendor=WCH
+Toolchain=RISC-V
+Series=CH32V307
+RTOS=NoneOS
+MCU=CH32V307RCT6
 Link=WCH-Link
-Toolchain=
-Series=
-Description=
+PeripheralVersion===1.0
+Description====
 Mcu Type=CH32V30x
 Address=0x08000000
 Target Path=obj\CHV307_APP.hex
+Exe Path=
+Exe Arguments=
+CLKSpeed=1
+DebugInterfaceMode=0
 Erase All=true
 Program=true
 Verify=true
 Reset=true
+SDIPrintf=false
+Disable Power Output=false
+Clear CodeFlash=false
+Disable Code-Protect=false

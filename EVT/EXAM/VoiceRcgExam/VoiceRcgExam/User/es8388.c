@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : es8388.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2025/01/08
 * Description        :
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -57,8 +57,6 @@ void IIC_Init( u32 bound , u16 address )
 /*********************************************************************
  * @fn      ES8388_Contrl_Init
  *
- * @brief   ����I2S��SD���ݷ���
- *
  * @return  none
  */
 void ES8388_Contrl_Init(void)
@@ -82,48 +80,42 @@ void ES8388_Contrl_Init(void)
  */
 u8 ES8388_Init(void)
 {
-    ES8388_Contrl_Init();		//����ģ�⿪�ؿ���SD���ݷ���
-    IIC_Init(200000,0x01);                 //��ʼ��IIC�ӿ�
+    ES8388_Contrl_Init();		
+    IIC_Init(200000,0x01);                 
 
-    //����λES8388
     ES8388_Write_Reg(0, 0x80);
     ES8388_Write_Reg(0, 0x00);
-    Delay_Ms(100);				//�ȴ���λ
+    Delay_Ms(100);				
 
     ES8388_Write_Reg(0x01, 0x58);
     ES8388_Write_Reg(0x01, 0x50);
     ES8388_Write_Reg(0x02, 0xF3);
     ES8388_Write_Reg(0x02, 0xF0);
 	
-	ES8388_Write_Reg(0x03, 0x09);	//��˷�ƫ�õ�Դ�ر�
-	ES8388_Write_Reg(0x00, 0x06);	//ʹ�ܲο�		500K����ʹ��
-	ES8388_Write_Reg(0x04, 0x00);	//DAC��Դ�����������κ�ͨ��
-	ES8388_Write_Reg(0x08, 0x00);	//MCLK����Ƶ
-    ES8388_Write_Reg(0x2B, 0x80);	//DAC����	DACLRC��ADCLRC��ͬ
+	ES8388_Write_Reg(0x03, 0x09);	
+	ES8388_Write_Reg(0x00, 0x06);	
+	ES8388_Write_Reg(0x04, 0x00);	
+	ES8388_Write_Reg(0x08, 0x00);	
+    ES8388_Write_Reg(0x2B, 0x80);	
    
-    ES8388_Write_Reg(0x09, 0x88);	//ADC L/R PGA��������Ϊ+24dB
-    ES8388_Write_Reg(0x0C, 0x4C);	//ADC	����ѡ��Ϊleft data = left ADC, right data = left ADC 	��Ƶ����Ϊ16bit
-    ES8388_Write_Reg(0x0D, 0x12);	//ADC���� MCLK/������=250
-    ES8388_Write_Reg(0x10, 0x00);	//ADC�����������ƽ��ź�˥�� L	����Ϊ��С������
-    ES8388_Write_Reg(0x11, 0x00);	//ADC�����������ƽ��ź�˥�� R	����Ϊ��С������
+    ES8388_Write_Reg(0x09, 0x88);	
+    ES8388_Write_Reg(0x0C, 0x4C);	
+    ES8388_Write_Reg(0x0D, 0x12);	
+    ES8388_Write_Reg(0x10, 0x00);	
+    ES8388_Write_Reg(0x11, 0x00);	
 	
-    ES8388_Write_Reg(0x17, 0x18);	//DAC ��Ƶ����Ϊ16bit
-    ES8388_Write_Reg(0x18, 0x02);	//DAC	���� MCLK/������=256
-    ES8388_Write_Reg(0x1A, 0x00);	//DAC�����������ƽ��ź�˥�� L	����Ϊ��С������
-    ES8388_Write_Reg(0x1B, 0x00);	//DAC�����������ƽ��ź�˥�� R	����Ϊ��С������
-    ES8388_Write_Reg(0x27, 0xB8);	//L��Ƶ��
-    ES8388_Write_Reg(0x2A, 0xB8);	//R��Ƶ��
+    ES8388_Write_Reg(0x17, 0x18);	
+    ES8388_Write_Reg(0x18, 0x02);	
+    ES8388_Write_Reg(0x1A, 0x00);	
+    ES8388_Write_Reg(0x1B, 0x00);	
+    ES8388_Write_Reg(0x27, 0xB8);	
+    ES8388_Write_Reg(0x2A, 0xB8);	
     Delay_Ms(100);
     return 0;
 }
 
 /*********************************************************************
  * @fn      ES8388_Write_Reg
- *
- * @brief   д���ݵ�ES8388�Ĵ���
- *
- * @param   reg - �Ĵ�����ַ
- *          val - Ҫд��Ĵ�����ֵ
  *
  * @return  0 - success
  *          other - fail
@@ -136,17 +128,16 @@ u8 ES8388_Write_Reg(u8 reg, u8 val)
 
     while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
     I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0),I2C_Direction_Transmitter);
-    //����������ַ+д����
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //�ȴ�Ӧ��
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  
   
     while( I2C_GetFlagStatus( I2C2, I2C_FLAG_TXE ) ==  RESET );
-    I2C_SendData(I2C2,reg); //д�Ĵ�����ַ
+    I2C_SendData(I2C2,reg); 
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) ); //�ȴ�Ӧ��
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) ); 
   
 	while( I2C_GetFlagStatus( I2C2, I2C_FLAG_TXE ) ==  RESET );
-    I2C_SendData(I2C2,val & 0XFF); //��������
+    I2C_SendData(I2C2,val & 0XFF); 
 
     I2C_GenerateSTOP( I2C2, ENABLE );
     return 0;
@@ -154,10 +145,6 @@ u8 ES8388_Write_Reg(u8 reg, u8 val)
 
 /*********************************************************************
  * @fn      ES8388_Read_Reg
- *
- * @brief   ��ָ����ַ����һ������
- *
- * @param   reg - �Ĵ�����ַ
  *
  * @return  read data
  */
@@ -170,23 +157,22 @@ u8 ES8388_Read_Reg(u8 reg)
 
 	while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
     I2C_Send7bitAddress(I2C2,(ES8388_ADDR << 1) | 0X00,I2C_Direction_Transmitter); 
-    //����������ַ+д����
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  //�ȴ�Ӧ��
-    I2C_SendData(I2C2,reg);        //д�Ĵ�����ַ
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ) );  
+    I2C_SendData(I2C2,reg);      
 
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) );//�ȴ�Ӧ��
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED ) );
 
     I2C_GenerateSTART( I2C2, ENABLE );
     while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ) );
 
-    I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0x01),I2C_Direction_Receiver);//����������ַ+������
-    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED ) ); //�ȴ�Ӧ��
+    I2C_Send7bitAddress(I2C2,((ES8388_ADDR << 1) | 0x01),I2C_Direction_Receiver);
+    while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED ) ); 
 
     while(I2C_GetFlagStatus( I2C2, I2C_FLAG_RXNE ) ==  RESET);
     temp = I2C_ReceiveData( I2C2 );
 
-    I2C_GenerateSTOP( I2C2, ENABLE );//����һ��ֹͣ����
+    I2C_GenerateSTOP( I2C2, ENABLE );
 
     return temp;
 }
@@ -194,10 +180,8 @@ u8 ES8388_Read_Reg(u8 reg)
 /*********************************************************************
  * @fn      ES8388_I2S_Cfg
  *
- * @brief   ����I2S����ģʽ
- *
  * @param   fmt - I2S mode
- *            0 - �����ֱ�׼I2S
+ *            0 - Philips Standard I2S
  *            1 - MSB
  *            2 - LSB
  *            3 - PCM/DSP
@@ -208,24 +192,24 @@ u8 ES8388_Read_Reg(u8 reg)
 void ES8388_I2S_Cfg(u8 fmt, u8 len)
 {
     fmt &= 0X03;
-    len &= 0X07; //�޶���Χ
-    ES8388_Write_Reg(23, (fmt << 1) | (len << 3));	//R23,ES8388����ģʽ����
+    len &= 0X07; 
+    ES8388_Write_Reg(23, (fmt << 1) | (len << 3));	
 }
 
 /*********************************************************************
  * @fn      ES8388_Set_Volume
  *
- * @brief   ����������С�������������ӵ����
+ * @brief   Set volume
  *
- * @param   volume - ������С(0-33)
- *                      0 �C -30dB
- *                      1 �C -29dB
- *                      2 �C -28dB
- *                      ��
- *                      30 �C 0dB
- *                      31 �C 1dB
- *                      ��
- *                      33 �C 3dB
+ * @param   volume - volume size(0-33)
+ *                      0 --30dB
+ *                      1 --29dB
+ *                      2 --28dB
+ *                      ...
+ *                      30 -- 0dB
+ *                      31 -- 1dB
+ *                      ...
+ *                      33 -- 3dB
  * @return  none
  */
 void ES8388_Set_Volume(u8 volume)
@@ -240,7 +224,7 @@ void ES8388_Set_Volume(u8 volume)
 /*********************************************************************
  * @fn      ES8388_ADDA_Cfg
  *
- * @brief   ES8388 DAC/ADC����
+ * @brief   ES8388 DAC/ADC config
  *
  * @param   dacen -
  *            0 - dac enable
@@ -269,8 +253,8 @@ void ES8388_ADDA_Cfg(u8 dacen,u8 adcen)
  * @brief   Initializes the IIC peripheral.
  *
  * @param   out -
- *            0 - ͨ��2���
- *            1 - ͨ��1���
+ *            0 - channel1 output
+ *            1 - channel2 output
  *
  * @return  none
  */
@@ -282,15 +266,15 @@ void ES8388_Output_Cfg(u8 out)
 /*********************************************************************
  * @fn      ES8388_Input_Cfg
  *
- * @brief   ES8388 ADC���ͨ������
+ * @brief   ES8388 ADC input config
  *
  * @param   in -
- *            0-ͨ��1����
- *            1-ͨ��2����
+ *            0-channel1 input
+ *            1-channel2 input
  *
  * @return  none
  */
 void ES8388_Input_Cfg(u8 in)
 {
-	ES8388_Write_Reg(0x0A,(5*in)<<4);	//ADC1 ����ͨ��ѡ��L/R	INPUT1
+	ES8388_Write_Reg(0x0A,(5*in)<<4);	
 }

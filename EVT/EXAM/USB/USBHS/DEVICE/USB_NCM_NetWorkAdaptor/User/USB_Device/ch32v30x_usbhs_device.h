@@ -19,6 +19,7 @@
 #include "ch32v30x_usb.h"
 #include "usb_desc.h"
 #include "eth_driver.h"
+#include "cdc_ncm.h"
 
 #ifdef __cplusplus
 extern "C" {

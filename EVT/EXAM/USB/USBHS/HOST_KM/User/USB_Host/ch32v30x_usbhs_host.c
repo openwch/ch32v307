@@ -208,21 +208,18 @@ void USBHSH_ResetRootHubPort( uint8_t mode )
 {
     USBHSH_SetSelfAddr( 0x00 );
     USBHSH_SetSelfSpeed( USB_HIGH_SPEED );
-
     if( mode <= 1 )
     {
         USBHSH->HOST_CTRL |= USBHS_UH_TX_BUS_RESET;
     }
     if( mode == 0 )
     {
-        Delay_Ms( DEF_BUS_RESET_TIME ); // Reset time from 10mS to 20mS
+        Delay_Ms( DEF_BUS_RESET_TIME );
     }
     if( mode != 1 )
     {
         USBHSH->HOST_CTRL &= ~USBHS_UH_TX_BUS_RESET;
     }
-    Delay_Ms( 2 );
-
     if( USBHSH->INT_FG & USBHS_UIF_DETECT )
     {
         if( USBHSH->MIS_ST & USBHS_UMS_DEV_ATTACH )
@@ -659,7 +656,7 @@ uint8_t USBHSH_ClearEndpStall( uint8_t ep0_size, uint8_t endp_num )
  * @brief   Get data from USB device input endpoint.
  *
  * @para    endp_num: Endpoint number
- *          endp_tog: Endpoint toggle
+ *          pendp_tog: Endpoint toggle
  *          pbuf: Data Buffer
  *          plen: Data length
  *
@@ -674,7 +671,6 @@ uint8_t USBHSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
     {
         *plen = USBHSH->RX_LEN;
         memcpy( pbuf, USBHS_RX_Buf, *plen );
-
         *pendp_tog ^= USBHS_UH_R_TOG_DATA1;
     }
     
@@ -687,7 +683,7 @@ uint8_t USBHSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
  * @brief   Send data to the USB device output endpoint.
  *
  * @para    endp_num: Endpoint number
- *          endp_tog: Endpoint toggle
+ *          pendp_tog: Endpoint toggle
  *          pbuf: Data Buffer
  *          len: Data length
  *

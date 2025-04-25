@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v30x_fsmc.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/06
+* Version            : V1.0.1
+* Date               : 2025/03/06
 * Description        : This file contains all the functions prototypes for the FSMC
 *                      firmware library.
 *********************************************************************************
@@ -88,10 +88,6 @@ typedef struct
   uint32_t FSMC_WaitSignalPolarity;  /* Specifies the wait signal polarity, valid only when accessing
                                         the Flash memory in burst mode.
                                         This parameter can be a value of @ref FSMC_Wait_Signal_Polarity */
-
-  uint32_t FSMC_WrapMode;            /* Enables or disables the Wrapped burst access mode for Flash
-                                        memory, valid only when accessing Flash memories in burst mode.
-                                        This parameter can be a value of @ref FSMC_Wrap_Mode */
 
   uint32_t FSMC_WaitSignalActive;    /* Specifies if the wait signal is asserted by the memory one
                                         clock cycle before the wait state or during the wait state,
@@ -207,10 +203,6 @@ typedef struct
 /* FSMC_Wait_Signal_Polarity */
 #define FSMC_WaitSignalPolarity_Low                     ((uint32_t)0x00000000)
 #define FSMC_WaitSignalPolarity_High                    ((uint32_t)0x00000200)
-
-/* FSMC_Wrap_Mode */
-#define FSMC_WrapMode_Disable                           ((uint32_t)0x00000000)
-#define FSMC_WrapMode_Enable                            ((uint32_t)0x00000400) 
 
 /* FSMC_Wait_Timing */
 #define FSMC_WaitSignalActive_BeforeWaitState           ((uint32_t)0x00000000)

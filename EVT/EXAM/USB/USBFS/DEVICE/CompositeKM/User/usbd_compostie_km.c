@@ -244,7 +244,7 @@ void KB_Scan_Init( void )
     /* Enable GPIOB clock */
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB, ENABLE );
 
-    /* Initialize GPIOB (Pin4-Pin7) for the keyboard scan */
+    /* Initialize GPIOB for the keyboard scan */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -506,9 +506,11 @@ void KB_LED_Handle( void )
 void MS_Scan_Init( void )
 {
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
-
+    
+    /* Enable GPIOA clock */
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE );
 
+    /* Initialize GPIOA for the mouse scan */
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

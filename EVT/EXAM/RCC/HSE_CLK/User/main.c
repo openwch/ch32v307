@@ -15,7 +15,7 @@
  *HSE frequency check routine:
  *HSE value -the frequency of HSE
  *MCO(PA8)	- outputs the HSE clock
-	 
+ *	 
 */
 
 #include "debug.h"
@@ -171,7 +171,7 @@ static void SetSysClockTo72(void) {
     if ((RCC->CTLR & RCC_HSERDY) != RESET) {
         value = HSE_FrequencyCheck();
         HSEStatus = (uint32_t) 0x00;
-        if (3 <= value <= 25) {
+      if ((value >= 3) && (value <= 25)) {
             HSEStatus = (uint32_t) 0x01;
         }
     } else {

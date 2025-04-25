@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2025/01/06
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -49,12 +49,13 @@ void ADC_Function_Init(void)
     ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode = DISABLE;
     ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
-    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigInjecConv_T2_CC1;
+    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel = 1;
     ADC_Init(ADC1, &ADC_InitStructure);
 
     ADC_InjectedSequencerLengthConfig(ADC1, 1);
+    ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_T2_CC1);
     ADC_InjectedChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_239Cycles5);
     ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 
@@ -90,7 +91,7 @@ void TIM1_PWM_In(u16 arr, u16 psc, u16 ccp)
     TIM_OCInitTypeDef       TIM_OCInitStructure = {0};
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure = {0};
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA| RCC_APB2Periph_TIM1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;

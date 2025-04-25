@@ -50,9 +50,16 @@
 #define DEF_NETSTAT_FULLDUPLEX          0x01 /* Link Duplex full-duplex */
 #define DEF_NETSTAT_HALFDUPLEX          0x00 /* Link Duplex half-duplex */
 
-#ifndef QUERY_STAT_FLAG
-#define QUERY_STAT_FLAG  ((LastQueryPhyTime == (LocalTime / 1000)) ? 0 : 1)
-#endif
+/******************************************************************************/
+/* Phy Operation Definition */
+#define DEF_PHY_QUERY_TIMEOUT           20   /* Query Phy Status every 200ms, in 10ms */
+
+/*********************************************************************
+ * MAC queue configuration
+ */
+#define DEF_ETH_RX_USBPACK            3160
+#define DEF_ETH_TX_USBPACK            1580
+#define DEF_ETH_USBPACK               1536
 
 /* Ringbuffer define  */
 #define DEF_U2E_REMINE                 (2)/* usb to eth 停止传输的剩余队列个数 */
@@ -87,12 +94,13 @@ extern __attribute__((__aligned__(4))) ETH_DMADESCTypeDef DMATxDscrTab[ ];      
 extern __attribute__((__aligned__(4))) uint8_t  MACRxBuf[ ];                     /* MAC receive buffer, 4-byte aligned */
 extern __attribute__((__aligned__(4))) uint8_t  MACTxBuf[ ];                     /* MAC send buffer, 4-byte aligned */
 
-extern uint8_t MAC_Address[ 6 ];
+
 extern rndis_state_t rndis_state;
 extern uint8_t encapsulated_buffer[ ];
 extern uint8_t RNDIS_RX_Buffer[ ];
 extern uint8_t RNDIS_TX_Buffer[ ];
 extern uint8_t RNDIS_EP1_Buffer[ ];
+extern uint8_t MACAddr[ 6 ];
 
 extern volatile uint8_t  RNDIS_Spd_ChangeReset;
 extern volatile uint8_t  USBHS_UsbRxFlag;
@@ -107,13 +115,19 @@ extern uint8_t  PhyInit_Flag;
 extern void USB2ETH_Trance( void );
 extern void ETH2USB_Trance( void );
 extern void RNDIS_Load_Status( void );
+extern uint8_t ETH2USB_DataSend(uint16_t len, uint32_t *pBuff );
 extern void RNDIS_MSG_Recv( void );
 extern void ETH_GetMacAddr( uint8_t *p );
 extern void ETH_DriverInit( uint8_t *addr );
 extern void ETH_PhyAbility_Set( void );
+extern void USBETH_Main( void );
 
 /* extern from eth_driver.c */
+extern volatile uint8_t LinkSta;
 extern uint32_t LastQueryPhyTime;
+extern ETH_DMADESCTypeDef *pDMARxSet;
+extern ETH_DMADESCTypeDef *pDMATxSet;
 extern uint32_t ETH_TxPktChainMode( uint16_t len, uint32_t *pBuff );
+extern void USBETH_MainTask(void);
 
 #endif

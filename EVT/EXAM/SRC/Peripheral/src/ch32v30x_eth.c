@@ -2518,6 +2518,7 @@ void RGMII_TXC_Delay(uint8_t clock_polarity, uint8_t delay_time)
     }
     if(delay_time <= 7)
     {
+        ETH->MACCR &= ~(uint32_t)(7 << 29);
         ETH->MACCR |= (uint32_t)(delay_time << 29);
     }
 }

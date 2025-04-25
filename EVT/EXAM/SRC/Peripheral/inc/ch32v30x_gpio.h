@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v30x_gpio.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/06
+* Version            : V1.0.1
+* Date               : 2025/04/09
 * Description        : This file contains all the functions prototypes for the 
 *                      GPIO firmware library.
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -139,8 +139,6 @@ typedef enum
 #define GPIO_PortSourceGPIOC        ((uint8_t)0x02)
 #define GPIO_PortSourceGPIOD        ((uint8_t)0x03)
 #define GPIO_PortSourceGPIOE        ((uint8_t)0x04)
-#define GPIO_PortSourceGPIOF        ((uint8_t)0x05)
-#define GPIO_PortSourceGPIOG        ((uint8_t)0x06)
 
 /* GPIO_Pin_sources */
 #define GPIO_PinSource0             ((uint8_t)0x00)

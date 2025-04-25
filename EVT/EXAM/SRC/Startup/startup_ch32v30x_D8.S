@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : startup_ch32v30x_D8.s
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2024/03/06
+* Version            : V1.0.2
+* Date               : 2025/03/06
 * Description        : CH32V303x vector table for eclipse toolchain.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -308,9 +308,9 @@ handle_reset:
 .option	norelax
 	la gp, __global_pointer$
 .option	pop
-1:
+
 	la sp, _eusrstack
-2:
+
 /* Load data section from flash to RAM */
 	la a0, _data_lma
 	la a1, _data_vma

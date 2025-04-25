@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2025/04/09
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -45,8 +45,7 @@ void OPA4_Init(void)
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE );
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4|GPIO_Pin_3;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     OPA_InitStructure.OPA_NUM=OPA4;

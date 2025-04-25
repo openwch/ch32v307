@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.1
+* Date               : 2025/01/09
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -11,17 +11,12 @@
 *******************************************************************************/
 
 /*
- *@Note
-IAP upgrade routine:
-Support serial port and USB for FLASH burning
-
-1. Use the IAP download tool to realize the download PA0 floating (default pull-up input)
-2. After downloading the APP, connect PA0 to ground (low level input), and press the reset
-button to run the APP program.
-Note: FLASH operation keeps the frequency below 100Mhz, it is recommended that the main
-frequency of IAP be below 100Mhz
-
-*/
+ * IAP routine: this routine support USB and UART mode,
+ * and you can choose the command method or the IO method to jump to the APP .
+ * Key  parameters: CalAddr - address in flash (same in APP), note that this address needs to be unused.
+ *                  CheckNum - The value of 'CalAddr' that needs to be modified.
+ * Tips :the routine need IAP software version 1.50.
+ */
 
 #include "debug.h"
 #include "ch32v30x_usbfs_device.h"
@@ -29,6 +24,11 @@ frequency of IAP be below 100Mhz
 #include "ch32v30x_gpio.h"
 #include "iap.h"
 extern u8 End_Flag;
+
+#define UPGRADE_MODE_COMMAND   0
+#define UPGRADE_MODE_IO        1
+
+#define UPGRADE_MODE   UPGRADE_MODE_COMMAND
 /*********************************************************************
  * @fn      IAP_2_APP
  *
@@ -73,18 +73,31 @@ void IAP_2_APP(void)
  */
 int main(void)
 {
-
 	SystemCoreClockUpdate();
 	Delay_Init();
-	USART_Printf_Init(115200);	
+	USART_Printf_Init(115200);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+	printf("IAP\r\n");
+
+#if UPGRADE_MODE == UPGRADE_MODE_COMMAND
+    if(*(uint32_t*)FLASH_Base  != 0xe339e339 )
+    {
+        if(*(uint32_t*)CalAddr != CheckNum)
+        {
+            IAP_2_APP();
+            while(1);
+        }
+    }
+#elif UPGRADE_MODE == UPGRADE_MODE_IO
     if(PA0_Check() == 0)
     {
         IAP_2_APP();
         while(1);
     }
-    USART3_CFG(57600);
+#endif
+
+    USART3_CFG(460800);
     /* USB20 device init */
     USBHS_RCC_Init( );
     USBHS_Device_Init( ENABLE );
@@ -93,17 +106,19 @@ int main(void)
     USBFS_Init( );
 	while(1)
 	{
-
         if( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET){
 
             UART_Rx_Deal();
         }
         IWDG_ReloadCounter();
+
+#if UPGRADE_MODE == UPGRADE_MODE_COMMAND
         if (End_Flag)
          {
-             Delay_Ms(10);
-             IAP_2_APP();
-             while(1);
+            IAP_2_APP();
+            while(1);
          }
+#endif
 	}
 }
+

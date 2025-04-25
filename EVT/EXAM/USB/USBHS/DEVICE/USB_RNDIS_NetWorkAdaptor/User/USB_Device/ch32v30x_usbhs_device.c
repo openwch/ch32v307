@@ -213,9 +213,10 @@ void USBHS_Device_Init( FunctionalState sta )
  */
 uint8_t USBHS_EP1_UpLoad( uint16_t len, uint32_t dma_adr )
 {
-    if( (USBHS_Endp_Busy[ DEF_UEP1 ] & DEF_UEP_BUSY) == RESET )
+    // if( (USBHS_Endp_Busy[ DEF_UEP1 ] & DEF_UEP_BUSY) == RESET )
+    if( (USBHSD->UEP1_TX_CTRL & USBHS_UEP_T_RES_MASK) == USBHS_UEP_T_RES_NAK )
     {
-        USBHS_Endp_Busy[ DEF_UEP1 ] = DEF_UEP_BUSY;
+        // USBHS_Endp_Busy[ DEF_UEP1 ] = DEF_UEP_BUSY;
         USBHSD->UEP1_TX_LEN = len;
         USBHSD->UEP1_TX_DMA = dma_adr;
         USBHSD->UEP1_TX_CTRL = ( USBHSD->UEP1_TX_CTRL & ~USBHS_UEP_T_RES_MASK ) | USBHS_UEP_T_RES_ACK;
@@ -236,9 +237,10 @@ uint8_t USBHS_EP1_UpLoad( uint16_t len, uint32_t dma_adr )
  */
 uint8_t USBHS_EP2_UpLoad( uint16_t len, uint32_t dma_adr )
 {
-    if( (USBHS_Endp_Busy[ DEF_UEP2 ] & DEF_UEP_BUSY) == RESET )
+    // if( (USBHS_Endp_Busy[ DEF_UEP2 ] & DEF_UEP_BUSY) == RESET )
+    if( (USBHSD->UEP2_TX_CTRL & USBHS_UEP_T_RES_MASK) == USBHS_UEP_T_RES_NAK )
     {
-        USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
+        // USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
         USBHSD->UEP2_TX_LEN = len;
         USBHSD->UEP2_TX_DMA = dma_adr;
         USBHSD->UEP2_TX_CTRL = ( USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK ) | USBHS_UEP_T_RES_ACK;
