@@ -130,9 +130,16 @@ typedef struct __attribute__((packed)) _NCM_BUFF_COMM
 #define DEF_NETSTAT_FULLDUPLEX          0x01 /* Link Duplex full-duplex */
 #define DEF_NETSTAT_HALFDUPLEX          0x00 /* Link Duplex half-duplex */
 
-#ifndef QUERY_STAT_FLAG
-#define QUERY_STAT_FLAG  ((LastQueryPhyTime == (LocalTime / 1000)) ? 0 : 1)
-#endif
+/******************************************************************************/
+/* Phy Operation Definition */
+#define DEF_PHY_QUERY_TIMEOUT           20   /* Query Phy Status every 200ms, in 10ms */
+
+/*********************************************************************
+ * MAC queue configuration
+ */
+#define DEF_ETH_RX_USBPACK            3160
+#define DEF_ETH_TX_USBPACK            1580
+#define DEF_ETH_USBPACK               1536
 
 /* Ringbuffer define  */
 #define DEF_U2E_REMINE                 (2)/* usb to eth 停止传输的剩余队列个数 */
@@ -182,19 +189,27 @@ extern volatile uint8_t  ETH_NETWork_Status;
 extern volatile uint32_t U2E_PackCnounter;
 extern volatile uint32_t E2U_PackCnounter;
 extern uint8_t  PhyInit_Flag;
+extern uint8_t  MACAddr[ 6 ];
 
 /* Extern Functions */
 extern void USB2ETH_Trance( void );
 extern void ETH2USB_Trance( void );
 extern void ECM_Load_Status( void );
+extern uint8_t ETH2USB_DataSend(uint16_t len, uint32_t *pBuff );
+extern void ETH2USB_DataRecv( void );
 extern void ECM_Change_MAC_Filter( uint8_t pac_filter );
 extern void MACAddr_Change_To_SNDesc( uint8_t *pmacbuf );
 extern void ETH_GetMacAddr( uint8_t *p );
 extern void ETH_DriverInit( uint8_t *addr );
 extern void ETH_PhyAbility_Set( void );
+extern void USBETH_Main( void );
 /* extern from eth_driver.c */
+extern volatile uint8_t LinkSta;
 extern uint32_t LastQueryPhyTime;
+extern ETH_DMADESCTypeDef *pDMARxSet;
+extern ETH_DMADESCTypeDef *pDMATxSet;
 extern uint32_t ETH_TxPktChainMode( uint16_t len, uint32_t *pBuff );
+extern void USBETH_MainTask(void);
 
 #ifdef __cplusplus
 }

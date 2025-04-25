@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : Get_Data.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2025/01/06
 * Description        :
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -78,7 +78,6 @@ void DMA_Rx_Init( DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufsi
 }
 
 
-//用于拆分数据
 void DMA_Data_Tran(DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufsize)
 {
     DMA_InitTypeDef DMA_InitStructure;
@@ -105,11 +104,11 @@ void DMA_Data_Tran(DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufs
 
 void voice_init(void)
 {
-    GPIO_WriteBit(GPIOA,GPIO_Pin_8,1);              //PA8 设置录音模式
+    GPIO_WriteBit(GPIOA,GPIO_Pin_8,1);              
     ES8388_Init();
     ES8388_Set_Volume(22);
-    ES8388_I2S_Cfg(0,3);                            //飞利浦格式，16bit
-    ES8388_ADDA_Cfg(1,0);                           //开启AD 关闭DA
+    ES8388_I2S_Cfg(0,3);                            //Philips，16bit
+    ES8388_ADDA_Cfg(1,0);                           //Open AD Close DA
     I2S2_Init();
     NVIC_SetPriority(DMA1_Channel4_IRQn,0xE0);
     NVIC_EnableIRQ(DMA1_Channel4_IRQn);
@@ -142,7 +141,7 @@ void DMA1_Channel4_IRQHandler(void)
 //               printf("\r\n");
 //           }
 //       }
-       DMA_Data_Tran(DMA1_Channel5, (u32)V_Data, (u32)V_Data,SampleDataLen);//利用DMA每个字只取半字
+       DMA_Data_Tran(DMA1_Channel5, (u32)V_Data, (u32)V_Data,SampleDataLen);
    }
 }
 
@@ -159,7 +158,7 @@ void DMA1_Channel5_IRQHandler(void)
    if(DMA_GetITStatus(DMA1_IT_TC5))
    {
 //       printf("TC5\r\n");
-       for(uint16_t i=0;i<SampleDataLen;i++)//原始数据为有符号16位，传入参数需要无符号16位
+       for(uint16_t i=0;i<SampleDataLen;i++)
        {
            V_Data[i]=(uint16_t)((int16_t)V_Data[i]+32768);
        }

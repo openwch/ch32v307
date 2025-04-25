@@ -208,7 +208,13 @@ void USBHSH_ResetRootHubPort( uint8_t mode )
     {
         USBHSH->HOST_CTRL &= ~USBHS_UH_TX_BUS_RESET;
     }
-    Delay_Ms( 2 );
+    if( USBHSH->INT_FG & USBHS_UIF_DETECT )
+    {
+        if( USBHSH->MIS_ST & USBHS_UMS_DEV_ATTACH )
+        {
+            USBHSH->INT_FG = USBHS_UIF_DETECT;
+        }
+    }
 }
 
 /*********************************************************************
@@ -640,9 +646,9 @@ uint8_t USBHSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
     s = USBHSH_Transact( ( USB_PID_IN << 4 ) | endp_num, *pendp_tog, 0 );
     if( s == ERR_SUCCESS )
     {
-        *pendp_tog ^= USBHS_UH_T_TOG_DATA1 | USBHS_UH_R_TOG_DATA1;
         *plen = USBHSH->RX_LEN;
         memcpy( pbuf, USBHS_RX_Buf, *plen );
+        *pendp_tog ^= USBHS_UH_R_TOG_DATA1;
     }
     
     return s;

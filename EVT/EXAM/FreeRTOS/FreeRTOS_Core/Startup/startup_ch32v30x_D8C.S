@@ -328,9 +328,9 @@ handle_reset:
 .option	norelax 
 	la gp, __global_pointer$
 .option	pop 
-1:
+
 	la sp, _eusrstack 
-2:
+
 /* Load data section from flash to RAM */
 	la a0, _data_lma
 	la a1, _data_vma

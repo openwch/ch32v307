@@ -34,8 +34,8 @@ void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void Interrupt_VTF_Init(void)
 {
-    NVIC_EnableIRQ(SysTicK_IRQn);
     SetVTFIRQ((u32)SysTick_Handler,SysTicK_IRQn,0,ENABLE);
+    NVIC_EnableIRQ(SysTicK_IRQn);
 }
 
 /*********************************************************************

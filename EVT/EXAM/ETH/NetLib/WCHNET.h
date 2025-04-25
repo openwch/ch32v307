@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#define WCHNET_LIB_VER                  0x1A              //the library version number
+#define WCHNET_LIB_VER                  0x1B              //the library version number
 #define WCHNET_CFG_VALID                0x12345678        //Configuration value valid flag
 
 /* LED state @LED_STAT */
@@ -166,6 +166,8 @@ typedef uint8_t (*dhcp_callback)( uint8_t status, void * );
 /* socket receive callback type */
 struct _SOCK_INF;
 typedef void (*pSockRecv)( struct _SOCK_INF *, uint32_t, uint16_t, uint8_t *, uint32_t);
+
+typedef uint8_t (*pTcpVerifyConnection)(uint32_t src_ip, uint16_t src_port, uint16_t dest_port);
 
 /* Socket information struct */
 typedef struct _SOCK_INF
@@ -580,6 +582,20 @@ uint8_t WCHNET_HostNameGetIp( const char *hostname, uint8_t *addr, dns_callback 
 void WCHNET_ConfigKeepLive( struct _KEEP_CFG *cfg );
 
 /**
+ * @brief   Configure ARP retransmission parameters.
+ *
+ * @param   retry_period - ARP retransmission period, the default value is 10, the unit is 100ms
+ *          retry_cnt - The number of ARP retransmissions, the default value is 3.
+ *                      When the value of the retry_cnt is 0xff, it will be retried
+ *                      until the MAC address of the device is obtained.
+ *          Arp_Entry_timeout_s - the time an ARP entry stays valid after its last update.
+ *                                the default value is 300, the unit is 1s
+ *
+ * @return  None
+ */
+void WCHNET_ARPRetryCfg(uint8_t retry_period, uint8_t retry_cnt, uint16_t Arp_Entry_timeout_s);
+
+/**
  * @brief   Configure socket KEEP LIVE enable. 
  *
  * @param   socketid - socket id value
@@ -598,6 +614,15 @@ uint8_t WCHNET_SocketSetKeepLive( uint8_t socketid, uint8_t enable );
  */
 void WCHNET_PhyStatus( uint32_t phy_stat );
 
+/**
+ * @brief   Configure socket Nagle Func.
+ *
+ * @param   socketid - socket id value
+ * @param   enable - 1: Enabled.   0: Disabled.
+ *
+ * @return  @ERR_T
+ */
+uint8_t WCHNET_SocketSetNagle( uint8_t socketid, uint8_t enable );
 
 #ifdef __cplusplus
 }

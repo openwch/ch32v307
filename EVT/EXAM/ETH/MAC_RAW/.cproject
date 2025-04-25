@@ -122,7 +122,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ETH_Driver/eth_driver_CH32V317.c|ETH_Driver/eth_driver_RMII.c|ETH_Driver/eth_driver_RGMII.c|ETH_Driver/eth_driver_MII.c|Startup/startup_ch32v30x_D8.S" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="ETH_Driver/eth_driver_CH32V317.c|ETH_Driver/eth_driver_MII.c|ETH_Driver/eth_driver_RMII.c|ETH_Driver/eth_driver_RGMII.c|Startup/startup_ch32v30x_D8.S" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

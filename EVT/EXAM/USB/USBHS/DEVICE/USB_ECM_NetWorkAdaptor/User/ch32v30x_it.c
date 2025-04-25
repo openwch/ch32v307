@@ -61,6 +61,7 @@ void HardFault_Handler(void)
  */
 void EXTI9_5_IRQHandler(void)
 {
+    ETH_PHYLink( );
     EXTI_ClearITPendingBit(EXTI_Line7);     /* Clear Flag */
 }
 
@@ -86,8 +87,8 @@ void ETH_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
     /* Load Eth Status */
+    WCHNET_TimeIsr( WCHNETTIMERPERIOD );
     ECM_Load_Status( );
-
     TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 }
 

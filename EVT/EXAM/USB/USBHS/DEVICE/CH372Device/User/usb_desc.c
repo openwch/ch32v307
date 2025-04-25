@@ -58,42 +58,42 @@ const uint8_t  MyCfgDescr_HS[ ] =
     0x05,        // bDescriptorType (Endpoint)
     0x01,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP1_HS_SIZE, (uint8_t)( DEF_USB_EP1_HS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP1_HS_SIZE, (uint8_t)( DEF_USB_EP1_HS_SIZE >> 8 ), // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x81,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP2_HS_SIZE, (uint8_t)( DEF_USB_EP2_HS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP2_HS_SIZE, (uint8_t)( DEF_USB_EP2_HS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x03,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP3_HS_SIZE, (uint8_t)( DEF_USB_EP3_HS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP3_HS_SIZE, (uint8_t)( DEF_USB_EP3_HS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x84,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP4_HS_SIZE, (uint8_t)( DEF_USB_EP4_HS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP4_HS_SIZE, (uint8_t)( DEF_USB_EP4_HS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x05,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP5_HS_SIZE, (uint8_t)( DEF_USB_EP5_HS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP5_HS_SIZE, (uint8_t)( DEF_USB_EP5_HS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x86,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP6_HS_SIZE, (uint8_t)( DEF_USB_EP6_HS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP6_HS_SIZE, (uint8_t)( DEF_USB_EP6_HS_SIZE >> 8 ), // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 };
 
@@ -123,42 +123,42 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x05,        // bDescriptorType (Endpoint)
     0x01,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP1_FS_SIZE, (uint8_t)( DEF_USB_EP1_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP1_FS_SIZE, (uint8_t)( DEF_USB_EP1_FS_SIZE >> 8 ), // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x81,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP2_FS_SIZE, (uint8_t)( DEF_USB_EP2_FS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP2_FS_SIZE, (uint8_t)( DEF_USB_EP2_FS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x03,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP3_FS_SIZE, (uint8_t)( DEF_USB_EP3_FS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP3_FS_SIZE, (uint8_t)( DEF_USB_EP3_FS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x84,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP4_FS_SIZE, (uint8_t)( DEF_USB_EP4_FS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP4_FS_SIZE, (uint8_t)( DEF_USB_EP4_FS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x05,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP5_FS_SIZE, (uint8_t)( DEF_USB_EP5_FS_SIZE >> 8 ),  // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP5_FS_SIZE, (uint8_t)( DEF_USB_EP5_FS_SIZE >> 8 ),  // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x86,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USB_EP6_FS_SIZE, (uint8_t)( DEF_USB_EP6_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USB_EP6_FS_SIZE, (uint8_t)( DEF_USB_EP6_FS_SIZE >> 8 ), // wMaxPacketSize
     0x00,        // bInterval 0 (unit depends on device speed)
 };
 

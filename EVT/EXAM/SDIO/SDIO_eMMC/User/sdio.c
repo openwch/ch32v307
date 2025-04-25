@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/15
+* Version            : V1.0.1
+* Date               : 2025/01/09
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -153,7 +153,7 @@ SD_Error eMMC_PowerON( void )
     u32 response = 0, count = 0, validvoltage = 0;
 
     SDIO_InitStructure.SDIO_ClockDiv = SDIO_INIT_CLK_DIV;  //When the multimedia card is in recognition mode,the frequency of SDIO_CK must be below 400kHz.
-    SDIO_InitStructure.SDIO_ClockEdge = SDIO_ClockEdge_Falling; //Change this setting to improve collecting samples
+    SDIO_InitStructure.SDIO_ClockEdge = SDIO_ClockEdge_Rising; //Change this setting to improve collecting samples
     SDIO_InitStructure.SDIO_ClockBypass = SDIO_ClockBypass_Disable;
     SDIO_InitStructure.SDIO_ClockPowerSave = SDIO_ClockPowerSave_Disable;
     SDIO_InitStructure.SDIO_BusWide = SDIO_BusWide_1b;
@@ -200,7 +200,7 @@ SD_Error eMMC_PowerON( void )
         errorstatus = SD_INVALID_VOLTRANGE;
         return errorstatus;
     }
-    CardType = SDIO_MULTIMEDIA_CARD;
+    CardType = SDIO_HIGH_CAPACITY_MMC_CARD;
     return( errorstatus );
 }
 
@@ -688,6 +688,11 @@ SD_Error SD_ReadBlock( u8 *buf, long long addr, u16 blksize )
     {
         return SD_LOCK_UNLOCK_FAILED;
     }
+    if( CardType == SDIO_HIGH_CAPACITY_MMC_CARD )
+    {
+        blksize = 512;
+        addr >>= 9;
+    }
     if( ( blksize > 0 ) && ( blksize <= 2048 ) && ( ( blksize & ( blksize - 1 ) ) == 0 ) )
     {
         power = convert_from_bytes_to_power_of_two( blksize );
@@ -824,7 +829,7 @@ SD_Error SD_ReadMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
         SD_ProcessIRQSrc();
     }
     SDIO->DCTRL = 0x0;
-    if( CardType == SDIO_HIGH_CAPACITY_SD_CARD )
+    if( CardType == SDIO_HIGH_CAPACITY_MMC_CARD )
     {
         blksize = 512;
         addr >>= 9;
@@ -1018,7 +1023,7 @@ SD_Error SD_WriteBlock( u8 *buf, long long addr,  u16 blksize )
     {
         return SD_LOCK_UNLOCK_FAILED;
     }
-    if( CardType == SDIO_HIGH_CAPACITY_SD_CARD )
+    if( CardType == SDIO_HIGH_CAPACITY_MMC_CARD )
     {
         blksize = 512;
         addr >>= 9;
@@ -1245,7 +1250,7 @@ SD_Error SD_WriteMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
     {
         return SD_LOCK_UNLOCK_FAILED;
     }
-    if( CardType == SDIO_HIGH_CAPACITY_SD_CARD )
+    if( CardType == SDIO_HIGH_CAPACITY_MMC_CARD )
     {
         blksize = 512;
         addr >>= 9;
@@ -1896,7 +1901,7 @@ SD_Error FindSCR( u16 rca, u32 *pscr )
         return errorstatus;
     }
 
-    SDIO_CmdInitStructure.SDIO_Argument = ( uint32_t ) RCA << 16;
+    SDIO_CmdInitStructure.SDIO_Argument = ( uint32_t ) rca << 16;
     SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_APP_CMD;
     SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_Short;
     SDIO_CmdInitStructure.SDIO_Wait = SDIO_Wait_No;

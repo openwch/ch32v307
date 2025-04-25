@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v30x.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/05/22
+* Version            : V1.0.1
+* Date               : 2025/04/09
 * Description        : CH32V30x Device Peripheral Access Layer Header File.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -36,7 +36,7 @@
 
 /* CH32V30x Standard Peripheral Library version number */
 #define __CH32V30x_STDPERIPH_VERSION_MAIN   (0x02) /* [15:8] main version */
-#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x07) /* [7:0] sub version */
+#define __CH32V30x_STDPERIPH_VERSION_SUB    (0x08) /* [7:0] sub version */
 #define __CH32V30x_STDPERIPH_VERSION        ( (__CH32V30x_STDPERIPH_VERSION_MAIN << 8)\
                                              |(__CH32V30x_STDPERIPH_VERSION_SUB << 0))
 
@@ -1187,8 +1187,6 @@ typedef struct
 #define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)
 #define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400)
 #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
-#define GPIOF_BASE            (APB2PERIPH_BASE + 0x1C00)
-#define GPIOG_BASE            (APB2PERIPH_BASE + 0x2000)
 #define ADC1_BASE             (APB2PERIPH_BASE + 0x2400)
 #define ADC2_BASE             (APB2PERIPH_BASE + 0x2800)
 #define TIM1_BASE             (APB2PERIPH_BASE + 0x2C00)
@@ -1196,12 +1194,8 @@ typedef struct
 #define TIM8_BASE             (APB2PERIPH_BASE + 0x3400)
 #define USART1_BASE           (APB2PERIPH_BASE + 0x3800)
 #define ADC3_BASE             (APB2PERIPH_BASE + 0x3C00)
-#define TIM15_BASE            (APB2PERIPH_BASE + 0x4000)
-#define TIM16_BASE            (APB2PERIPH_BASE + 0x4400)
-#define TIM17_BASE            (APB2PERIPH_BASE + 0x4800)
 #define TIM9_BASE             (APB2PERIPH_BASE + 0x4C00)
 #define TIM10_BASE            (APB2PERIPH_BASE + 0x5000)
-#define TIM11_BASE            (APB2PERIPH_BASE + 0x5400)
 #define SDIO_BASE             (APB2PERIPH_BASE + 0x8000)
 
 #define DMA1_BASE             (AHBPERIPH_BASE + 0x0000)
@@ -1283,8 +1277,6 @@ typedef struct
 #define GPIOC               ((GPIO_TypeDef *) GPIOC_BASE)
 #define GPIOD               ((GPIO_TypeDef *) GPIOD_BASE)
 #define GPIOE               ((GPIO_TypeDef *) GPIOE_BASE)
-#define GPIOF               ((GPIO_TypeDef *) GPIOF_BASE)
-#define GPIOG               ((GPIO_TypeDef *) GPIOG_BASE)
 #define ADC1                ((ADC_TypeDef *) ADC1_BASE)
 #define ADC2                ((ADC_TypeDef *) ADC2_BASE)
 #define TKey1               ((ADC_TypeDef *) ADC1_BASE)
@@ -1294,12 +1286,8 @@ typedef struct
 #define TIM8                ((TIM_TypeDef *) TIM8_BASE)
 #define USART1              ((USART_TypeDef *) USART1_BASE)
 #define ADC3                ((ADC_TypeDef *) ADC3_BASE)
-#define TIM15               ((TIM_TypeDef *) TIM15_BASE)
-#define TIM16               ((TIM_TypeDef *) TIM16_BASE)
-#define TIM17               ((TIM_TypeDef *) TIM17_BASE)
 #define TIM9                ((TIM_TypeDef *) TIM9_BASE)
 #define TIM10               ((TIM_TypeDef *) TIM10_BASE)
-#define TIM11               ((TIM_TypeDef *) TIM11_BASE)
 #define SDIO                ((SDIO_TypeDef *) SDIO_BASE)
 
 #define DMA1                ((DMA_TypeDef *) DMA1_BASE)

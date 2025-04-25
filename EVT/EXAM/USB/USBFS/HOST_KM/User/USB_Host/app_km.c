@@ -1481,7 +1481,6 @@ uint8_t HUB_Port_PreEnum2( uint8_t usb_port, uint8_t hub_port, uint8_t *pbuf )
             return s;
         }
 
-        Delay_Ms( 10 );
         do
         {
             s = HUB_GetPortStatus( usb_port, RootHubDev[ usb_port ].bEp0MaxPks, hub_port, &buf[ 0 ] );
@@ -1491,9 +1490,10 @@ uint8_t HUB_Port_PreEnum2( uint8_t usb_port, uint8_t hub_port, uint8_t *pbuf )
                 return s;
             }
             retry++;
-        }while( ( !( buf[ 2 ] & 0x10 ) ) && ( retry <= 10 ) );
+            Delay_Ms(1);
+        }while( ( !( buf[ 2 ] & 0x10 ) ) && ( retry <= 100 ) );
 
-        if( retry != 10 )
+        if( retry != 100 )
         {
             retry = 0;
             s = HUB_ClearPortFeature( usb_port, RootHubDev[ usb_port ].bEp0MaxPks, hub_port, HUB_C_PORT_RESET  );

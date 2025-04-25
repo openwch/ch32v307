@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2025/01/09
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -11,19 +11,22 @@
 *******************************************************************************/
 
 /*
- *@Note 
- ADC uses DMA sampling routine:
- ADC channel 2 (PA2), the rule group channel obtains ADC conversion data for 1024
- consecutive times through DMA.
- 
-*/
+ * APP routine: this routine support USB and UART mode,
+ * and you can choose the command method to jump to the IAP .
+ * Key  parameters: CalAddr - address in flash(same in IAP), note that this address needs to be unused.
+ *                  CheckNum - The value of 'CalAddr' that needs to be modified.
+ * Tips :the routine need IAP software version 1.50.
+ */
 
 #include "debug.h"
-
+#include "ch32v30x_usbfs_device.h"
+#include "ch32v30x_usbhs_device.h"
+#include "ch32v30x_gpio.h"
+#include "iap.h"
 /* Global Variable */
+
 u16 TxBuf[1024];
 s16 Calibrattion_Val = 0;
-
 
 /*********************************************************************
  * @fn      ADC_Function_Init
@@ -157,6 +160,43 @@ u16 Get_ConversionVal(s16 val)
 }
 
 /*********************************************************************
+ * @fn      APP_2_IAP
+ *
+ * @brief   APP_2_IAP program.
+ *
+ * @return  none
+ */
+void APP_2_IAP(void)
+{
+    NVIC_SystemReset();
+    while(1){
+    }
+}
+
+/*********************************************************************
+ * @fn      USART3_IT_CFG
+ *
+ * @brief   USART3 IT configuration.
+ *
+ * @return  none
+ */
+void USART3_IT_CFG(void)
+{
+    NVIC_InitTypeDef  NVIC_InitStructure = {0};
+
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    USART_Cmd(USART3, ENABLE);
+}
+
+/*********************************************************************
  * @fn      main
  *
  * @brief   Main program.
@@ -185,17 +225,54 @@ int main(void)
     Delay_Ms(50);
     ADC_SoftwareStartConvCmd(ADC1, DISABLE);
 
-    for(i=0; i<1024; i++)
+    for(i=0; i<10; i++)
     {
         printf( "%04d\r\n", Get_ConversionVal(TxBuf[i]));
         Delay_Ms(10);
     }
 
-	while(1);
+    //enable usart and usb device
+    USART3_CFG(460800);
+    /* USB20 device init */
+    USBHS_RCC_Init( );
+    USBHS_Device_Init( ENABLE );
+    NVIC_EnableIRQ( USBHS_IRQn );
+    USBFS_Init( );
+    USART3_IT_CFG();
+    while(1)
+    {
+#if 0
+        if( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET){
+
+                UART_Rx_Deal();
+            }
+#endif
+        IWDG_ReloadCounter();
+
+        if(*(uint32_t*)CalAddr == CheckNum)
+        {
+             Delay_Ms(10);
+             APP_2_IAP();
+             while(1);
+        }
+    }
 }
 
+void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+/*********************************************************************
+ * @fn      USART3_IRQHandler
+ *
+ * @brief   This function handles USART3 global interrupt request.
+ *
+ * @return  none
+ */
+void USART3_IRQHandler(void)
+{
+    if( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET){
 
-
+        UART_Rx_Deal();
+    }
+}
 
 
 

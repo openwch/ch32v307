@@ -84,8 +84,8 @@ typedef struct Port_Cfg                          //Port configuration parameters
 typedef struct Login_Cfg                         //Login configuration parameters
 {
     u8  flag[2];                                //Configuration information verification code: 0x57,0xab
-    u8  user[10];
-    u8  pass[10];
+    u8  user[11];
+    u8  pass[11];
 } Login_Cfg_t;
 
 

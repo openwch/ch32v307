@@ -16,7 +16,7 @@
 
 
 
-#define ES8388_ADDR     0x10	//ES8388��������ַ,�̶�Ϊ0x10 
+#define ES8388_ADDR     0x10	//ES8388 address 0x10 
 
 u8 ES8388_Init(void);
 u8 ES8388_Write_Reg(u8 reg, u8 val);

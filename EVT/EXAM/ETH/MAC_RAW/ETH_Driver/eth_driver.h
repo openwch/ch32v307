@@ -159,6 +159,7 @@ extern ETH_DMADESCTypeDef *DMATxDescToSet;
 extern ETH_DMADESCTypeDef *DMARxDescToGet;
 extern __attribute__ ((aligned(4))) uint8_t  MACTxBuf[ETH_TXBUFNB*ETH_TX_BUF_SZE];
 
+#define PHY_PAG_SEL 0x1F
 void WCHNET_ETHIsr(void);
 void ETH_PHYLink( void );
 void WCHNET_MainTask(void);

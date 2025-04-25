@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2024.10
+Nanjing Qinheng Microelectronics Co., Ltd. 2025.04
 
 https://wch-ic.com
 
@@ -80,6 +80,9 @@ Directory
   |      |      |      |      |-- UdpServer: demonstration routine that Udp Server receives data and returns data
   |      |      |      |      |-- ETH_Filter_Multicast:demonstrate filtering and multicast sending functions
   |      |      |      |      |-- WebServer: Web Server routine, to demonstrate the configuration of WCHNET device functions through Web browser. As the WCHNET devices have built-in web server, the network parameter configuration and password management of WCHNET can be implemented on the web page.   
+  |      |      |      |      |-- IoCHub
+  |      |      |      |      |      |--  Lib:IoCHub library file
+  |      |      |      |      |      |--  IoCHub_Demo:IoCHub basic routines, using AT commands to implement IoCHub's basic function demonstration on MCU
   |      |      |      |-- EXTI
   |      |      |      |      |-- EXTI0:External Interrupt Routine
   |      |      |      |-- FLASH
@@ -93,6 +96,7 @@ Directory
   |      |      |      |      |-- NANDFLASH: FSMC routine to operate NANDFLASH 
   |      |      |      |      |-- SRAM: FSMC routine to operate NOR_ SRAM 
   |      |      |      |      |-- NORFLASH: FSMC routine to operate NORFLASH 
+  |      |      |      |      |-- LCD_8bit：8 bit data bus LCD routine
   |      |      |      |-- GPIO
   |      |      |      |      |-- GPIO_Toggle:GPIO routines 
   |      |      |      |-- HarmonyOS
@@ -113,6 +117,7 @@ Directory
   |      |      |      |-- INT
   |      |      |      |      |-- Interrupt_Nest: interrupt nested routine
   |      |      |      |      |-- Interrupt_VTF: VTF IRQ interrupt routine   
+  |      |      |      |      |-- VectorInRAM：Vector in RAM routine  
   |      |      |      |-- IWDG
   |      |      |      |      |-- IWDG:Independent Watchdog routine 
   |      |      |      |-- OPA
@@ -145,6 +150,7 @@ Directory
   |      |      |      |      |-- RT_Thread_Core:RT-Thread migration routine  
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO routine to operate SD card
+  |      |      |      |      |-- SDIO_SD_FATFS：SD card migrate FATFS file system
   |      |      |      |      |-- SDIO_EMMC：SDIO routine to operate eMMC card
   |      |      |      |      |-- SDIO_Mode：SDIO Host/Slave mode transceiver routine
   |      |      |      |-- SPI
@@ -174,6 +180,9 @@ Directory
   |      |      |      |      |-- TIM_DMA: timer DMA routines
   |      |      |      |      |-- Encode:Timer encoder mode routines
   |      |      |      |      |-- TIM_INT:Timer interput mode routines
+  |      |      |      |      |-- TIM_Continuous：Timer continuous routines
+  |      |      |      |      |-- PWM_Phase_shifted：Timer PWM Phase shifted routines
+  |      |      |      |      |-- PWM_6_Step：Timer 6_Step PWM routines
   |      |      |      |-- TOUCHKEY
   |      |      |      |      |-- TKey:TouchKey Detection Routine 
   |      |      |      |-- USART
@@ -196,6 +205,9 @@ Directory
   |      |      |      |      |      |      |-- MSC_CD-ROM: Simulate CDROM, need external SPI-Flash
   |      |      |      |      |      |      |-- SimulateCDC:Simulate a CDC serial port and use serial port 2 to send and receive.
   |      |      |      |      |      |      |-- SimulateCDC-HID:Simulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |-- UAC10_Headphone: Simulates a UAC 1.0 headset device and transmits the received audio data through the serial port
+  |      |      |      |      |      |      |-- UAC10_Microphone: Simulates a UAC 1.0 microphone device and transmits the received audio data through the serial port
+  |      |      |      |      |      |      |-- CH372_Double_Buffering: Demonstrates USB double buffering and provides 372 device speed test routine
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.
@@ -215,6 +227,7 @@ Directory
   |      |      |      |      |      |      |--USB_NCM-NetWorkAdaptor: USB NCM routines
   |      |      |      |      |      |      |-- SimulateCDC:Simulate a CDC serial port and use serial port 2 to send and receive.
   |      |      |      |      |      |      |-- SimulateCDC-HID:Simulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |      |-- CH372_Double_Buffering: Demonstrates USB double buffering and provides 372 device speed test routine
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: APP used with HOST_IAP, the project has modified the starting location of the program, after compilation, you need to convert the file into a bin file and rename it to APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  The host U disk IAP routine based on the U disk read file routine finishing, read the file with the name bit APP.bin from the U disk, write it to the internal flash, check it and jump automatically.

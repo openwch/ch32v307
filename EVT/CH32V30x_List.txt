@@ -1,5 +1,5 @@
 
-南京沁恒微电子股份有限公司 2024.07
+南京沁恒微电子股份有限公司 2025.04
 最新资料请到我们的网站上查询
 https://wch.cn
 
@@ -80,6 +80,9 @@ https://wch.cn
   |      |      |      |      |-- UdpServer：演示Udp Server接收数据并回传
   |      |      |      |      |-- ETH_Filter_Multicast：演示过滤和组播发送功能
   |      |      |      |      |-- WebServer： 演示通过Web浏览器配置WCHNET芯片的功能，WCHNET芯片内置web服务器 ，通过网页可以实现WCHNET的网络参数配置，以及密码管理  
+  |      |      |      |      |-- IoCHub
+  |      |      |      |      |      |--  Lib: IoCHub库文件夹
+  |      |      |      |      |      |--  IoCHub_Demo: IoCHub_Demo基础例程，通过AT指令实现IoCHub在MCU上的基础功能演示
   |      |      |      |-- EXTI
   |      |      |      |      |-- EXTI0：外部中断线例程 
   |      |      |      |-- FLASH
@@ -93,6 +96,7 @@ https://wch.cn
   |      |      |      |      |-- NANDFLASH：FSMC操作NANDFLASH例程
   |      |      |      |      |-- SRAM：FSMC操作NOR_SRAM例程  
   |      |      |      |      |-- NORFLASH：FSMC操作NORFLASH例程
+  |      |      |      |      |-- LCD_8bit：8bit数据总线LCD例程
   |      |      |      |-- GPIO
   |      |      |      |      |-- GPIO_Toggle：GPIO例程 
   |      |      |      |-- HarmonyOS
@@ -113,6 +117,7 @@ https://wch.cn
   |      |      |      |-- INT
   |      |      |      |      |-- Interrupt_Nest：中断嵌套例程
   |      |      |      |      |-- Interrupt_VTF：使用VTF IRQ中断例程  
+  |      |      |      |      |-- VectorInRAM：中断向量表在RAM中运行例程  
   |      |      |      |-- IWDG
   |      |      |      |      |-- IWDG：独立看门狗例程 
   |      |      |      |-- OPA
@@ -145,6 +150,7 @@ https://wch.cn
   |      |      |      |      |-- RTC_Calibration：RTC校准例程  
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO操作SD卡例程
+  |      |      |      |      |-- SDIO_SD_FATFS：FATFS文件系统（SD卡）例程
   |      |      |      |      |-- SDIO_EMMC：SDIO操作eMMC卡例程
   |      |      |      |      |-- SDIO_Mode：SDIO 主机/从机 模式收发例程
   |      |      |      |-- SPI
@@ -174,6 +180,9 @@ https://wch.cn
   |      |      |      |      |-- TIM_DMA：定时器使用DMA例程
   |      |      |      |      |-- Encoder：定时器编码器例程
   |      |      |      |      |-- TIM_INT：定时器中断例程
+  |      |      |      |      |-- TIM_Continuous：定时器连续模式例程
+  |      |      |      |      |-- PWM_Phase_shifted：定时器PWM移向例程
+  |      |      |      |      |-- PWM_6_Step：定时器六步PWM例程
   |      |      |      |-- TOUCHKEY
   |      |      |      |      |-- TKey：TouchKey检测例程  
   |      |      |      |-- USART
@@ -194,8 +203,11 @@ https://wch.cn
   |      |      |      |      |      |      |-- CompositeKM：模拟键盘和鼠标，使用IO模拟按键，同时模拟数据可以通过串口2上传。
   |      |      |      |      |      |      |-- MSC_U-Disk: 模拟简单U盘，可选使用片内Flash或外部SPI-Flash
   |      |      |      |      |      |      |-- MSC_CD-ROM: 模拟CDROM，需要外挂SPI-Flash
-  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
-  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
+  |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发
+  |      |      |      |      |      |      |-- CH372_Double_Buffering：演示USB的双缓冲，以及提供了372设备速度测试例程
+  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。
+  |      |      |      |      |      |      |-- UAC10_Headphone：模拟一个UAC 1.0耳机设备，并通过串口传输接收到的音频数据
+  |      |      |      |      |      |      |-- UAC10_Microphone：模拟一个UAC 1.0麦克风设备，并通过串口传输接收到的音频数据
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: 与HOST_IAP配套使用的APP，工程修改了程序起始位置，编译后需自行将文件转化为bin文件并重命名为APP.bin
   |      |      |      |      |      |      |-- HOST_IAP:  基于U盘读取文件例程整理的主机U盘IAP例程，从U盘内读取名称位APP.bin的文件，写入内部flash，校验后自动跳转。
@@ -214,6 +226,7 @@ https://wch.cn
   |      |      |      |      |      |      |-- USB_NCM-NetWorkAdaptor: USB NCM网络适配器例程
   |      |      |      |      |      |      |-- USB_RNDIS-NetWorkAdaptor: USB RNDIS网络适配器例程
   |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
+  |      |      |      |      |      |      |-- CH372_Double_Buffering：演示USB的双缓冲，以及提供了372设备速度测试例程
   |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
   |      |      |      |      |      |-- HOST_IAP
   |      |      |      |      |      |      |-- APP: 与HOST_IAP配套使用的APP，工程修改了程序起始位置，编译后需自行将文件转化为bin文件并重命名为APP.bin

@@ -34,7 +34,7 @@ u8 Basic_Default[BASIC_CFG_LEN] = {
 /*WCHNET login default parameters, user name and password*/
 u8 Login_Default[LOGIN_CFG_LEN] = {
 0x57, 0xAB,
-'a', 'd', 'm', 'i', 'n', 0, 0, 0, 0, 0, '1', '2', '3', 0, 0, 0, 0, 0, 0, 0 };
+'a', 'd', 'm', 'i', 'n', 0, 0, 0, 0, 0, 0, '1', '2', '3', 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /*WCHNET default port configuration*/
 u8 Port_Default[PORT_CFG_LEN] = {
@@ -2627,7 +2627,7 @@ void Refresh_Login(char *buf)
 {
     char *p, *q = NULL;
     u8 len;
-    uint8_t tempbuff[10] = {0x00};
+    uint8_t tempbuff[30] = {0x00};
     Login_Cfg_t LoginInf;
 
 
@@ -2640,8 +2640,10 @@ void Refresh_Login(char *buf)
         q = strstr(p, "&");
         if(q == NULL) return;
         len = q - p;
-        if(len > sizeof(LoginInf.user)) return;
-        memcpy(LoginInf.user, p, len);
+        if(len > sizeof(tempbuff)) return;
+        len = URLDecode(p, tempbuff, len);
+        if(len == 0) return;
+        memcpy(LoginInf.user, tempbuff, len);
     }
     else return;
 
@@ -2652,6 +2654,7 @@ void Refresh_Login(char *buf)
             len = q - p;
         else
             len = strlen(p);
+        if(len > sizeof(tempbuff)) return;
         len = URLDecode(p, tempbuff, len);
         if(len == 0) return;
         memcpy(LoginInf.pass, tempbuff, len);

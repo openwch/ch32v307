@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : core_riscv.h
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2023/11/11
+* Version            : V1.0.2
+* Date               : 2025/04/14
 * Description        : RISC-V V4 Core Peripheral Access Layer Header File for CH32V30x
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -141,6 +141,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __enable_irq()
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void __disable_irq()
 {
   __asm volatile ("csrc 0x800, %0" : : "r" (0x88) );
+  __asm volatile ("fence.i");
 }
 
 /*********************************************************************
@@ -181,6 +182,7 @@ __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_EnableIRQ(IRQn_Typ
 __attribute__( ( always_inline ) ) RV_STATIC_INLINE void NVIC_DisableIRQ(IRQn_Type IRQn)
 {
   NVIC->IRER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+  __asm volatile ("fence.i");
 }
 
 /*********************************************************************

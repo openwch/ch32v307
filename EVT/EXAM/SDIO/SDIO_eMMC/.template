@@ -15,3 +15,4 @@ PeripheralVersion=1.4
 Target Path=obj\SDIO_eMMC.hex
 MCU=CH32V307RVT6
 CLKSpeed=1
+SDIPrintf=true

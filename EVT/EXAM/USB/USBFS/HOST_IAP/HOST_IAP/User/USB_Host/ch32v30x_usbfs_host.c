@@ -197,10 +197,11 @@ void USBFSH_SetSelfSpeed( uint8_t speed )
 void USBFSH_ResetRootHubPort( uint8_t mode )
 {
     USBFSH_SetSelfAddr( 0x00 );
-    USBFSH_SetSelfSpeed( 1 );
+    USBFSH_SetSelfSpeed( USB_FULL_SPEED );
+    
     if( mode <= 1 )
     {
-        USBFSH->HOST_CTRL = ( USBFSH->HOST_CTRL & ~USBFS_UH_LOW_SPEED ) | USBFS_UH_BUS_RESET;
+        USBFSH->HOST_CTRL |= USBFS_UH_BUS_RESET; // Start reset
     }
     if( mode == 0 )
     {
@@ -208,10 +209,17 @@ void USBFSH_ResetRootHubPort( uint8_t mode )
     }
     if( mode != 1 )
     {
-        USBFSH->HOST_CTRL = USBFSH->HOST_CTRL & ~USBFS_UH_BUS_RESET; // End Reset
+        USBFSH->HOST_CTRL &= ~USBFS_UH_BUS_RESET; // End reset
     }
     Delay_Ms( 2 );
-    USBFSH->INT_FG = USBFS_UIF_DETECT;
+
+    if( USBFSH->INT_FG & USBFS_UIF_DETECT )
+    {
+        if( USBFSH->MIS_ST & USBFS_UMS_DEV_ATTACH )
+        {
+            USBFSH->INT_FG = USBFS_UIF_DETECT;
+        }
+    }
 }
 
 /*********************************************************************
@@ -625,9 +633,9 @@ uint8_t USBFSH_GetEndpData( uint8_t endp_num, uint8_t *pendp_tog, uint8_t *pbuf,
     s = USBFSH_Transact( ( USB_PID_IN << 4 ) | endp_num, *pendp_tog, 0 );
     if( s == ERR_SUCCESS )
     {
-        *pendp_tog ^= USBFS_UH_T_TOG | USBFS_UH_R_TOG;
         *plen = USBFSH->RX_LEN;
         memcpy( pbuf, USBFS_RX_Buf, *plen );
+        *pendp_tog ^= USBFS_UH_R_TOG;
     }
     
     return s;

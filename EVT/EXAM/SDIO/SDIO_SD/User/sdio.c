@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2023/11/24
+* Version            : V1.0.1
+* Date               : 2025/01/09
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -1893,7 +1893,7 @@ SD_Error FindSCR( u16 rca, u32 *pscr )
         return errorstatus;
     }
 
-    SDIO_CmdInitStructure.SDIO_Argument = ( uint32_t ) RCA << 16;
+    SDIO_CmdInitStructure.SDIO_Argument = ( uint32_t ) rca << 16;
     SDIO_CmdInitStructure.SDIO_CmdIndex = SD_CMD_APP_CMD;
     SDIO_CmdInitStructure.SDIO_Response = SDIO_Response_Short;
     SDIO_CmdInitStructure.SDIO_Wait = SDIO_Wait_No;

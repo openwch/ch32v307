@@ -20,7 +20,7 @@
 #include "wchnet.h"
 
  /* 1: interrupt 0: polling in RMII or RGMII mode */
-#define LINK_STAT_ACQUISITION_METHOD            1
+#define LINK_STAT_ACQUISITION_METHOD            0
 
 #define PHY_ADDRESS                             1
 
@@ -154,6 +154,8 @@
 extern ETH_DMADESCTypeDef *DMATxDescToSet;
 extern ETH_DMADESCTypeDef *DMARxDescToGet;
 extern SOCK_INF SocketInf[ ];
+
+#define PHY_PAG_SEL 0x1F
 
 void ETH_PHYLink( void );
 void WCHNET_ETHIsr( void );

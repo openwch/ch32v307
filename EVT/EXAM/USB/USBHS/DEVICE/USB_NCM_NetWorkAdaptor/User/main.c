@@ -30,15 +30,16 @@
  *  2,Using built-in 10M/100M/1G MAC with 10MBase/RMII/MII/RGMII Interface.
  *  3,Support auto negotiation, Adaptive 10M/100M/1G Ethernet.
  *How to Change Interface(Phy)
- *  1,Find header file : eth_driver.h.
- *  2,Find macro definition : #define PHY_MODE  USE_MAC_MII.
- *  3,Change it to the interface you want, Default setting is USE_MAC_MII
- *  #define PHY_MODE  USE_10M_BASE   // Use internal 10M base Phy
- *  #define PHY_MODE  USE_MAC_RMII   // Use external 100M Phy with RMII interface
- *  #define PHY_MODE  USE_MAC_MII    // Use external 100M Phy with MII interface
- *  #define PHY_MODE  USE_MAC_RGMII  // Use external 1000M Phy with RGMII interface
- *  4,CH32V307 supports 100M phy like CH182 or RTL8201F, 1000M phy like RTL8211FS.
+ *  1,There are 5 types of interfaces, they are 10M internal, CH32V317(100M internal), MII, RMII and RGMII;
+ *  2,If you need to use one of them, such as eth_driver_10M.c, right-click on the corresponding file, select 'Include/Exclude From Build', 
+ *  include it to bulid, and ensure that the others are not included. 
+ *  3,Rebuild the project;
  */
+
+/*What changed: 
+ * 1,Update eth-drivers, use the same way as Ethernet Evts.
+ * 2,Adjust the writing of other code according to the new stye of eth-drivers;
+ * */
 
 #include "cdc_ncm.h"
 
@@ -57,7 +58,7 @@ int main(void)
     SystemCoreClockUpdate( );
     NVIC_PriorityGroupConfig( NVIC_PriorityGroup_2 );
     Delay_Init( );
-    USART_Printf_Init( 921600 );
+    USART_Printf_Init( 115200 );
     
     printf( "SystemClk:%d\r\n", SystemCoreClock );
     printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
@@ -80,16 +81,7 @@ int main(void)
 
     while(1)
     {
-        if( USBHS_DevEnumStatus && ( PhyInit_Flag == 0 ) )
-        {
-            /* MAC&Phy Initialize  */
-            PhyInit_Flag = 1;
-            ETH_NETWork_Status = 0;
-            ETH_DriverInit( MACAddr );
-            ETH_PhyAbility_Set( );
-        }
-        USB2ETH_Trance( );
-        ETH2USB_Trance( );
+        USBETH_Main( );
     }
 }
 

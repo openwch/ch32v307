@@ -86,8 +86,8 @@ void ETH_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
     /* Load Eth Status */
+    WCHNET_TimeIsr( WCHNETTIMERPERIOD );
     ECM_Load_Status( );
-
     TIM_ClearITPendingBit( TIM2, TIM_IT_Update );
 }
 
