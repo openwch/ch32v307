@@ -13,19 +13,19 @@
 #include "cdc_ecm.h"
 
 /* ECM/NCM Network Status to Load */
-__attribute__ ((aligned(4))) uint8_t ECM_NetWork_Speed_Change[ 16 ] = { 0xA1, 0x2A, 0x00, 0x00, 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  /* ECM速度变化状态上传 */
+__attribute__ ((aligned(4))) uint8_t ECM_NetWork_Speed_Change[ 16 ] = { 0xA1, 0x2A, 0x00, 0x00, 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  /* ECMUpload the speed change status */
 __attribute__ ((aligned(4))) uint8_t ECM_NetWork_Connection[ 8 ]    = { 0xA1, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 };
 
 /* Ring Buffer */
-__attribute__((__aligned__(4))) RING_BUFF_COMM U2E_Trance_Manage;/* usb to eth 缓冲区管理 */
-__attribute__((__aligned__(4))) uint32_t U2E_PackAdr[DEF_U2E_MAXBLOCKS];/* usb to eth 包地址记录 */
-__attribute__((__aligned__(4))) uint32_t U2E_PackLen[DEF_U2E_MAXBLOCKS];/* usb to eth 包长度记录 */
+__attribute__((__aligned__(4))) RING_BUFF_COMM U2E_Trance_Manage;/* usb to eth Buffer management */
+__attribute__((__aligned__(4))) uint32_t U2E_PackAdr[DEF_U2E_MAXBLOCKS];/* usb to eth Packet address record */
+__attribute__((__aligned__(4))) uint32_t U2E_PackLen[DEF_U2E_MAXBLOCKS];/* usb to eth Packet length record */
 
-__attribute__((__aligned__(4))) RING_BUFF_COMM E2U_Trance_Manage;/* eth to usb 缓冲区管理 */
-__attribute__((__aligned__(4))) uint32_t E2U_PackAdr[DEF_E2U_MAXBLOCKS];/* eth to usb 包地址记录 */
-__attribute__((__aligned__(4))) uint32_t E2U_PackLen[DEF_E2U_MAXBLOCKS];/* eth to usb 包长度记录 */
+__attribute__((__aligned__(4))) RING_BUFF_COMM E2U_Trance_Manage;/* eth to usb Buffer management */
+__attribute__((__aligned__(4))) uint32_t E2U_PackAdr[DEF_E2U_MAXBLOCKS];/* eth to usb Packet address record */
+__attribute__((__aligned__(4))) uint32_t E2U_PackLen[DEF_E2U_MAXBLOCKS];/* eth to usb Packet length record */
 
-__attribute__((__aligned__(4))) ETH_DMADESCTypeDef *DMARxDealTabs[ETH_RXBUFNB];/* MAC recv descriptor, 4-byte aligned， eth to usb 接收描述符包状态归属 */
+__attribute__((__aligned__(4))) ETH_DMADESCTypeDef *DMARxDealTabs[ETH_RXBUFNB];/* MAC recv descriptor, 4-byte aligned, eth to usb Ownership of the receive descriptor packet status */
 
 /* Phy Status */
 volatile uint8_t  ETH_LastStatus = 0;
@@ -60,7 +60,7 @@ void mStopIfError( uint8_t iError )
 /*********************************************************************
  * @fn      MAC_Filter_Set
  *
- * @brief   Change MacFliter by USB Request
+ * @brief   Change MacFilter by USB Request
  *
  * @return  none
  */
@@ -131,7 +131,7 @@ void MACAddr_Change_To_SNDesc( uint8_t *pmacbuf )
     p = pmacbuf;
     for( i = 0; i < 6; i++ )
     {
-        /* 取高4位处理 */
+        /* Handle the upper 4 bits */
         temp8 = ( *p & 0xF0 ) >> 4;
         temp8 = temp8 & 0x0F;
         if( temp8 >= 0x0A )
@@ -144,7 +144,7 @@ void MACAddr_Change_To_SNDesc( uint8_t *pmacbuf )
         }
         ECM_StrDesc_Sn[ ( ( i * 2 ) + 1 ) * 2 ] = temp8;
 
-        /* 取低4位处理 */
+        /* Handle the lower 4 bits */
         temp8 = *p & 0x0F;
         if( temp8 >= 0x0A )
         {
@@ -238,7 +238,7 @@ uint8_t ETH2USB_DataSend(uint16_t len, uint32_t *pBuff )
 /*********************************************************************
  * @fn      USB2ETH_Trance
  *
- * @brief   usb to eth trance
+ * @brief   usb to eth transfer
  *
  * @return  none
  */
@@ -344,7 +344,7 @@ void ETH2USB_DataRecv( void )
 /*********************************************************************
  * @fn      ETH2USB_Trance
  *
- * @brief   eth to usb trance
+ * @brief   eth to usb transfer
  *
  * @return  none
  */
@@ -600,7 +600,7 @@ void ETH_DriverInit( uint8_t *addr )
     /* Used for Time Base */
     Timer_Init( );
     ETH_Init( addr );
-    /* Enable flowConlrol */
+    /* Enable flowControl */
     /* PT = 240(10 full eth pack); PLT = 01(28*PT) */
     ETH->MACFCR = 0;
     ETH->MACFCR |= (0xF0<<16);/* 240(64bits time) 10 full eth pack time */

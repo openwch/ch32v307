@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2020/04/30
+* Version            : V1.0.1
+* Date               : 2026/10/15
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -81,7 +81,7 @@ int led(void)
     rt_uint8_t count;
 
     rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
-    printf("led_SP:%08x\r\n",__get_SP());
+    rt_kprintf("led_SP:%08x\r\n",__get_SP());
     for(count = 0 ; count < 10 ;count++)
     {
         rt_pin_write(LED0_PIN, PIN_LOW);

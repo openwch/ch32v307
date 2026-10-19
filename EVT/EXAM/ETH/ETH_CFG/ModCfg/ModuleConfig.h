@@ -73,13 +73,18 @@ typedef struct MODULE_CFG {
 }module_cfg,*pmodule_cfg;
 
 extern u8 MACAddr[6];
+
 extern u8  brocastIp[4];
+
 extern u8 Configbuf[MODULE_CFG_LEN];
+
 extern u8 Default_cfg[MODULE_CFG_LEN];
+
 extern u16 brocastPort;
+
 extern pmodule_cfg CFG;
 
-extern u8 ParseConfigbuf(u8 *buf);
+extern u8 ParseConfigbuf(u8 *buf, u32 buflen, u8 sockid);
 
 extern void CFG_ERASE(uint32_t Page_Address, u32 Length );
 

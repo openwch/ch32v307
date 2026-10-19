@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : SPI_FLAH.h
+ * File Name          : SPI_FLASH.h
  * Author             : WCH
  * Version            : V1.0.0
  * Date               : 2022/08/08
- * Description        : header file for SPI_FLAH.c
+ * Description        : header file for SPI_FLASH.c
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -17,12 +17,12 @@
 #endif 
 
 /******************************************************************************/
-/* 头文件包含 */
+/* Header file inclusions */
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 /******************************************************************************/
-/* SPI FLASH相关引脚 */
+/* SPI FLASHRelated pins */
 #define PIN_FLASH_CS_LOW( )       ( GPIOA->BCR = GPIO_Pin_2 )
 #define PIN_FLASH_CS_HIGH( )      ( GPIOA->BSHR = GPIO_Pin_2 )
 
@@ -38,23 +38,23 @@
 #define CMD_FLASH_JEDEC_ID         0x9F                                         /* JEDEC ID read */
 
 /******************************************************************************/
-/* FLASH操作填充自己定义 */
+/* FLASHFill in your own definitions here */
 #define DEF_DUMMY_BYTE             0xFF
 
 /******************************************************************************/
-/* FLASH操作相关参数定义 */
+/* FLASHDefinitions of the parameters related to the operation */
 #define SPI_FLASH_SectorSize       4096
 #define SPI_FLASH_PageSize         256
 #define SPI_FLASH_PerWritePageSize 256
 
 /******************************************************************************/
-/* SPI FLASH芯片类型定义 */
-#define DEF_TYPE_W25XXX            0                                            /* W25XXX系列 */
+/* SPI FLASHChip type definitions */
+#define DEF_TYPE_W25XXX            0                                            /* W25XXXseries */
 
 /******************************************************************************/
-/* SPI FLASH芯片型号定义 */
+/* SPI FLASHChip model definitions */
 
-/* W25XXX系列 */
+/* W25XXXseries */
 #define W25X10_FLASH_ID            0xEF3011                                     /* 1M bit */
 #define W25X20_FLASH_ID            0xEF3012                                     /* 2M bit */
 #define W25X40_FLASH_ID            0xEF3013                                     /* 4M bit */
@@ -71,14 +71,14 @@
 #define W25Q256_FLASH_ID2          0xEF6019                                     /* 256M bit */
 
 /******************************************************************************/
-/* 常、变量外扩 */
-extern volatile uint8_t  Flash_Type;                                            /* FLASH芯片类型: 0: W25XXX系列;  */
-extern volatile uint32_t Flash_ID;                                              /* FLASH芯片ID号 */
-extern volatile uint32_t Flash_Sector_Count;                                    /* FLASH芯片扇区数 */
-extern volatile uint16_t Flash_Sector_Size;                                     /* FLASH芯片扇区大小 */
+/* Exported constants and variables */
+extern volatile uint8_t  Flash_Type;                                            /* FLASHChip type: 0: W25XXX series;  */
+extern volatile uint32_t Flash_ID;                                              /* FLASHChip ID */
+extern volatile uint32_t Flash_Sector_Count;                                    /* FLASHNumber of chip sectors */
+extern volatile uint16_t Flash_Sector_Size;                                     /* FLASHChip sector size */
 
 /******************************************************************************/
-/* 函数外扩 */
+/* Exported functions */
 extern void FLASH_Port_Init( void );
 extern uint8_t SPI_FLASH_SendByte( uint8_t byte );
 extern uint8_t SPI_FLASH_ReadByte( void );

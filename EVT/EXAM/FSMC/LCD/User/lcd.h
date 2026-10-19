@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : lcd.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the TFTLCD.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -45,7 +45,7 @@ typedef struct
 
 /* A17, Bank1, sector1 */
 #define LCD_BASE        ((u32)(0x60000000 | 0x0003FFFE))
-#define LCD             ((LCD_TypeDef *) LCD_BASE)
+#define LCD                 ((LCD_TypeDef *) LCD_BASE)
 
 /* Scan direction definition */
 #define L2R_U2D  0
@@ -63,16 +63,16 @@ typedef struct
 /* Colour */
 #define WHITE            0xFFFF
 #define BLACK            0x0000
-#define BLUE             0x001F
-#define BRED             0XF81F
+#define BLUE              0x001F
+#define BRED              0XF81F
 #define GRED             0XFFE0
 #define GBLUE            0X07FF
-#define RED              0xF800
-#define MAGENTA          0xF81F
+#define RED                0xF800
+#define MAGENTA      0xF81F
 #define GREEN            0x07E0
 #define CYAN             0x7FFF
-#define YELLOW           0xFFE0
-#define BROWN            0XBC40
+#define YELLOW          0xFFE0
+#define BROWN          0XBC40
 #define BRRED            0XFC07
 #define GRAY             0X8430
 
@@ -81,10 +81,10 @@ typedef struct
 #define GRAYBLUE         0X5458
  
 #define LIGHTGREEN       0X841F
-#define LGRAY            0XC618
+#define LGRAY                 0XC618
 
 #define LGRAYBLUE        0XA651
-#define LBBLUE           0X2B12
+#define LBBLUE              0X2B12
 
 void LCD_Init(void);
 void LCD_Clear(u16 Color);
@@ -95,7 +95,6 @@ void LCD_WriteRAM_Prepare(void);
 void LCD_WriteRAM(u16 RGB_Code);
 void LCD_Scan_Dir(u8 dir);
 void LCD_Display_Dir(u8 dir);
-void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height);
 void LCD_Fast_DrawPoint(u16 x,u16 y,u16 color);
 void LCD_ShowChar(u16 x,u16 y,u8 num,u8 size,u8 mode);
 void LCD_ShowNum(u16 x,u16 y,u32 num,u8 len,u8 size);

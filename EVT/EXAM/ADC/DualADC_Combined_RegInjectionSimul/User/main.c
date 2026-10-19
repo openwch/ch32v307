@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -21,12 +21,12 @@
 #include "debug.h"
 
 /* Global Variable */
-u32 TxBuf[1];
-u16 Adc_Val[2];
-u16 ADC_Val1,ADC_Val2;
-u8 Injected_IT_Flag,DMA_IT_Flag;
-s16 Calibrattion_Val1 = 0;
-s16 Calibrattion_Val2 = 0;
+vu32 TxBuf[1];
+vu16 Adc_Val[2];
+vu16 ADC_Val1, ADC_Val2;
+vu8 Injected_IT_Flag, DMA_IT_Flag;
+vs16 Calibrattion_Val1 = 0;
+vs16 Calibrattion_Val2 = 0;
 
 void ADC1_2_IRQHandler(void)   __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel1_IRQHandler(void)   __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -97,7 +97,7 @@ void  ADC_Function_Init(void)
     ADC_InjectedChannelConfig(ADC2, ADC_Channel_5, 1, ADC_SampleTime_239Cycles5);
 
     ADC_ExternalTrigInjectedConvConfig(ADC2,ADC_ExternalTrigInjecConv_None );
-    ADC_SoftwareStartConvCmd(ADC2, ENABLE);
+    ADC_ExternalTrigConvCmd( ADC2, ENABLE );
     ADC_ITConfig(ADC2, ADC_IT_JEOC, ENABLE);
     ADC_Cmd(ADC2, ENABLE);
 
@@ -144,7 +144,7 @@ void DMA_Tx_Init( DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufsi
 	DMA_Init( DMA_CHx, &DMA_InitStructure );
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -163,9 +163,15 @@ void DMA_Tx_Init( DMA_Channel_TypeDef* DMA_CHx, u32 ppadr, u32 memadr, u16 bufsi
  */
 u16 Get_ConversionVal1(s16 val)
 {
-	if((val+Calibrattion_Val1)<0|| val==0) return 0;
-	if((Calibrattion_Val1+val)>4095||val==4095) return 4095;
-	return (val+Calibrattion_Val1);
+    if( ( val + Calibrattion_Val1 ) < 0 || val==0 )
+    {
+        return 0;
+    }
+    if( ( Calibrattion_Val1 + val ) > 4095 || val==4095  )
+    {
+        return 4095;
+    }
+    return ( val + Calibrattion_Val1 );
 }
 
 /*********************************************************************
@@ -179,9 +185,15 @@ u16 Get_ConversionVal1(s16 val)
  */
 u16 Get_ConversionVal2(s16 val)
 {
-    if((val+Calibrattion_Val2)<0|| val==0) return 0;
-    if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
-    return (val+Calibrattion_Val2);
+    if( ( val + Calibrattion_Val2 ) < 0 || val==0 )
+    {
+        return 0;
+    }
+    if( ( Calibrattion_Val2 + val ) > 4095 || val==4095 )
+    {
+        return 4095;
+    }
+    return ( val + Calibrattion_Val2 );
 }
 
 /*********************************************************************
@@ -258,8 +270,9 @@ void ADC1_2_IRQHandler()
  */
 void DMA1_Channel1_IRQHandler()
 {
-    if(DMA_GetITStatus(DMA1_IT_TC1)==SET ){
-        DMA_IT_Flag=1;
+    if(DMA_GetITStatus(DMA1_IT_TC1) == SET)
+    {
+        DMA_IT_Flag = 1;
         DMA_ClearITPendingBit(DMA1_IT_GL1);
 
         Adc_Val[0]=TxBuf[0]&0xffff;

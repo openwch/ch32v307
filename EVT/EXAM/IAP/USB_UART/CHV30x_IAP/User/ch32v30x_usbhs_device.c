@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : ch32v30x_usbhs_device.c
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2024/03/05
+ * Version            : V1.0.1
+ * Date               : 2026/10/16
  * Description        : USBHS
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -21,7 +21,7 @@ __attribute__ ((aligned(4))) UINT8 Ep1Buffer[USBHS_MAX_PACK_SIZE * 2];
 __attribute__ ((aligned(4))) UINT8 Ep2Buffer[USBHS_MAX_PACK_SIZE * 2]; 
 __attribute__ ((aligned(4))) UINT8 Ep3Buffer[USBHS_MAX_PACK_SIZE * 2]; 
 #define pMySetupReqPak        ((PUSB_SETUP_REQ)Ep0Buffer)
-const UINT8 *pDescr;
+static const UINT8 *pDescr;
 volatile UINT8 USBHS_Dev_SetupReqCode = 0xFF; 
 volatile UINT16 USBHS_Dev_SetupReqLen = 0x00; 
 volatile UINT8 USBHS_Dev_SetupReqValueH = 0x00; 

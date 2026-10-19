@@ -415,11 +415,16 @@ void ETH_LedConfiguration(void)
  */
 void ETH_SetClock(void)
 {
+    uint16_t timeout = 10000;
     RCC_PLL3Cmd(DISABLE);
     RCC_PREDIV2Config(RCC_PREDIV2_Div2);                             /* HSE = 8M */
     RCC_PLL3Config(RCC_PLL3Mul_15);                                  /* 4M*15 = 60MHz */
     RCC_PLL3Cmd(ENABLE);
-    while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));
+    do{
+        Delay_Us(10);
+        if( !--timeout )  break;
+    }while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));  //Wait for counters reset to complete
+    if (timeout == 0) printf(" Failed to set PLL3 clock\r\n");
 }
 
 /*********************************************************************
@@ -433,6 +438,8 @@ void ETH_SetClock(void)
  */
 void ETH_LinkUpCfg(uint16_t regval)
 {
+    uint16_t timeout = 1000;
+
     WCHNET_PhyStatus( regval );
     ETH->MACCR &= ~(ETH_Speed_100M|ETH_Speed_1000M);
     phyStatus = PHY_Linked_Status;
@@ -441,7 +448,11 @@ void ETH_LinkUpCfg(uint16_t regval)
     ETH->MACFFR |= (ETH_ReceiveAll_Enable | ETH_PromiscuousMode_Enable);
 
     ETH->MMCCR |= ETH_MMCCR_CR;             //Counters Reset
-    while(ETH->MMCCR & ETH_MMCCR_CR);       //Wait for counters reset to complete
+    do{
+        Delay_Us(10);
+        if( !--timeout )  break;
+    }while(ETH->MMCCR & ETH_MMCCR_CR);  //Wait for counters reset to complete
+    if (timeout == 0) printf(" Failed to reset counters\r\n");
     PhyPolarityDetect = 1;
     LinkSuccTime = LocalTime;
     ETH_Start( );
@@ -564,8 +575,11 @@ void ReInitMACReg(void)
     uint32_t maccr, macmiiar, macffr, machthr, machtlr;
     uint32_t macfcr, macvlantr, dmaomr;
 
-    /* Wait for sending data to complete */
-    while((ETH->DMASR & (7 << 20)) != ETH_DMA_TransmitProcess_Suspended);
+    /* Wait for sending data to complete, give up when the timeout is reached */
+    do{
+        Delay_Us(10);
+        if( !--timeout )  break;
+    }while((ETH->DMASR & (7 << 20)) != ETH_DMA_TransmitProcess_Suspended);
 
     PHY_TR_REVERSE();
 
@@ -582,6 +596,7 @@ void ReInitMACReg(void)
     /* Software reset */
     ETH_SoftwareReset();
     /* Wait for software reset */
+    timeout = 10000;
     do{
         Delay_Us(10);
         if( !--timeout )  break;

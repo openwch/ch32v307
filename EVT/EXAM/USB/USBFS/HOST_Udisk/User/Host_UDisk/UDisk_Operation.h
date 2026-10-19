@@ -31,23 +31,23 @@ extern __attribute__((aligned(4)))  uint8_t  Com_Buffer[ DEF_COM_BUF_LEN ];     
 extern __attribute__((aligned(4)))  uint8_t  DevDesc_Buf[ 18 ];                 // Device Descriptor Buffer
 
 /*******************************************************************************/
-/* 长文件名相关的宏定义极其全局变量 */
-// 长文件名缓冲区从(0到20)*26
+/* Macros and global variables related to long file names */
+// Long file name buffer, from (0 to 20)*26
 #define     LONG_NAME_BUF_LEN       (20*26)
-#define     UNICODE_ENDIAN          0           // 1为UNICDOE大端编码 0为小端
-// 长文件名存放缓冲区(Unicode编码)
+#define     UNICODE_ENDIAN          0           // 11 for UNICODE big-endian encoding, 0 for little-endian
+// Buffer that holds the long file name (Unicode encoding)
 extern uint8_t LongNameBuf[ ];
-// 长文件名(Unicode编码)
+// Long file name (Unicode encoding)
 extern uint8_t LongName[ ];
 #define     LongName_Len            124
 #define     TRUE                    1
 #define     FALSE                   0
 
-// 函数返回
-#define     ERR_NO_NAME             0X44        // 此短文件名没有长文件名或错误的长文件
-#define     ERR_BUF_OVER            0X45        // 长文件缓冲区溢出
-#define     ERR_LONG_NAME           0X46        // 错误的长文件名
-#define     ERR_NAME_EXIST          0X47        // 此短文件名存在
+// Function returns
+#define     ERR_NO_NAME             0X44        // This short file name has no long file name, or the long file name is invalid
+#define     ERR_BUF_OVER            0X45        // Long file name buffer overflow
+#define     ERR_LONG_NAME           0X46        // Invalid long file name
+#define     ERR_NAME_EXIST          0X47        // This short file name exists
 
 /*******************************************************************************/
 /* Extern UDisk Operation Functions */

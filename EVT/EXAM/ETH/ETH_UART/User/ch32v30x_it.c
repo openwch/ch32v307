@@ -17,7 +17,7 @@ void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void DMA1_Channel7_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 /*********************************************************************
  * @fn      NMI_Handler
@@ -42,11 +42,6 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-    printf("HardFault_Handler\r\n");
-
-    printf("mepc  :%08x\r\n", __get_MEPC());
-    printf("mcause:%08x\r\n", __get_MCAUSE());
-    printf("mtval :%08x\r\n", __get_MTVAL());
     NVIC_SystemReset();
     while(1);
 }

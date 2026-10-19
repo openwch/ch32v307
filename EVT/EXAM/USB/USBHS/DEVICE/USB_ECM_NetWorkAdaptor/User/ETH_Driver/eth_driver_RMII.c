@@ -328,9 +328,9 @@ void RecDataPolling(void)
         (pDMARxSet->Status & ETH_DMARxDesc_LS) &&\
         (pDMARxSet->Status & ETH_DMARxDesc_FS) )
         {
-            /* Get the Frame Length of the received packet: substruct 4 bytes of the CRC */
+            /* Get the Frame Length of the received packet: subtract 4 bytes of the CRC */
             length = (pDMARxSet->Status & ETH_DMARxDesc_FL) >> 16;
-            /* Get the addrees of the actual buffer */
+            /* Get the address of the actual buffer */
             buffer = pDMARxSet->Buffer1Addr;
 
             /* Do something*/
@@ -832,7 +832,11 @@ void ReInitMACReg(void)
     uint32_t macfcr, macvlantr, dmaomr;
 
     /* Wait for sending data to complete */
-    while((ETH->DMASR & (7 << 20)) != ETH_DMA_TransmitProcess_Suspended);
+    while(((ETH->DMASR & (7 << 20)) != ETH_DMA_TransmitProcess_Suspended) && --timeout)  Delay_Us( 10 );
+    if( timeout == 0 )
+    {
+        timeout = 10000;
+    }
 
     ETH_Stop();
 

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : lcd.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main Interrupt Service Routines.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -81,7 +81,7 @@ void LCD_DrawLine(u16 x1,u16 y1,u16 x2,u16 y2,u16 color)
 	else {incx=-1;delta_x=-delta_x;}
 	if(delta_y>0)incy=1;
 	else if (delta_y==0)incy=0;//horizontal line
-	else {incy=-1;delta_y=-delta_x;}
+	else {incy=-1;delta_y=-delta_y;}
 	if(delta_x>delta_y)distance=delta_x; //Select the basic incremental coordinate axis
 	else distance=delta_y;
 	for(t=0;t<distance+1;t++)
@@ -292,7 +292,7 @@ void LCD_ShowChinese24x24(u16 x,u16 y,u8 *s,u16 fc,u16 bc,u8 sizey,u8 mode)
 				}
 			}
 		}				  	
-		continue;  //If the corresponding dot matrix font library is found, exit immediately to prevent the impact of multiple Chinese characters being duplicated
+		continue;  
 	}
 } 
 
@@ -349,7 +349,7 @@ void LCD_ShowChinese32x32(u16 x,u16 y,u8 *s,u16 fc,u16 bc,u8 sizey,u8 mode)
 				}
 			}
 		}				  	
-		continue;  //If the corresponding dot matrix font library is found, exit immediately to prevent the impact of multiple Chinese characters being duplicated
+		continue;  
 	}
 }
 
@@ -375,6 +375,7 @@ void LCD_ShowChar(u16 x,u16 y,u8 num,u16 fc,u16 bc,u8 sizey,u8 mode)
 	u16 x0=x;
 	sizex=sizey/2;
 	TypefaceNum=sizex/8*sizey;
+	if(num<' '||num>'~')return;
 	num=num-' ';    //Obtain the offset value
 	LCD_Address_Set(x,y,x+sizex-1,y+sizey-1);  //Set cursor position
 	for(i=0;i<TypefaceNum;i++)
@@ -528,7 +529,8 @@ void LCD_ShowFloatNum1(u16 x,u16 y,float num,u8 len,u16 fc,u16 bc,u8 sizey)
  */
 void LCD_ShowPicture(u16 x,u16 y,u16 length,u16 width,const u8 pic[])
 {
-	u16 i,j,k=0;
+	u16 i,j=0;
+	u32 k=0;
 	LCD_Address_Set(x,y,x+length-1,y+width-1);
 	for(i=0;i<length;i++)
 	{

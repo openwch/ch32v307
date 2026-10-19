@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.2
-* Date               : 2026/01/04
+* Version            : V1.0.3
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,9 +13,9 @@
 #include "string.h"
 
 
-SDIO_InitTypeDef SDIO_InitStructure;
-SDIO_CmdInitTypeDef SDIO_CmdInitStructure;
-SDIO_DataInitTypeDef SDIO_DataInitStructure;
+SDIO_InitTypeDef SDIO_InitStructure={0};
+SDIO_CmdInitTypeDef SDIO_CmdInitStructure={0};
+SDIO_DataInitTypeDef SDIO_DataInitStructure={0};
 
 SD_Error CmdError( void );
 SD_Error CmdResp7Error( void );
@@ -107,7 +107,7 @@ SD_Error eMMC_Init( void )
     }
    SystemInit();
     delay_ms(5);
-    if( ( errorstatus == SD_OK ) || ( SDIO_MULTIMEDIA_CARD == CardType ) )
+    if( errorstatus == SD_OK  )
     {
         if( eMMCCardInfo.CardType == SDIO_STD_CAPACITY_SD_CARD_V1_1 || eMMCCardInfo.CardType == SDIO_STD_CAPACITY_SD_CARD_V2_0 )
         {
@@ -449,8 +449,8 @@ SD_Error eMMC_GetCardInfo(eMMC_CardInfo *eMMC, u32 *CSD_Tab, u32 *CID_Tab, u16 R
     tmp = (u8)((CSD_Tab[2] & 0x0000FF00) >> 8);
     eMMC->eMMC_csd.DeviceSizeMul |= (tmp & 0x80) >> 7;
     eMMC->CardBlockSize = 1 << (eMMC->eMMC_csd.RdBlockLen);
-    eMMC->SectorNums = (u32)(eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[3] << 24) | (u32)(eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[2] << 16) |
-            (u32)(eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[1] << 8) | (u32)(eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[0]);
+    eMMC->SectorNums = ((u32)eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[3] << 24) | ((u32)eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[2] << 16) |
+           ( (u32)eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[1] << 8) | ((u32)eMMC->eMMC_ExtCsd.EXT_CSD.SEC_COUNT[0]);
     eMMC->eMMC_csd.EraseGrSize = (tmp & 0x40) >> 6;
     eMMC->eMMC_csd.EraseGrMul = (tmp & 0x3F) << 1;
 
@@ -968,7 +968,7 @@ SD_Error SD_ReadMultiBlocks( u8 *buf, long long addr, u16 blksize, u32 nblks )
             SDIO->MASK |= ( 1 << 1 ) | ( 1 << 3 ) | ( 1 << 8 ) | ( 1 << 5 ) | ( 1 << 9 );
             SDIO->DCTRL |= 1 << 3;
             SD_BUSY=1;
-            while( ( ( DMA2->INTFR & 0X4000 ) == RESET )&&( TransferEnd == 0 ) && ( TransferError == SD_OK ) && timeout )
+            while( ( ( DMA2->INTFR & 0X2000 ) == RESET )&&( TransferEnd == 0 ) && ( TransferError == SD_OK ) && timeout )
             {
                 timeout--;
             }
@@ -1188,7 +1188,6 @@ SD_Error SD_WriteBlock( u8 *buf, long long addr,  u16 blksize )
         }
         if( timeout == 0 )
         {
-            eMMC_Init();
             return SD_DATA_TIMEOUT;
         }
         timeout = SDIO_DATATIMEOUT;

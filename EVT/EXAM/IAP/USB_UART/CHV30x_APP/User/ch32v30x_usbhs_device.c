@@ -21,7 +21,7 @@ __attribute__ ((aligned(4))) UINT8 Ep1Buffer[USBHS_MAX_PACK_SIZE * 2];
 __attribute__ ((aligned(4))) UINT8 Ep2Buffer[USBHS_MAX_PACK_SIZE * 2]; 
 __attribute__ ((aligned(4))) UINT8 Ep3Buffer[USBHS_MAX_PACK_SIZE * 2]; 
 #define pMySetupReqPak        ((PUSB_SETUP_REQ)Ep0Buffer)
-const UINT8 *pDescr;
+static const UINT8 *pDescr;
 volatile UINT8 USBHS_Dev_SetupReqCode = 0xFF; 
 volatile UINT16 USBHS_Dev_SetupReqLen = 0x00; 
 volatile UINT8 USBHS_Dev_SetupReqValueH = 0x00; 

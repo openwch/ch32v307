@@ -16,9 +16,12 @@ void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
-u8 publishValid = 0;
-u16 timeCnt = 0;
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+/* publishValid and timeCnt are shared between the TIM2 interrupt and the main
+ * loop, so they are declared volatile. The interrupt only sets publishValid,
+ * the main loop is the one that consumes it and clears it. */
+volatile u8 publishValid = 0;
+volatile u16 timeCnt = 0;
 /*********************************************************************
  * @fn      NMI_Handler
  *
@@ -42,11 +45,6 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-    printf("HardFault_Handler\r\n");
-
-    printf("mepc  :%08x\r\n", __get_MEPC());
-    printf("mcause:%08x\r\n", __get_MCAUSE());
-    printf("mtval :%08x\r\n", __get_MTVAL());
     NVIC_SystemReset();
     while(1);
 }
@@ -87,7 +85,7 @@ void TIM2_IRQHandler(void)
 {
     if(!publishValid){            //Set the publishValid flag every 20s
         timeCnt += 10;
-        if(timeCnt > 20000){
+        if(timeCnt >= 20000){
             publishValid = 1;
             timeCnt = 0;
         }

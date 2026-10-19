@@ -133,11 +133,11 @@ void ETH_HashFilter(const uint8_t *MACAddr)
     }
     if(CHECK_MAC_ISMULTICAST(MACAddr))
     {
-        ETH->MACFFR &= ~((1 << 0) | (1 << 3) | (1 << 4) | (1 << 10));
+        ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_DAIF | ETH_MACFFR_PAM | ETH_MACFFR_HPF);
         ETH->MACFFR |= ETH_MulticastFramesFilter_HashTable;
     }
     else {
-        ETH->MACFFR &= ~((1 << 0) | (1 << 3) | (1 << 10));
+        ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_DAIF | ETH_MACFFR_HPF);
         ETH->MACFFR |= ETH_UnicastFramesFilter_HashTable;
     }
     ETH->MACFFR &= ~ETH_ReceiveAll_Enable;
@@ -150,14 +150,18 @@ void ETH_HashFilter(const uint8_t *MACAddr)
  *
  * @param   MACAddr    MAC address pointer
  *
- * @return  the index of MAC address register.
+ * @return  the index of MAC address register,
+ *          MAC_FILTER_REG_NUM if no free register is available.
  */
 uint8_t ETH_PerfectFilter(const uint8_t *MACAddr)
 {
     uint8_t i;
+    /* MACA0HR/LR ~ MACA3HR/LR are traversed as one continuous, word aligned
+     * region: HR at MACAxHR, LR at MACAxHR + 4. Recheck this layout if the
+     * device or the register definition header changes. */
     uint32_t *RegPtr = (uint32_t *)&ETH->MACA0LR;
 
-    for(i = 0; i < 4; i++)
+    for(i = 0; i < MAC_FILTER_REG_NUM; i++)
     {
         if(*RegPtr == 0xffffffff)
         {
@@ -165,23 +169,22 @@ uint8_t ETH_PerfectFilter(const uint8_t *MACAddr)
             *RegPtr = (uint32_t)(MACAddr[0] | (MACAddr[1]<<8) | (MACAddr[2]<<16) | (MACAddr[3]<<24));
             if(i != 0)
             {
-                *(RegPtr - 1) |= 1<<31;
-                *(RegPtr - 1) &= ~(1<<30);
+                /* MACA1 ~ MACA3: address enable, destination address filter */
+                *(RegPtr - 1) |= ETH_MACA1HR_AE;
+                *(RegPtr - 1) &= ~ETH_MACA1HR_SA;
             }
             if(CHECK_MAC_ISMULTICAST(MACAddr))
             {
-                ETH->MACFFR &= ~((1 << 0) | (1 << 2) | (1 << 3) | (1 << 4));
+                ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_HM | ETH_MACFFR_DAIF | ETH_MACFFR_PAM);
             }
             else {
-                ETH->MACFFR &= ~((1 << 0) | (1 << 1) | (1 << 3));
+                ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_HU | ETH_MACFFR_DAIF);
             }
             ETH->MACFFR &= ~ETH_ReceiveAll_Enable;
             break;
         }
         RegPtr += 2;
     }
-    if(i == 4)
-        printf("MAC address register is full !\r\n");
     return i;
 }
 
@@ -197,9 +200,10 @@ uint8_t ETH_PerfectFilter(const uint8_t *MACAddr)
  */
 void ETH_ClearMACAddrReg(uint8_t index)
 {
+    /* Same continuous, word aligned MACAxHR/LR layout as ETH_PerfectFilter */
     uint32_t *RegPtr = (uint32_t *)&ETH->MACA0HR;
 
-    if(index < 4)
+    if(index < MAC_FILTER_REG_NUM)
     {
         RegPtr += index * 2;
         *RegPtr = 0xffff;
@@ -225,13 +229,13 @@ void ETH_HashOrPerfectFilter(uint8_t mode)
     switch (mode)
     {
         case UNICAST_HashOrPerfectFilter:
-            ETH->MACFFR &= ~((1 << 0) | (1 << 3));
-            ETH->MACFFR |= (1 << 1) | (1 << 10);
+            ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_DAIF);
+            ETH->MACFFR |= ETH_MACFFR_HU | ETH_MACFFR_HPF;
             break;
 
         case MULTICAST_HashOrPerfectFilter:
-            ETH->MACFFR &= ~((1 << 0) | (1 << 3) | (1 << 4));
-            ETH->MACFFR |= (1 << 2) | (1 << 10);
+            ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_DAIF | ETH_MACFFR_PAM);
+            ETH->MACFFR |= ETH_MACFFR_HM | ETH_MACFFR_HPF;
             break;
 
         default:
@@ -272,29 +276,31 @@ void ETH_BroadcastFilter(FunctionalState NewState)
  *
  * @param   MACAddr    MAC address pointer
  *
- * @return  the index of MAC address register.
+ * @return  the index of MAC address register,
+ *          MAC_FILTER_REG_NUM if no free register is available.
+ *          Only MACA1 ~ MACA3 are used, MACA0 does not support
+ *          source address filtering.
  */
 uint8_t ETH_SrcAddrPerfectFilter(const uint8_t *MACAddr)
 {
     uint8_t i = 0;
     uint32_t *RegPtr = (uint32_t *)&ETH->MACA1LR;
 
-    for(i = 1; i < 4; i++)
+    for(i = 1; i < MAC_FILTER_REG_NUM; i++)
     {
         if(*RegPtr == 0xffffffff)
         {
             *(RegPtr - 1) = (uint32_t)(((MACAddr[5]<<8)) | MACAddr[4]);
             *RegPtr = (uint32_t)(MACAddr[0] | (MACAddr[1]<<8) | (MACAddr[2]<<16) | (MACAddr[3]<<24));
-            *(RegPtr - 1) |= (1<<31) | (1<<30);
+            /* address enable, source address filter */
+            *(RegPtr - 1) |= ETH_MACA1HR_AE | ETH_MACA1HR_SA;
 
-            ETH->MACFFR &= ~((1 << 0) | (1 << 8));
-            ETH->MACFFR |= 1 << 9;
+            ETH->MACFFR &= ~(ETH_MACFFR_PM | ETH_MACFFR_SAIF);
+            ETH->MACFFR |= ETH_MACFFR_SAF;
             ETH->MACFFR &= ~ETH_ReceiveAll_Enable;
             break;
         }
         RegPtr += 2;
     }
-    if(i == 4)
-        printf("MAC address register is full !\r\n");
     return i;
 }

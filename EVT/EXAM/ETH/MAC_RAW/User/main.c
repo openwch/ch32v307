@@ -93,7 +93,7 @@ void TIM2_Init(void)
 /*********************************************************************
  * @fn      main
  *
- * @brief   Main program
+ * @brief   Main program.
  *
  * @return  none
  */
@@ -104,15 +104,15 @@ int main(void)
 
     SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);                                  //USART initialize
-    printf("MAC RAW Test\r\n");
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+    USART_Printf_Init(115200);	
+    printf("MAC RAW\r\n");
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
     WCHNET_GetMacAddr(MACAddr);                                 //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++)
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     ETH_Init(MACAddr);
     /* change source MAC address */
@@ -126,7 +126,7 @@ int main(void)
         {
             MACRAW_Tx(ARPPackage, sizeof(ARPPackage));
             if(++PktCnt % 100 == 0)
-                printf("PktCnt:%d\r\n",PktCnt);
+                printf("PktCnt:%lu\r\n",(unsigned long)PktCnt);
             Delay_Ms(100);
         }
     }

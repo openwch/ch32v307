@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : nand_flash.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the NANDFLASH.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,10 +24,10 @@ u32 ReadEccData[4];
  */
 u8 NAND_Init(void)
 {
-    FSMC_NANDInitTypeDef  FSMC_NANDInitStructure;
-    FSMC_NAND_PCCARDTimingInitTypeDef  ComSpaceTiming;
-    FSMC_NAND_PCCARDTimingInitTypeDef  AttSpaceTiming;
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    FSMC_NANDInitTypeDef  FSMC_NANDInitStructure = {0};
+    FSMC_NAND_PCCARDTimingInitTypeDef  ComSpaceTiming = {0};
+    FSMC_NAND_PCCARDTimingInitTypeDef  AttSpaceTiming = {0};
+    GPIO_InitTypeDef  GPIO_InitStructure = {0};
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE,ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_FSMC,ENABLE);
@@ -202,29 +202,6 @@ u8 NAND_Reset(void)
 }
 
 /*********************************************************************
- * @fn      NAND_WaitRB
- *
- * @brief   Wait RB signal valid
- *
- * @param   rb -
- *            0- Low level active
- *            1- High level active
- *
- * @return  0 - success
- *          1 - ERR
- */
-u8 NAND_WaitRB(vu8 rb)
-{
-    vu16 time=0;
-    while(time<10000)
-    {
-        time++;
-        GPIO_ReadInputDataBit(GPIOD,  GPIO_Pin_6);
-    }
-    return 1;
-}
-
-/*********************************************************************
  * @fn      NAND_Delay
  *
  * @brief   Delay function
@@ -349,7 +326,7 @@ u8 NAND_ReadPageWithEcc(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToRead)
            Delay_Ms(10);
            for (int p= 0;  p < 4; p++)
            {
-               SpareBuf[p] = *(vu8*)(NAND_ADDRESS+2*i);
+               SpareBuf[p] = *(vu8*)(NAND_ADDRESS+2*k);
 
         }
            Eccdata=SpareBuf[0]+(SpareBuf[1]<<8)+(SpareBuf[2]<<16)+(SpareBuf[3]<<24);
@@ -482,7 +459,7 @@ u8 NAND_WritePagewithEcc(u32 PageNum,u16 ColNum,u8 *pBuffer,u16 NumByteToWrite)
         buf[3]=(WriteEccData[k]>>24)&0xFF;
         for(int p=0;p<4;p++)
         {
-            *(vu8*)(NAND_ADDRESS+2*i)=buf[p];
+            *(vu8*)(NAND_ADDRESS+2*k)=buf[p];
         }
         while(FSMC_GetFlagStatus(FSMC_Bank2_NAND, FSMC_FLAG_FEMPT)==RESET);
         *(vu8*)(NAND_ADDRESS|NAND_CMD)=NAND_WRITE_TURE1;
@@ -548,8 +525,9 @@ u32 CheckEcc( u32  data)
           else {
               return 0;
           }
-          printf("Error location: %d\r\n",location);
+
       }
+    printf("Error location: %d\r\n",location);
   }
   return location;
 }

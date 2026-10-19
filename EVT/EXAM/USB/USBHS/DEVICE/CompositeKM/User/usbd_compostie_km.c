@@ -265,7 +265,7 @@ void KB_Sleep_Wakeup_Cfg( void )
 {
     EXTI_InitTypeDef EXTI_InitStructure = { 0 };
 
-    /* Enable GPIOB clock */
+    /* Enable AFIO clock */
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO, ENABLE );
 
     GPIO_EXTILineConfig( GPIO_PortSourceGPIOB, GPIO_PinSource12 );
@@ -355,7 +355,7 @@ void KB_Scan_Handle( void )
                 /* Determine that there is at least one key is pressed or released */
                 if( ( KB_Scan_Result & ( 1 << i ) ) != ( KB_Scan_Last_Result & ( 1 << i ) ) )
                 {
-                    if( ( KB_Scan_Result & ( 1 << i ) ) )           // Key press
+                    if( ( KB_Scan_Result & ( 1 << i ) ) )           // Key release
                     {
                         if( i == 12 )
                         {
@@ -404,12 +404,15 @@ void KB_Scan_Handle( void )
                         }
                         else
                         {
-                            memcpy( &KB_Data_Pack[ j ], &KB_Data_Pack[ j + 1 ], ( 8 - j - 1 ) );
+                            memmove( &KB_Data_Pack[ j ], &KB_Data_Pack[ j + 1 ], ( 8 - j - 1 ) );
                             KB_Data_Pack[ 7 ] = 0;
                         }
-                        key_cnt--;
+                        if( key_cnt )
+                        {
+                            key_cnt--;
+                        }
                     }
-                    else                                            // Key release
+                    else                                            // Key press
                     {
                         if( i == 12 )
                         {
@@ -532,7 +535,7 @@ void MS_Sleep_Wakeup_Cfg( void )
 {
     EXTI_InitTypeDef EXTI_InitStructure = { 0 };
 
-    /* Enable GPIOC clock */
+    /* Enable AFIO clock */
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO, ENABLE );
 
     GPIO_EXTILineConfig( GPIO_PortSourceGPIOA, GPIO_PinSource4 );

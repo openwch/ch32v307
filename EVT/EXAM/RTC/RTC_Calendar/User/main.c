@@ -97,7 +97,7 @@ u8 RTC_Init(void)
     RCC_RTCCLKCmd(ENABLE);
     RTC_WaitForLastTask();
     RTC_WaitForSynchro();
-    //		RTC_ITConfig(RTC_IT_ALR, ENABLE);
+    //RTC_ITConfig(RTC_IT_ALR, ENABLE);
     RTC_ITConfig(RTC_IT_SEC, ENABLE);
     RTC_WaitForLastTask();
     RTC_EnterConfigMode();

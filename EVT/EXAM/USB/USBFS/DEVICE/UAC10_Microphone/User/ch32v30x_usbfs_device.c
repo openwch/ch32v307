@@ -333,6 +333,10 @@ void USBFS_IRQHandler( void )
                                             break;
                                     }
                                 }
+                                else
+                                {
+                                    errflag = 0xFF;
+                                }
                             }
                             else
                             {
@@ -341,7 +345,12 @@ void USBFS_IRQHandler( void )
                             }
                         }
 
-                        if( USBFS_SetupReqLen == 0 )
+                        if( errflag == 0xFF )
+                        {
+                            USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG | USBFS_UEP_T_RES_STALL;
+                            USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG | USBFS_UEP_R_RES_STALL;
+                        }
+                        else if( USBFS_SetupReqLen == 0 )
                         {
                             USBFSD->UEP0_TX_LEN  = 0;
                             USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG | USBFS_UEP_T_RES_ACK;
@@ -396,6 +405,10 @@ void USBFS_IRQHandler( void )
                                 errflag = 0xFF;
                                 break;
                         }
+                    }
+                    else
+                    {
+                        errflag = 0xFF;
                     }
                 }
                 else
@@ -497,6 +510,10 @@ void USBFS_IRQHandler( void )
                                 {
                                     /* clear usb sleep status, device not prepare to sleep */
                                     USBFS_DevSleepStatus &= ~0x01;
+                                }
+                                else
+                                {
+                                    errflag = 0xFF;
                                 }
                             }
                             else if( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )

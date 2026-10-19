@@ -29,7 +29,7 @@ const uint8_t  MyDevDescr[ ] =
     0x01,                                               // iManufacturer (String Index)
     0x02,                                               // iProduct (String Index)
     0x03,                                               // iSerialNumber (String Index)
-    0x01,                                               // bNumConfigurations 2
+    0x01,                                               // bNumConfigurations 1
 };
 
 /* Configuration Descriptor(HS) */
@@ -93,7 +93,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x01,                           // bNumInterfaces
     0x01,                           // bConfigurationValue
     0x00,                           // iConfiguration (String Index)
-    0x80,                           // bmAttributes Remote Wakeup
+    0x80,                           // bmAttributes (bit7 reserved = 1, no remote wakeup)
     0x23,                           // bMaxPower 70mA
 
     /* Interface Descriptor */

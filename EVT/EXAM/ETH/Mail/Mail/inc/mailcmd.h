@@ -14,7 +14,11 @@
 
 #include "mail.h"
 
-extern char send_buff[];
+/*Size of the command buffer. Declared here so that every user of send_buff
+ *can take its size with sizeof() instead of an unrelated length.*/
+#define SEND_BUFF_SIZE      512
+
+extern char send_buff[SEND_BUFF_SIZE];
 extern char EncodeHostName[];
 
 extern const char *g_autograph2;
@@ -25,11 +29,11 @@ extern const char *g_autograph1;
 
 void Base64Encode(char *src, u16 src_len, char *dst);
 
-void Base64Decode(char *src, u16 src_len, char *dst);
+void Base64Decode(char *src, u16 src_len, char *dst, u16 dst_cap);
 
-void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine );
+void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine, u16 dst_cap );
 
-void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen );
+void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen, u16 dst_cap );
 
 void WCHNET_XToChar( char  *dat,char  *p,char len);
 
@@ -37,7 +41,7 @@ void WCHNET_SMTPInit(void);
 
 void WCHNET_SMTPIsMIME(void);
 
-void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader );
+void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader, u16 dst_cap );
 
 void WCHNET_SMTPAttachEnd( u16 *EndSize, char *pAttachEnd );
 

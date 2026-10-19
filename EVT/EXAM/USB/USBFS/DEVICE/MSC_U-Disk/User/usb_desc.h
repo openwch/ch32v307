@@ -30,10 +30,10 @@
 /* usb device endpoint size define */
 #define DEF_USBD_UEP0_SIZE           64     /* usb hs/fs device end-point 0 size */
 /* HS */
-#define DEF_USBD_HS_PACK_SIZE        512    /* usb hs device max bluk/int pack size */
+#define DEF_USBD_HS_PACK_SIZE        512    /* usb hs device max bulk/int pack size */
 #define DEF_USBD_HS_ISO_PACK_SIZE    1024   /* usb hs device max iso pack size */
 /* FS */
-#define DEF_USBD_FS_PACK_SIZE        64     /* usb fs device max bluk/int pack size */
+#define DEF_USBD_FS_PACK_SIZE        64     /* usb fs device max bulk/int pack size */
 #define DEF_USBD_FS_ISO_PACK_SIZE    1023   /* usb fs device max iso pack size */
 /* LS */
 #define DEF_USBD_LS_UEP0_SIZE        8      /* usb ls device end-point 0 size */

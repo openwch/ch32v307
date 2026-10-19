@@ -192,7 +192,7 @@ int MQTTSerialize_disconnect(unsigned char* buf, int buflen)
 
 
 /**
-  * Serializes a disconnect packet into the supplied buffer, ready for writing to a socket
+  * Serializes a pingreq packet into the supplied buffer, ready for writing to a socket
   * @param buf the buffer into which the packet will be serialized
   * @param buflen the length in bytes of the supplied buffer, to avoid overruns
   * @return serialized length, or error if 0

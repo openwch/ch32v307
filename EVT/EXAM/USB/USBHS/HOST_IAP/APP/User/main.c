@@ -133,7 +133,7 @@ uint8_t IAP_Flash_Erase( uint32_t address, uint32_t length )
         return 0xFF;
     }
     /* Verify Address, No flash operation if the address is out of range */
-    if( ((erase_addr >= DEF_APP_CODE_START_ADDR) && (erase_addr <= DEF_APP_CODE_END_ADDR)) || ((erase_addr >= DEF_VERIFY_CODE_START_ADDR) && (erase_addr <= DEF_VERIFY_CODE_END_ADDR)) )
+    if( ((erase_addr >= DEF_APP_CODE_START_ADDR) && ((erase_addr + erase_len) <= DEF_APP_CODE_END_ADDR)) || ((erase_addr >= DEF_VERIFY_CODE_START_ADDR) && ((erase_addr + erase_len) <= DEF_VERIFY_CODE_END_ADDR)) )
     {
         for( i=0; i<page_cnts; i++ )
         {
@@ -147,6 +147,11 @@ uint8_t IAP_Flash_Erase( uint32_t address, uint32_t length )
             FLASH_ErasePage_Fast( page_addr );
             page_addr += DEF_FLASH_PAGE_SIZE;
         }
+        FLASH_Lock_Fast( );
+    }
+    else
+    {
+        return 0xC0;
     }
 
     return 0;

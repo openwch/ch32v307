@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/01/09
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -19,9 +19,9 @@
 #include "debug.h"
 
 /* Global Variable */
-u16 ADC_val[2];
-s16 Calibrattion_Val1 = 0;
-s16 Calibrattion_Val2 = 0;
+vu16 ADC_val[2];
+vs16 Calibrattion_Val1 = 0;
+vs16 Calibrattion_Val2 = 0;
 
 /*********************************************************************
  * @fn      ADC_Function_Init
@@ -94,9 +94,9 @@ void  ADC_Function_Init(void)
 }
 
 /*********************************************************************
- * @fn      TIM2_PWM_In
+ * @fn      TIM2_PWM_Init
  *
- * @brief   TIM2,PWM input mode init,Only CH1 and CH2 channels can be used.
+ * @brief   TIM2,PWM input mode init.
  *
  * @param   arr - Auto reload values
  *          psc - Prescaler value
@@ -104,19 +104,13 @@ void  ADC_Function_Init(void)
  *
  * @return  none
  */
-void TIM2_PWM_In( u16 arr, u16 psc, u16 ccp )
+void TIM2_PWM_Init( u16 arr, u16 psc, u16 ccp )
 {
-    GPIO_InitTypeDef GPIO_InitStructure={0};
-    TIM_OCInitTypeDef TIM_OCInitStructure={0};
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure={0};
 
-    RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA, ENABLE );
+    TIM_OCInitTypeDef       TIM_OCInitStructure = {0};
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure = {0};
+
     RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM2, ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init( GPIOA, &GPIO_InitStructure );
 
     TIM_TimeBaseInitStructure.TIM_Period = arr;
     TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
@@ -133,9 +127,7 @@ void TIM2_PWM_In( u16 arr, u16 psc, u16 ccp )
 
     TIM_ARRPreloadConfig( TIM2, ENABLE );
 
-    TIM_SelectOutputTrigger( TIM2, TIM_TRGOSource_Update );
-
-    TIM_Cmd( TIM2, ENABLE );
+    TIM_Cmd(TIM2, ENABLE);
 }
 
 /*********************************************************************
@@ -147,11 +139,17 @@ void TIM2_PWM_In( u16 arr, u16 psc, u16 ccp )
  *
  * @return  val+Calibrattion_Val - Conversion Value.
  */
-u16 Get_ConversionVal1(s16 val)
+u16 Get_ConversionVal1( s16 val )
 {
-	if((val+Calibrattion_Val1)<0|| val==0) return 0;
-	if((Calibrattion_Val1+val)>4095||val==4095) return 4095;
-	return (val+Calibrattion_Val1);
+    if( ( val + Calibrattion_Val1 ) < 0 || val==0)
+    {
+        return 0;
+    }
+    if( ( Calibrattion_Val1 + val ) > 4095 || val==4095 )
+    {
+        return 4095;
+    }
+    return ( val + Calibrattion_Val1 );
 }
 
 /*********************************************************************
@@ -163,11 +161,17 @@ u16 Get_ConversionVal1(s16 val)
  *
  * @return  val+Calibrattion_Val - Conversion Value.
  */
-u16 Get_ConversionVal2(s16 val)
+u16 Get_ConversionVal2( s16 val )
 {
-    if((val+Calibrattion_Val2)<0|| val==0) return 0;
-    if((Calibrattion_Val2+val)>4095||val==4095) return 4095;
-    return (val+Calibrattion_Val2);
+    if( ( val + Calibrattion_Val2 ) < 0 || val==0)
+    {
+        return 0;
+    }
+    if( ( Calibrattion_Val2 + val ) > 4095 || val==4095)
+    {
+        return 4095;
+    }
+    return ( val + Calibrattion_Val2 );
 }
 
 /*********************************************************************
@@ -187,7 +191,7 @@ int main(void)
 	ADC_Function_Init();
 	printf("CalibrattionValue1:%d\n", Calibrattion_Val1);
 	printf("CalibrattionValue2:%d\n", Calibrattion_Val2);
-	TIM2_PWM_In( 600, 48000-1, 300 );
+    TIM2_PWM_Init( 600, 48000 - 1, 300 );
 	while(1)
 	{
         while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_JEOC )){/*printf("wait\r\n");*/};

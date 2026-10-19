@@ -87,8 +87,11 @@ void WCHNET_CreateTcpSocketListen(void)
     TmpSocketInf.SourPort = HTTP_SERVER_PORT;
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     i = WCHNET_SocketCreat(&SocketIdForListen, &TmpSocketInf);
-    printf("SocketIdForListen %d\r\n", SocketIdForListen);
     mStopIfError(i);
+    if (i != WCHNET_ERR_SUCCESS) {
+        return;
+    }
+    printf("SocketIdForListen %d\r\n", SocketIdForListen);
     i = WCHNET_SocketListen(SocketIdForListen);
     mStopIfError(i);
 }
@@ -111,15 +114,18 @@ void WCHNET_CreateCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport)
     SOCK_INF TmpSocketInf;
 
     memset((void *) &TmpSocketInf, 0, sizeof(SOCK_INF));
-    printf("desport: %d, srcport: %d\n", Desport, Srcport);
-    printf("desip:%d.%d.%d.%d\n", Desip[0], Desip[1], Desip[2], Desip[3]);
-    printf("mode %d\n", mode);
+    printf("desport: %d, srcport: %d\r\n", Desport, Srcport);
+    printf("desip:%d.%d.%d.%d\r\n", Desip[0], Desip[1], Desip[2], Desip[3]);
+    printf("mode %d\r\n", mode);
     switch (mode) {
         case MODE_TCPSERVER:
             TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
             TmpSocketInf.SourPort = Srcport;
             i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
             mStopIfError(i);
+            if (i != WCHNET_ERR_SUCCESS) {
+                return;
+            }
             i = WCHNET_SocketListen(SocketId);
             mStopIfError(i);
             break;
@@ -132,6 +138,9 @@ void WCHNET_CreateCfgSocket(u8 mode, u8 *Desip, u16 Desport, u16 Srcport)
             TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
             i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
             mStopIfError(i);
+            if (i != WCHNET_ERR_SUCCESS) {
+                return;
+            }
             i = WCHNET_SocketConnect(SocketId);
             mStopIfError(i);
             break;
@@ -152,9 +161,14 @@ void WCHNET_RestoreDefaults(void)                                       /*WCHNET
 {
     WCHNET_GetMacAddr(&Basic_Default[2]);
     WEB_ERASE( PAGE_WRITE_START_ADDR, FLASH_PAGE_SIZE * 3);
-    WEB_WRITE( BASIC_CFG_ADDR, Basic_Default, BASIC_CFG_LEN);
-    WEB_WRITE( PORT_CFG_ADDR, Port_Default, PORT_CFG_LEN);
-    WEB_WRITE( LOGIN_CFG_ADDR, Login_Default, LOGIN_CFG_LEN);
+    /*A failed write leaves the configuration invalid, resetting here would
+     *only loop back into this function.*/
+    if((WEB_WRITE( BASIC_CFG_ADDR, Basic_Default, BASIC_CFG_LEN) != FLASH_COMPLETE) || \
+       (WEB_WRITE( PORT_CFG_ADDR, Port_Default, PORT_CFG_LEN) != FLASH_COMPLETE) || \
+       (WEB_WRITE( LOGIN_CFG_ADDR, Login_Default, LOGIN_CFG_LEN) != FLASH_COMPLETE)) {
+        printf("write default cfg failed\r\n");
+        while(1);
+    }
     NVIC_SystemReset();
 }
 
@@ -269,11 +283,11 @@ int main(void)
     USART_Printf_Init(115200);                                                  //USART initialize
     GPIOInit();
     printf("Web Server\r\n");
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n", WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if (WCHNET_LIB_VER != WCHNET_GetVer()) {
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     /*After the button(PB6) is pressed, initialize
      * WCHNET and execute the default configuration*/
@@ -301,17 +315,22 @@ int main(void)
     printf("ip: ");
     for (i = 0; i < 4; i++)
         printf("%d.", IPAddr[i]);
-    printf("\n");
+    printf("\r\n");
 
     printf("mac addr: ");
-    for(i = 0; i < 6; i++) 
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);                         //Ethernet library initialize
     mStopIfError(i);
-    if (i == WCHNET_ERR_SUCCESS)
+    if (i == WCHNET_ERR_SUCCESS) {
         printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
     WCHNET_CreateTcpSocketListen();                                             //Create  TCP Socket
 
     DESPORT = Port_CfgBuf.des_port[0] * 256 + Port_CfgBuf.des_port[1];

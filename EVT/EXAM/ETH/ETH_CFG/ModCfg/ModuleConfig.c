@@ -93,15 +93,23 @@ void CFG_READ( u32 StartAddr, u8 *Buffer, u32 Length )
  *
  * @brief   Parse Configuration command
  *
- * @param   buf - data buff.
+ * @param   buf    - data buff.
+ *          buflen - number of valid bytes in buf (length actually received)
+ *          sockid - socket the datagram arrived on, used for the answer
  *
- * @return  opcode
+ * @return  0 - the datagram has been handled, nothing else to do.
+ *          1 - the new configuration is in effect, the main loop has to
+ *              reset the module so that it is taken into account.
  */
-u8 ParseConfigbuf(u8 *buf)
-{   
+u8 ParseConfigbuf(u8 *buf, u32 buflen, u8 sockid)
+{
     u16 i;
     u32 len;
+    int n;
     pnet_comm net = (pnet_comm)buf;
+    char name[sizeof(CFG->module_name) + 1];
+
+    if((buf == NULL) || (buflen < sizeof(net_comm))) return 0;
 
     i = memcmp(net->flag,NET_MODULE_FLAG,sizeof(NET_MODULE_FLAG));
     if(i) return 0;
@@ -110,14 +118,21 @@ u8 ParseConfigbuf(u8 *buf)
         case NET_MODULE_CMD_SEARCH :                                             //search module
             memcpy(net->id,MACAddr,6);
             net->cmd = NET_MODULE_ACK_SEARCH ;
-            sprintf((char *)net->dat,"%d.%d.%d.%d",(u16)CFG->src_ip[0],
-                   (u16)CFG->src_ip[1],(u16)CFG->src_ip[2],(u16)CFG->src_ip[3]);
-            net->len = strlen((char *)net->dat);
-            sprintf((char*)&net->dat[net->len + 1],"%s",CFG->module_name);
-            net->len += strlen((char*)&net->dat[net->len + 1]) + 1;
+            memcpy(name, CFG->module_name, sizeof(CFG->module_name));
+            name[sizeof(CFG->module_name)] = '\0';
+
+            n = snprintf((char *)net->dat, sizeof(net->dat), "%d.%d.%d.%d",
+                         (u16)CFG->src_ip[0], (u16)CFG->src_ip[1],
+                         (u16)CFG->src_ip[2], (u16)CFG->src_ip[3]);
+            if((n < 0) || ((u32)n + 1 >= sizeof(net->dat))) return 0;
+            net->len = (u8)n;
+            n = snprintf((char *)&net->dat[net->len + 1],
+                         sizeof(net->dat) - net->len - 1, "%s", name);
+            if(n < 0) return 0;
+            net->len = (u8)(net->len + n + 1);
             len = sizeof(net_comm);
-            WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("**********CMD_SEARCH**********\n");
+            WCHNET_SocketUdpSendTo(sockid,buf,&len,brocastIp,brocastPort);
+            printf("**********CMD_SEARCH**********\r\n");
             return 0;
 
         case NET_MODULE_CMD_SET :                                                //Configure module parameters
@@ -129,10 +144,11 @@ u8 ParseConfigbuf(u8 *buf)
             CFG->cfg_flag[0]=checkcode1;
             CFG->cfg_flag[1]=checkcode2;
             CFG_ERASE(PAGE_WRITE_START_ADDR,FLASH_PAGE_SIZE);
-            CFG_WRITE(PAGE_WRITE_START_ADDR,Configbuf,MODULE_CFG_LEN );
+            if(CFG_WRITE(PAGE_WRITE_START_ADDR,Configbuf,MODULE_CFG_LEN ) != FLASH_COMPLETE)
+                printf("write module cfg failed\r\n");       
             len = sizeof(net_comm);
-            WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("**********CMD_SET*************\n");
+            WCHNET_SocketUdpSendTo(sockid,buf,&len,brocastIp,brocastPort);
+            printf("**********CMD_SET*************\r\n");
             return 1;
 
         case NET_MODULE_CMD_GET :                                                //Get module configuration
@@ -145,18 +161,20 @@ u8 ParseConfigbuf(u8 *buf)
             net->len = (MODULE_CFG_LEN-2);
             memcpy(net->dat,Configbuf,(MODULE_CFG_LEN-2))  ;
             len = sizeof(net_comm);
-            WCHNET_SocketUdpSendTo(0,buf,&len,brocastIp,brocastPort);
-            printf("************CMD_GET***********\n");
+            WCHNET_SocketUdpSendTo(sockid,buf,&len,brocastIp,brocastPort);
+            printf("************CMD_GET***********\r\n");
             return 0;
-         
+
         case NET_MODULE_CMD_RESET :                                              //reset module
             i = memcmp(net->id,MACAddr,6);
             if(i) return 0;
             CFG_ERASE(PAGE_WRITE_START_ADDR,FLASH_PAGE_SIZE);
-            CFG_WRITE(PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN );
-            net->cmd = NET_MODULE_ACK_RESET ;
+            if(CFG_WRITE(PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN ) != FLASH_COMPLETE)
+                printf("restore module cfg failed\r\n");
+            net->cmd = NET_MODULE_ACK_RESET;
             len = sizeof(net_comm);
-            printf("**********CMD_RESET***********\n");
+            WCHNET_SocketUdpSendTo(sockid,buf,&len,brocastIp,brocastPort);
+            printf("**********CMD_RESET***********\r\n");
             return 1;
         default:
             return 0 ;

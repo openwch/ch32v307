@@ -32,18 +32,18 @@
  *How to Change Interface(Phy)
  *  1,There are 5 types of interfaces, they are 10M internal, CH32V317(100M internal), MII, RMII and RGMII;
  *  2,If you need to use one of them, such as eth_driver_10M.c, right-click on the corresponding file, select 'Include/Exclude From Build', 
- *  include it to bulid, and ensure that the others are not included. 
+ *  include it to build, and ensure that the others are not included. 
  *  3,Rebuild the project;
  */
 
 /*What changed: 
  * 1,Update eth-drivers, use the same way as Ethernet Evts.
- * 2,Adjust the writing of other code according to the new stye of eth-drivers;
+ * 2,Adjust the writing of other code according to the new style of eth-drivers;
  * */
 
 /*
-此选项用于控制是否使用额外的处理，当您使用旧版本芯片或RTL芯片时，或当使用时遇到Link反复连接up和down时，请置此选项为0。此选项仅当您使用MII或RMII接口的芯片时有效。 
-特别注意：当此选项为0时，一些额外的措施将失效，可能存在一些连接性或其它问题。
+This option controls whether extra processing is used. Set it to 0 when using an older or RTL version of the chip, or when the link repeatedly goes up and down. It is only effective on chips with an MII or RMII interface. 
+Note: when this option is 0, some extra measures are disabled and connectivity or other problems may occur.
 This option is used to control whether additional processing is used. When using an older version chip or RTL chip, or when encountering Link repeatedly connecting up and down during use, please set this option to 0. This option is only valid when you are using chips with MII or RMII interfaces.
 Special note: When this option is set to 0, some additional measures may fail and there may be connectivity or other issues.*/
 

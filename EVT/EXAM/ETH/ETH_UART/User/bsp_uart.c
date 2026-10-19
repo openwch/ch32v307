@@ -58,7 +58,9 @@ void UART_DMA_Init(void)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART2->DATAR);
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_data_t.TX_buffer;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-    //DMA_InitStructure.DMA_BufferSize = size(TX_DMA_dataBuf);
+    /* The TX DMA transfer length is deliberately not configured here: uartTx()
+     * points MADDR at the buffer that is to be sent and writes CNTR right
+     * before enabling the channel, so the length is set per transfer. */
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -107,6 +109,8 @@ void UART_Interrupt_Init(void)
  *  @fn      BSP_Uart_Init
  *
  *  @brief   initialize uart2
+ *
+ *  @param   baudrate - uart2 baud rate, BAUD_RATE is used by this example.
  *
  *  @return  none
  * */

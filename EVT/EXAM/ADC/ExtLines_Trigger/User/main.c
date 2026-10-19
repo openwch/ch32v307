@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/01/09
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -22,8 +22,9 @@
 #include "debug.h"
 
 /* Global Variable */
-s16 Calibrattion_Val = 0;
-
+vs16 Calibrattion_Val = 0;
+vu8  IntResponse=0 ;
+vu16 ADC_val;
 /*********************************************************************
  * @fn      ADC_Function_Init
  *
@@ -60,7 +61,7 @@ void ADC_Function_Init(void)
 	ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 
 	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -116,9 +117,11 @@ void EXTI_Event_Init(void)
  */
 u16 Get_ConversionVal(s16 val)
 {
-	if((val+Calibrattion_Val)<0|| val==0) return 0;
-	if((Calibrattion_Val+val)>4095||val==4095) return 4095;
-	return (val+Calibrattion_Val);
+    if((val + Calibrattion_Val) < 0|| val==0)
+        return 0;
+    if((Calibrattion_Val + val) > 4095 || val==4095)
+        return 4095;
+    return (val + Calibrattion_Val);
 }
 
 /*********************************************************************
@@ -138,9 +141,16 @@ int main(void)
     printf("CalibrattionValue:%d\n", Calibrattion_Val);	
 	EXTI_Event_Init();
 
-	while(1);
+    while( 1 )
+		{
+				if(IntResponse == 1)
+        {
+				   IntResponse=0;
+           printf( "ADC Extline trigger conversion...\r\n" );
+           printf( "JADC%04d\r\n", Get_ConversionVal( ADC_val ) );
+        }
+		}
 }
-
 void ADC1_2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /*********************************************************************
@@ -152,16 +162,14 @@ void ADC1_2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void ADC1_2_IRQHandler()
 {
-	u16 ADC_val;
 
-	if(ADC_GetITStatus( ADC1, ADC_IT_JEOC))
-	{
-		ADC_val = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_1);
-#if 0
-		printf("ADC Extline trigger conversion...\r\n");
-		printf( "JADC%04d\r\n", Get_ConversionVal(ADC_val));
-#endif
-	}
+
+    if(ADC_GetITStatus(ADC1, ADC_IT_JEOC))
+    {
+        
+        ADC_val = ADC_GetInjectedConversionValue( ADC1, ADC_InjectedChannel_1 );
+        IntResponse=1;
+    }
 
 	ADC_ClearITPendingBit( ADC1, ADC_IT_JEOC);
 }

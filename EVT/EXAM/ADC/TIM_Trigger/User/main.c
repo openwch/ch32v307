@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/09/22
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -22,8 +22,9 @@
 #include "debug.h"
 
 /* Global Variable */
-s16 Calibrattion_Val = 0;
-
+vs16 Calibrattion_Val = 0;
+vu8 IntResponse = 0;
+vu16 ADC_val;
 /*********************************************************************
  * @fn      ADC_Function_Init
  *
@@ -78,26 +79,18 @@ void ADC_Function_Init(void)
 }
 
 /*********************************************************************
- * @fn      TIM1_PWM_In
+ * @fn      TIM2_PWM_Init
  *
  * @brief   Initializes PWM.
  *
  * @return  none
  */
-
-void TIM1_PWM_In(u16 arr, u16 psc, u16 ccp)
+void TIM2_PWM_Init(u16 arr, u16 psc, u16 ccp)
 {
-    GPIO_InitTypeDef        GPIO_InitStructure = {0};
     TIM_OCInitTypeDef       TIM_OCInitStructure = {0};
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure = {0};
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     TIM_TimeBaseInitStructure.TIM_Period = arr;
     TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
@@ -112,9 +105,6 @@ void TIM1_PWM_In(u16 arr, u16 psc, u16 ccp)
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
 
     TIM_CtrlPWMOutputs(TIM2, ENABLE);
-    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Disable);
-    TIM_ARRPreloadConfig(TIM2, ENABLE);
-    TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);
     TIM_Cmd(TIM2, ENABLE);
 }
 
@@ -151,9 +141,17 @@ int main(void)
 
     ADC_Function_Init();
     printf("CalibrattionValue:%d\n", Calibrattion_Val);
-    TIM1_PWM_In(7200-1,1000-1,3600);
+    TIM2_PWM_Init(7200-1,1000-1,3600);
 
-    while(1);
+    while(1)
+		{
+				 if(IntResponse == 1)
+        {
+           printf("ADC Extline trigger conversion...\r\n"); 
+           printf("JADC%04d\r\n", Get_ConversionVal(ADC_val));
+           IntResponse = 0;
+        }
+		}
 }
 
 void ADC1_2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -167,13 +165,14 @@ void ADC1_2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void ADC1_2_IRQHandler()
 {
-    u16 ADC_val;
+
 
     if(ADC_GetITStatus(ADC1, ADC_IT_JEOC))
     {
-        printf("ADC Extline trigger conversion...\r\n");
+      
         ADC_val = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_1);
-        printf("JADC %04d\r\n", Get_ConversionVal(ADC_val));
+        IntResponse=1;
+      
     }
 
     ADC_ClearITPendingBit(ADC1, ADC_IT_JEOC);

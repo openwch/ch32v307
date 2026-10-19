@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/11/20
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,7 +13,7 @@
 /*
  *@Note
  * This example is used to show how to migrate an SD card to a FATFS file read/write system.
- *   DVP--PIN:
+ *   PIN:
  *   D0--PC8
  *   D1--PC9
  *   D2--PC10
@@ -108,13 +108,17 @@ int main(void)
 	        }
 	    }
 	    else {
-	        printf("Disk formatting failed£¡£¨%d£©\r\n", res_sd);
+	        printf("Disk formatting faile!(%d)\r\n", res_sd);
 	    }
 	}
     res_sd= f_open(&fnew,(const char*)"1:/testWCH.txt",FA_CREATE_ALWAYS|FA_WRITE);
       if(res_sd!=FR_OK)
       {
-          printf("Create file error\r\n");
+        while(1)
+        {
+            printf("Create file error\r\n");
+        }
+          
       }
       else
       {
@@ -128,7 +132,10 @@ int main(void)
       }
       if(res_sd!=FR_OK)
       {
+        while(1)
+        {
           printf("Write error\r\n");
+        }
       }
       f_close(&fnew);
       res_sd= f_open(&fnew,(const char*)"1:/testWCH.txt",FA_OPEN_EXISTING|FA_READ);
@@ -139,8 +146,11 @@ int main(void)
       printf("Reading......................\r\n");
       res_sd= f_read(&fnew,ReadSDBuf,11,(UINT*)&fnum);
       if(res_sd!=FR_OK)
-      {
+      {        
+        while(1)
+        {
           printf("Read error\r\n");
+        }
       }
       for(int i=0;i<sizeof(ReadSDBuf);i++)
       {

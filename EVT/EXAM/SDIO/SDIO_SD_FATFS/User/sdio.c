@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/01/09
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -1121,7 +1121,6 @@ SD_Error SD_WriteBlock( u8 *buf, long long addr,  u16 blksize )
         }
         if( timeout == 0 )
         {
-            SD_Init();
             return SD_DATA_TIMEOUT;
         }
         timeout = SDIO_DATATIMEOUT;

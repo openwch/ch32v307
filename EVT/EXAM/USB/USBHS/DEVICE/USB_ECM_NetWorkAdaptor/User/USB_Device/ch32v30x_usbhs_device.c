@@ -44,7 +44,7 @@ volatile uint8_t  USBHS_DevSpeed;
 volatile uint8_t  USBHS_DevSleepStatus;
 volatile uint8_t  USBHS_DevEnumStatus;
 
-/* trance rx len */
+/* transfer rx len */
 volatile uint16_t USBHS_Endp3_RxLen = 0;
 
 /* Endpoint Buffer */
@@ -244,7 +244,7 @@ uint8_t USBHS_EP2_UpLoad( uint16_t len, uint32_t dma_adr )
     // if( (USBHS_Endp_Busy[ DEF_UEP2 ] & DEF_UEP_BUSY) == RESET )
     if( (USBHSD->UEP2_TX_CTRL & USBHS_UEP_T_RES_MASK) == USBHS_UEP_T_RES_NAK )
     {
-        // USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
+        USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
         USBHSD->UEP2_TX_LEN = len;
         USBHSD->UEP2_TX_DMA = dma_adr;
         USBHSD->UEP2_TX_CTRL = ( USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK ) | USBHS_UEP_T_RES_ACK;
@@ -733,6 +733,10 @@ void USBHS_IRQHandler( void )
                                     errflag = 0xFF;
                                     break;
                             }
+                        }
+                        else
+                        {
+                            errflag = 0xFF;
                         }
                     }
                     break;

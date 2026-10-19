@@ -17,7 +17,7 @@ Subscribe to this topic and publish messages to this topic.
 For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
-#include "string.h"
+#include <string.h>
 #include "eth_driver.h"
 #include "MQTTPacket.h"
 
@@ -107,7 +107,10 @@ u8 Transport_Open(void)
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
     mStopIfError(i);
-
+    if (i != WCHNET_ERR_SUCCESS) {
+        return SocketId;
+    }
+    printf("SocketId %d\r\n", SocketId);
     i = WCHNET_SocketConnect(SocketId);
     mStopIfError(i);
     return SocketId;
@@ -140,8 +143,27 @@ u8 Transport_Close(void)
  */
 void Transport_SendPacket(u8 *buf, u32 len)
 {
-    WCHNET_SocketSend(SocketId, buf, &len);
-    printf("%d bytes uploaded!\r\n",len);
+    u32 sent;
+    u32 remain = len;
+    u8 *p = buf;
+
+    /*WCHNET_SocketSend writes the length that was really handed to the stack
+     *back into sent, so the part that was not accepted is sent in the next
+     *round instead of being dropped.*/
+    while(remain){
+        sent = remain;
+        if(WCHNET_SocketSend(SocketId, p, &sent) != WCHNET_ERR_SUCCESS){
+            printf("Transport_SendPacket failed, %d bytes left\r\n",(int)remain);
+            return;
+        }
+        if(sent == 0){
+            printf("Transport_SendPacket stopped, %d bytes left\r\n",(int)remain);
+            return;
+        }
+        p += sent;
+        remain -= sent;
+    }
+    printf("%d bytes uploaded!\r\n",(int)len);
 }
 
 /*********************************************************************
@@ -157,7 +179,7 @@ void Transport_SendPacket(u8 *buf, u32 len)
 void MQTT_Connect(char *username, char *password)
 {
     MQTTPacket_connectData data = MQTTPacket_connectData_initializer;
-    u32 len;
+    int len;
     u8 buf[200];
 
     data.clientID.cstring = "admin1";
@@ -167,7 +189,11 @@ void MQTT_Connect(char *username, char *password)
     data.password.cstring = password;
 
     len = MQTTSerialize_connect(buf,sizeof(buf),&data);
-    Transport_SendPacket(buf,len);
+    if(len <= 0){
+        printf("MQTT connect packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
@@ -183,13 +209,17 @@ void MQTT_Connect(char *username, char *password)
 void MQTT_Subscribe( char *topic,int req_qos)
 {
     MQTTString topicString = MQTTString_initializer;
-    u32 len;
+    int len;
     u32 msgid = 1;
     u8 buf[200];
 
     topicString.cstring = topic;
     len = MQTTSerialize_subscribe(buf,sizeof(buf),0,msgid,1,&topicString,&req_qos);
-    Transport_SendPacket(buf,len);
+    if(len <= 0){
+        printf("MQTT subscribe packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
@@ -204,13 +234,17 @@ void MQTT_Subscribe( char *topic,int req_qos)
 void MQTT_Unsubscribe(char *topic)
 {
     MQTTString topicString = MQTTString_initializer;
-    u32 len;
+    int len;
     u32 msgid = 1;
     u8 buf[200];
 
     topicString.cstring = topic;
     len = MQTTSerialize_unsubscribe(buf,sizeof(buf),0,msgid,1,&topicString);
-    Transport_SendPacket(buf,len);
+    if(len <= 0){
+        printf("MQTT unsubscribe packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
@@ -228,44 +262,57 @@ void MQTT_Publish(char *topic, int qos, char *payload)
 {
     MQTTString topicString = MQTTString_initializer;
     u32 payloadlen;
-    u32 len;
-    u8 buf[1024];
+    int len;
+    static u8 buf[1024];
 
     topicString.cstring = topic;
     payloadlen = strlen(payload);
-    len = MQTTSerialize_publish(buf,sizeof(buf),0,qos,0,packetid++,topicString,payload,payloadlen);
-    Transport_SendPacket(buf,len);
+    len = MQTTSerialize_publish(buf,sizeof(buf),0,qos,0,packetid++,topicString,
+                                (unsigned char *)payload,payloadlen);
+    if(len <= 0){
+        printf("MQTT publish packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
  * @fn      MQTT_Pingreq
  *
- * @brief   MQTT sends heartbeat packet
+ * @brief   MQTT sends heartbeat packet.
  *
  * @return  none
  */
 void MQTT_Pingreq(void)
 {
-    u32 len;
+    int len;
     u8 buf[200];
 
     len = MQTTSerialize_pingreq(buf,sizeof(buf));
-    Transport_SendPacket(buf,len);
+    if(len <= 0){
+        printf("MQTT pingreq packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
  * @fn      MQTT_Disconnect
  *
- * @brief   Disconnect the MQTT connection
+ * @brief   Disconnect the MQTT connection.
  *
  * @return  none
  */
 void MQTT_Disconnect(void)
 {
-    u32 len;
+    int len;
     u8 buf[50];
     len = MQTTSerialize_disconnect(buf,sizeof(buf));
-    Transport_SendPacket(buf,len);
+    if(len <= 0){
+        printf("MQTT disconnect packet serialize failed: %d\r\n",len);
+        return;
+    }
+    Transport_SendPacket(buf,(u32)len);
 }
 
 /*********************************************************************
@@ -278,22 +325,43 @@ void MQTT_Disconnect(void)
  *
  * @return  none
  */
+/*Payload log switch: set to 0 to keep msgDeal() silent. Every printf ends up
+ *in the byte-wise busy-wait _write() of debug.c (~87us per byte at 115200),
+ *and the network callbacks run on the WCHNET main task chain.*/
+#define MSGDEAL_LOG_EN         1
+/*Upper bound on the payload bytes printed for one message, so that a long
+ *publish cannot block the protocol stack for hundreds of milliseconds.*/
+#define MSGDEAL_LOG_MAX_LEN    128
+
 void msgDeal(unsigned char *msg, int len)
 {
-    unsigned char *ptr = msg;
-    printf("payload len = %d\r\n",len);
-    printf("payload: ");
-    for(int i = 0; i < len; i++)
-    {
-        printf("%c ", *ptr++);
+#if (MSGDEAL_LOG_EN)
+    int printlen;
+#endif
+    if((msg == NULL) || (len < 0) || (len > (int)sizeof(MyBuf))){
+        printf("invalid payload buffer or length: %d\r\n",len);
+        return;
     }
-    printf("\r\n");
+#if (MSGDEAL_LOG_EN)
+    printf("payload len = %d\r\n",len);
+    /*One printf for the whole payload instead of one printf per byte, and only
+     *a bounded prefix is printed. The payload is printed as text, so an
+     *embedded '\0' ends the printed prefix.*/
+    printlen = (len > MSGDEAL_LOG_MAX_LEN) ? MSGDEAL_LOG_MAX_LEN : len;
+    if(printlen > 0)
+        printf("payload: %.*s\r\n", printlen, (char *)msg);
+    if(len > printlen)
+        printf("...(%d more bytes not printed)\r\n", len - printlen);
+#else
+    (void)msg;
+    (void)len;
+#endif
 }
 
 /*********************************************************************
  * @fn      WCHNET_HandleSockInt
  *
- * @brief   Socket Interrupt Handle
+ * @brief   Socket Interrupt Handle.
  *
  * @param   socketid - socket id.
  *          intstat - interrupt status
@@ -307,36 +375,54 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
     MQTTString topicName;
     unsigned short packetid;
     unsigned char retained, dup;
-    unsigned char *payload;
+    unsigned char *payload = NULL;
 
     if(intstat & SINT_STAT_RECV)                                                //receive data
     {
+        memset(MyBuf, 0 ,sizeof(MyBuf));                                        //clear before every receive, do not rely on the previous round
         len = WCHNET_SocketRecvLen(socketid,NULL);
-        WCHNET_SocketRecv(socketid,MyBuf,&len);
-        switch(MyBuf[0]>>4)
+        if(len > sizeof(MyBuf))                                                 //never let the stack write past MyBuf
         {
-            case CONNACK:
-                printf("CONNACK\r\n");
-                con_flag = 1;
-                MQTT_Subscribe(sub_topic, sub_qos);
-                break;
-
-            case PUBLISH:
-                MQTTDeserialize_publish(&dup,&qos,&retained,&packetid,&topicName,
-                                        &payload,&payloadlen,MyBuf,len);
-                msgDeal(payload, payloadlen);
-                break;
-
-            case SUBACK:
-                sub_flag = 1;
-                printf("SUBACK\r\n");
-                break;
-
-            default:
-
-                break;
+            printf("received %d bytes, buffer is %d bytes\r\n",(int)len,(int)sizeof(MyBuf));
+            len = sizeof(MyBuf);
         }
-        memset(MyBuf, 0 ,sizeof(MyBuf));
+        /*WCHNET_SocketRecv writes back the length that was really read through
+         *len; after a failed read there is no packet type to look at.*/
+        if(WCHNET_SocketRecv(socketid,MyBuf,&len) != WCHNET_ERR_SUCCESS)
+        {
+            printf("WCHNET_SocketRecv failed\r\n");
+            len = 0;
+        }
+        if(len != 0)
+        {
+            switch(MyBuf[0]>>4)
+            {
+                case CONNACK:
+                    printf("CONNACK\r\n");
+                    con_flag = 1;
+                    MQTT_Subscribe(sub_topic, sub_qos);
+                    break;
+
+                case PUBLISH:
+                    if(MQTTDeserialize_publish(&dup,&qos,&retained,&packetid,&topicName,
+                                            &payload,&payloadlen,MyBuf,len) == 1){
+                        msgDeal(payload, payloadlen);
+                    }
+                    else{
+                        printf("MQTT publish packet parse failed\r\n");
+                    }
+                    break;
+
+                case SUBACK:
+                    sub_flag = 1;
+                    printf("SUBACK\r\n");
+                    break;
+
+                default:
+
+                    break;
+            }
+        }
     }
     if(intstat & SINT_STAT_CONNECT)                                             //connect successfully
     {
@@ -348,6 +434,7 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
     {
         con_flag = 0;
         printf("TCP Disconnect\r\n");
+        Transport_Open();
     }
     if(intstat & SINT_STAT_TIM_OUT)                                             //timeout disconnect
     {
@@ -361,7 +448,7 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
 /*********************************************************************
  * @fn      WCHNET_HandleGlobalInt
  *
- * @brief   Global Interrupt Handle
+ * @brief   Global Interrupt Handle.
  *
  * @return  none
  */
@@ -399,7 +486,7 @@ void WCHNET_HandleGlobalInt(void)
 /*********************************************************************
  * @fn      main
  *
- * @brief   Main program
+ * @brief   Main program.
  *
  * @return  none
  */
@@ -410,21 +497,32 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                               //USART initialize
     printf("MQTT Test\r\n");
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n",WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if(WCHNET_LIB_VER != WCHNET_GetVer()){
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                              //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                         //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
+    if(i == WCHNET_ERR_SUCCESS) {
+        printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
+    /*DESIP is shipped as 0.0.0.0 and has to be set to the address of the MQTT
+     *server, otherwise the connection below can never succeed.*/
+    if((DESIP[0] == 0) && (DESIP[1] == 0) && (DESIP[2] == 0) && (DESIP[3] == 0)){
+        printf("WARNING: MQTT server IP is not configured (DESIP), set it first\r\n");
+    }
     Transport_Open();                                                        //open the TCP connection.
 
     while(1)

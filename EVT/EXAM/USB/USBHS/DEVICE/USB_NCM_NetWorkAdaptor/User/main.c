@@ -32,13 +32,13 @@
  *How to Change Interface(Phy)
  *  1,There are 5 types of interfaces, they are 10M internal, CH32V317(100M internal), MII, RMII and RGMII;
  *  2,If you need to use one of them, such as eth_driver_10M.c, right-click on the corresponding file, select 'Include/Exclude From Build', 
- *  include it to bulid, and ensure that the others are not included. 
+ *  include it to build, and ensure that the others are not included. 
  *  3,Rebuild the project;
  */
 
 /*What changed: 
  * 1,Update eth-drivers, use the same way as Ethernet Evts.
- * 2,Adjust the writing of other code according to the new stye of eth-drivers;
+ * 2,Adjust the writing of other code according to the new style of eth-drivers;
  * */
 
 #include "cdc_ncm.h"
@@ -53,7 +53,6 @@
 int main(void)
 {
     uint8_t i;
-    uint8_t MACAddr[ 6 ];
 
     SystemCoreClockUpdate( );
     NVIC_PriorityGroupConfig( NVIC_PriorityGroup_2 );

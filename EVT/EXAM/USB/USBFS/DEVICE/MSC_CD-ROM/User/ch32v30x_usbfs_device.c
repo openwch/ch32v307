@@ -487,6 +487,10 @@ void USBFS_IRQHandler( void )
                                     /* clear usb sleep status, device not prepare to sleep */
                                     USBFS_DevSleepStatus &= ~0x01;
                                 }
+                                else
+                                {
+                                    errflag = 0xFF;
+                                }
                             }
                             else if( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )
                             {

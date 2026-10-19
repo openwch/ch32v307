@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/07/04
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,7 +15,7 @@
    SDIO routine to operate SD card:
       This example demonstrates reading and writing all sectors of the SD card
       through the SDIO interface.
-  DVP--PIN:
+    PIN:
     D0--PC8
     D1--PC9
     D2--PC10
@@ -94,7 +94,7 @@ int main(void)
         buf[i] = i;
     }
 
-    for(i=0; i<Sector_Nums; i++){
+    for(i=1; i<Sector_Nums; i++){
         if(SD_WriteDisk(buf,i,1)) printf("Wr %d sector fail\n", i);
         if(SD_ReadDisk(Readbuf,i,1)) printf("Rd %d sector fail\n", i);
 

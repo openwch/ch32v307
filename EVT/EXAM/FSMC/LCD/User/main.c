@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2020/04/30
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -36,12 +36,6 @@
     PD9--FSMC_D14
     PD10--FSMC_D15
     PB14--IO_BLCTR
-    PA8 --IO_MISO_NC
-    PB3 --IO_MOSI_SDA
-    PB15--IO_TKINT
-    PC13--IO_BUSY_NC
-    PC0 --IO_TKRST#
-    PB4 --IO_CLK
 */
 
 #include "debug.h"
@@ -83,7 +77,7 @@ int main(void)
 	SystemCoreClockUpdate();
 	Delay_Init();
 	USART_Printf_Init(115200);	
-	printf("SystemClk:%d\r\n",SystemCoreClock);
+	printf ("SystemCoreClk:%lu\r\n", (unsigned long)SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 
 	LCD_Reset_GPIO_Init();
@@ -112,6 +106,7 @@ int main(void)
 			case 9:LCD_Clear(GRAY);break;
 			case 10:LCD_Clear(LGRAY);break;
 			case 11:LCD_Clear(BROWN);break;
+            default: break;
 		}
 		POINT_COLOR=RED;	  
 		LCD_ShowString(30,40,210,24,24,"CH32V307");

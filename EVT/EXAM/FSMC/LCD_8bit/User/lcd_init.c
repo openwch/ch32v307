@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : lcd_init.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/04/03
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the TFTLCD.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -161,8 +161,6 @@ void LCD_WR_REG(u8 dat)
 
 void LCD_Address_Set(u16 x1,u16 y1,u16 x2,u16 y2)
 {
-    if(USE_HORIZONTAL==0)
-	{
         LCD_WR_REG(0x2a);
 		LCD_WR_DATA(x1);
 		LCD_WR_DATA(x2);
@@ -170,37 +168,6 @@ void LCD_Address_Set(u16 x1,u16 y1,u16 x2,u16 y2)
 		LCD_WR_DATA(y1);
 		LCD_WR_DATA(y2);
 		LCD_WR_REG(0x2c);
-	}
-	else if(USE_HORIZONTAL==1)
-	{
-		LCD_WR_REG(0x2a);
-		LCD_WR_DATA(x1);
-		LCD_WR_DATA(x2);
-		LCD_WR_REG(0x2b);
-		LCD_WR_DATA(y1);
-		LCD_WR_DATA(y2);
-		LCD_WR_REG(0x2c);
-	}
-	else if(USE_HORIZONTAL==2)
-	{
-		LCD_WR_REG(0x2a);
-		LCD_WR_DATA(x1);
-		LCD_WR_DATA(x2);
-		LCD_WR_REG(0x2b);
-		LCD_WR_DATA(y1);
-		LCD_WR_DATA(y2);
-		LCD_WR_REG(0x2c);
-	}
-	else
-	{
-		LCD_WR_REG(0x2a);
-		LCD_WR_DATA(x1);
-		LCD_WR_DATA(x2);
-		LCD_WR_REG(0x2b);
-		LCD_WR_DATA(y1);
-		LCD_WR_DATA(y2);
-		LCD_WR_REG(0x2c);
-	}
 }
 
 /*********************************************************************
@@ -225,7 +192,10 @@ void LCD_Init(void)
 	
    ID=ST7789_ReadID();
    printf("LCDID:%X",ID);
-   while(ID!=0x8552 ){};
+   while(ID!=0x8552 )
+   {
+    printf("LCD err!\r\n");
+   }
 
     LCD_WR_REG(0x11);
     Delay_Ms(120);

@@ -58,6 +58,10 @@
 
 #define RES_GIFHEAD_OK  "HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\nContent-Length:"
 
+/*Answer sent when the requested resource type cannot be determined.
+ *MakeHttpResponse used to leave its header pointer NULL in that case.*/
+#define RES_HTMLHEAD_ERR "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length:"
+
 #define RES_END "\r\n\r\n"
 
 
@@ -78,6 +82,7 @@ typedef struct Port_Cfg                          //Port configuration parameters
     u8 src_port[2];
     u8 des_ip[4];
     u8 des_port[2];
+    u8 reserved;                                //keeps sizeof() a multiple of 4, see the assertion below
 } Port_Cfg_t;
 
 
@@ -87,6 +92,13 @@ typedef struct Login_Cfg                         //Login configuration parameter
     char  user[11];
     char  pass[11];
 } Login_Cfg_t;
+
+/*WEB_READ/WEB_WRITE move the configuration in and out of the flash in words,
+ *so the size of every stored structure has to be a multiple of 4. PORT_CFG_LEN
+ *used to be 11, which made both helpers touch one byte past the structure.*/
+_Static_assert((sizeof(Basic_Cfg_t) % 4) == 0, "Basic_Cfg_t size must be a multiple of 4");
+_Static_assert((sizeof(Port_Cfg_t) % 4) == 0, "Port_Cfg_t size must be a multiple of 4");
+_Static_assert((sizeof(Login_Cfg_t) % 4) == 0, "Login_Cfg_t size must be a multiple of 4");
 
 
 typedef struct _st_http_request                  //Browser request information
@@ -102,19 +114,20 @@ typedef struct Para_Tab                         //Configuration information para
 	char value[30];                             //Configuration item value
 }Parameter;
 
-extern Basic_Cfg_t Basic_CfgBuf;
+/*Word aligned because WEB_READ/WEB_WRITE move them in words.*/
+extern __attribute__((aligned(4))) Basic_Cfg_t Basic_CfgBuf;
 
-extern Login_Cfg_t Login_CfgBuf;
+extern __attribute__((aligned(4))) Login_Cfg_t Login_CfgBuf;
 
-extern Port_Cfg_t  Port_CfgBuf;
+extern __attribute__((aligned(4))) Port_Cfg_t  Port_CfgBuf;
 
 extern st_http_request http_request;
 
-extern u8 Basic_Default[BASIC_CFG_LEN];
+extern __attribute__((aligned(4))) u8 Basic_Default[BASIC_CFG_LEN];
 
-extern u8 Login_Default[LOGIN_CFG_LEN];
+extern __attribute__((aligned(4))) u8 Login_Default[LOGIN_CFG_LEN];
 
-extern u8 Port_Default[PORT_CFG_LEN];
+extern __attribute__((aligned(4))) u8 Port_Default[PORT_CFG_LEN];
 
 extern char httpweb[200] ;
 
@@ -127,8 +140,6 @@ extern void ParseHttpRequest(st_http_request *, char *);
 extern void ParseURLType(char *, char *);
 
 void MakeHttpResponse(char *buf, char type, u32 len );
-
-extern char *GetURLName(char* url);
 
 extern char *DataLocate(char *buf,char *name);
 

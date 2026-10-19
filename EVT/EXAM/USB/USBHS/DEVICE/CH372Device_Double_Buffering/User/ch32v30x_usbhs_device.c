@@ -404,7 +404,7 @@ void USBHS_IRQHandler( void )
                         }
                         break;
 
-                    /* end-point 1 data in interrupt */
+                    /* end-point 2 data in interrupt */
                     case USBHS_UIS_TOKEN_IN | DEF_UEP2:
                         USBHSD->UEP2_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
                         if (USBHSD->UEP2_TX_CTRL & USBHS_UEP_T_TOG_DATA1)
@@ -446,7 +446,7 @@ void USBHS_IRQHandler( void )
                         else
                         {
                             USBHSD->UEP4_TX_CTRL = (USBHSD->UEP4_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_ACK;
-                            USBHSD->UEP3_RX_CTRL = (USBHSD->UEP3_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_T_RES_ACK;
+                            USBHSD->UEP3_RX_CTRL = (USBHSD->UEP3_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                         }
                         break;
 
@@ -901,6 +901,10 @@ void USBHS_IRQHandler( void )
                                     errflag = 0xFF;
                                     break;
                             }
+                        }
+                        else
+                        {
+                            errflag = 0xFF;
                         }
                     }
                     break;

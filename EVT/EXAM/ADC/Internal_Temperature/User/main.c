@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2023/11/17
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -21,7 +21,7 @@
 #include "debug.h"
 
 /* Global Variable */
-s16 Calibrattion_Val = 0;
+vs16 Calibrattion_Val = 0;
 
 /*********************************************************************
  * @fn      ADC_Function_Init
@@ -126,6 +126,7 @@ u16 Get_ADC_Val(u8 ch)
  *            ADC_Channel_16 - ADC Channel16 selected.
  *            ADC_Channel_17 - ADC Channel17 selected.
  *
+ *            times - convert times 0x1-0xff.
  * @return  val - The Data conversion value.
  */
 u16 Get_ADC_Average(u8 ch,u8 times)
@@ -156,9 +157,15 @@ u16 Get_ADC_Average(u8 ch,u8 times)
  */
 u16 Get_ConversionVal(s16 val)
 {
-	if((val+Calibrattion_Val)<0|| val==0) return 0;
-	if((Calibrattion_Val+val)>4095||val==4095) return 4095;
-	return (val+Calibrattion_Val);
+    if( ( val + Calibrattion_Val ) < 0 || val==0 )
+    {
+        return 0;
+    }
+    if( ( Calibrattion_Val + val ) > 4095 || val==4095 )
+    {
+        return 4095;
+    }
+    return ( val + Calibrattion_Val );
 }
 
 /*********************************************************************
@@ -191,7 +198,7 @@ int main(void)
 
 		val_mv = (ADC_val*3300/4096);
 
-		printf("mv-T-%d,%0d\n",val_mv ,TempSensor_Volt_To_Temper(val_mv));
+        printf( "mv-T-%d,%d\n", val_mv, TempSensor_Volt_To_Temper( val_mv ) );
 
 		Delay_Ms(2);
 	}

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/01/09
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -20,7 +20,7 @@
  */
 
 #include "debug.h"
-s16 Calibrattion_Val = 0;
+vs16 Calibrattion_Val = 0;
 
 /*********************************************************************
  * @fn      ADC_Function_Init
@@ -80,7 +80,7 @@ void ADC_Function_Init(void)
 }
 
 /*********************************************************************
- * @fn      TIM1_PWM_In
+ * @fn      TIM1_PWM_Init
  *
  * @brief   Initializes TIM1 PWM output.
  *
@@ -90,18 +90,12 @@ void ADC_Function_Init(void)
  *
  * @return  none
  */
-void TIM1_PWM_In( u16 arr, u16 psc, u16 ccp )
+void TIM1_PWM_Init( u16 arr, u16 psc, u16 ccp )
 {
-	GPIO_InitTypeDef GPIO_InitStructure={0};
-	TIM_OCInitTypeDef TIM_OCInitStructure={0};
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure={0};
+    TIM_OCInitTypeDef       TIM_OCInitStructure = {0};
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure = {0};
 
-	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_TIM1, ENABLE );
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init( GPIOA, &GPIO_InitStructure);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 
 	TIM_TimeBaseInitStructure.TIM_Period = arr;
 	TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
@@ -115,11 +109,8 @@ void TIM1_PWM_In( u16 arr, u16 psc, u16 ccp )
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
 	TIM_OC4Init( TIM1, &TIM_OCInitStructure );
 
-	TIM_CtrlPWMOutputs(TIM1, ENABLE );
-	TIM_OC4PreloadConfig( TIM1, TIM_OCPreload_Disable );
-	TIM_ARRPreloadConfig( TIM1, ENABLE );
-	TIM_SelectOutputTrigger( TIM1, TIM_TRGOSource_Update );
-	TIM_Cmd( TIM1, ENABLE );
+    TIM_CtrlPWMOutputs(TIM1, ENABLE);
+    TIM_Cmd(TIM1, ENABLE);
 }
 
 /*********************************************************************
@@ -133,9 +124,11 @@ void TIM1_PWM_In( u16 arr, u16 psc, u16 ccp )
  */
 u16 Get_ConversionVal(s16 val)
 {
-	if((val+Calibrattion_Val)<0|| val==0) return 0;
-	if((Calibrattion_Val+val)>4095||val==4095) return 4095;
-	return (val+Calibrattion_Val);
+    if((val + Calibrattion_Val) < 0||val==0)
+        return 0;
+    if((Calibrattion_Val + val) > 4095||val==4095)
+        return 4095;
+    return (val + Calibrattion_Val);
 }
 
 /*********************************************************************
@@ -153,14 +146,14 @@ int main(void)
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	ADC_Function_Init();
     printf("CalibrattionValue:%d\n", Calibrattion_Val);
-	
-	TIM1_PWM_In( 1000, 48000-1, 500 );
 
-	while(1){
-		while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));
-		ADC_ClearFlag( ADC1, ADC_FLAG_EOC);
-		while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_JEOC ));
-		ADC_ClearFlag( ADC1, ADC_FLAG_JEOC);
+    TIM1_PWM_Init( 1000-1, 48000 - 1, 500 );
+
+    while(1)
+    {
+ 
+        while( !ADC_GetFlagStatus( ADC1, ADC_FLAG_JEOC ) );
+        ADC_ClearFlag( ADC1, ADC_FLAG_JEOC );
 
 		printf("ADC Discontinuous injected group conversion...\r\n");
 		printf( "%04d\r\n", Get_ConversionVal(ADC1->IDATAR1) );

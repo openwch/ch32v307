@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : lcd_init.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/01/03
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the TFTLCD.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -44,9 +44,9 @@ typedef struct
 
 //-----------------LCD port definition----------------
 
-#define	LCD_RES_Set()	GPIOA->BSHR=1<<15    //Reset			       PA15
+#define	LCD_RES_Set()	GPIOA->BSHR=1<<15    //Reset       PA15
 #define	LCD_BLK_Set()	GPIOA->BSHR=1<<12    //Turn on the backlight   PA12
-#define	LCD_RES_Clr()	GPIOA->BCR=1<<15     //No reset		           PA15
+#define	LCD_RES_Clr()	GPIOA->BCR=1<<15     //No reset    PA15
 #define	LCD_BLK_Clr()	GPIOA->BCR=1<<12     //Turn off the backlight  PA12
 
 

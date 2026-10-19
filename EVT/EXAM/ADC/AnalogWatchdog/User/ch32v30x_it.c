@@ -10,7 +10,7 @@
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v30x_it.h"
-
+extern vu8  IntResponse;
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ADC1_2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -53,10 +53,8 @@ void HardFault_Handler(void)
  */
 void ADC1_2_IRQHandler(void)
 {
-	if(ADC_GetITStatus( ADC1, ADC_IT_AWD)){
-#if 1
-		printf( "Enter AnalogWatchdog Interrupt\r\n" );
-#endif
+	if(ADC_GetITStatus( ADC1, ADC_IT_AWD)){   		
+		IntResponse = 1;
 	}
 	
 	ADC_ClearITPendingBit( ADC1, ADC_IT_AWD); 

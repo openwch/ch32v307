@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : FSMC_NOR.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/013
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the FSMC_NOR.
 *********************************************************************************
 * Copyright (c) 2024 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -19,7 +19,6 @@
 #define WRITE_READ_ADDR    0x03F0000
 #define ChipErase_Timeout     ((uint32_t)0x30000000)
 #define BlockErase_Timeout    ((uint32_t)0x00A00000)
-#define ChipErase_Timeout     ((uint32_t)0x30000000)
 #define Program_Timeout       ((uint32_t)0x00001400)
 
 typedef enum
@@ -45,7 +44,7 @@ void NOR_ReadID(NOR_IDTypeDef* NOR_ID);
 NOR_Status NOR_ReturnToReadMode(void);
 NOR_Status NOR_EraseBlock(uint32_t BlockAddr);
 NOR_Status NOR_EraseChip(void);
-void Fill_Buffer(uint16_t *pBuffer, uint16_t BufferLenght, uint32_t Offset);
+void Fill_Buffer(uint16_t *pBuffer, uint16_t BufferLength, uint32_t Offset);
 NOR_Status NOR_WriteHalfWord(uint32_t WriteAddr, uint16_t Data);
 NOR_Status NOR_WriteBuffer(uint16_t* pBuffer, uint32_t WriteAddr, uint32_t NumHalfwordToWrite);
 void NOR_ReadBuffer(uint16_t* pBuffer, uint32_t ReadAddr, uint32_t NumHalfwordToRead);

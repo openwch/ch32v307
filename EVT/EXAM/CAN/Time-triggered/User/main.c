@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/07/07
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -87,7 +87,7 @@
 
  int CAN2FilterStartBank = CANSOFTFILTER_MAX_GROUP_NUM;
  
- uint8_t interrupt_rx_flag = 0;
+ volatile uint8_t interrupt_rx_flag = 0;
  volatile u8 canexbuf_interrupt[8];
  uint8_t USESoftFilterFlag = 0;
  
@@ -115,7 +115,7 @@
   */
  void CAN_SoftFilterInit(CAN_FilterInitTypeDef* CAN_FilterInitStruct)
  {
-	if(CAN_FilterInitStruct->CAN_FilterNumber > CANSOFTFILTER_MAX_GROUP_NUM){
+	if(CAN_FilterInitStruct->CAN_FilterNumber >= CANSOFTFILTER_MAX_GROUP_NUM){
 		return;
 	}
 	if(CAN_FilterInitStruct->CAN_FilterActivation)
@@ -149,25 +149,30 @@
  void CAN_ReceiveViaSoftFilter(CAN_TypeDef* CANx, uint8_t FIFONumber, CanRxMsg* RxMessage)
  {
      int group, start_bank, end_bank;
-    if(CANx == CAN1)
-    {
-        start_bank = 0;
-        end_bank = CAN2FilterStartBank;
-    }
-    else
-    {
-        start_bank = CAN2FilterStartBank;
-        end_bank = CANSOFTFILTER_MAX_GROUP_NUM;
-    }
-
-     for ( group = start_bank; group < end_bank; group++) 
+     /* Validate the FIFO number before using it. */
+     if( FIFONumber != CAN_FIFO0 && FIFONumber != CAN_FIFO1 )
      {
-         if (CANFilterStruct[group].en) 
+         return;
+     }
+     if(CANx == CAN1)
+     {
+         start_bank = 0;
+         end_bank = CAN2FilterStartBank;
+     }
+     else
+     {
+         start_bank = CAN2FilterStartBank;
+         end_bank = CANSOFTFILTER_MAX_GROUP_NUM;
+     }
+
+     for ( group = start_bank; group < end_bank; group++)
+     {
+         if (CANFilterStruct[group].en)
          {
-             uint32_t temp = CANx->sFIFOMailBox[0].RXMIR & (~0x1);
-             switch ((uint8_t)CANFilterStruct[group].ctrl_byte & ~0x1) 
+             uint32_t temp = CANx->sFIFOMailBox[FIFONumber].RXMIR & (~0x1);
+             switch ((uint8_t)CANFilterStruct[group].ctrl_byte & ~0x1)
              {
- 
+
                  case CANSOFTFILER_PREDEF_CTRLBYTE_ID32:
                      if((CANFilterStruct[group].FR[0].FR_32 != temp) && (CANFilterStruct[group].FR[1].FR_32 != temp))
                      {
@@ -175,30 +180,30 @@
                      }
                      else
                      {
-                         CAN_Receive(CANx, CAN_FIFO0, RxMessage);
+                         CAN_Receive(CANx, FIFONumber, RxMessage);
                          return;
                      }
                      break;
- 
+
                  case CANSOFTFILER_PREDEF_CTRLBYTE_MASK32:
                      if((CANFilterStruct[group].FR[0].FR_32 & CANFilterStruct[group].FR[1].FR_32) ^ (temp & CANFilterStruct[group].FR[1].FR_32))
                      {
                          continue;
                      }
-                     else 
+                     else
                      {
-                         CAN_Receive(CANx, CAN_FIFO0, RxMessage);
+                         CAN_Receive(CANx, FIFONumber, RxMessage);
                          return;
                      }
                      break;
- 
+
                  default:
                      return;
                      break;
              }
          }
      }
-     CAN_FIFORelease(CANx,CAN_FIFO0);
+     CAN_FIFORelease(CANx,FIFONumber);
  }
  
  /* Global Variable */
@@ -413,27 +418,45 @@ void CAN_SoftSlaveStartBank(uint8_t CAN_BankNumber)
  u8 CAN_Receive_Msg( u8 *buf )
  {
 	 u8 i;
-	 
+
 	 CanRxMsg CanRxStructure;
-	 
-	 if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)	
+
+	 if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)
 	 {
 		 return 0;
 	 }
-	 
+
+	 /* Initialize to avoid reading random values when the soft filter
+	  * does not match (returns without filling the structure). */
+	 CanRxStructure.DLC = 0;
+	 CanRxStructure.StdId = 0;
+	 CanRxStructure.ExtId = 0;
+	 CanRxStructure.IDE = 0;
+	 CanRxStructure.RTR = 0;
+	 CanRxStructure.FMI = 0;
+	 for( i=0; i<8; i++ )
+	 {
+		 CanRxStructure.Data[i] = 0;
+	 }
+
  #ifdef USE_SOFT_FILTER
 	 CAN_ReceiveViaSoftFilter( CAN1, CAN_FIFO0, &CanRxStructure );
  #else
-	 CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );	
+	 CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );
  #endif // USE_SOFT_FILTER
-	 
+
+	 if( CanRxStructure.DLC > 8 )
+	 {
+		 return 0;
+	 }
+
 	 for( i=0; i<8; i++ )
 	 {
 		 buf[i] = CanRxStructure.Data[i];
 	 }
-	 
+
 	 return CanRxStructure.DLC;
-	 
+
  }
  
  void USB_LP_CAN1_RX0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
@@ -448,28 +471,41 @@ void CAN_SoftSlaveStartBank(uint8_t CAN_BankNumber)
  {
 	 u8 rx,i;
 	 u8 rxbuf[8];
-	 
+
 	 if( CAN_GetITStatus( CAN1, CAN_IT_FMP0 ) != RESET )
 	 {
-		 rx = CAN_Receive_Msg( rxbuf );	
- 
+		 rx = CAN_Receive_Msg( rxbuf );
+		 if(rx > 8)
+		 {
+			 rx = 8;
+		 }
+		 for(i = 0; i < rx; i++)
+		 {
+			 canexbuf_interrupt[i] = rxbuf[i];
+		 }
+		 if(rx)
+		 {
+			 interrupt_rx_flag = 1;
+		 }
  #if 0
-		 if( rx )	
+		 /* Do not call printf in the ISR: it is blocking and not
+		  * reentrant. Set the flag and print in the main loop. */
+		 if( rx )
 		 {
 			 printf( "Receive Data:\r\n" );
-			 
+
 			 for(i=0; i<8; i++)
 			 {
-				  printf( "%02x\r\n", rxbuf[i] );				
+				  printf( "%02x\r\n", rxbuf[i] );
 			 }
 		 }
-		 
+
 		 printf( "RDTR:%08x\r\n", CAN1->sFIFOMailBox[0].RXMDTR );
- 
+
  #endif
 	 }
-	 
-	 CAN_ClearITPendingBit( CAN1, CAN_IT_FMP0 );	
+
+	 CAN_ClearITPendingBit( CAN1, CAN_IT_FMP0 );
  }
  
  #endif	

@@ -1,5 +1,5 @@
-#ifndef __UAC_10_HANDPHONE_H_
-#define __UAC_10_HANDPHONE_H_
+#ifndef __UAC_10_MICROPHONE_H_
+#define __UAC_10_MICROPHONE_H_
 #include "stdint.h"
 
 /* UAC1.0 5.2 Class-Specific Requests */

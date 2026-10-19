@@ -12,7 +12,7 @@
 
 #include "string.h"
 #include "debug.h"
-#include "WCHNET.h"
+#include "wchnet.h"
 #include "eth_driver.h"
 #include "app_iochub.h"
 #include "app_net.h"
@@ -29,12 +29,11 @@
  */
 void TIM2_Init (void)
 {
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure =
-    { 0 };
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = { 0 };
 
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM2, ENABLE);
 
-    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -100,14 +99,15 @@ int main (void) {
     Delay_Init();
     USART_Printf_Init (115200);
     printf ("IoCHub - UART\r\n");
-    printf ("SystemClk:%d\r\n", SystemCoreClock);
+    printf ("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf ("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
     TIM2_Init();
     NET_Init();
     IoCHub_Init();
     AT_Init();
     uart_Init();
-
-    while (1) {
+    while(1)
+    {
         NET_Process();
         WCHIOCHUB_Process();
         AT_Process();

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/04/05
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,10 +15,9 @@
    FSMC routine to operate NOR_ SRAM:
       This routine demonstrates the operation of IS62WV25616BLL model
       NOR_SRAM erase-read through FSMC interface.
-  PIN:
+     SRAM-PIN:
    (Latches)
     FSMC_NADV   -    PB7
-    SRAM
     FSMC_A18    -    PD13 (CS1)
     FSMC_NOE    -    PD4  (OE)
     FSMC_NWE    -    PD5  (WE)
@@ -110,46 +109,6 @@ void FSMC_SRAM_Init(void)
     FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 }
 
-/*********************************************************************
- * @fn      FSMC_SRAM_WriteBuffer
- *
- * @brief   Write data to NOR_SRAM
- *
- * @param   pBuffer - data pointer
- *          WriteAddr - Start address
- *          n - data number
- *
- * @return  none
- */
-void FSMC_SRAM_WriteBuffer(u8* pBuffer,u32 WriteAddr,u32 n)
-{
-    for(;n!=0;n--)
-    {
-        *(vu8*)(Bank1_SRAM1_ADDR+WriteAddr)=*pBuffer;
-        WriteAddr++;
-        pBuffer++;
-    }
-}
-
-/*********************************************************************
- * @fn      FSMC_SRAM_ReadBuffer
- *
- * @brief   Read data from NOR_SRAM
- *
- * @param   pBuffer - data pointer
- *          WriteAddr - Start address
- *          n - data number
- *
- * @return  none
- */
-void FSMC_SRAM_ReadBuffer(u8* pBuffer,u32 ReadAddr,u32 n)
-{
-    for(;n!=0;n--)
-    {
-        *pBuffer++=*(vu8*)(Bank1_SRAM1_ADDR+ReadAddr);
-        ReadAddr++;
-    }
-}
 
 /*********************************************************************
  * @fn      main
@@ -165,10 +124,10 @@ int main(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SystemCoreClockUpdate();
     Delay_Init();
-	USART_Printf_Init(115200);	
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf("SRAM TEST\n");
+    USART_Printf_Init(115200);
+    printf ("SystemCoreClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    printf("SRAM TEST\r\n");
 
 	FSMC_SRAM_Init();
 

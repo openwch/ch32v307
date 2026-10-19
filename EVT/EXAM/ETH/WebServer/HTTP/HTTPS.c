@@ -14,7 +14,7 @@
 #include <stdlib.h>    
 #include "HTTPS.h"
 
-#define HTML_LEN     1024*5                                 //Maximum size of a single web page
+#define HTML_LEN     (1024*5)                               //Maximum size of a single web page
 
 st_http_request http_request;
 
@@ -22,29 +22,29 @@ st_http_request http_request;
  * settings, port settings, and password settings.*/
 Parameter Para_Basic[4], Para_Port[4], Para_Login[2];
 
-Basic_Cfg_t Basic_CfgBuf;
-Port_Cfg_t  Port_CfgBuf;
-Login_Cfg_t Login_CfgBuf;
+__attribute__((aligned(4))) Basic_Cfg_t Basic_CfgBuf;
+__attribute__((aligned(4))) Port_Cfg_t  Port_CfgBuf;
+__attribute__((aligned(4))) Login_Cfg_t Login_CfgBuf;
 
 /*Default configuration of WCHNET network parameters*/
-u8 Basic_Default[BASIC_CFG_LEN] = {
+__attribute__((aligned(4))) u8 Basic_Default[BASIC_CFG_LEN] = {
 0x57, 0xAB,
 01, 02, 03, 04, 05, 06, 192, 168, 1, 10, 255, 255, 255, 0, 192, 168, 1, 1};
 
 /*WCHNET login default parameters, user name and password*/
-u8 Login_Default[LOGIN_CFG_LEN] = {
+__attribute__((aligned(4))) u8 Login_Default[LOGIN_CFG_LEN] = {
 0x57, 0xAB,
 'a', 'd', 'm', 'i', 'n', 0, 0, 0, 0, 0, 0, '1', '2', '3', 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /*WCHNET default port configuration*/
-u8 Port_Default[PORT_CFG_LEN] = {
+__attribute__((aligned(4))) u8 Port_Default[PORT_CFG_LEN] = {
 0x57, 0xAB,
 MODE_TCPCLIENT, 1000 / 256, 1000 % 256, 192, 168, 1, 100, 1000 / 256, 1000 % 256 };
 
-char *name;                                             //The name of the web page requested by HTTP
-u8 socket;                                              //socket id
+char *name;                                               //The name of the web page requested by HTTP
+u8 socket;                                                  //socket id
 char httpweb[200];                                        //The array is used to store the HTTP response message
-char HtmlBuffer[HTML_LEN];                              //Web page send buffer
+char HtmlBuffer[HTML_LEN];                                  //Web page send buffer
 
 extern u8 HTTPDataBuffer[RECE_BUF_LEN];//MAC address IP address Gateway IP address subnet mask
 
@@ -303,29 +303,29 @@ const char Html_main[] = {
     "\r\n"
     "</div>\r\n"
     "\r\n"
-    "<!--这是左侧目录栏 -->\r\n"
+    "<!--This is the left side catalog bar -->\r\n"
     "<div id=\"basicContent\">\r\n"
     "<ul id=\"bConFun\" >\r\n"
-    "<!--目录第一行 -->\r\n"
+    "<!--First line of the table of contents -->\r\n"
     "<li  id=\"1\">\r\n"
     "<a href=\"basic.html\" target=\"ifrPage\" onclick=\"changeCss('1')\">\r\n"
     "<img  class=\"tubiao\" src=\"png1.png\"/><h2 >Basic Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--目录第二行 -->\r\n"
+    "<!--Second line of the table of contents -->\r\n"
     "<li   id=\"2\">\r\n"
     "<a href=\"port.html\" target=\"ifrPage\"onclick=\"changeCss('2')\" >\r\n"
     "<img class=\"tubiao\" src=\"png2.png\"/> <h2>Port Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--目录第三行 -->\r\n"
+    "<!--Third line of the table of contents -->\r\n"
     "\r\n"
     "<li id=\"3\">\r\n"
     "<a href=\"user.html\" target=\"ifrPage\"onclick=\"changeCss('3')\" >\r\n"
     "<img class=\"tubiao\" src=\"png3.png\"/><h2 style=\"line-height: 15px;font-size: 18px;margin-top: 2px\">Password<br/> Settings</h2>\r\n"
     "</a>\r\n"
     "</li>\r\n"
-    "<!--目录第四行 -->\r\n"
+    "<!--Fourth line of the table of contents -->\r\n"
     "<li id=\"4\" >\r\n"
     "<a href=\"about.html\" target=\"ifrPage\" onclick=\"changeCss('4')\" >\r\n"
     "<img class=\"tubiao\" src=\"png4.png\"/><h2>About us</h2>\r\n"
@@ -505,7 +505,7 @@ const char Html_about[] = {
     "<div class=\"top\">\r\n"
     "<h2 >About us</h2>\r\n"
     "</div>\r\n"
-    "<div class=\"div_c\"  style=\"font-family:微软雅黑;margin-top:30px;\">\r\n"
+    "<div class=\"div_c\"  style=\"font-family:Microsoft YaHei;margin-top:30px;\">\r\n"
     "\r\n"
     "<div class=\"lab_4 STYLE4\"><span class=\"STYLE2\">Company Profile</span><br />\r\n"
     "<p style=\"text-indent: 2em\" align=\"left\">Nanjing Qinheng Microelectronics Co., Ltd. founded in 2004, is an IC communication interface and full-stack MCU Design Company.</p>\r\n"
@@ -2232,24 +2232,32 @@ const char Html_png4[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00,
 /*********************************************************************
  * @fn      ParseHttpRequest
  *
- * @brief   Analyze the request message, take out the method and assign it to request->method,
- *          and assign the URL to request->URL (with '/')
+ * @brief   Analyze the request message: take out the method and store it in
+ *          request->METHOD, then copy the URL that follows into request->URL.
+ *          The method and the character after it are skipped together with the
+ *          leading '/' of the path, so request->URL never starts with a '/'.
+ *          A request for the root path therefore carries the protocol version
+ *          ("HTTP/1.1...") in request->URL, which is what Web_Server uses to
+ *          recognise it and answer with the login page. Keep the offset as is.
  *
- * @param   request - data buff,Used to save the content of each part of the post request
- *          buf - POST request
+ * @param   request - structure receiving the parsed method, type and URL
+ *          buf - HTTP request line (and the body that follows it)
  *
- * @return  none
+ * @return  none; request->METHOD is set to METHOD_ERR when the request line
+ *          starts with neither GET nor POST, or when it carries no space
  */
 void ParseHttpRequest(st_http_request *request, char *buf)
 {
     char *strptr = buf;
 
-    if (strstr(strptr, "GET") || strstr(strptr, "get")) {       /*browser 'get' request*/
+    if ((strncmp(strptr, "GET", strlen("GET")) == 0) || \
+            (strncmp(strptr, "get", strlen("get")) == 0)) {     /*browser 'get' request*/
         request->METHOD = METHOD_GET;
         strptr += strlen("GET") + 2;
         memset(buf, 1, strlen("GET"));                          /* clear the request method */
     }
-    else if (strstr(strptr, "POST") || strstr(strptr, "post")) {  /*browser 'post' request*/
+    else if ((strncmp(strptr, "POST", strlen("POST")) == 0) || \
+            (strncmp(strptr, "post", strlen("post")) == 0)) {   /*browser 'post' request*/
         request->METHOD = METHOD_POST;
         strptr += strlen("POST") + 2;
         memset(buf, 1, strlen("POST"));                         /* clear the request method */
@@ -2258,10 +2266,15 @@ void ParseHttpRequest(st_http_request *request, char *buf)
         request->METHOD = METHOD_ERR;
         return;
     }
-    request->URL[MAX_URL_SIZE - 1] = '0';
+
+    request->URL[MAX_URL_SIZE - 1] = '\0';
     memcpy(request->URL, strptr, MAX_URL_SIZE - 1);
     strptr = strtok(request->URL, " ");
-    strcpy((char*) request->URL, strptr);
+    if (strptr == NULL) {                                       /*request line without a space*/
+        request->METHOD = METHOD_ERR;
+        return;
+    }
+    memmove((char *) request->URL, strptr, strlen(strptr) + 1);  /*source is inside the destination*/
 }
 
 /*********************************************************************
@@ -2276,7 +2289,7 @@ void ParseHttpRequest(st_http_request *request, char *buf)
  */
 void ParseURLType(char *type, char * buf)
 {
-    if (strstr(buf, ".html") || strstr((char *)name, "HTTP")) /* html type */
+    if (strstr(buf, ".html") || strstr(buf, "HTTP")) /* html type */
         *type = PTYPE_HTML;
     else if (strstr(buf, ".png"))                    /* png type */
         *type = PTYPE_PNG;
@@ -2314,6 +2327,8 @@ void MakeHttpResponse(char *buf, char type, u32 len )
         head = RES_CSSHEAD_OK;
     else if (type == PTYPE_GIF)
         head = RES_GIFHEAD_OK;
+    else
+        head = RES_HTMLHEAD_ERR;                                /*never leave head NULL*/
     strcpy((char *)buf, head);
     snprintf(string, sizeof(string), "%d", len);
     strcat((char *)buf, string);
@@ -2328,7 +2343,8 @@ void MakeHttpResponse(char *buf, char type, u32 len )
  * @param   buf - data buff
  *          name - name strings
  *
- * @return  pointer to the last digit of name
+ * @return  pointer to the first character behind "name" (that is, to the value
+ *          that follows it), or NULL when "name" is not found
  */
 char * DataLocate(char *buf, char *name)
 {
@@ -2342,11 +2358,12 @@ char * DataLocate(char *buf, char *name)
 /*********************************************************************
  * @fn      atoh
  *
- * @brief   Converting character to hexadecimal number
+ * @brief   Convert one hexadecimal ASCII character ('0'-'9', 'a'-'f', 'A'-'F')
+ *          to its 4-bit value. Any other character yields 0.
  *
- * @param   src - character
+ * @param   src - pointer to the character to be converted
  *
- * @return  hexadecimal number
+ * @return  value of the character, 0 when it is not a hexadecimal digit
  */
 uint8_t atoh(char *src)
 {
@@ -2376,7 +2393,7 @@ void Refresh_Basic(char *buf)
 {
     char *p, *q;
     char temp[30];                               //Save the value of each configuration in the form of a string
-    Basic_Cfg_t BasicCfg;
+    __attribute__((aligned(4))) Basic_Cfg_t BasicCfg;
     u8 i;
 
     memset((uint8_t *)(&BasicCfg), 0, BASIC_CFG_LEN);
@@ -2388,11 +2405,14 @@ void Refresh_Basic(char *buf)
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         p = strtok(temp, ".");
+        if(p == NULL) return;
         (strlen(p) == 1) ? (BasicCfg.mac[0] = atoh(p)) : (BasicCfg.mac[0] = atoh(p) << 4 | atoh(p + 1));
         for (i = 1; i < 6; i++) {
             p = strtok(NULL, ".");
+            if(p == NULL) return;
             (strlen(p) == 1) ? (BasicCfg.mac[i] = atoh(p)) : (BasicCfg.mac[i] = atoh(p) << 4 | atoh(p + 1));
         }
     }
@@ -2403,11 +2423,14 @@ void Refresh_Basic(char *buf)
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         p = strtok(temp, ".");
+        if(p == NULL) return;
         BasicCfg.ip[0] = atoi(p);
         for (i = 1; i < 4; i++) {
             p = strtok(NULL, ".");
+            if(p == NULL) return;
             BasicCfg.ip[i] = atoi(p);
         }
     }
@@ -2418,11 +2441,14 @@ void Refresh_Basic(char *buf)
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         p = strtok(temp, ".");
+        if(p == NULL) return;
         BasicCfg.mask[0] = atoi(p);
         for (i = 1; i < 4; i++) {
             p = strtok(NULL, ".");
+            if(p == NULL) return;
             BasicCfg.mask[i] = atoi(p);
         }
     }
@@ -2432,21 +2458,30 @@ void Refresh_Basic(char *buf)
     if (p != NULL) {
         memset(temp, 0, 30);
         q = strstr(p, "\r\n");
-        if(q)
+        if(q) {
+            if((size_t)(q - p) >= sizeof(temp)) return;
             memcpy(temp, p, (q - p));
-        else
+        }
+        else {
+            if(strlen(p) >= sizeof(temp)) return;
             memcpy(temp, p, strlen(p));
+        }
         p = strtok(temp, ".");
+        if(p == NULL) return;
         BasicCfg.gateway[0] = atoi(p);
         for (i = 1; i < 4; i++) {
             p = strtok(NULL, ".");
+            if(p == NULL) return;
             BasicCfg.gateway[i] = atoi(p);
         }
     }
     else return;
 
     WEB_ERASE( BASIC_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( BASIC_CFG_ADDR, (uint8_t *)(&BasicCfg), BASIC_CFG_LEN);
+    if(WEB_WRITE( BASIC_CFG_ADDR, (uint8_t *)(&BasicCfg), BASIC_CFG_LEN) != FLASH_COMPLETE) {
+        printf("write basic cfg failed\r\n");
+        return;
+    }
     printf("flag:%x %x\r\n", BasicCfg.flag[0], BasicCfg.flag[1]);
     printf("mac:%x %x %x %x %x %x\r\n", BasicCfg.mac[0], BasicCfg.mac[1], \
                                         BasicCfg.mac[2], BasicCfg.mac[3], \
@@ -2474,17 +2509,19 @@ void Refresh_Port(char *buf)
     u8 i;
     char *p, *q;
     char temp[30];
-    Port_Cfg_t portCfg;
+
+    __attribute__((aligned(4))) Port_Cfg_t portCfg;
 
     memset((uint8_t *)(&portCfg), 0, PORT_CFG_LEN);
     portCfg.flag[0] = 0X57;
     portCfg.flag[1] = 0XAB;
-
+	
     p = DataLocate(buf, "__PMOD=");
     if (p != NULL) {
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         if (strcmp(temp, "0") == 0)
         {
@@ -2501,6 +2538,7 @@ void Refresh_Port(char *buf)
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         portCfg.src_port[0] = atoi(temp) / 256;
         portCfg.src_port[1] = atoi(temp) % 256;
@@ -2512,11 +2550,14 @@ void Refresh_Port(char *buf)
         memset(temp, 0, 30);
         q = strstr(p, "&");
         if(q == NULL) return;
+        if((size_t)(q - p) >= sizeof(temp)) return;
         memcpy(temp, p, (q - p));
         p = strtok(temp, ".");
+        if(p == NULL) return;
         portCfg.des_ip[0] = atoi(p);
         for (i = 1; i < 4; i++) {
             p = strtok(NULL, ".");
+            if(p == NULL) return;
             portCfg.des_ip[i] = atoi(p);
         }
     }
@@ -2526,17 +2567,24 @@ void Refresh_Port(char *buf)
     if (p != NULL) {
         memset(temp, 0, 30);
         q = strstr(p, "\r\n");
-        if(q)
+        if(q) {
+            if((size_t)(q - p) >= sizeof(temp)) return;
             memcpy(temp, p, (q - p));
-        else
+        }
+        else {
+            if(strlen(p) >= sizeof(temp)) return;
             memcpy(temp, p, strlen(p));
+        }
         portCfg.des_port[0] = atoi(temp) / 256;
         portCfg.des_port[1] = atoi(temp) % 256;
     }
     else return;
 
     WEB_ERASE( PORT_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( PORT_CFG_ADDR, (uint8_t *)(&portCfg), PORT_CFG_LEN);
+    if(WEB_WRITE( PORT_CFG_ADDR, (uint8_t *)(&portCfg), PORT_CFG_LEN) != FLASH_COMPLETE) {
+        printf("write port cfg failed\r\n");
+        return;
+    }
 
     printf("mode:%x\r\n",portCfg.mode);
     printf("src_port:%d\r\n", portCfg.src_port[0]*256 + portCfg.src_port[1]);
@@ -2579,25 +2627,29 @@ uint8_t ASCToDec(char *ASCPtr)
 /*********************************************************************
  * @fn      URLDecode
  *
- * @brief   Decoding special characters for URL transmission
+ * @brief   Decoding special characters for URL transmission ("%XX" escapes)
  *
  * @param   srcptr - source buff
- *          desptr - destination buff
- *          bufflen - length of source buff
+ *          desptr - destination buff, left NUL terminated on success
+ *          srclen - number of bytes to decode from the source buff
+ *          destcap - capacity of the destination buff, the decoded string
+ *                    (without its terminator) never exceeds it
  *
- * @return  status or Decoded string length
+ * @return  length of the decoded string, or NoREADY if an escape is truncated
+ *          or invalid, or if the value does not fit into destcap
  */
-uint8_t URLDecode(char *srcptr, char *desptr, uint8_t bufflen)
+uint8_t URLDecode(char *srcptr, char *desptr, uint8_t srclen, uint8_t destcap)
 {
     uint8_t i = 0, ret, datalen = 0;
     char tempbuf[2];
-    while(i < bufflen)
+    while(i < srclen)
     {
         if(srcptr[i] == '%')
         {
+            if((i + 2) >= srclen) return NoREADY;
             tempbuf[0] = srcptr[++i];
             tempbuf[1] = srcptr[++i];
-            ret = ASCToDec(tempbuf);
+            ret = ASCToDec((uint8_t *)tempbuf);
             if(ret == NoREADY) return ret;
             tempbuf[0] = tempbuf[0] * 16 + tempbuf[1];
             *desptr++ = tempbuf[0];
@@ -2608,8 +2660,9 @@ uint8_t URLDecode(char *srcptr, char *desptr, uint8_t bufflen)
             *desptr++ = srcptr[i++];
             datalen++;
         }
-        if(datalen > sizeof(Login_CfgBuf.pass)) return NoREADY;
+        if(datalen > destcap) return NoREADY;
     }
+    *desptr = '\0';
     return datalen;
 }
 
@@ -2628,7 +2681,7 @@ void Refresh_Login(char *buf)
     char *p, *q = NULL;
     u8 len;
     char tempbuff[30] = {0x00};
-    Login_Cfg_t LoginInf;
+    __attribute__((aligned(4))) Login_Cfg_t LoginInf;
 
 
     memset((uint8_t *)(&LoginInf), 0, LOGIN_CFG_LEN);
@@ -2641,7 +2694,7 @@ void Refresh_Login(char *buf)
         if(q == NULL) return;
         len = q - p;
         if(len > sizeof(tempbuff)) return;
-        len = URLDecode(p, tempbuff, len);
+        len = URLDecode(p, tempbuff, len, sizeof(LoginInf.user) - 1);
         if(len == 0) return;
         memcpy(LoginInf.user, tempbuff, len);
     }
@@ -2655,14 +2708,17 @@ void Refresh_Login(char *buf)
         else
             len = strlen(p);
         if(len > sizeof(tempbuff)) return;
-        len = URLDecode(p, tempbuff, len);
+        len = URLDecode(p, tempbuff, len, sizeof(LoginInf.pass) - 1);
         if(len == 0) return;
         memcpy(LoginInf.pass, tempbuff, len);
     }
     else return;
 
     WEB_ERASE( LOGIN_CFG_ADDR, FLASH_PAGE_SIZE);
-    WEB_WRITE( LOGIN_CFG_ADDR, (uint8_t *)(&LoginInf), LOGIN_CFG_LEN);
+    if(WEB_WRITE( LOGIN_CFG_ADDR, (uint8_t *)(&LoginInf), LOGIN_CFG_LEN) != FLASH_COMPLETE) {
+        printf("write login cfg failed\r\n");
+        return;
+    }
     printf("user:%s\r\n",LoginInf.user);
     printf("pass:%s\r\n",LoginInf.pass);
 }
@@ -2677,7 +2733,8 @@ void Refresh_Login(char *buf)
  *          buf - parameter structure
  *          paranum - parameters number
  *
- * @return  length of data
+ * @return  number of bytes stored in HtmlBuffer, or 0 when the result would not
+ *          fit into HtmlBuffer[HTML_LEN] or when a parameter is not found
  */
 uint16_t Refresh_Html(const char *html, Parameter *buf, u8 paranum)
 {
@@ -2692,6 +2749,9 @@ uint16_t Refresh_Html(const char *html, Parameter *buf, u8 paranum)
         currptr = strstr(lastptr, keyword);
         if(currptr == NULL) break;
         copylen = currptr - lastptr;
+
+        if(((u32)datalen + copylen) > HTML_LEN)
+            return 0;
         memcpy(&HtmlBuffer[datalen], lastptr, copylen);
         datalen += copylen;
         for(i = 0; i < paranum; i++)
@@ -2701,12 +2761,16 @@ uint16_t Refresh_Html(const char *html, Parameter *buf, u8 paranum)
         }
         if(i == paranum)
             return 0 ;
+        if(((u32)datalen + strlen(buf[i].value)) > HTML_LEN)
+            return 0;
         memcpy(&HtmlBuffer[datalen], buf[i].value, strlen(buf[i].value));
         datalen += strlen(buf[i].value);
         lastptr = currptr + strlen(buf[i].para);
     }
     if(strlen(lastptr) != 0)
     {
+        if(((u32)datalen + strlen(lastptr)) > HTML_LEN)
+            return 0;
         memcpy(&HtmlBuffer[datalen], lastptr, strlen(lastptr));
         datalen += strlen(lastptr);
     }
@@ -2726,6 +2790,8 @@ uint16_t Refresh_Html(const char *html, Parameter *buf, u8 paranum)
  */
 void copy_flash(const char *html, u32 len)
 {
+    if(len > HTML_LEN)
+        len = HTML_LEN;
     memset(HtmlBuffer, 0, HTML_LEN);
     memcpy(HtmlBuffer, html, len);
 }
@@ -2805,7 +2871,9 @@ void WEB_READ(u32 StartAddr, u8 *Buffer, u32 Length) {
 /*********************************************************************
  * @fn      Init_Para_Tab
  *
- * @brief   Initialization parameter table.
+ * @brief   Initialization parameter table: build the tables Para_Basic /
+ *          Para_Port / Para_Login used by Refresh_Html to replace the "__Axxx"
+ *          placeholders of the web pages with the values read from the Data-Flash.
  *
  * @return  none
  */
@@ -2868,26 +2936,35 @@ void Init_Para_Tab(void)
     strcpy(Para_Port[3].value, s);
     printf("__ADPT = %s\n", Para_Port[3].value);
 
+    /*The user/pass fields of the stored configuration are not guaranteed to be
+     *terminated, so the copy is bounded by their size and terminated here.*/
     Para_Login[0].para = "__AUSE";
-    strcpy(Para_Login[0].value, Login_CfgBuf.user);
+    memcpy(Para_Login[0].value, Login_CfgBuf.user, sizeof(Login_CfgBuf.user));
+    Para_Login[0].value[sizeof(Login_CfgBuf.user)] = '\0';
     printf("__AUSE = %s\n", Para_Login[0].value);
 
     Para_Login[1].para = "__APAS";
-    strcpy(Para_Login[1].value, Login_CfgBuf.pass);
+    memcpy(Para_Login[1].value, Login_CfgBuf.pass, sizeof(Login_CfgBuf.pass));
+    Para_Login[1].value[sizeof(Login_CfgBuf.pass)] = '\0';
     printf("__APAS = %s\n", Para_Login[1].value);
 }
 
 /*********************************************************************
  * @fn      Data_Send
  *
- * @brief   Socket sends data.
+ * @brief   Socket sends data: hand the whole buffer over to the socket,
+ *          retrying until nothing is left or the retry limit is reached.
+ *
+ * @param   id - socket id
+ *          dataptr - data to be sent
+ *          datalen - number of bytes to send
  *
  * @return  none
  */
 void Data_Send(u8 id, uint8_t *dataptr, uint32_t datalen)
 {
     u32 len, totallen;
-    u8 *p, timeout = 50;
+    u8 *p, timeout = 100;
 
     p = dataptr;
     totallen = datalen;
@@ -2896,8 +2973,12 @@ void Data_Send(u8 id, uint8_t *dataptr, uint32_t datalen)
         WCHNET_SocketSend(id, p, &len);                         //Send the data
         totallen -= len;                                        //Subtract the sent length from the total length
         p += len;                                               //offset buffer pointer
-        if(--timeout == 0) break;
-        if(totallen) continue;                                  //If the data is not sent, continue to send
+		if(--timeout == 0) break;
+        if(totallen) 											//If the data is not sent, continue to send
+		{
+			Delay_Us(100);
+			continue; 
+		}                                 
         break;                                                  //After sending, exit
     }
 }
@@ -2918,6 +2999,7 @@ int strFind( char str[], char substr[] )
     int i, j, check ,count = 0;
     int len = strlen( str );
     int sublen = strlen( substr );
+    if(sublen == 0) return 0;
     for( i = 0; i < len; i++ )
     {
         check = 1;
@@ -2932,7 +3014,7 @@ int strFind( char str[], char substr[] )
         if( check == 1 )
         {
             count++;
-            i = i + sublen;
+            i = i + sublen - 1;
         }
     }
     return count;
@@ -2989,8 +3071,8 @@ void Web_Server(void)
                     }
                 }
                 /*Analyze the requested resource type and return the response*/
-                MakeHttpResponse(httpweb, http_request.TYPE, pagelen);
-                resplen = strlen(httpweb);
+                MakeHttpResponse((char *)httpweb, http_request.TYPE, pagelen);
+                resplen = strlen((char *)httpweb);
                 Data_Send(socket, (uint8_t *)httpweb, resplen);
 
                 Data_Send(socket, (uint8_t *)HtmlBuffer, pagelen);
@@ -3054,7 +3136,7 @@ void Web_Server(void)
                     copy_flash(Html_style, pagelen);
                 }
                 /*Analyze the requested resource type and return the response*/
-                MakeHttpResponse(httpweb, http_request.TYPE, pagelen);
+                MakeHttpResponse((char *)httpweb, http_request.TYPE, pagelen);
                 resplen = strlen((char *)httpweb);
                 Data_Send(socket, (uint8_t *)httpweb, resplen);
                 Data_Send(socket, (uint8_t *)HtmlBuffer, pagelen);

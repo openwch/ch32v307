@@ -36,10 +36,10 @@ const uint8_t  MyDevDescr[ ] =
     0x01,                           /* bNumConfigurations */
 };
 
-/* USB配置描述符(高速) */
+/* USBConfiguration descriptor (high speed) */
 const uint8_t  MyCfgDescr_HS[ ] =
 {
-    /* 配置描述符 */
+    /* Configuration descriptor */
     0x09,                           /* bLength: Configuation Descriptor size */
     0x02,                           /* bDescriptorType: Configuration */
     0x56,                           /* wTotalLength: Bytes returned */
@@ -50,45 +50,45 @@ const uint8_t  MyCfgDescr_HS[ ] =
     DEF_USB_ATTRIBUTES,             /* bmAttributes: Bus powered */
     DEF_USB_MAXPOWER,               /* MaxPower 100 mA: this current is used for detecting Vbus */
 
-    /* 控制接口(接口0)描述符 */
+    /* Control interface (interface 0) descriptor */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x00,                           /* bInterfaceNumber */
     0x00,                           /* bAlternateSetting: 0x00 */
     0x01,                           /* bNumEndpoints */
-    0x02,                           /* bInterfaceClass: 接口实现通信设备/接口类 */
-    0x0D,                           /* bInterfaceSubClass: 接口实现以太网组网控制模型子类 */
-    0x00,                           /* bInterfaceProtocol: 接口使用不需要特定于类的协议 */
+    0x02,                           /* bInterfaceClass: The interface implements the communication device/interface class */
+    0x0D,                           /* bInterfaceSubClass: The interface implements the Ethernet networking control model subclass */
+    0x00,                           /* bInterfaceProtocol: The interface is used without a class-specific protocol */
     0x05,                           /* iInterface */
 
     /* Header Functional Descriptor */
     0x05,                           /* bLength */
     0x24,                           /* bDescriptorType */
     0x00,                           /* bDescriptorSubType */
-    0x10,                           /* bcdCDC: USB通信类定义通信规范1.10版 */
+    0x10,                           /* bcdCDC: USBThe communication class defines version 1.10 of the communication specification */
     0x01,
 
     /* Union Functional Descriptor */
     0x05,                           /* bLength */
     0x24,                           /* bDescriptorType */
     0x06,                           /* bDescriptorSubType */
-    0x00,                           /* bControlInterface: 通信或数据类接口的接口号 */
-    0x01,                           /* bSubordinateInterface0: 下级接口的接口号 */
+    0x00,                           /* bControlInterface: Interface number of the communication or data class interface */
+    0x01,                           /* bSubordinateInterface0: Interface number of the subordinate interface */
     
     /* Ethernet Networking Functional Descriptor */
     0x0D,                           /* bLength */
     0x24,                           /* bDescriptorType: CS_INTERFACE */
     0x0F,                           /* bDescriptorSubType */
-    0x04,                           /* iMACAddress: 字符串描述符索引,ECM/NCM通过序列号描述符上报MAC地址 */
-    0x00,                           /* bmEthernetStatistics: 设备不支持GetEthernetStatistic请求 */
+    0x04,                           /* iMACAddress: String descriptor index; ECM/NCM report the MAC address through the serial number descriptor */
+    0x00,                           /* bmEthernetStatistics: The device does not support the GetEthernetStatistic request */
     0x00,
     0x00,
     0x00,
-    0xEA,                           /* wMaxSegmentSize: 太网设备能够支持的最大段大小: 1514 */
+    0xEA,                           /* wMaxSegmentSize: Maximum segment size supported by the Ethernet device: 1514 */
     0x05,
-    0x00,                           /* wNumberMCFilters: 多播筛选器位图 */
+    0x00,                           /* wNumberMCFilters: Multicast filter bitmap */
     0x00,
-    0x00,                           /* bNumberPowerFilters: 包含可用于唤醒主机的模式筛选器数 */
+    0x00,                           /* bNumberPowerFilters: Number of pattern filters available for waking the host */
 
     /* NCM Functional Descriptor */
     0x06,                           /* bLength */
@@ -98,7 +98,7 @@ const uint8_t  MyCfgDescr_HS[ ] =
     0x01,                           /* bcdNcmVersion */
     0x00,                           /* bmNetworkCapabilities */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x81,                           /* bEndpointAddress */
@@ -106,18 +106,18 @@ const uint8_t  MyCfgDescr_HS[ ] =
     (uint8_t)DEF_USB_EP1_HS_SIZE, (uint8_t)( DEF_USB_EP1_HS_SIZE >> 8 ), /* wMaxPacketSize 64 */
     0x08,                           /* bInterval */
 
-    /* 数据接口(接口1)描述符alt0 */
+    /* Data interface (interface 1) descriptor alt0 */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x01,                           /* bInterfaceNumber: 0x01 */
     0x00,                           /* bAlternateSetting: 0x00 */
     0x00,                           /* bNumEndpoints: 0 */
-    0x0A,                           /* bInterfaceClass: 接口实现数据接口类 */
-    0x00,                           /* bInterfaceProtocol: 接口使用不需要特定于类的协议 */
+    0x0A,                           /* bInterfaceClass: The interface implements the data interface class */
+    0x00,                           /* bInterfaceProtocol: The interface is used without a class-specific protocol */
     0x01,                           /* bInterfaceSubClass */
     0x00,                           /* iInterface */
 
-    /* 数据接口(接口1)描述符alt1 */
+    /* Data interface (interface 1) descriptor alt1 */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x01,                           /* bInterfaceNumber: 0x01 */
@@ -128,7 +128,7 @@ const uint8_t  MyCfgDescr_HS[ ] =
     0x01,                           /* bInterfaceSubClass */
     0x00,                           /* iInterface */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x82,                           /* bEndpointAddress */
@@ -136,7 +136,7 @@ const uint8_t  MyCfgDescr_HS[ ] =
     (uint8_t)DEF_USB_EP2_HS_SIZE, (uint8_t)( DEF_USB_EP2_HS_SIZE >> 8 ), /* wMaxPacketSize 512 */
     0x00,                           /* bInterval */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x03,                           /* bEndpointAddress */
@@ -148,7 +148,7 @@ const uint8_t  MyCfgDescr_HS[ ] =
 /* Configuration Descriptor */
 const uint8_t  MyCfgDescr_FS[ ] =
 {
-    /* 配置描述符 */
+    /* Configuration descriptor */
     0x09,                           /* bLength: Configuation Descriptor size */
     0x02,                           /* bDescriptorType: Configuration */
     0x56,                           /* wTotalLength: Bytes returned */
@@ -159,45 +159,45 @@ const uint8_t  MyCfgDescr_FS[ ] =
     DEF_USB_ATTRIBUTES,             /* bmAttributes: Bus powered */
     DEF_USB_MAXPOWER,               /* MaxPower 100 mA: this current is used for detecting Vbus */
 
-    /* 控制接口(接口0)描述符 */
+    /* Control interface (interface 0) descriptor */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x00,                           /* bInterfaceNumber */
     0x00,                           /* bAlternateSetting: 0x00 */
     0x01,                           /* bNumEndpoints */
-    0x02,                           /* bInterfaceClass: 接口实现通信设备/接口类 */
-    0x0D,                           /* bInterfaceSubClass: 接口实现以太网组网控制模型子类 */
-    0x00,                           /* bInterfaceProtocol: 接口使用不需要特定于类的协议 */
+    0x02,                           /* bInterfaceClass: The interface implements the communication device/interface class */
+    0x0D,                           /* bInterfaceSubClass: The interface implements the Ethernet networking control model subclass */
+    0x00,                           /* bInterfaceProtocol: The interface is used without a class-specific protocol */
     0x05,                           /* iInterface */
 
     /* Header Functional Descriptor */
     0x05,                           /* bLength */
     0x24,                           /* bDescriptorType */
     0x00,                           /* bDescriptorSubType */
-    0x10,                           /* bcdCDC: USB通信类定义通信规范1.10版 */
+    0x10,                           /* bcdCDC: USBThe communication class defines version 1.10 of the communication specification */
     0x01,
 
     /* Union Functional Descriptor */
     0x05,                           /* bLength */
     0x24,                           /* bDescriptorType */
     0x06,                           /* bDescriptorSubType */
-    0x00,                           /* bControlInterface: 通信或数据类接口的接口号 */
-    0x01,                           /* bSubordinateInterface0: 下级接口的接口号 */
+    0x00,                           /* bControlInterface: Interface number of the communication or data class interface */
+    0x01,                           /* bSubordinateInterface0: Interface number of the subordinate interface */
 
     /* Ethernet Networking Functional Descriptor */
     0x0D,                           /* bLength */
     0x24,                           /* bDescriptorType: CS_INTERFACE */
     0x0F,                           /* bDescriptorSubType */
-    0x04,                           /* iMACAddress: 字符串描述符索引,ECM/NCM通过序列号描述符上报MAC地址 */
-    0x00,                           /* bmEthernetStatistics: 设备不支持GetEthernetStatistic请求 */
+    0x04,                           /* iMACAddress: String descriptor index; ECM/NCM report the MAC address through the serial number descriptor */
+    0x00,                           /* bmEthernetStatistics: The device does not support the GetEthernetStatistic request */
     0x00,
     0x00,
     0x00,
-    0xEA,                           /* wMaxSegmentSize: 太网设备能够支持的最大段大小: 1514 */
+    0xEA,                           /* wMaxSegmentSize: Maximum segment size supported by the Ethernet device: 1514 */
     0x05,
-    0x00,                           /* wNumberMCFilters: 多播筛选器位图 */
+    0x00,                           /* wNumberMCFilters: Multicast filter bitmap */
     0x00,
-    0x00,                           /* bNumberPowerFilters: 包含可用于唤醒主机的模式筛选器数 */
+    0x00,                           /* bNumberPowerFilters: Number of pattern filters available for waking the host */
 
     /* NCM Functional Descriptor */
     0x06,                           /* bLength */
@@ -207,7 +207,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x01,                           /* bcdNcmVersion */
     0x00,                           /* bmNetworkCapabilities */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x81,                           /* bEndpointAddress */
@@ -215,18 +215,18 @@ const uint8_t  MyCfgDescr_FS[ ] =
     (uint8_t)DEF_USB_EP1_FS_SIZE, (uint8_t)( DEF_USB_EP1_FS_SIZE >> 8 ), /* wMaxPacketSize 64 */
     0x08,                           /* bInterval */
 
-    /* 数据接口(接口1)描述符alt0 */
+    /* Data interface (interface 1) descriptor alt0 */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x01,                           /* bInterfaceNumber: 0x01 */
     0x00,                           /* bAlternateSetting: 0x00 */
     0x00,                           /* bNumEndpoints: 0 */
-    0x0A,                           /* bInterfaceClass: 接口实现数据接口类 */
-    0x00,                           /* bInterfaceProtocol: 接口使用不需要特定于类的协议 */
+    0x0A,                           /* bInterfaceClass: The interface implements the data interface class */
+    0x00,                           /* bInterfaceProtocol: The interface is used without a class-specific protocol */
     0x01,                           /* bInterfaceSubClass */
     0x00,                           /* iInterface */
 
-    /* 数据接口(接口1)描述符alt1 */
+    /* Data interface (interface 1) descriptor alt1 */
     0x09,                           /* bLength */
     0x04,                           /* bDescriptorType */
     0x01,                           /* bInterfaceNumber: 0x01 */
@@ -237,7 +237,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     0x01,                           /* bInterfaceSubClass */
     0x00,                           /* iInterface */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x82,                           /* bEndpointAddress */
@@ -245,7 +245,7 @@ const uint8_t  MyCfgDescr_FS[ ] =
     (uint8_t)DEF_USB_EP2_FS_SIZE, (uint8_t)( DEF_USB_EP2_FS_SIZE >> 8 ), /* wMaxPacketSize 512 */
     0x00,                           /* bInterval */
 
-    /* 端点描述符 */
+    /* Endpoint descriptor */
     0x07,                           /* bLength */
     0x05,                           /* bDescriptorType */
     0x03,                           /* bEndpointAddress */
@@ -280,11 +280,11 @@ const uint8_t  MySerNumInfo[ ] =
               , '6', 0, '7', 0, '8', 0, '9', 0
 };
 
-/* USB序列号字符串描述符 */
+/* USBSerial number string descriptor */
 uint8_t ECM_StrDesc_Sn[ ] =
 {
-    /* Sn默认序列号字符串描述符 0x84 0xC2 0xE4 0x00 0x00 0x01  */
-    /* 生成方法见 USB.c 中的 MACAddr_Change_To_SNDesc( ) 函数 */
+    /* SnDefault serial number string descriptor 0x84 0xC2 0xE4 0x00 0x00 0x01 */
+    /* For how it is generated, see the MACAddr_Change_To_SNDesc() function in USB.c */
     0x1A, 0x03, 0x38, 0x00, 0x34, 0x00, /* 84 */
                 0x43, 0x00, 0x32, 0x00, /* C2 */
                 0x45, 0x00, 0x34, 0x00, /* E4 */

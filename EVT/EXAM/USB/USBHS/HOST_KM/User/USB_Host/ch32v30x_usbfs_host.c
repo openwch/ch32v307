@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : ch32f20x_usbfs_host.c
+* File Name          : ch32v30x_usbfs_host.c
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/09/01
@@ -351,7 +351,7 @@ uint8_t USBFSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
 
             if( USBFSH_CheckRootHubPortEnable( ) == 0x00 )
             {
-                return ERR_USB_CONNECT;  // USB device connect
+                return ERR_USB_DISCON;  // USB device disconnect
             }
             else
             {

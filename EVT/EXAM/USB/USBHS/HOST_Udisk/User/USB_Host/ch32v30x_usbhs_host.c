@@ -314,7 +314,7 @@ uint8_t USBHSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
                 {
                     return ( r | ERR_USB_TRANSFER );
                 }
-                if( timeout < 0xFFFF )
+                if( timeout < 0xFFFFFFFF )
                 {
                     timeout--;
                 }

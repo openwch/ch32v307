@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2024/12/16
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,7 +24,7 @@
 #define Num 7
 
 /* Global Variable */ 
-u16 DAC_Value[Num]={64,128,256,512,1024,2048,4095};   
+static const u16 DAC_Value[Num]={64,128,256,512,1024,2048,4095};   
 
 
 /*********************************************************************
@@ -109,15 +109,13 @@ int main(void)
         DAC->R12BDHR1=DAC_Value[i];
         i++;
 
-        if(i>Num){
-          i=0;
-        }
+        i %= Num;
 
         Delay_Ms(1000);
         printf("run\r\n");
         printf("DAC->R12BDHR1:0x%04x\r\n",DAC->R12BDHR1);
         printf("DAC->DOR1:0x%04x\r\n",DAC->DOR1);
-        printf("TIM3->CNT:%d\r\n",TIM3->CNT);
+        printf("TIM3->CNT:%d\r\n",TIM8->CNT);
 
     }
 }

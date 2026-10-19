@@ -9,9 +9,7 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-#include <stdlib.h>
 #include <string.h>
-#include "string.h"
 #include "eth_driver.h"
 #include "IAP_Task.h"
 /*
@@ -96,8 +94,11 @@ void WCHNET_CreateTcpSocket(void)
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-    printf("WCHNET_SocketCreat %d\r\n",SocketId);
     mStopIfError(i);
+    if(i != WCHNET_ERR_SUCCESS){
+        return;
+    }
+    printf("WCHNET_SocketCreat %d\r\n",SocketId);
     i = WCHNET_SocketConnect(SocketId);
     mStopIfError(i);
 }
@@ -215,9 +216,9 @@ int main(void)
 
     SystemCoreClockUpdate();
     Delay_Init();
-    USART_Printf_Init(115200);                                                      //USART initialize   	
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+    USART_Printf_Init(115200);                                                      //USART initialize
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
     GPIOInit();
     /*Detect whether the button(PA0) is pressed, if pressed,
      *make a TCP connection to upgrade, otherwise jump
@@ -226,20 +227,25 @@ int main(void)
         Delay_Ms(50);
         if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0){
             printf("IAP Test\r\n");
-            printf("SystemClk:%d\r\n",SystemCoreClock);
-            printf("net version:%x\n",WCHNET_GetVer());
+            printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
             if( WCHNET_LIB_VER != WCHNET_GetVer() ){
-                printf("version error.\n");
+                printf("version error.\r\n");
             }
             WCHNET_GetMacAddr(MACAddr);                                             //get the chip MAC address
             printf("mac addr:");
-            for(i = 0; i < 6; i++) 
-                printf("%x ",MACAddr[i]);
-            printf("\n");
+            for(i = 0; i < 6; i++)
+                printf("%x ", (unsigned)MACAddr[i]);
+            printf("\r\n");
             TIM2_Init();
             i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                        //Ethernet library initialize
             mStopIfError(i);
-            if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
+            if(i == WCHNET_ERR_SUCCESS) {
+                printf("WCHNET_LibInit Success\r\n");
+            }
+            else {
+                printf("WCHNET_LibInit failed, halted\r\n");
+                while(1);
+            }
             WCHNET_CreateTcpSocket();                                               //Create TCP Socket
 
             while(1)
@@ -265,6 +271,10 @@ int main(void)
         if(IAPCopyFlashDeal() == READY){
             printf("update success!\r\n");
             printf("Run APP!\r\n");
+            /*Control is handed over to the application by triggering the
+             *software interrupt: SW_Handler (ch32v30x_it.c) jumps to
+             *USER_IMAGE_START_ADD. The application has to bring its own
+             *vector table, see the WCHNET IAP upgrade tutorial.*/
             NVIC_EnableIRQ(Software_IRQn);
             NVIC_SetPendingIRQ(Software_IRQn);
         }

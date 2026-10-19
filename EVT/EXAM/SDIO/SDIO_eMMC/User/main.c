@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2026/01/04
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,7 +15,7 @@
  * 8 lines SDIO routine to operate eMMC card:
  *   This example demonstrates reading and writing all sectors of the eMMC card--KLM8G1GETF-B041
  *   through the SDIO interface by CH32V307WCU.
- * DVP--PIN:
+ *   PIN:
  *   D0--PC8
  *   D1--PC9
  *   D2--PC10
@@ -51,6 +51,7 @@ void show_eMMCcard_info(void)
         case SDIO_STD_CAPACITY_SD_CARD_V2_0:printf("Card Type:SDSC V2.0\r\n");break;
         case SDIO_HIGH_CAPACITY_SD_CARD:printf("Card Type:SDHC V2.0\r\n");break;
         case SDIO_HIGH_CAPACITY_MMC_CARD:printf("Card Type:eMMC Card\r\n");break;
+        default:break;
     }
     printf("Card ManufacturerID:0x%x\r\n",eMMCCardInfo.eMMC_cid.ManufacturerID);
     printf("Card SectorNums:0x%08x\n", eMMCCardInfo.SectorNums);
@@ -184,8 +185,9 @@ int main(void)
     for(i=0; i<512; i++)
     {
         buf[i] = i;
+	    Readbuf[i]=0;
     }
-    for(i=0; i<Sector_Nums; i++)
+    for(i=1; i<Sector_Nums; i++)
     {
         if(SD_WriteDisk(buf,i,1))
         {
