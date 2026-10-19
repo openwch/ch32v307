@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2023/11/07
+* Version            : V1.0.1
+* Date               : 2026/10/15
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -111,9 +111,10 @@ int main(void)
 void WWDG_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 1.WWDG_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(PVD_IRQn);
 	asm("nop");
 	asm("nop");
@@ -131,9 +132,10 @@ void WWDG_IRQHandler(void)
 void PVD_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 2.PVD_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(TAMPER_IRQn);
 	asm("nop");
 	asm("nop");
@@ -151,9 +153,10 @@ void PVD_IRQHandler(void)
 void TAMPER_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 3.TAMPER_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(RTC_IRQn);
 	asm("nop");
 	asm("nop");
@@ -171,9 +174,10 @@ void TAMPER_IRQHandler(void)
 void RTC_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 4.RTC_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(FLASH_IRQn);
 	asm("nop");
 	asm("nop");
@@ -191,9 +195,10 @@ void RTC_IRQHandler(void)
 void FLASH_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 5.FLASH_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(RCC_IRQn);
 	asm("nop");
 	asm("nop");
@@ -211,9 +216,10 @@ void FLASH_IRQHandler(void)
 void RCC_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 6.RCC_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(EXTI0_IRQn);
 	asm("nop");
 	asm("nop");
@@ -231,9 +237,10 @@ void RCC_IRQHandler(void)
 void EXTI0_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 7.EXTI0_IRQHandler");
     printf("  step:%d\r\n",step);
-
+    #endif
     NVIC_SetPendingIRQ(EXTI1_IRQn);
 	asm("nop");
 	asm("nop");
@@ -251,13 +258,17 @@ void EXTI0_IRQHandler(void)
 void EXTI1_IRQHandler(void)
 {
     step++;
+    #if 1
     printf(" 8.EXTI1_IRQHandler");
     printf("  step:%d\r\n",step);
+    #endif
 	asm("nop");
 	asm("nop");
 	asm("nop");
 	asm("nop");
+    #if 1
 	printf("GISR:%08x\r\n",PFIC->GISR);
+    #endif
 }
 
 

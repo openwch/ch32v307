@@ -49,6 +49,7 @@ void HardFault_Handler(void) {
  * @return  none
  */
 void SW_Handler(void) {
+    __disable_irq();
     __asm("li  a6, 0x5000");
     __asm("jr  a6");
 

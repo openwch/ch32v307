@@ -26,27 +26,27 @@ void WCHNET_ReplyMailBody( void )
     u8 i;
 
     memset( MailBodyData,'\0',sizeof(MailBodyData));
-    QuotedPrintableEncode( "hello" ,MailBodyData, strlen("hello"),76 );
+    QuotedPrintableEncode( "hello" ,MailBodyData, strlen("hello"),76, sizeof(MailBodyData) );
     strcat( send_buff, MailBodyData );
     strcat( send_buff, "\r\n    " );
     strcat( send_buff, p_pop3->DecodeRName );
     strcat( send_buff, "!" );
     memset( MailBodyData,'\0',sizeof(MailBodyData));
-    QuotedPrintableEncode( (char *)g_mailbody ,MailBodyData, strlen(g_mailbody),76 );
+    QuotedPrintableEncode( (char *)g_mailbody ,MailBodyData, strlen(g_mailbody),76, sizeof(MailBodyData) );
     strcat( send_buff, MailBodyData );
     if(p_pop3->identitycheck == 1){
         for(i=0;i<6;i++) MacAddr[i] = MACAddr[i];
-        WCHNET_XToChar(MacAddr,&MacAddrC[0],strlen(MacAddr));
+        WCHNET_XToChar(MacAddr,&MacAddrC[0],6);
 #if DIALOG
     printf("B len= %02X\n",(u16)strlen(MacAddrC));
 #endif
         if(strlen(MacAddrC)>17) MacAddrC[17] = '\0';
         strcat( send_buff, "\r\n" );
         memset( MailBodyData,'\0',sizeof(MailBodyData));
-        QuotedPrintableEncode( "I am ", MailBodyData, strlen("I am "),76 );
+        QuotedPrintableEncode( "I am ", MailBodyData, strlen("I am "),76, sizeof(MailBodyData) );
         strcat( send_buff, MailBodyData );
         memset( MailBodyData,'\0',sizeof(MailBodyData));
-        QuotedPrintableEncode( (char *)MacAddrC, MailBodyData, strlen(MacAddrC),76 );
+        QuotedPrintableEncode( (char *)MacAddrC, MailBodyData, strlen(MacAddrC),76, sizeof(MailBodyData) );
         strcat( send_buff, MailBodyData );
         strcat( send_buff, "\r\n" );
     }
@@ -72,6 +72,7 @@ void WCHNET_ReplyMailBody( void )
 }
 #endif // receive_over_reply
 
+#ifdef receive_mail
 /*********************************************************************
  * @fn      WCHNET_AnalyseMailData
  *
@@ -85,6 +86,13 @@ void WCHNET_AnalyseMailData( char *recv_buff )
 {
      u16    i=0,j=0;
 
+    /*The mail being parsed was written by an arbitrary sender: every field of
+     *the headers can be as long as the mail itself, while the buffers filled
+     *in below are 32/40/48/512 bytes.  Therefore each copy loop is limited by
+     *the capacity of its own destination (j < sizeof(target) - 1) instead of
+     *by ReceLen only, and terminates what it wrote, so that the value left in
+     *the target is a string even when the field had to be truncated.*/
+
     if(p_pop3->ReceFlag){
         i = 0;
         if(p_pop3->EncodeType == 2) goto type2;                    //Jump to attachment receiving, encoding -- quoted-printable
@@ -93,115 +101,120 @@ void WCHNET_AnalyseMailData( char *recv_buff )
     }
     for(i=0;i<ReceLen;i++){
         /* sender name/address */
-        if( strncmp("\nFrom: ", &recv_buff[i], 7) == 0 ){
+        if( ((i + 7) <= ReceLen) && (strncmp("\nFrom: ", &recv_buff[i], 7) == 0) ){
             i += 7;
 #if DIALOG
     printf("1#From \n");
 #endif
             if(recv_buff[i] == '"') i++;
             if(recv_buff[i] == '='){
-                while(strncmp("?B?", &recv_buff[i], 3)&&(i < ReceLen)) i++;
+                while(((i + 3) <= ReceLen)&&strncmp("?B?", &recv_buff[i], 3)) i++;
                 i += 3;
                 j = 0;
-                memset( send_buff, '\0', strlen(send_buff) );
+                memset( send_buff, '\0', sizeof(send_buff) );
                 /* sender name */
-                while((recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(i < ReceLen)){
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(j < (sizeof(send_buff) - 1))){
                     send_buff[j] = recv_buff[i];
                     j++;
                     i++;        
                 }
                 memset( p_pop3->DecodeRName, '\0', sizeof(p_pop3->DecodeRName) );
-                Base64Decode(send_buff,  strlen(send_buff),p_pop3->DecodeRName);
+                Base64Decode(send_buff,  strlen(send_buff),p_pop3->DecodeRName, sizeof(p_pop3->DecodeRName));
 #if DIALOG
     printf("DecName:%s\n", p_pop3->DecodeRName);
 #endif
             }
             else{                                                               //not encoded
                 j = 0;
-                while((recv_buff[i] != '"')&&(i < ReceLen)){                    //sender name
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '"')&&(j < (sizeof(p_pop3->DecodeRName) - 1))){   //sender name
                     p_pop3->DecodeRName[j] = recv_buff[i];
                     j++;
-                    i++;        
+                    i++;
                 }
-            }                       
-            while((recv_buff[i] != '<')&&(i < ReceLen)) i++;
+                p_pop3->DecodeRName[j] = '\0';
+            }
+            while(((i + 1) <= ReceLen)&&(recv_buff[i] != '<')) i++;
             i++;
             j = 0;
-            while((recv_buff[i] != '>')&&(i < ReceLen)){                        //sender address
+            while(((i + 1) <= ReceLen)&&(recv_buff[i] != '>')&&(j < (sizeof(R_argv[0]) - 1))){   //sender address
                 R_argv[0][j] = recv_buff[i];
                 j++;
-                i++; 
+                i++;
             }
+            R_argv[0][j] = '\0';
         }
 
-        if( strncmp("\nCc: ", &recv_buff[i], 5) == 0 ){
+        if( ((i + 5) <= ReceLen) && (strncmp("\nCc: ", &recv_buff[i], 5) == 0) ){
             i += 5;
 #if DIALOG
     printf("2#Cc \n");
 #endif        
-            while(recv_buff[i] != '<')    i++;
+            while(((i + 1) <= ReceLen)&&(recv_buff[i] != '<'))    i++;
             i++;
             j = 0;
-            while(recv_buff[i] != '>'&&(i < ReceLen)){                          //CC address
+            while(((i + 1) <= ReceLen)&&(recv_buff[i] != '>')&&(j < (sizeof(p_pop3->Ccname) - 1))){   //CC address
                 p_pop3->Ccname[j] = recv_buff[i];
                 j++;
-                i++;        
+                i++;
             }
+            p_pop3->Ccname[j] = '\0';
         }
 
-        if( strncmp("\nDate: ", &recv_buff[i], 7) == 0 ){
+        if( ((i + 7) <= ReceLen) && (strncmp("\nDate: ", &recv_buff[i], 7) == 0) ){
             i += 7;
 #if DIALOG
     printf("3#date \n");
 #endif
             j = 0;
-            while((recv_buff[i] != '\r')&&(i < ReceLen)){                       //date sent
+            while(((i + 1) <= ReceLen)&&(recv_buff[i] != '\r')&&(j < (sizeof(p_pop3->sBufTime) - 1))){   //date sent
                 p_pop3->sBufTime[j] = recv_buff[i];
                 j++;
-                i++;        
+                i++;
             }
+            p_pop3->sBufTime[j] = '\0';
         }
 
-        if( strncmp("\nSubject: ", &recv_buff[i], 10) == 0 ){
+        if( ((i + 10) <= ReceLen) && (strncmp("\nSubject: ", &recv_buff[i], 10) == 0) ){
             i += 10;
 #if DIALOG
     printf("4#Subject \n");
 #endif
             if(recv_buff[i] == '[') {
-                while(recv_buff[i] == ']'&&(i < ReceLen)) i++;
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] == ']')) i++;
                 i += 2;
             }
             if(recv_buff[i] == '='){
-                while(strncmp("?B?", &recv_buff[i], 3)&&(i < ReceLen)) i++;
+                while(((i + 3) <= ReceLen)&&strncmp("?B?", &recv_buff[i], 3)) i++;
                 i += 3;
                 j = 0;
-                memset( send_buff, '\0', strlen(send_buff) );
+                memset( send_buff, '\0', sizeof(send_buff) );
 
-                while((recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(i < ReceLen)){
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(j < (sizeof(send_buff) - 1))){
                     send_buff[j] = recv_buff[i];
                     j++;
-                    i++;      
+                    i++;
                 }
-                Base64Decode(send_buff,strlen(send_buff),R_argv[1]);
+                Base64Decode(send_buff,strlen(send_buff),R_argv[1], sizeof(R_argv[1]));
 #if DIALOG
     printf("Decode subject:%s\n", R_argv[1]);
 #endif
             }
             else{
                 j = 0;
-                while(recv_buff[i] != '\r'&&(i < ReceLen)){
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '\r')&&(j < (sizeof(R_argv[1]) - 1))){
                     R_argv[1][j] = recv_buff[i];
                     j++;
-                    i++;      
+                    i++;
                 }
+                R_argv[1][j] = '\0';
             }
         }
-        if( strncmp("name=", &recv_buff[i], 5) == 0 ){
+        if( ((i + 5) <= ReceLen) && (strncmp("name=", &recv_buff[i], 5) == 0) ){
 #if DIALOG
     printf("5#\n");
 #endif
             i += 5;
-            while(strncmp("Content-Transfer-Encoding: ", &recv_buff[i], 27)&&strncmp("filename=", &recv_buff[i], 9)&&(i < ReceLen)) i++;
+            while(((i + 27) <= ReceLen)&&strncmp("Content-Transfer-Encoding: ", &recv_buff[i], 27)&&strncmp("filename=", &recv_buff[i], 9)) i++;
             if(strncmp("Content-Transfer-Encoding: ", &recv_buff[i], 27) == 0){
 
                 i += 27;
@@ -220,33 +233,34 @@ void WCHNET_AnalyseMailData( char *recv_buff )
                     p_pop3->EncodeType = 2;
                 }
                 else p_pop3->EncodeType = 0;  
-                while(strncmp("filename=", &recv_buff[i], 9)) i++;
+                while(((i + 9) <= ReceLen)&&strncmp("filename=", &recv_buff[i], 9)) i++;
                 i += 9;
-                while(recv_buff[i] != '"'&&i<ReceLen) i++;
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '"')) i++;
                 i++;
 #if DIALOG
     printf("6#filename \n");
 #endif
                 if(recv_buff[i] == '='){
-                    while(strncmp("?B?", &recv_buff[i], 3)&&(i < ReceLen)) i++;
+                    while(((i + 3) <= ReceLen)&&strncmp("?B?", &recv_buff[i], 3)) i++;
                     i += 3;
                     j = 0;
-                    memset(send_buff,'\0', strlen(send_buff) );
+                    memset( send_buff, '\0', sizeof(send_buff) );
 
-                    while((recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(i < ReceLen)){             
+                    while(((i + 1) <= ReceLen)&&(recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(j < (sizeof(send_buff) - 1))){
                         send_buff[j] = recv_buff[i];
                         j++;
-                        i++;      
+                        i++;
                     }
-                    Base64Decode(send_buff,  strlen(send_buff),R_argv[2]);
+                    Base64Decode(send_buff,  strlen(send_buff),R_argv[2], sizeof(R_argv[2]));
                 }
                 else{
                     j = 0;
-                    while(recv_buff[i] != '"'&&(i < ReceLen)){
+                    while(((i + 1) <= ReceLen)&&(recv_buff[i] != '"')&&(j < (sizeof(R_argv[2]) - 1))){
                         R_argv[2][j] = recv_buff[i];
                         j++;
-                        i++;        
+                        i++;
                     }
+                    R_argv[2][j] = '\0';
                 }
             }
             else if( strncmp("filename=", &recv_buff[i], 9) == 0 ){
@@ -254,29 +268,30 @@ void WCHNET_AnalyseMailData( char *recv_buff )
     printf("6#filename \n");
 #endif
                 i += 9;
-                while(recv_buff[i] != '"'&&i<ReceLen) i++;
+                while(((i + 1) <= ReceLen)&&(recv_buff[i] != '"')) i++;
                 i++;
                 if(recv_buff[i] == '='){
-                    while(strncmp("?B?", &recv_buff[i], 3)&&(i < ReceLen)) i++;
+                    while(((i + 3) <= ReceLen)&&strncmp("?B?", &recv_buff[i], 3)) i++;
                     i += 3;
                     j = 0;
-                    memset(send_buff,'\0', strlen(send_buff) );
-                    while((recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(i < ReceLen)){
+                    memset( send_buff, '\0', sizeof(send_buff) );
+                    while(((i + 1) <= ReceLen)&&(recv_buff[i] != '=')&&(recv_buff[i] != '?')&&(j < (sizeof(send_buff) - 1))){
                         send_buff[j] = recv_buff[i];
                         j++;
-                        i++;      
+                        i++;
                     }
-                    Base64Decode(send_buff,  strlen(send_buff),R_argv[2]);
+                    Base64Decode(send_buff,  strlen(send_buff),R_argv[2], sizeof(R_argv[2]));
                 }
                 else{
                     j = 0;
-                    while(recv_buff[i] != '"'&&(i < ReceLen)){
+                    while(((i + 1) <= ReceLen)&&(recv_buff[i] != '"')&&(j < (sizeof(R_argv[2]) - 1))){
                         R_argv[2][j] = recv_buff[i];
                         j++;
-                        i++;        
+                        i++;
                     }
+                    R_argv[2][j] = '\0';
                 }
-                while(strncmp("Content-Transfer-Encoding: ", &recv_buff[i], 27)) i++;
+                while(((i + 27) <= ReceLen)&&strncmp("Content-Transfer-Encoding: ", &recv_buff[i], 27)) i++;
                 i += 27;
                 if(strncmp("base64", &recv_buff[i], 6) == 0 ){
 #if DIALOG
@@ -294,44 +309,49 @@ void WCHNET_AnalyseMailData( char *recv_buff )
                 }
                 else p_pop3->EncodeType = 0;  
             }
-            while( strncmp("\n\r\n", &recv_buff[i], 3) != 0 &&(i < ReceLen)) i++;
+            while(((i + 3) <= ReceLen)&&(strncmp("\n\r\n", &recv_buff[i], 3) != 0)) i++;
             i += 3;
             if(p_pop3->EncodeType==1){    /* base64 */
                 j = 0;
-                memset(send_buff,'\0', strlen(send_buff) );
-type1:          while((recv_buff[i] != '=')&&strncmp("\r\n--", &recv_buff[i], 4)&&strncmp("\r\n\r\n", &recv_buff[i], 4)&&(i < ReceLen)&&\
-                (j<attach_max_len)){
+                memset( send_buff, '\0', sizeof(send_buff) );
+                /*The text of an attachment can span several blocks: a later block
+                 *re-enters at the type1 label below with j kept, so what has been
+                 *collected is terminated before it is decoded.*/
+type1:          while(((i + 4) <= ReceLen)&&(j < (sizeof(send_buff) - 1))&&(recv_buff[i] != '=')&&strncmp("\r\n--", &recv_buff[i], 4)&&strncmp("\r\n\r\n", &recv_buff[i], 4)){
                     send_buff[j] = recv_buff[i];
                     j++;
-                    i++;        
+                    i++;
                 }
+                send_buff[j] = '\0';
                 if(i>=ReceLen-1) p_pop3->ReceFlag = 1;
                 else {
                     p_pop3->ReceFlag = 0;
-                    Base64Decode(send_buff,  strlen(send_buff),AttachmentData);
+                    Base64Decode(send_buff,  strlen(send_buff),AttachmentData, sizeof(AttachmentData));
                 }
             }
             else if(p_pop3->EncodeType==2){     /* quoted-printable */
                 j = 0;
-                memset(send_buff,'\0', strlen(send_buff));
-type2:            while(strncmp("\r\n.\r\n", &recv_buff[i], 5)&&strncmp("\r\n--", &recv_buff[i], 4)&&(i < ReceLen)&&(j<attach_max_len)){
+                memset( send_buff, '\0', sizeof(send_buff) );
+type2:            while(((i + 5) <= ReceLen)&&(j < (sizeof(send_buff) - 1))&&strncmp("\r\n.\r\n", &recv_buff[i], 5)&&strncmp("\r\n--", &recv_buff[i], 4)){
                     send_buff[j] = recv_buff[i];
                     j++;
-                    i++;        
+                    i++;
                 }
+                send_buff[j] = '\0';
                 if(i>=ReceLen-1) p_pop3->ReceFlag = 1;
                 else {
                     p_pop3->ReceFlag = 0;
-                    QuotedPrintableDecode(send_buff,(char *)AttachmentData, strlen(send_buff));
+                    QuotedPrintableDecode(send_buff,(char *)AttachmentData, strlen(send_buff), sizeof(AttachmentData));
                 }
             }
             else{    /* 7bit or others */ 
                 j = 0;
-type0:            while(recv_buff[i] != '\r'&&(i < ReceLen)&&(j<attach_max_len)){
+type0:            while(((i + 1) <= ReceLen)&&(j < (sizeof(AttachmentData) - 1))&&(recv_buff[i] != '\r')){
                     AttachmentData[j] = recv_buff[i];
                     j++;
-                    i++;        
+                    i++;
                 }
+                AttachmentData[j] = '\0';
                 if(i>=ReceLen-1) p_pop3->ReceFlag = 1;
                 else p_pop3->ReceFlag = 0; 
             }
@@ -353,6 +373,7 @@ type0:            while(recv_buff[i] != '\r'&&(i < ReceLen)&&(j<attach_max_len))
 #endif
     }
 }
+#endif
 
 /*********************************************************************
  * @fn      strFind
@@ -549,7 +570,7 @@ u8 WCHNET_CheckResponse( char *recv_buff,u8 checktype )
                 return (CHECK_SUCCESS);
             } 
             else if(strncmp("-ERROR", recv_buff, 6) != 0){
-                if( strncmp("\r\n.\r\n", &recv_buff[ReceLen-5], 5) == 0 ){
+                if( (ReceLen >= 5) && (strncmp("\r\n.\r\n", &recv_buff[ReceLen-5], 5) == 0) ){
 #if POP3_LOG_EN
                     printf("%s\r\n",recv_buff);
 #endif
@@ -619,6 +640,9 @@ u8 WCHNET_CheckResponse( char *recv_buff,u8 checktype )
  */
 void WCHNET_MailQuery( void )
 {
+    /*p_pop3 is only set up in the work modes that receive mail; in the others
+     *there is no POP3 connection to keep alive.*/
+    if( p_pop3 == NULL ) return;
     if( p_pop3->DiscnntFlag == 1){
         p_pop3->DiscnntFlag = 0;
 #ifdef    POP_REFRESH

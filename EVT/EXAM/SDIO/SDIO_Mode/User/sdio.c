@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/07/10
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -12,7 +12,6 @@
 
 #include "sdio.h"
 #include "string.h"
-#include "sdio.h"
 
 
 SDIO_InitTypeDef SDIO_InitStructure ={0};
@@ -46,9 +45,9 @@ void Host_Send_Cmd(u8 arg,u8 index)
  *
  * @return  R1
  */
-u8 Host_Res_R1()
+u32 Host_Res_R1()
 {
-    u8 Res_R1;
+    u32 Res_R1;
     Res_R1=SDIO->RESP1;
     return Res_R1;
 }
@@ -207,7 +206,6 @@ u32 Slv_Rec_Data(u8 len)
 void SD_Init( void )
 {
     GPIO_InitTypeDef  GPIO_InitStructure = {0};
-    NVIC_InitTypeDef NVIC_InitStructure = {0};
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE );
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_SDIO | RCC_AHBPeriph_DMA2, ENABLE );
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 |GPIO_Pin_7 |GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 ;
@@ -229,12 +227,6 @@ void SD_Init( void )
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init( GPIOC, &GPIO_InitStructure );
 #endif
-
-    /*SDIO_CMD */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init( GPIOD, &GPIO_InitStructure );
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 ;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -259,9 +251,4 @@ void SD_Init( void )
     SDIO_SetPowerState( SDIO_PowerState_ON );
     SDIO_ClockCmd( ENABLE );
 
-    NVIC_InitStructure.NVIC_IRQChannel = SDIO_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init( &NVIC_InitStructure );
 }

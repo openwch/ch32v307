@@ -406,6 +406,10 @@ void USBHS_IRQHandler( void )
                                             break;
                                     }
                                 }
+                                else
+                                {
+                                    errflag = 0xFF;
+                                }
                             }
                             else
                             {
@@ -526,6 +530,10 @@ void USBHS_IRQHandler( void )
                         errflag = 0xFF;
                         break;
                 }
+            }
+            else
+            {
+                errflag = 0xFF;
             }
         }
         else
@@ -668,7 +676,7 @@ void USBHS_IRQHandler( void )
                         switch( (uint8_t)( USBHS_SetupReqIndex & 0xFF ) )
                         {
                             case ( DEF_UEP_IN | DEF_UEP1 ):
-                                /* Set End-point 1 OUT NAK */
+                                /* Set End-point 1 IN NAK */
                                 USBHSD->UEP1_TX_CTRL = USBHS_UEP_T_TOG_DATA0 | USBHS_UEP_T_RES_NAK;
                                 break;
 

@@ -130,7 +130,7 @@ void TIM2_Init( void )
 /*********************************************************************
  * @fn      WCHNET_CreateTcpSmtp
  *
- * @brief   create TCP Client  socket for SMTP
+ * @brief   create TCP Client socket for SMTP.
  *
  * @return  none
  */
@@ -146,10 +146,14 @@ void WCHNET_CreateTcpSmtp( void )
     TmpSocketInf.SourPort = SmtpSourPrt;
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
+    SmtpSocket = SOCKET_INVALID;                     /*no valid handle if the creation fails*/
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-    printf("SocketId TCP SMTP = %02x\n",(u16)SocketId);
     mStopIfError(i);
-    p_smtp->Socket = SocketId;
+    if (i != WCHNET_ERR_SUCCESS) {
+        return;
+    }
+    printf("SocketId TCP SMTP = %02x\r\n",(u16)SocketId);
+    SmtpSocket = SocketId;
     CheckType = SMTP_CHECK_CNNT;
     i = WCHNET_SocketConnect(SocketId);
     mStopIfError(i);
@@ -158,7 +162,7 @@ void WCHNET_CreateTcpSmtp( void )
 /*********************************************************************
  * @fn      WCHNET_CreateTcpPop3
  *
- * @brief   create TCP Client socket for POP3
+ * @brief   create TCP Client socket for POP3.
  *
  * @return  none
  */
@@ -174,10 +178,14 @@ void WCHNET_CreateTcpPop3( void )
     TmpSocketInf.SourPort = Pop3SourPrt;
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
+    Pop3Socket = SOCKET_INVALID;                     /*no valid handle if the creation fails*/
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-    printf("SocketId TCP pop3 = %02x\n",(u16)SocketId);
     mStopIfError(i);
-    p_pop3->Socket = SocketId;
+    if (i != WCHNET_ERR_SUCCESS) {
+        return;
+    }
+    printf("SocketId TCP pop3 = %02x\r\n",(u16)SocketId);
+    Pop3Socket = SocketId;
     CheckType = POP_CHECK_CNNT;
     i = WCHNET_SocketConnect(SocketId);
     mStopIfError(i);
@@ -222,7 +230,7 @@ void WCHNET_SendData( char *PSend, u32 Len,u8 type,u8 id  )
 /*********************************************************************
  * @fn      WCHNET_HandleSockInt
  *
- * @brief   Socket Interrupt Handle
+ * @brief   Socket Interrupt Handle.
  *
  * @param   socketid - socket id.
  *          intstat - interrupt status
@@ -237,13 +245,17 @@ void WCHNET_HandleSockInt(u8 socketid,u8 intstat)
     {
        ReceDatFlag = 1;
        len = WCHNET_SocketRecvLen(socketid,NULL);
-       ReceLen = len;
+       /*Never read more than the destination buffer holds, and keep ReceLen as
+        *the length actually read: the parser scans the buffer with it.*/
+       if(len > sizeof(SocketRecvBuf[socketid]))
+           len = sizeof(SocketRecvBuf[socketid]);
        WCHNET_SocketRecv(socketid,SocketRecvBuf[socketid],&len);
+       ReceLen = (u16)len;
        if( CheckType != UNCHECK ){
            i = WCHNET_CheckResponse((char *)SocketRecvBuf[socketid],CheckType);
            if(i != CHECK_SUCCESS){
-               if(socketid == p_smtp->Socket) OrderType = SMTP_ERR_CHECK;
-               if(socketid == p_pop3->Socket) OrderType = POP_ERR_CHECK;
+               if(socketid == SmtpSocket) OrderType = SMTP_ERR_CHECK;
+               if(socketid == Pop3Socket) OrderType = POP_ERR_CHECK;
                printf("ERROR: %02x\n",(u16)i);
            }
        }
@@ -257,19 +269,19 @@ void WCHNET_HandleSockInt(u8 socketid,u8 intstat)
     if(intstat & SINT_STAT_DISCONNECT)                                           //disconnect
     {
         printf("TCP Disconnect\r\n");
-        if(socketid == p_pop3->Socket) p_pop3->DiscnntFlag = 1;
+        if((p_pop3 != NULL) && (socketid == Pop3Socket)) p_pop3->DiscnntFlag = 1;
     }
     if(intstat & SINT_STAT_TIM_OUT)                                              //timeout disconnect
     {
        printf("TCP Timeout\r\n");
-       if(socketid == p_pop3->Socket) p_pop3->DiscnntFlag = 1;
+       if((p_pop3 != NULL) && (socketid == Pop3Socket)) p_pop3->DiscnntFlag = 1;
     }
 }
 
 /*********************************************************************
  * @fn      WCHNET_HandleGlobalInt
  *
- * @brief   Global Interrupt Handle
+ * @brief   Global Interrupt Handle.
  *
  * @return  none
  */
@@ -307,7 +319,7 @@ void WCHNET_HandleGlobalInt(void)
 /*********************************************************************
  * @fn      main
  *
- * @brief   Main program
+ * @brief   Main program.
  *
  * @return  none
  */
@@ -319,29 +331,38 @@ int main(void)
 	Delay_Init();
 	USART_Printf_Init(115200);                                                    //USART initialize
 	printf("Mail Test\r\n");
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n",WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer()){
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                                   //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                              //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
+    if(i == WCHNET_ERR_SUCCESS) {
+        printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
 
+/*The Init functions clear the SMTP/POP structures and mark the socket handle
+ *as not created, so they have to run before the connection is created: called
+ *afterwards they would throw away the handle of the socket just made.*/
 #ifdef send_mail
-    if(send_mail) WCHNET_CreateTcpSmtp( );
     WCHNET_SMTPInit( );
+    if(send_mail) WCHNET_CreateTcpSmtp( );
 #endif
 #ifdef receive_mail
-    if(receive_mail) WCHNET_CreateTcpPop3( );
     WCHNET_POP3Init( );
+    if(receive_mail) WCHNET_CreateTcpPop3( );
 #endif
 
 	while(1)

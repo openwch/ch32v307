@@ -100,7 +100,7 @@
 
  int CAN2FilterStartBank = CANSOFTFILTER_MAX_GROUP_NUM;
  
- uint8_t interrupt_rx_flag = 0;
+ volatile uint8_t interrupt_rx_flag = 0;
  volatile u8 canexbuf_interrupt[8];
  
  void CAN_SoftSlaveStartBank(uint8_t CAN_BankNumber);
@@ -118,7 +118,11 @@
 	 if (CAN_GetITStatus(CAN1,CAN_IT_FMP0))
 	 {
 		 px = CAN_Receive_Msg(pbuf);
-		 for ( i = 0; i < px; i++) 
+		 if(px > 8)
+		 {
+			 px = 8;
+		 }
+		 for ( i = 0; i < px; i++)
 		 {
 			 canexbuf_interrupt[i] = pbuf[i];
 		 }
@@ -143,7 +147,7 @@
   */
  void CAN_SoftFilterInit(CAN_FilterInitTypeDef* CAN_FilterInitStruct)
  {
-	if(CAN_FilterInitStruct->CAN_FilterNumber > CANSOFTFILTER_MAX_GROUP_NUM){
+	if(CAN_FilterInitStruct->CAN_FilterNumber >= CANSOFTFILTER_MAX_GROUP_NUM){
 		return;
 	}
 	if(CAN_FilterInitStruct->CAN_FilterActivation)
@@ -433,26 +437,43 @@ void CAN_SoftSlaveStartBank(uint8_t CAN_BankNumber)
  u8 CAN_Receive_Msg( u8 *buf )
  {
 	 u8 i;
-	 
 	 CanRxMsg CanRxStructure;
-	 
-	 if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)	 
+
+	 if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)
 	 {
 		 return 0;
 	 }
- 
+
+	 /* Initialize the structure to avoid reading random values when
+	  * the soft filter does not match (returns without filling it in). */
+	 CanRxStructure.DLC = 0;
+	 CanRxStructure.StdId = 0;
+	 CanRxStructure.ExtId = 0;
+	 CanRxStructure.IDE = 0;
+	 CanRxStructure.RTR = 0;
+	 CanRxStructure.FMI = 0;
+	 for( i=0; i<8; i++ )
+	 {
+		 CanRxStructure.Data[i] = 0;
+	 }
+
  #ifdef USE_SOFT_FILTER
 	 CAN_ReceiveViaSoftFilter( CAN1, CAN_FIFO0, &CanRxStructure );
  #else
-	 CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );	
+	 CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );
  #endif // USE_SOFT_FILTER
-	 
+
+	 if( CanRxStructure.DLC > 8 )
+	 {
+		 return 0;
+	 }
+
 	 for( i=0; i<8; i++ )
 	 {
 		 buf[i] = CanRxStructure.Data[i];
 	 }
-	 
-	 return CanRxStructure.DLC;	
+
+	 return CanRxStructure.DLC;
  }
  
  /*********************************************************************

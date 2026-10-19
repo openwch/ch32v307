@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/04/09
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -259,8 +259,7 @@ int main(void)
         {
             DAC_SetChannel1Data(DAC_Align_12b_R, DAC_OUT[i]);
             ADC_val = Get_ADC_Average( ADC_Channel_0, 10 );
-            printf( "OPA_OUT:%04d\r\n", ADC_val);
-            printf( "OPA_OUT:%04d\r\n", Get_ConversionVal(ADC_val+Calibrattion_Val));
+            printf( "OPA_OUT:%04d\r\n", Get_ConversionVal(ADC_val));
             Delay_Ms(500);
         }
    }

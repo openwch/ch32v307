@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/24
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -22,48 +22,64 @@
 #include "debug.h"
 
 /* Global define */
+#define RAM_BASE            0x20000000U
+#define RAM2K_BASE          (RAM_BASE)          
+#define RAM2K_SIZE          (2U  * 1024U)
+#define RAM30K_BASE         (RAM_BASE + 2U * 1024U)    
+#define RAM30K_SIZE         (30U * 1024U)
 
+#define RAM30K_TEST_ADDR    (RAM_BASE + 10U * 1024U)      
+#define RAM30K_TEST_WORDS   1024U                          
+#define RAM2K_TEST_ADDR     (RAM_BASE + 1U * 1024U + 512U)  
+#define RAM2K_TEST_WORDS    10U  
+
+#define RAM_TEST_PATTERN    0x3333AAAAU
+
+#define RAM_TEST_OK         0U
+#define RAM_TEST_FAIL       1U
 /* Global Variable */
 
 /*********************************************************************
  * @fn      TestDataWrite
  *
- * @brief   Write 0x11111111 to certain address of 2K RAM and 30K RAM.
+ * @brief   Write data to certain address of 2K RAM and 30K RAM.
  *
  * @return  none
  */
-void TestDataWrite(void)
+uint32_t TestDataWrite(void)
 {
-    uint32_t myAddr=0x20000000+10*1024;
-    uint32_t myAddr2=0x20000000+1*1024+512;
     uint32_t i=0;
-    for(i=0;i<1024;i++)//Write 30K RAM
+    uint32_t myAddr = RAM30K_TEST_ADDR;
+    uint32_t myAddr2 = RAM2K_TEST_ADDR;
+    
+    for(i = 0; i < RAM30K_TEST_WORDS; i++)//Write 30KRAM
     {
-        *(uint32_t volatile *)(myAddr+(i<<2)) = 0x33333333;
+        *(uint32_t volatile *)(myAddr+(i<<2)) = RAM_TEST_PATTERN;
     }
-    for(i=0;i<1024;i++)//Check 30K RAM
+    for(i = 0; i < RAM30K_TEST_WORDS; i++)//Check 30KRAM
     {
-        if((*(uint32_t volatile *)(myAddr+(i<<2))) != 0x33333333)
+        if((*(uint32_t volatile *)(myAddr+(i<<2))) != RAM_TEST_PATTERN)
         {
-            printf("Write 30K RAM Error!\r\n");
-            break;
+            printf("30K RAM write error at 0x%08x\r\n", (unsigned)(myAddr + (i << 2)));
+            return RAM_TEST_FAIL;
         }
     }
     printf("Write 30K RAM Successfully!\r\n");
-    for(i=0;i<10;i++)//Write 2K RAM
+
+    for(i = 0; i < RAM2K_TEST_WORDS; i++)//Write 2KRAM
     {
-        *(uint32_t volatile *)(myAddr2+(i<<2)) = 0x33333333;
+        *(uint32_t volatile *)(myAddr2+(i<<2)) = RAM_TEST_PATTERN;
     }
-    for(i=0;i<10;i++)//Check 30K RAM
+    for(i = 0; i < RAM2K_TEST_WORDS; i++)//Check 2KRAM
     {
-        if((*(uint32_t volatile *)(myAddr2+(i<<2))) != 0x33333333)
+        if((*(uint32_t volatile *)(myAddr2+(i<<2))) != RAM_TEST_PATTERN)
         {
-            printf("Write 2K RAM Error!\r\n");
-            break;
+            printf("2K RAM write error at 0x%08x\r\n", (unsigned)(myAddr2 + (i << 2)));
+            return RAM_TEST_FAIL;
         }
     }
     printf("Write 2K RAM Successfully!\r\n");
-
+    return RAM_TEST_OK;
 }
 
 /*********************************************************************
@@ -75,20 +91,17 @@ void TestDataWrite(void)
  */
 void TestDataRead(void)
 {
-    uint32_t myAddr=0x20000000+10*1024;
-    uint32_t myAddr2=0x20000000+1*1024+512;
-    uint32_t i=0;
+    uint32_t i = 0;
+
     printf("2K RAM:\r\n");
-    for(i=0;i<10;i++)
-    {
-        printf("0x%08lx=0x%08lx\r\n",myAddr2+(i<<2),*(uint32_t volatile *)(myAddr2+(i<<2)));
-    }
-    printf("32K RAM:\r\n");
-    for(i=0;i<1024;i++)
-    {
-        printf("0x%08lx=0x%08lx\r\n",myAddr+(i<<2),*(uint32_t volatile *)(myAddr+(i<<2)));
+    for(i = 0; i < RAM2K_TEST_WORDS; i++){
+        printf("0x%08x=0x%08x\r\n", (unsigned)(RAM2K_TEST_ADDR + (i << 2)),
+               (unsigned)*(uint32_t volatile *)(RAM2K_TEST_ADDR + (i << 2)));
     }
 
+    printf("30K RAM:\r\n");
+    printf("0x%08x=0x%08x\r\n", (unsigned)(RAM30K_TEST_ADDR + (i << 2)),
+               (unsigned)*(uint32_t volatile *)(RAM30K_TEST_ADDR + (i << 2)));
 }
 
 /*********************************************************************
@@ -106,9 +119,10 @@ int main(void)
     /* Configure unused GPIO as IPD to reduce power consumption */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|
              RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     GPIO_Init(GPIOB, &GPIO_InitStructure);
     GPIO_Init(GPIOC, &GPIO_InitStructure);

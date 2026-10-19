@@ -21,7 +21,7 @@
 __attribute__ ((aligned(4))) uint8_t  CDROM_Pack_Buffer[DEF_CDROM_PACK_64];
 
 /******************************************************************************/
-/* INQUITY */
+/* INQUIRY */
 uint8_t CDROM_Inquity_Tab[ ] =
 {
     0x05,                                                /* Peripheral Device CD-ROM = 0x05 */
@@ -74,7 +74,7 @@ uint8_t CDROM_Rd_Format_Capacity[ ] =
     ( MY_CDROM_SIZE >> 16 ) & 0xFF,
     ( MY_CDROM_SIZE >> 8 ) & 0xFF,
     ( MY_CDROM_SIZE ) & 0xFF,
-    0x02,
+    0x00,
     ( DEF_CFG_DISK_SEC_SIZE >> 16 ) & 0xFF,             /* Number of Blocks */
     ( DEF_CFG_DISK_SEC_SIZE >> 8 ) & 0xFF,
     ( DEF_CFG_DISK_SEC_SIZE ) & 0xFF,
@@ -272,9 +272,9 @@ void CDROM_CMD_Deal_Ret_ErrorData()
     /* Upload 60 bytes of all 0 data */
     if( CDROM_Transfer_DataLen )
     {
-        if( CDROM_Transfer_DataLen > 60 )
+        if( CDROM_Transfer_DataLen > sizeof( mBOC.buf ) )
         {
-            CDROM_Transfer_DataLen = 60;
+            CDROM_Transfer_DataLen = sizeof( mBOC.buf );
         }
         for( i = 0x00; i < CDROM_Transfer_DataLen; i++ )
         {
@@ -555,6 +555,10 @@ void CDROM_SCSI_CMD_Deal( void )
     
             case  CMD_U_REQUEST_SENSE:                                              
                 /* CMD: 0x03 */
+                if( CDROM_Transfer_DataLen > 0x12 )
+                {
+                    CDROM_Transfer_DataLen = 0x12;
+                }
                 mBOC.ReqSense.ErrorCode = 0x70;
                 mBOC.ReqSense.Reserved1 = 0x00;
                 mBOC.ReqSense.SenseKey  = CDROM_Sense_Key;
@@ -826,6 +830,8 @@ void CDROM_Bulk_UpData( void )
 
     /* Load the data into the upload buffer and start the upload */
     USBFS_Endp_DataUp(DEF_UEP2, pEndp2_Buf, len, DEF_UEP_CPY_LOAD );
+
+    pEndp2_Buf += len;
 }
 
 /*******************************************************************************

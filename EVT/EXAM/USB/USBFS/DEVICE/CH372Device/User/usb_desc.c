@@ -58,42 +58,42 @@ const uint8_t  MyCfgDescr[ ] =
     0x05,        // bDescriptorType (Endpoint)
     0x86,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP6_FS_SIZE, (uint8_t)( DEF_USBD_EP6_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP6_FS_SIZE, (uint8_t)( DEF_USBD_EP6_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x05,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP5_FS_SIZE, (uint8_t)( DEF_USBD_EP5_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP5_FS_SIZE, (uint8_t)( DEF_USBD_EP5_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x84,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP4_FS_SIZE, (uint8_t)( DEF_USBD_EP4_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP4_FS_SIZE, (uint8_t)( DEF_USBD_EP4_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x03,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP3_FS_SIZE, (uint8_t)( DEF_USBD_EP3_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP3_FS_SIZE, (uint8_t)( DEF_USBD_EP3_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x82,        // bEndpointAddress (IN/D2H)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP2_FS_SIZE, (uint8_t)( DEF_USBD_EP2_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP2_FS_SIZE, (uint8_t)( DEF_USBD_EP2_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 
     0x07,        // bLength
     0x05,        // bDescriptorType (Endpoint)
     0x01,        // bEndpointAddress (OUT/H2D)
     0x02,        // bmAttributes (Bulk)
-    (uint8_t)DEF_USBD_EP1_FS_SIZE, (uint8_t)( DEF_USBD_EP1_FS_SIZE >> 8 ), // wMaxPacketSize 8
+    (uint8_t)DEF_USBD_EP1_FS_SIZE, (uint8_t)( DEF_USBD_EP1_FS_SIZE >> 8 ), // wMaxPacketSize 64
     0x00,        // bInterval 0 (unit depends on device speed)
 };
 

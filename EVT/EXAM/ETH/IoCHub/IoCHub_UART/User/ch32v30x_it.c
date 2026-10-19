@@ -36,6 +36,11 @@ void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void NMI_Handler(void)
 {
+    /*An NMI source that is not cleared would re-enter this handler forever,
+     *so keep the core halted here instead of returning into the main loop.*/
+    while (1)
+    {
+    }
 }
 
 /*********************************************************************
@@ -47,11 +52,7 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-    printf("HardFault_Handler\r\n");
-
-    printf("mepc  :%08x\r\n", __get_MEPC());
-    printf("mcause:%08x\r\n", __get_MCAUSE());
-    printf("mtval :%08x\r\n", __get_MTVAL());
+    NVIC_SystemReset();
     while(1);
 }
 

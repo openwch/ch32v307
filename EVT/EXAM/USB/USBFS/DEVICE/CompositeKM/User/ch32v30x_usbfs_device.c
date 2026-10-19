@@ -368,6 +368,10 @@ void USBFS_IRQHandler( void )
                                             break;
                                     }
                                 }
+                                else
+                                {
+                                    errflag = 0xFF;
+                                }
                             }
                             else
                             {
@@ -478,6 +482,10 @@ void USBFS_IRQHandler( void )
                                 errflag = 0xFF;
                                 break;
                         }
+                    }
+                    else
+                    {
+                        errflag = 0xFF;
                     }
                 }
                 else
@@ -616,6 +624,10 @@ void USBFS_IRQHandler( void )
                                     /* clear usb sleep status, device not prepare to sleep */
                                     USBFS_DevSleepStatus &= ~0x01;
                                 }
+                                else
+                                {
+                                    errflag = 0xFF;
+                                }
                             }
                             else if( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )
                             {
@@ -625,7 +637,7 @@ void USBFS_IRQHandler( void )
                                     switch( (uint8_t)( USBFS_SetupReqIndex & 0xFF ) )
                                     {
                                         case ( DEF_UEP_IN | DEF_UEP1 ):
-                                            /* Set End-point 1 OUT ACK */
+                                            /* Set End-point 1 IN NAK */
                                             USBFSD->UEP1_TX_CTRL = USBFS_UEP_T_RES_NAK;
                                             break;
 
@@ -638,6 +650,10 @@ void USBFS_IRQHandler( void )
                                             errflag = 0xFF;
                                             break;
                                     }
+                                }
+                                else
+                                {
+                                    errflag = 0xFF;
                                 }
                             }
                             else

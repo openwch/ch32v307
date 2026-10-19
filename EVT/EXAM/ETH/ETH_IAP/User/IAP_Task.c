@@ -9,19 +9,22 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-#include <stdlib.h>
 #include <string.h>
 #include "debug.h"
 #include "wchnet.h"
 #include "IAP_Task.h"
 
-__attribute__((__aligned__(4))) u8 dataDealBuf[RECE_BUF_LEN] = {0};
+_Static_assert(READ_DATA_LEN < IAP_STACK_SIZE, "READ_DATA_LEN exceeds IAP_STACK_SIZE in Ld/Link.ld");
+
+__attribute__((__aligned__(4))) u8 dataDealBuf[RECE_BUF_LEN] = {0};   //ring buffer storage
+
+__attribute__((__aligned__(4))) static u8 fileParaBuff[BIN_INF_LEN] = {0};
+__attribute__((__aligned__(4))) static u8 saveFileBuff[RECE_BUF_LEN] = {0};
 
 ethDataDeal dataDeal = {                              //Ring buffer parameter initialization
         .readIndex = 0,
         .writeIndex = 0,
         .buffUsedLen = 0,
-        .dataBuff = dataDealBuf,
 };
 
 u32 fileDataLen = 0;                                  //IAP file data length
@@ -84,11 +87,20 @@ void IAP_EEPROM_WRITE( u32 StartAddr, u8 *Buffer, u32 Length )
 
     if(lastDataNum){                                                //write by a half word(2B)
         u8 *p_buff1 = Buffer + FLASH_PAGE_SIZE * pageNum;
+        u16 halfWordNum = (lastDataNum + 1) / 2;                    //round the length up to a half word
         address = StartAddr + FLASH_PAGE_SIZE * pageNum;
         FLASH_Unlock();
 
-        for(i = 0; i < lastDataNum; i += 2)
-            FLASH_ProgramHalfWord((address + i), *(u16 *)(p_buff1 + i));
+        for(i = 0; i < halfWordNum; i++)
+        {
+            /*The last half word is zero padded when Length is odd, so that the
+             *programmed data matches the zero padded file checksum. Reading the
+             *byte past the buffer would program whatever followed it instead.*/
+            u16 halfWord = (u16)p_buff1[2 * i];
+            if((2 * i + 1) < lastDataNum)
+                halfWord |= (u16)p_buff1[2 * i + 1] << 8;
+            FLASH_ProgramHalfWord((address + 2 * i), halfWord);
+        }
 
         FLASH_Lock();
     }
@@ -151,7 +163,6 @@ void IAPParaInit(void)
     memset(iapPara.iapFileFlag, 0,sizeof(iapPara.iapFileFlag));
     iapPara.iapFileLen = 0;
     dataDeal.buffUsedLen = 0;
-    dataDeal.dataBuff = dataDealBuf;
     dataDeal.readIndex = 0;
     dataDeal.writeIndex = 0;
     fileDataLen = 0;
@@ -162,7 +173,10 @@ void IAPParaInit(void)
 /*********************************************************************
  * @fn      IAPFileParaCheck
  *
- * @brief   Verify upgrade file parameters.
+ * @brief   Verify upgrade file parameters. The first BIN_INF_LEN bytes,
+ *          which hold the file flag, the image length and the checksum,
+ *          are read and checked; the socket is closed if the flag is
+ *          wrong or if the image does not fit into the BACKUP area.
  *
  * @param   id - socket id.
  *
@@ -171,32 +185,43 @@ void IAPParaInit(void)
 void IAPFileParaCheck(u8 id)
 {
     u32 len;
-    u8 *pBuff = NULL;
     len = WCHNET_SocketRecvLen(id,NULL);
     if(BIN_INF_LEN <= len){                                  //The first 512 bytes are the bin file parameters
         u8 buffIndex;
         u32 recLen = BIN_INF_LEN;
 
-        pBuff = malloc(recLen);
+        WCHNET_SocketRecv(id,fileParaBuff,&recLen);
 
-        WCHNET_SocketRecv(id,pBuff,&recLen);
-        memcpy(iapPara.iapFileFlag, pBuff, 8);
+        /*The fields are parsed with '=', a header received while the previous
+         *one is still pending must not accumulate into them.*/
+        iapPara.iapFileLen = 0;
+        iapPara.iapFileCheckSum = 0;
+        memcpy(iapPara.iapFileFlag, fileParaBuff, 8);
         buffIndex = 8;
-        iapPara.iapFileLen |= *(pBuff + buffIndex++);
-        iapPara.iapFileLen |= *(pBuff + buffIndex++) << 8;
-        iapPara.iapFileLen |= *(pBuff + buffIndex++) << 16;
-        iapPara.iapFileLen |= *(pBuff + buffIndex++) << 24;
+        iapPara.iapFileLen = *(fileParaBuff + buffIndex++);
+        iapPara.iapFileLen |= *(fileParaBuff + buffIndex++) << 8;
+        iapPara.iapFileLen |= *(fileParaBuff + buffIndex++) << 16;
+        iapPara.iapFileLen |= *(fileParaBuff + buffIndex++) << 24;
 
-        iapPara.iapFileCheckSum |= *(pBuff + buffIndex++);
-        iapPara.iapFileCheckSum |= *(pBuff + buffIndex++) << 8;
-        iapPara.iapFileCheckSum |= *(pBuff + buffIndex++) << 16;
-        iapPara.iapFileCheckSum |= *(pBuff + buffIndex++) << 24;
+        iapPara.iapFileCheckSum = *(fileParaBuff + buffIndex++);
+        iapPara.iapFileCheckSum |= *(fileParaBuff + buffIndex++) << 8;
+        iapPara.iapFileCheckSum |= *(fileParaBuff + buffIndex++) << 16;
+        iapPara.iapFileCheckSum |= *(fileParaBuff + buffIndex++) << 24;
         fileDataLen += recLen;
-
-        free(pBuff);
 
         if(memcmp(iapPara.iapFileFlag, FILE_FLAG, strlen(FILE_FLAG))){
             printf("The file's flag is wrong!\r\n");
+            IAPParaInit();
+            WCHNET_SocketClose(SocketId, TCP_CLOSE_NORMAL);
+            return;
+        }
+        /*The image goes to the BACKUP area, whose last page holds the update
+         *flag, so the data part must not exceed BACKUP_IMAGE_MAX_DATA_SIZE.
+         *Reject an oversized file here, before any byte has been written.*/
+        if((iapPara.iapFileLen < BIN_INF_LEN) || \
+                ((iapPara.iapFileLen - BIN_INF_LEN) > BACKUP_IMAGE_MAX_DATA_SIZE)){
+            printf("The file is too large!\r\n");
+            IAPParaInit();
             WCHNET_SocketClose(SocketId, TCP_CLOSE_NORMAL);
         }
     }
@@ -236,7 +261,7 @@ void receUpdatedFile(u8 id)
             else{
                 recLen = remainLen;
             }
-            receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&recLen);
+            receive_state = WCHNET_SocketRecv(id,&dataDealBuf[dataDeal.writeIndex],&recLen);
             if(receive_state == WCHNET_ERR_SUCCESS){
                 dataDeal.writeIndex = (dataDeal.writeIndex + recLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen += recLen;
@@ -248,7 +273,7 @@ void receUpdatedFile(u8 id)
                     if(len <= remainLen){
                         remainLen = len;
                     }
-                    receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&remainLen);
+                    receive_state = WCHNET_SocketRecv(id,&dataDealBuf[dataDeal.writeIndex],&remainLen);
                     if(receive_state == WCHNET_ERR_SUCCESS){
                         dataDeal.writeIndex = (dataDeal.writeIndex + remainLen)%RECE_BUF_LEN;
                         dataDeal.buffUsedLen += remainLen;
@@ -262,7 +287,7 @@ void receUpdatedFile(u8 id)
             if(len <= remainLen){
                 remainLen = len;
             }
-            receive_state = WCHNET_SocketRecv(id,&dataDeal.dataBuff[dataDeal.writeIndex],&remainLen);
+            receive_state = WCHNET_SocketRecv(id,&dataDealBuf[dataDeal.writeIndex],&remainLen);
             if(receive_state == WCHNET_ERR_SUCCESS){
                 dataDeal.writeIndex = (dataDeal.writeIndex + remainLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen += remainLen;
@@ -279,7 +304,11 @@ void receUpdatedFile(u8 id)
 /*********************************************************************
  * @fn      saveUpdatedFile
  *
- * @brief   Save the upgrade file to the backup area.
+ * @brief   Save the upgrade file to the backup area: whole pages are taken
+ *          from the ring buffer and programmed, then the checksum of the
+ *          received image is compared with the one in the file header and
+ *          the update flag is set on success (the module is reset), the
+ *          socket being closed if the checksum does not match.
  *
  * @return  none
  */
@@ -299,7 +328,16 @@ void saveUpdatedFile(void)
         }
         else return;
 
-        pBuff = malloc(writableDataLen);
+        /*Second bound check, this one does not rely on the file header: the
+         *image must stay inside the BACKUP area, whose last page holds the
+         *update flag.*/
+        if((flashProgramLen + writableDataLen) > BACKUP_IMAGE_MAX_DATA_SIZE){
+            printf("The file is too large!\r\n");
+            WCHNET_SocketClose(SocketId, TCP_CLOSE_NORMAL);
+            return;
+        }
+
+        pBuff = saveFileBuff;
         if(dataDeal.writeIndex <= dataDeal.readIndex){
             remainLen = RECE_BUF_LEN - dataDeal.readIndex;
             if(writableDataLen <= remainLen){
@@ -309,20 +347,20 @@ void saveUpdatedFile(void)
                 tempLen = remainLen;
             }
 
-            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.readIndex], tempLen);
+            memcpy(pBuff, &dataDealBuf[dataDeal.readIndex], tempLen);
             dataDeal.readIndex = (dataDeal.readIndex + tempLen)%RECE_BUF_LEN;
             dataDeal.buffUsedLen -= tempLen;
 
             if(remainLen < writableDataLen){
                 remainLen = writableDataLen - tempLen;
-                memcpy((pBuff + tempLen), &dataDeal.dataBuff[dataDeal.readIndex], remainLen);
+                memcpy((pBuff + tempLen), &dataDealBuf[dataDeal.readIndex], remainLen);
                 dataDeal.readIndex = (dataDeal.readIndex + remainLen)%RECE_BUF_LEN;
                 dataDeal.buffUsedLen -= remainLen;
             }
             IAP_EEPROM_WRITE((BACKUP_IMAGE_START_ADD + flashProgramLen), pBuff, writableDataLen );
         }
         else{
-            memcpy(pBuff, &dataDeal.dataBuff[dataDeal.readIndex], writableDataLen);
+            memcpy(pBuff, &dataDealBuf[dataDeal.readIndex], writableDataLen);
             dataDeal.readIndex = (dataDeal.readIndex + writableDataLen)%RECE_BUF_LEN;
             dataDeal.buffUsedLen -= writableDataLen;
 
@@ -340,8 +378,6 @@ void saveUpdatedFile(void)
             memcpy(temBuff, (pBuff + writableDataLen - lastDataLen), lastDataLen);
             fileCheckSum += *(u32 *)temBuff;
         }
-
-        free(pBuff);
 
         /*After the data is saved, compare the checksum. If the checksum is correct,
          * update the upgrade flag. Disconnect if checksum error.*/
@@ -375,7 +411,7 @@ u8 IAPCopyFlashDeal(void)
     u16 i,j;
     u32 *pBuf;
     u32 flashAddr;
-    u32 updataBuff[READ_DATA_LEN / 4];
+    static u32 updataBuff[READ_DATA_LEN / 4];
 
     pBuf = updataBuff;
 

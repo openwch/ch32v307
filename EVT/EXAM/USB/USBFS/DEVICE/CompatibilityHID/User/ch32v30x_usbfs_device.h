@@ -12,6 +12,10 @@
 #ifndef __CH32V30X_USBFS_DEVICE_H_
 #define __CH32V30X_USBFS_DEVICE_H_
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 #include "debug.h"
 #include "string.h"
 #include "ch32v30x_usbfs_device.h"

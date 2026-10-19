@@ -17,10 +17,10 @@
 
 /*
 flash:256K
-BIM area（Image Boot Manager）：40K
-USER area（用户代码区）：108K
-BACKUP area（代码备份区）：108K
-address assignment：
+BIM area (Image Boot Manager): 40K
+USER area (user code area): 108K
+BACKUP area (backup area): 108K
+address assignment:
 0x0         size:0xA000
 0xA000      size:0x1B000
 0x25000     size:0x1B000
@@ -44,6 +44,17 @@ address assignment：
 
 #define FLASH_PAGE_SIZE                 256
 
+/*The update flag is stored in the last page of the BACKUP area
+ *(UPDATA_FLAG_STORAGE_ADD), so the image data that fits into the BACKUP area
+ *is BACKUP_IMAGE_MAX_SIZE - FLASH_PAGE_SIZE. Any image larger than this must
+ *be rejected before a single byte is written.*/
+#define BACKUP_IMAGE_MAX_DATA_SIZE      (BACKUP_IMAGE_MAX_SIZE - FLASH_PAGE_SIZE)
+
+/*Stack size declared by __stack_size in Ld/Link.ld. Keep the two in sync.
+ *The copy buffer of IAPCopyFlashDeal is READ_DATA_LEN bytes and must stay
+ *static, see the assertion in IAP_Task.c.*/
+#define IAP_STACK_SIZE                  4096
+
 /*Flash operation information*/
 #define BIN_INF_LEN        512
 
@@ -62,7 +73,6 @@ typedef struct{
     u16 readIndex;
     u16 writeIndex;
     u16 buffUsedLen;
-    u8  *dataBuff;
 }ethDataDeal;
 
 extern ethDataDeal dataDeal;

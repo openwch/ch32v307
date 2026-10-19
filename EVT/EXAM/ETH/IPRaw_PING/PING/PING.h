@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : main.c
+* File Name          : PING.h
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/06/11
@@ -9,8 +9,8 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-#ifndef __PINC_H__
-#define __PINC_H__
+#ifndef __PING_H__
+#define __PING_H__
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,11 +61,11 @@ extern void WCHNET_PINGInit( void );
 
 extern void mStopIfError(u8 iError);
 
-extern void Respond_PING( u8 *pDat );
+extern void Respond_PING( u8 *pDat, u32 len );
 
 extern void WCHNET_ICMPRecvData( u32 len, u8 *pDat );
 
-extern void WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 id );
+extern u8 WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 id );
 
 extern void WCHNET_ProcessReceDat( char *recv_buff,u8 check_type,u8 socketid );
 

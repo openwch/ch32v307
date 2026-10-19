@@ -59,8 +59,6 @@ uint8_t  UART8_RX_DMA_DataBuf[UART_RX_DMA_SIZE]= {0};
 uint8_t  UART8_TX_DMA_DataBuf[UART_TX_BUF_NUM][ETH_RECEIVE_SIZE] = {0};
 uint16_t UART8_TX_Buf_Length[UART_TX_BUF_NUM] = {0};
 
-/* Global typedef */
-typedef enum { FAILED = 0, PASSED = !FAILED} TestStatus;
 
 /**********************************************************************
  *  @fn      UART_GPIO_Init
@@ -201,7 +199,6 @@ void UART_DMA_Init(void)
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART1->DATAR);
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_data_t[0].TX_buffer;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	//DMA_InitStructure.DMA_BufferSize = size(TX_DMA_dataBuf);
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -230,7 +227,6 @@ void UART_DMA_Init(void)
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART2->DATAR);
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_data_t[1].TX_buffer;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	//DMA_InitStructure.DMA_BufferSize = size(TX_DMA_dataBuf);
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -483,18 +479,15 @@ void BSP_Uart_Init(void)
 	uart_data_t[0].RX_buffer = &UART1_RX_DMA_DataBuf[0];
 	uart_data_t[0].TX_buffer = &UART1_TX_DMA_DataBuf[0];
 	uart_data_t[0].TX_data_length = &UART1_TX_Buf_Length[0];
-	uart_data_t[0].rx_read = 0;
-	uart_data_t[0].rx_write = 0;
 	uart_data_t[0].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[0].RX_data_length = 0;
 	uart_data_t[0].tx_read = 0;
-	uart_data_t[0].rx_write = 0;
+	uart_data_t[0].tx_write = 0;
 	uart_data_t[0].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[0].uart_tx_dma_state = IDEL;
+	uart_data_t[0].uart_tx_dma_state = IDLE;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
-	USART_InitStructure.USART_BaudRate = BAUD_RATE;
+	USART_InitStructure.USART_BaudRate = DEBUG_BAUD_RATE;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -509,14 +502,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[1].RX_buffer = &UART2_RX_DMA_DataBuf[0];
 	uart_data_t[1].TX_buffer = &UART2_TX_DMA_DataBuf[0];
 	uart_data_t[1].TX_data_length = &UART2_TX_Buf_Length[0];
-	uart_data_t[1].rx_read = 0;
-	uart_data_t[1].rx_write = 0;
 	uart_data_t[1].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[1].RX_data_length = 0;
 	uart_data_t[1].tx_read = 0;
-	uart_data_t[1].rx_write = 0;
+	uart_data_t[1].tx_write = 0;
 	uart_data_t[1].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[1].uart_tx_dma_state = IDEL;
+	uart_data_t[1].uart_tx_dma_state = IDLE;
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
@@ -534,14 +524,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[2].RX_buffer = &UART3_RX_DMA_DataBuf[0];
 	uart_data_t[2].TX_buffer = &UART3_TX_DMA_DataBuf[0];
 	uart_data_t[2].TX_data_length = &UART3_TX_Buf_Length[0];
-	uart_data_t[2].rx_read = 0;
-	uart_data_t[2].rx_write = 0;
 	uart_data_t[2].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[2].RX_data_length = 0;
 	uart_data_t[2].tx_read = 0;
-	uart_data_t[2].rx_write = 0;
+	uart_data_t[2].tx_write = 0;
 	uart_data_t[2].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[2].uart_tx_dma_state = IDEL;
+	uart_data_t[2].uart_tx_dma_state = IDLE;
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
@@ -553,14 +540,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[3].RX_buffer = &UART4_RX_DMA_DataBuf[0];
 	uart_data_t[3].TX_buffer = &UART4_TX_DMA_DataBuf[0];
 	uart_data_t[3].TX_data_length = &UART4_TX_Buf_Length[0];
-	uart_data_t[3].rx_read = 0;
-	uart_data_t[3].rx_write = 0;
 	uart_data_t[3].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[3].RX_data_length = 0;
 	uart_data_t[3].tx_read = 0;
-	uart_data_t[3].rx_write = 0;
+	uart_data_t[3].tx_write = 0;
 	uart_data_t[3].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[3].uart_tx_dma_state = IDEL;
+	uart_data_t[3].uart_tx_dma_state = IDLE;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
@@ -571,14 +555,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[4].RX_buffer = &UART5_RX_DMA_DataBuf[0];
 	uart_data_t[4].TX_buffer = &UART5_TX_DMA_DataBuf[0];
 	uart_data_t[4].TX_data_length = &UART5_TX_Buf_Length[0];
-	uart_data_t[4].rx_read = 0;
-	uart_data_t[4].rx_write = 0;
 	uart_data_t[4].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[4].RX_data_length = 0;
 	uart_data_t[4].tx_read = 0;
-	uart_data_t[4].rx_write = 0;
+	uart_data_t[4].tx_write = 0;
 	uart_data_t[4].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[4].uart_tx_dma_state = IDEL;
+	uart_data_t[4].uart_tx_dma_state = IDLE;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 
@@ -589,14 +570,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[5].RX_buffer = &UART6_RX_DMA_DataBuf[0];
 	uart_data_t[5].TX_buffer = &UART6_TX_DMA_DataBuf[0];
 	uart_data_t[5].TX_data_length = &UART6_TX_Buf_Length[0];
-	uart_data_t[5].rx_read = 0;
-	uart_data_t[5].rx_write = 0;
 	uart_data_t[5].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[5].RX_data_length = 0;
 	uart_data_t[5].tx_read = 0;
-	uart_data_t[5].rx_write = 0;
+	uart_data_t[5].tx_write = 0;
 	uart_data_t[5].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[5].uart_tx_dma_state = IDEL;
+	uart_data_t[5].uart_tx_dma_state = IDLE;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART6, ENABLE);
 
@@ -607,14 +585,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[6].RX_buffer = &UART7_RX_DMA_DataBuf[0];
 	uart_data_t[6].TX_buffer = &UART7_TX_DMA_DataBuf[0];
 	uart_data_t[6].TX_data_length = &UART7_TX_Buf_Length[0];
-	uart_data_t[6].rx_read = 0;
-	uart_data_t[6].rx_write = 0;
 	uart_data_t[6].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[6].RX_data_length = 0;
 	uart_data_t[6].tx_read = 0;
-	uart_data_t[6].rx_write = 0;
+	uart_data_t[6].tx_write = 0;
 	uart_data_t[6].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[6].uart_tx_dma_state = IDEL;
+	uart_data_t[6].uart_tx_dma_state = IDLE;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART7, ENABLE);
 
@@ -626,14 +601,11 @@ void BSP_Uart_Init(void)
 	uart_data_t[7].RX_buffer = &UART8_RX_DMA_DataBuf[0];
 	uart_data_t[7].TX_buffer = &UART8_TX_DMA_DataBuf[0];
 	uart_data_t[7].TX_data_length = &UART8_TX_Buf_Length[0];
-	uart_data_t[7].rx_read = 0;
-	uart_data_t[7].rx_write = 0;
 	uart_data_t[7].last_RX_DMA_length = UART_RX_DMA_SIZE;
-	uart_data_t[7].RX_data_length = 0;
 	uart_data_t[7].tx_read = 0;
-	uart_data_t[7].rx_write = 0;
+	uart_data_t[7].tx_write = 0;
 	uart_data_t[7].tx_remainBuffNum = UART_TX_BUF_NUM;
-	uart_data_t[7].uart_tx_dma_state = IDEL;
+	uart_data_t[7].uart_tx_dma_state = IDLE;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART8, ENABLE);
 

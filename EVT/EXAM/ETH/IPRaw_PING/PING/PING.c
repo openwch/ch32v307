@@ -15,7 +15,13 @@ u8 sendErrCnt;
 u8 unreachCnt;
 u8 timeoutCnt;
 u8 sucRecCnt;
-u8 sendBuf[100];
+/* Two distinct roles, two distinct buffers: reqBuf holds the Echo Request of
+ * this node (built by InitPING()), rspBuf holds the Echo Reply to a third
+ * party's request (built by Respond_PING()). A single shared buffer would let
+ * an incoming request overwrite the request that is currently in flight, so
+ * the next (re)transmission would carry someone else's sequence number. */
+u8 reqBuf[100];
+u8 rspBuf[100];
 u8 ICMPCnt = 0;
 u8 ICMPSeq = 0;
 u8 ICMPSuc = 0;
@@ -71,17 +77,17 @@ void InitPING(void)
     check_sum += head.i_code;
     check_sum += head.i_id;
     check_sum += head.i_seq;
-    head.i_cksum = check_sum >> 16;
-    head.i_cksum += check_sum & 0xffff;
-    head.i_cksum = 0xffff - head.i_cksum;
-    memset(sendBuf, 0, sizeof(sendBuf));
-    memcpy(sendBuf, &head, sizeof(head));
-    sendBuf[2] = head.i_cksum >> 8;
-    sendBuf[3] = head.i_cksum & 0xff;
-    sendBuf[4] = head.i_id >> 8;
-    sendBuf[5] = head.i_id & 0xff;
-    sendBuf[6] = head.i_seq >> 8;
-    sendBuf[7] = head.i_seq & 0xff;
+    while(check_sum >> 16)
+        check_sum = (check_sum & 0xffff) + (check_sum >> 16);
+    head.i_cksum = 0xffff - (u16)check_sum;
+    memset(reqBuf, 0, sizeof(reqBuf));
+    memcpy(reqBuf, &head, sizeof(head));
+    reqBuf[2] = head.i_cksum >> 8;
+    reqBuf[3] = head.i_cksum & 0xff;
+    reqBuf[4] = head.i_id >> 8;
+    reqBuf[5] = head.i_id & 0xff;
+    reqBuf[6] = head.i_seq >> 8;
+    reqBuf[7] = head.i_seq & 0xff;
 }
 
 /*********************************************************************
@@ -90,14 +96,25 @@ void InitPING(void)
  * @brief   Respond to PING request.
  *
  * @param   pDat - ACK data.
+ *          len - length of pDat.
  *
  * @return  none
+ *
+ * @note    The Echo Reply is assembled in the global rspBuf, which is
+ *          deliberately kept apart from reqBuf (the Echo Request buffer filled
+ *          by InitPING()): answering a third party must not disturb the
+ *          request of this node that may still be on its way out.
  */
-void Respond_PING(u8 *pDat)
+void Respond_PING(u8 *pDat, u32 len)
 {
     IcmpHeader head;
     u32 check_sum = 0;
     u8 i;
+
+    /* The identifier, the sequence number and the data area are read from the
+     * request below, so a complete message has to be handed over. */
+    if((pDat == NULL) || (len < sizeof(IcmpHeader)))
+        return;
 
     head.i_type = ICMP_HEAD_REPLY;
     head.i_code = pDat[1];
@@ -108,24 +125,26 @@ void Respond_PING(u8 *pDat)
     check_sum += head.i_code;
     check_sum += head.i_id;
     check_sum += head.i_seq;
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ICMP_DATA_BYTES; i++) {
         head.i_data[i] = pDat[i + 8];
         if (i % 2 == 0)
             check_sum += head.i_data[i] << 8;
         else
             check_sum += head.i_data[i];
     }
-    head.i_cksum = check_sum >> 16;
-    head.i_cksum += check_sum & 0xffff;
-    head.i_cksum = 0xffff - head.i_cksum;
-    memset(sendBuf, 0, sizeof(sendBuf));
-    memcpy(sendBuf, &head, sizeof(head));
-    sendBuf[2] = head.i_cksum >> 8;
-    sendBuf[3] = head.i_cksum & 0xff;
-    sendBuf[4] = head.i_id >> 8;
-    sendBuf[5] = head.i_id & 0xff;
-    sendBuf[6] = head.i_seq >> 8;
-    sendBuf[7] = head.i_seq & 0xff;
+    /* Fold the carries until the sum fits into 16 bits: a single fold is not
+     * enough when the low half is close to 0xffff. */
+    while(check_sum >> 16)
+        check_sum = (check_sum & 0xffff) + (check_sum >> 16);
+    head.i_cksum = 0xffff - (u16)check_sum;
+    memset(rspBuf, 0, sizeof(rspBuf));
+    memcpy(rspBuf, &head, sizeof(head));
+    rspBuf[2] = head.i_cksum >> 8;
+    rspBuf[3] = head.i_cksum & 0xff;
+    rspBuf[4] = head.i_id >> 8;
+    rspBuf[5] = head.i_id & 0xff;
+    rspBuf[6] = head.i_seq >> 8;
+    rspBuf[7] = head.i_seq & 0xff;
 }
 
 /*********************************************************************
@@ -142,8 +161,14 @@ void WCHNET_ICMPRecvData(u32 len, u8 *pDat)
 {
     u16 tmp = 0;
 
+    /* The type, the code and, for a full message, the identifier and the
+     * sequence number are read below, so the 8 byte ICMP header must be
+     * present before anything else is done. */
+    if((pDat == NULL) || (len < 8))
+        return;
+
     ICMPTmpVal = ICMPSuc;
-    ICMPSuc = 3;
+    ICMPSuc = ICMP_RECV_ERR;
     if (len == 40) {
         if (pDat[0] == ICMP_HEAD_REPLY) {
             if (pDat[1] == ICMP_HEAD_CODE) {
@@ -162,7 +187,7 @@ void WCHNET_ICMPRecvData(u32 len, u8 *pDat)
         }
         if (pDat[0] == ICMP_HEAD_TYPE) {
             if (pDat[1] == ICMP_HEAD_CODE) {
-                Respond_PING(pDat);
+                Respond_PING(pDat, len);
                 ICMPSuc = ICMP_REPLY;
             }
         }
@@ -184,32 +209,64 @@ void WCHNET_ICMPRecvData(u32 len, u8 *pDat)
  *          Len - data length
  *          id - socket id
  *
- * @return  none
+ * @return  WCHNET_ERR_SUCCESS if the whole message has been handed over to the
+ *          stack, the error code of WCHNET_SocketSend() if the stack rejected
+ *          it, WCHNET_ERR_BUF if the stack took no data at all after three
+ *          attempts. The caller is responsible for the state transition.
  */
-void WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 id )
+u8 WCHNET_PINGSendData( u8 *PSend, u32 Len,u8 id )
 {
     u32 length;
+    u32 sendLen;
     u8 i,count=0;
 
     length = Len;
     count = 0;
 
     while(1){
-        Len = length;
-        i = WCHNET_SocketSend(id,PSend,&Len);
+        /* Len is an in/out parameter: the library reports back how much of the
+         * message it accepted. Whether it also clears Len when it fails is
+         * undocumented, so the outcome is taken from the return value. */
+        sendLen = length;
+        i = WCHNET_SocketSend(id,PSend,&sendLen);
         mStopIfError(i);
-        if(Len == 0){
+        if(i != WCHNET_ERR_SUCCESS){
+            return i;
+        }
+        if(sendLen == 0){
             count++;
             if(count>2){
-                return;
+                /* The stack kept refusing the data without taking any of it;
+                 * report the failure instead of spinning here so that the
+                 * caller can schedule the retry. */
+                return WCHNET_ERR_BUF;
             }
         }
-        length -= Len;
-        PSend += Len;                             //offset buffer pointer
+        length -= sendLen;
+        PSend += sendLen;                         //offset buffer pointer
         if(length)continue;                       //If the data is not sent, continue to send
         break;
     }
-    ICMPSuc++;
+    return WCHNET_ERR_SUCCESS;
+}
+
+/*********************************************************************
+ * @fn      PING_SendRequest
+ *
+ * @brief   Hands the pending Echo Request (reqBuf) over to the stack and moves
+ *          the state machine to the successor state implied by the result.
+ *          Nothing is built here: the message is either the one InitPING()
+ *          prepared, or the one still waiting to be retransmitted.
+ *
+ * @return  none
+ */
+static void PING_SendRequest(void)
+{
+    timeCnt = 0;
+    if (WCHNET_PINGSendData(reqBuf, sizeof(IcmpHeader), SocketId) == WCHNET_ERR_SUCCESS)
+        ICMPSuc = ICMP_SEND_SUC;                  //handed over, the 1 s timeout starts
+    else
+        ICMPSuc = ICMP_SEND_ERR;                  //retry after 2.5 s, bounded by sendErrCnt
 }
 
 /*********************************************************************
@@ -224,9 +281,7 @@ void WCHNET_PINGCmd(void)
     if (ICMPSuc < ICMP_KEEP_NO) {
         switch (ICMPSuc) {
         case ICMP_SOKE_CON:
-            ICMPSuc = 1;
-            timeCnt = 0;
-            WCHNET_PINGSendData(sendBuf, 40, SocketId);
+            PING_SendRequest();
             printf("Ping %d.%d.%d.%d with %d bytes of data.\r\n",
                     (u16) DESIP[0], (u16) DESIP[1], (u16) DESIP[2],
                     (u16) DESIP[3], (u16) ICMP_DATA_BYTES);
@@ -236,25 +291,22 @@ void WCHNET_PINGCmd(void)
                 ICMPSuc = ICMP_KEEP_NO;
                 sendErrCnt = 0;
             }
-            if (timeCnt > 250) {
-                printf("send data fail!\n");
-                timeCnt = 0;
+            else if (timeCnt > 250) {
+                printf("send data fail!\r\n");
                 sendErrCnt++;
-                WCHNET_PINGSendData(sendBuf, 40, SocketId);
+                PING_SendRequest();
             }
             break;
         case ICMP_SEND_SUC:
             if (timeCnt > 100) {
-                printf("Request timeout.\n");
+                printf("Request timeout.\r\n");
                 timeoutCnt++;
                 if (ICMPCnt < PING_SEND_CNT) {
-                    ICMPSuc = 1;
                     InitPING();
-                    timeCnt = 0;
-                    WCHNET_PINGSendData(sendBuf, 40, SocketId);
+                    PING_SendRequest();
                 } else {
                     printf("PING end!\r\n");
-                    printf("send = %d Received = %d", PING_SEND_CNT, sucRecCnt);
+                    printf("send = %d Received = %d\r\n", (u16) PING_SEND_CNT, (u16) sucRecCnt);
                     ICMPSuc = ICMP_KEEP_NO;
                 }
             }
@@ -269,10 +321,8 @@ void WCHNET_PINGCmd(void)
                     (u16) DESIP[3], (u16) ICMP_DATA_BYTES);
             sucRecCnt++;
             if (ICMPCnt < PING_SEND_CNT) {
-                ICMPSuc = 1;
                 InitPING();
-                timeCnt = 0;
-                WCHNET_PINGSendData(sendBuf, 40, SocketId);
+                PING_SendRequest();
             } else {
                 printf(
                         "Ping statistics for %d.%d.%d.%d:\r\nPackets: Sent = %d,Received = %d,Lost = %d<%d%% loss>.\r\n",
@@ -289,18 +339,23 @@ void WCHNET_PINGCmd(void)
                     (u16) DESIP[3]);
             unreachCnt++;
             if (ICMPCnt < PING_SEND_CNT) {
-                ICMPSuc = 1;
                 InitPING();
-                timeCnt = 0;
-                WCHNET_PINGSendData(sendBuf, 40, SocketId);
+                PING_SendRequest();
             } else {
                 printf("PING end!\r\n");
-                printf("send = %d Received = %d", PING_SEND_CNT, sucRecCnt);
+                printf("send = %d Received = %d\r\n", (u16) PING_SEND_CNT, (u16) sucRecCnt);
                 ICMPSuc = ICMP_KEEP_NO;
             }
             break;
         case ICMP_REPLY:
-            WCHNET_PINGSendData(sendBuf, 40, SocketId);
+            /* Send the Echo Reply that Respond_PING() left in rspBuf, which is a
+             * different buffer than the one PING_SendRequest() sends from. A
+             * rejected reply is dropped and the previous state restored right
+             * away, so this branch cannot be re-entered on every main loop round. */
+            if (WCHNET_PINGSendData(rspBuf, sizeof(IcmpHeader), SocketId) == WCHNET_ERR_SUCCESS)
+                ICMPSuc = ICMP_REPLY_SUC;
+            else
+                ICMPSuc = ICMPTmpVal;
             break;
         case ICMP_REPLY_SUC:
             printf("Reply ping.\r\n");

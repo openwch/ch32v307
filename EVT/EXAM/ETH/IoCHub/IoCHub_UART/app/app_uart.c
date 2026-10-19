@@ -64,8 +64,9 @@ void uart1_init (uint32_t baudrate) {
 
 /**
  * @brief  uart1 dma send channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart1_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -86,13 +87,16 @@ void uart1_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_Init (DMA1_Channel4, &DMA_InitStructure);
     DMA_ITConfig (DMA1_Channel4, DMA_IT_TC | DMA_IT_TE, ENABLE);
     DMA_ClearFlag (DMA1_IT_TC4); /* Clearing the delivery completion flag */
-    DMA_Cmd (DMA1_Channel4, ENABLE);
+    /*Left disabled on purpose: uart1_dmatx_send() enables the channel when a
+     *transfer is actually started.*/
+    DMA_Cmd (DMA1_Channel4, DISABLE);
 }
 
 /**
  * @brief  uart1 dma send enable
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart1_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
     DMA1_Channel4->CFGR &= ~0x00000001;
@@ -103,8 +107,9 @@ void uart1_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
 }
 /**
  * @brief  uart1 dma receive channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart1_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -137,7 +142,7 @@ uint16_t uart1_get_dmarx_buf_remain_size (uint8_t uart_id) {
 
 #if UART2_CFG_EN
 /*********************************************************************
- * @fn      USART2_CFG
+ * @fn      uart2_init
  *
  * @brief   Initializes the USART2 peripheral.
  *
@@ -191,8 +196,9 @@ void uart2_init (uint32_t baudrate) {
 
 /**
  * @brief  uart2 dma send channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart2_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -213,13 +219,16 @@ void uart2_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_Init (DMA1_Channel7, &DMA_InitStructure);
     DMA_ITConfig (DMA1_Channel7, DMA_IT_TC | DMA_IT_TE, ENABLE);
     DMA_ClearFlag (DMA1_IT_TC7); /* Clearing the delivery completion flag */
-    DMA_Cmd (DMA1_Channel7, ENABLE);
+    /*Left disabled on purpose: uart2_dmatx_send() enables the channel when a
+     *transfer is actually started.*/
+    DMA_Cmd (DMA1_Channel7, DISABLE);
 }
 
 /**
  * @brief  uart2 dma send enable
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart2_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
     DMA1_Channel7->CFGR &= ~0x00000001;
@@ -231,8 +240,9 @@ void uart2_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
 
 /**
  * @brief  uart2 dma receive channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart2_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -254,7 +264,8 @@ void uart2_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_ITConfig (DMA1_Channel6, DMA_IT_TC | DMA_IT_HT | DMA_IT_TE, ENABLE); /* Enable DMA half-full, overflow, and error interrupts */
     DMA_ClearFlag (DMA1_IT_TC6);
     DMA_ClearFlag (DMA1_IT_HT6);
-    DMA_Cmd (DMA1_Channel6, DISABLE);
+    /*Circular RX channel, it has to run continuously from the start.*/
+    DMA_Cmd (DMA1_Channel6, ENABLE);
 }
 
 uint16_t uart2_get_dmarx_buf_remain_size (uint8_t uart_id) {
@@ -318,8 +329,9 @@ void uart3_init (uint32_t baudrate) {
 
 /**
  * @brief  uart3 dma send channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart3_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -344,8 +356,9 @@ void uart3_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
 }
 /**
  * @brief  uart3 dma send enable
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart3_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
     DMA1_Channel2->CFGR &= ~0x00000001;
@@ -357,8 +370,9 @@ void uart3_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
 
 /**
  * @brief  uart3 dma receive channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart3_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -391,7 +405,7 @@ void uart3_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
 /*********************************************************************
  * @fn      uart4_init
  *
- * @brief   Initializes the USART3 peripheral.
+ * @brief   Initializes the USART4 peripheral.
  *
  * @return  none
  */
@@ -443,8 +457,9 @@ void uart4_init (uint32_t baudrate) {
 
 /**
  * @brief  uart4 dma send channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart4_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -470,8 +485,9 @@ void uart4_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
 
 /**
  * @brief  uart4 dma send enable
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart4_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
     DMA2_Channel5->CFGR &= ~0x00000001;
@@ -482,8 +498,9 @@ void uart4_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
 }
 /**
  * @brief  uart4 dma receive channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart4_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -518,7 +535,7 @@ uint16_t uart4_get_dmarx_buf_remain_size (uint8_t uart_id) {
 /*********************************************************************
  * @fn      uart5_init
  *
- * @brief   Initializes the USART3 peripheral.
+ * @brief   Initializes the USART5 peripheral.
  *
  * @return  none
  */
@@ -570,8 +587,9 @@ void uart5_init (uint32_t baudrate) {
 
 /**
  * @brief  uart5 dma send channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart5_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -597,8 +615,9 @@ void uart5_dmatx_config (uint8_t *mem_addr, uint32_t mem_size) {
 
 /**
  * @brief  uart5 dma send enable
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart5_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
     DMA2_Channel4->CFGR &= ~0x00000001;
@@ -609,8 +628,9 @@ void uart5_dmatx_send (uint8_t *mem_addr, uint32_t mem_size) {
 }
 /**
  * @brief  uart5 dma receive channel configuration
- * @param
- * @retval
+ * @param   mem_addr - pointer to the data buffer
+ * @param   mem_size - number of bytes to transfer
+ * @retval  none
  */
 void uart5_dmarx_config (uint8_t *mem_addr, uint32_t mem_size) {
     DMA_InitTypeDef DMA_InitStructure = {0};
@@ -677,8 +697,8 @@ uint16_t uart_get_dmarx_buf_remain_size (uint8_t uart_id) {
 
 /**
  * @brief  UART DMA Rx completion ISR
- * @param
- * @retval
+ * @param   uart_id - UART device index (DEV_UARTx)
+ * @retval  none
  */
 void uart_dmarx_done_isr (uint8_t uart_id) {
     uint16_t recv_size;
@@ -693,15 +713,15 @@ void uart_dmarx_done_isr (uint8_t uart_id) {
 
 /**
  * @brief  UART DMA HT (Half-Transfer) ISR
- * @param
- * @retval
+ * @param   uart_id - UART device index (DEV_UARTx)
+ * @retval  none
  */
 void uart_dmarx_half_done_isr (uint8_t uart_id) {
     uint16_t recv_total_size;
     uint16_t recv_size;
     lwrb_sz_t wsize = 0;
 
-    recv_total_size = s_uart_dev[uart_id].dmarx_buf_size - uart_get_dmarx_buf_remain_size (DEV_UART3);
+    recv_total_size = s_uart_dev[uart_id].dmarx_buf_size - uart_get_dmarx_buf_remain_size (uart_id);
 
     recv_size = recv_total_size - s_uart_dev[uart_id].last_dmarx_size;
 
@@ -712,15 +732,15 @@ void uart_dmarx_half_done_isr (uint8_t uart_id) {
 
 /**
  * @brief  UART IDLE ISR
- * @param
- * @retval
+ * @param   uart_id - UART device index (DEV_UARTx)
+ * @retval  none
  */
 void uart_dmarx_idle_isr (uint8_t uart_id) {
     uint16_t recv_total_size;
     uint16_t recv_size;
     lwrb_sz_t wsize = 0;
 
-    recv_total_size = s_uart_dev[uart_id].dmarx_buf_size - uart_get_dmarx_buf_remain_size (DEV_UART3);
+    recv_total_size = s_uart_dev[uart_id].dmarx_buf_size - uart_get_dmarx_buf_remain_size (uart_id);
 
     recv_size = recv_total_size - s_uart_dev[uart_id].last_dmarx_size;
 
@@ -732,8 +752,8 @@ void uart_dmarx_idle_isr (uint8_t uart_id) {
 
 /**
  * @brief  UART DMA TC (Transfer Complete) ISR
- * @param
- * @retval
+ * @param   uart_id - UART device index (DEV_UARTx)
+ * @retval  none
  */
 void uart_dmatx_done_isr (uint8_t uart_id) {
     s_uart_dev[uart_id].status = 0;

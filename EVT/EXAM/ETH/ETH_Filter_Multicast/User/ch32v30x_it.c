@@ -16,9 +16,9 @@ void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void ETH_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void)  __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI9_5_IRQHandler(void) __attribute__((interrupt()));
-uint8_t TimeCnt = 0;
-uint8_t SendFlag = 0;
+void EXTI9_5_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+volatile uint8_t TimeCnt = 0;
+volatile uint8_t SendFlag = 0;
 /*********************************************************************
  * @fn      NMI_Handler
  *
@@ -42,11 +42,6 @@ void NMI_Handler(void)
  */
 void HardFault_Handler(void)
 {
-    printf("HardFault_Handler\r\n");
-
-    printf("mepc  :%08x\r\n", __get_MEPC());
-    printf("mcause:%08x\r\n", __get_MCAUSE());
-    printf("mtval :%08x\r\n", __get_MTVAL());
     NVIC_SystemReset();
     while(1);
 }
@@ -85,7 +80,7 @@ void ETH_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
     WCHNET_TimeIsr(WCHNETTIMERPERIOD);
-    if(TimeCnt++ == 100)
+    if(++TimeCnt >= 100)
     {
         TimeCnt = 0;
         SendFlag = 1;

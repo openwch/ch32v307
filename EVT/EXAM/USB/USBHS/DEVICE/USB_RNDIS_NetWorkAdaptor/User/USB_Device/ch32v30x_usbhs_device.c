@@ -46,7 +46,7 @@ volatile uint8_t  USBHS_DevSpeed;
 volatile uint8_t  USBHS_DevSleepStatus;
 volatile uint8_t  USBHS_DevEnumStatus;
 
-/* trance rx len */
+/* transfer rx len */
 volatile uint16_t USBHS_Endp3_RxLen = 0;
 
 /* Endpoint Buffer */
@@ -245,7 +245,7 @@ uint8_t USBHS_EP2_UpLoad( uint16_t len, uint32_t dma_adr )
     // if( (USBHS_Endp_Busy[ DEF_UEP2 ] & DEF_UEP_BUSY) == RESET )
     if( (USBHSD->UEP2_TX_CTRL & USBHS_UEP_T_RES_MASK) == USBHS_UEP_T_RES_NAK )
     {
-        // USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
+        USBHS_Endp_Busy[ DEF_UEP2 ] = DEF_UEP_BUSY;
         USBHSD->UEP2_TX_LEN = len;
         USBHSD->UEP2_TX_DMA = dma_adr;
         USBHSD->UEP2_TX_CTRL = ( USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK ) | USBHS_UEP_T_RES_ACK;
@@ -318,6 +318,13 @@ void USBHS_IRQHandler( void )
                                 /* Non-standard request end-point 0 Data download */
                                 if( USBHS_SetupReqLen != 0 )
                                 {
+                                    if( ( (uint32_t)( pRNDIS_Message - encapsulated_buffer ) + DEF_USBD_UEP0_SIZE ) > RNDIS_Enc_Buf_Size )
+                                    {
+                                        USBHSD->UEP0_TX_CTRL = USBHS_UEP_T_TOG_DATA1 | USBHS_UEP_T_RES_STALL;
+                                        USBHSD->UEP0_RX_CTRL = USBHS_UEP_R_TOG_DATA1 | USBHS_UEP_R_RES_STALL;
+                                        USBHS_SetupReqLen = 0;
+                                        break;
+                                    }
                                     if( USBHS_SetupReqLen >= DEF_USBD_UEP0_SIZE )
                                     {
                                         memcpy( ( void *)pRNDIS_Message, USBHS_EP0_Buf, DEF_USBD_UEP0_SIZE );
@@ -327,6 +334,7 @@ void USBHS_IRQHandler( void )
                                     else
                                     {
                                         memcpy( ( void *)pRNDIS_Message, USBHS_EP0_Buf, USBHS_SetupReqLen );
+                                        pRNDIS_Message += USBHS_SetupReqLen;
                                         RNDIS_MSG_Recv( );
                                     }
                                 }
@@ -559,7 +567,7 @@ void USBHS_IRQHandler( void )
                             if( USBHS_DevSpeed == USBHS_SPEED_HIGH )
                             {
                                 /* High speed mode */
-                                memcpy( &TAB_USB_HS_OSC_DESC[ 2 ], &MyCfgDescr_HS[ 2 ], DEF_USBD_CONFIG_FS_DESC_LEN - 2 );
+                                memcpy( &TAB_USB_HS_OSC_DESC[ 2 ], &MyCfgDescr_FS[ 2 ], DEF_USBD_CONFIG_FS_DESC_LEN - 2 );
                                 pUSBHS_Descr = ( uint8_t * )&TAB_USB_HS_OSC_DESC[ 0 ];
                                 len = DEF_USBD_CONFIG_FS_DESC_LEN;
                             }
@@ -646,7 +654,7 @@ void USBHS_IRQHandler( void )
 
                                 case (DEF_UEP3 | DEF_UEP_OUT):
                                     /* Set End-point 3 OUT ACK */
-                                    USBHSD->UEP3_RX_CTRL = USBHS_UEP_R_RES_NAK;
+                                    USBHSD->UEP3_RX_CTRL = USBHS_UEP_R_RES_ACK;
                                     break;
 
                                 default:
@@ -727,6 +735,10 @@ void USBHS_IRQHandler( void )
                                     errflag = 0xFF;
                                     break;
                             }
+                        }
+                        else
+                        {
+                            errflag = 0xFF;
                         }
                     }
                     break;

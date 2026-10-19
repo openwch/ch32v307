@@ -390,7 +390,7 @@ void USBHS_IRQHandler( void )
                         }
                         break;
 
-                    /* end-point 1 data in interrupt */
+                    /* end-point 2 data in interrupt */
                     case USBHS_UIS_TOKEN_IN | DEF_UEP2:
                         USBHSD->UEP2_TX_CTRL = (USBHSD->UEP2_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
                         USBHSD->UEP2_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
@@ -460,8 +460,11 @@ void USBHS_IRQHandler( void )
                                  }
                                  else if( USBHS_SetupReqCode == HID_SET_REPORT )
                                  {
+                                     if( Hid_Report_Ptr + len > sizeof( HID_Report_Buffer ) )
+                                     {
+                                         len = sizeof( HID_Report_Buffer ) - Hid_Report_Ptr;
+                                     }
                                      memcpy(&HID_Report_Buffer[Hid_Report_Ptr],USBHS_EP0_Buf,len);
-                                     USBHS_SetupReqLen -= len;
                                      Hid_Report_Ptr += len;
                                      USBHSD->UEP0_RX_CTRL ^= USBHS_UEP_R_TOG_DATA1;
                                      USBHSD->UEP0_RX_CTRL = (USBHSD->UEP0_RX_CTRL & USBHS_UEP_R_TOG_MASK) | USBHS_UEP_R_RES_ACK;
@@ -513,8 +516,8 @@ void USBHS_IRQHandler( void )
                             USBHS_EP4_Tx_Buf[ i ] = ~USBHS_EP4_Rx_Buf[ i ];
                         }
                         USBHSD->UEP4_TX_LEN  = len;
-                        USBHSD->UEP4_TX_CTRL &= ~USBHS_UEP_R_RES_MASK;
-                        USBHSD->UEP4_TX_CTRL |= USBHS_UEP_R_RES_ACK;
+                        USBHSD->UEP4_TX_CTRL &= ~USBHS_UEP_T_RES_MASK;
+                        USBHSD->UEP4_TX_CTRL |= USBHS_UEP_T_RES_ACK;
                         break;
 
                     default:
@@ -573,7 +576,7 @@ void USBHS_IRQHandler( void )
                         break;
 
                     case HID_GET_REPORT:                            /* 0x01: GET_REPORT */
-                        if( USBHS_SetupReqIndex == 0x00 )
+                        if( USBHS_SetupReqIndex == 0x02 )
                         {
                             Hid_Report_Ptr = 0;
                             len = (USBHS_SetupReqLen >= DEF_USBD_UEP0_SIZE) ? DEF_USBD_UEP0_SIZE : USBHS_SetupReqLen;
@@ -587,7 +590,7 @@ void USBHS_IRQHandler( void )
                         break;
 
                     case HID_SET_IDLE:                              /* 0x0A: SET_IDLE */
-                        if( USBHS_SetupReqIndex == 0x00 )
+                        if( USBHS_SetupReqIndex == 0x02 )
                         {
                             USBHS_HidIdle = (uint8_t)( USBHS_SetupReqValue >> 8 );
                         }
@@ -598,7 +601,7 @@ void USBHS_IRQHandler( void )
                         break;
 
                     case HID_SET_PROTOCOL:                          /* 0x0B: SET_PROTOCOL */
-                        if( USBHS_SetupReqIndex == 0x00 )
+                        if( USBHS_SetupReqIndex == 0x02 )
                         {
                             USBHS_HidProtocol = (uint8_t)USBHS_SetupReqValue;
                         }
@@ -609,7 +612,7 @@ void USBHS_IRQHandler( void )
                         break;
 
                     case HID_GET_IDLE:                              /* 0x02: GET_IDLE */
-                        if( USBHS_SetupReqIndex == 0x00 )
+                        if( USBHS_SetupReqIndex == 0x02 )
                         {
                             USBHS_EP0_Buf[ 0 ] = USBHS_HidIdle;
                             len = 1;
@@ -621,7 +624,7 @@ void USBHS_IRQHandler( void )
                         break;
 
                     case HID_GET_PROTOCOL:                          /* 0x03: GET_PROTOCOL */
-                        if( USBHS_SetupReqIndex == 0x00 )
+                        if( USBHS_SetupReqIndex == 0x02 )
                         {
                             USBHS_EP0_Buf[ 0 ] = USBHS_HidProtocol;
                             len = 1;
@@ -971,6 +974,10 @@ void USBHS_IRQHandler( void )
                                     errflag = 0xFF;
                                     break;
                             }
+                        }
+                        else
+                        {
+                            errflag = 0xFF;
                         }
                     }
                     break;

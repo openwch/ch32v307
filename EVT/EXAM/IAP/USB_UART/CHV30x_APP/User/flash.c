@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT  *******************************
- * File Name          : iap.c
+ * File Name          : flash.c
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2020/12/16
- * Description        : CH32F103  fast program
+ * Version            : V1.0.1
+ * Date               : 2026/10/15
+ * Description        : fast program
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -12,7 +12,6 @@
 #include "flash.h"
 #include "string.h"
 
-u32 Verify_buf[32];
 
 /*********************************************************************
  * @fn      CH32_IAP_Program
@@ -24,7 +23,7 @@ u32 Verify_buf[32];
  */
 void CH32_IAP_Program(u32 adr, u32* buf) {
 
-    FLASH_ProgramPage_Fast(adr, buf);
+    FLASH_ROM_WRITE(adr, buf, 256);
 }
 
 

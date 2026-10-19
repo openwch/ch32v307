@@ -94,8 +94,11 @@ void WCHNET_CreateTcpSocket(void)
     TmpSocketInf.ProtoType = PROTO_TYPE_TCP;
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
-    printf("SocketId %d\r\n", SocketId);
     mStopIfError(i);
+    if (i != WCHNET_ERR_SUCCESS) {
+        return;
+    }
+    printf("SocketId %d\r\n", SocketId);
     i = WCHNET_SocketConnect(SocketId);                        //make a TCP connection
     mStopIfError(i);
 }
@@ -131,7 +134,7 @@ void WCHNET_DataLoopback(u8 id)
     u8 *p = MyBuf, TransCnt = 255;
 
     len = WCHNET_SocketRecvLen(id, NULL);                                //query length
-    printf("Receive Len = %d\r\n", len);
+    printf("Receive Len = %lu\r\n", (unsigned long) len);
     totallen = len;
     WCHNET_SocketRecv(id, MyBuf, &len);                                  //Read the data of the receive buffer into MyBuf
     while(1){
@@ -177,7 +180,12 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
             }
         }
         printf("TCP Connect Success\r\n");
-        printf("socket id: %d\r\n", socket[i]);
+        if (i < WCHNET_MAX_SOCKET_NUM) {
+            printf("socket id: %d\r\n", socket[i]);
+        }
+        else {
+            printf("socket table is full, socket id: %d\r\n", socketid);
+        }
     }
     if (intstat & SINT_STAT_DISCONNECT)                         //disconnect
     {
@@ -188,6 +196,9 @@ void WCHNET_HandleSockInt(u8 socketid, u8 intstat)
             }
         }
         printf("TCP Disconnect\r\n");
+        /* The stack has already released the socket, so re-establishing the
+         * connection only needs a new socket, there is nothing to close. */
+        WCHNET_CreateTcpSocket();
     }
     if (intstat & SINT_STAT_TIM_OUT)                            //timeout disconnect
     {
@@ -254,22 +265,27 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                  //USART initialize
     printf("TCPClient Test\r\n");
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n", WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if (WCHNET_LIB_VER != WCHNET_GetVer()) {
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                 //get the chip MAC address
     printf("mac addr:");
     for(i = 0; i < 6; i++)
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);         //Ethernet library initialize
     mStopIfError(i);
-    if (i == WCHNET_ERR_SUCCESS)
+    if (i == WCHNET_ERR_SUCCESS) {
         printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
 #if KEEPALIVE_ENABLE                                            //Configure keep alive parameters
     {
         struct _KEEP_CFG cfg;

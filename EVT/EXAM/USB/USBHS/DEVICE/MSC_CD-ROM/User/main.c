@@ -21,8 +21,8 @@
  * ISO 9660 Joliet Level 1 format and is suitable for a sector size of 512B. If other 
  * file systems are used, the sector size DEF_CFG_DISK_SEC_SIZE in the program needs to 
  * be adjusted.
- * 3.This Code Only Supports Winboard W25 Series flash, if user needs to use other type
- * of flash, you can add flash type by yourself in SPI_FLASH.c in user floder.
+ * 3.This Code Only Supports Winbond W25 Series flash, if user needs to use other type
+ * of flash, you can add flash type by yourself in SPI_FLASH.c in user folder.
  * 4.External flash chip needs to be attached to SPI_1.
  * 5.CD_ROM iso file 'TEST.iso' contains wch serial-port driver, and autorun.inf.
  *  *//*********************************************************************

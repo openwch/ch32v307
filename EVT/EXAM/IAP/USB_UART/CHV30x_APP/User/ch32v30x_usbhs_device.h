@@ -608,7 +608,6 @@ extern __attribute__ ((aligned(4))) UINT8 Ep0Buffer[ USBHS_UEP0_SIZE ];       /*
 extern __attribute__ ((aligned(4))) UINT8 Ep1Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data sending buffer of endpoint 1 */
 extern __attribute__ ((aligned(4))) UINT8 Ep2Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data receiving buffer of endpoint 2 */
 extern __attribute__ ((aligned(4))) UINT8 Ep3Buffer[ USBHS_MAX_PACK_SIZE*2 ]; /* Data sending buffer of endpoint 2 */
-extern const UINT8 *pDescr;
 extern volatile UINT8  USBHS_Dev_SetupReqCode;                                  /* USBHS device Setup package command code */
 extern volatile UINT16 USBHS_Dev_SetupReqLen;                                   /* USBHS device Setup packet length */
 extern volatile UINT8  USBHS_Dev_SetupReqValueH;                                /* USBHS device Setup package Value high byte */

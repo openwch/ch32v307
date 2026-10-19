@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : main.c
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2021/06/06
+ * Version            : V1.0.1
+ * Date               : 2026/10/16
  * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -159,6 +159,10 @@ void ring_buffer_push_huge(uint8_t *buffer, uint16_t len)
     {
         memcpy(&(ring_buffer.buffer[ring_buffer.RecvPos]), buffer, len);
         ring_buffer.RecvPos += len;
+        if (ring_buffer.RecvPos >= RING_BUFFER_LEN)
+        {
+            ring_buffer.RecvPos = 0;
+        }
     }
     else
     {
@@ -179,14 +183,18 @@ void ring_buffer_push_huge(uint8_t *buffer, uint16_t len)
  */
 uint8_t ring_buffer_pop()
 {
-    uint8_t data = ring_buffer.buffer[ring_buffer.SendPos];
+    uint8_t data;
 
+    __disable_irq();
+    data = ring_buffer.buffer[ring_buffer.SendPos];
     ring_buffer.SendPos++;
     if (ring_buffer.SendPos >= RING_BUFFER_LEN)
     {
         ring_buffer.SendPos = 0;
     }
     ring_buffer.RemainCount--;
+    __enable_irq();
+
     return data;
 }
 

@@ -11,7 +11,7 @@
 *******************************************************************************/
 #include "mailcmd.h"
 
-char send_buff[512];
+char send_buff[SEND_BUFF_SIZE];
 char EncodeHostName[32];
 
 #ifdef receive_mail
@@ -71,6 +71,11 @@ char     R_argv[3][32];
 POP      m_pop3;
 SMTP     m_smtp;
 
+/*Socket handle of each connection, valid as soon as the matching
+ *WCHNET_CreateTcpSmtp()/WCHNET_CreateTcpPop3() has created the socket.*/
+u8       SmtpSocket = SOCKET_INVALID;
+u8       Pop3Socket = SOCKET_INVALID;
+
 /*********************************************************************
  * @fn      Base64Encode
  *
@@ -118,31 +123,34 @@ void Base64Encode(char *src, u16 src_len, char *dst)
  * @param   pSrc - String to decode.
  *          src_len - the length of the string that needs to be decoded
  *          dst - decoded string
+ *          dst_cap - size of the destination buffer
  *
  * @return  none
  */
 #ifdef receive_mail
-void Base64Decode(char *src, u16 src_len, char *dst)
+void Base64Decode(char *src, u16 src_len, char *dst, u16 dst_cap)
 {
         u32 i = 0, j = 0;
-        
+
         for (; i < src_len; i += 4) {
-            if(strncmp( &src[i], "\r\n", 2 ) == 0) i += 2;
-            dst[j++] = base64_decode_map[src[i]] << 2 |
-                    base64_decode_map[src[i + 1]] >> 4;
-            dst[j++] = base64_decode_map[src[i + 1]] << 4 |
-                    base64_decode_map[src[i + 2]] >> 2;
-            dst[j++] = base64_decode_map[src[i + 2]] << 6 |
-                    base64_decode_map[src[i + 3]];
+            /*Skip a line break inside the encoded data, but only when the two
+             *bytes are really there.*/
+            if((i + 1 < src_len) && (strncmp( &src[i], "\r\n", 2 ) == 0)) i += 2;
+            /*An incomplete group at the end is not decoded, and the three
+             *output bytes are only written when they fit: this function used
+             *to write to dst without knowing how large dst is.*/
+            if((i + 3) >= src_len) break;
+            if((j + 3) >= dst_cap) break;
+            /*The map index must be taken as unsigned: char is signed here, so
+             *a byte >= 0x80 would index before the start of the table.*/
+            dst[j++] = base64_decode_map[(u8)src[i]] << 2 |
+                    base64_decode_map[(u8)src[i + 1]] >> 4;
+            dst[j++] = base64_decode_map[(u8)src[i + 1]] << 4 |
+                    base64_decode_map[(u8)src[i + 2]] >> 2;
+            dst[j++] = base64_decode_map[(u8)src[i + 2]] << 6 |
+                    base64_decode_map[(u8)src[i + 3]];
         }
-        if(src_len%4 == 3) {
-            dst[strlen(dst)-1] = '\0'; 
-        }
-        else if(src_len%4 == 2) {
-            dst[strlen((char *)dst)-1] = '\0'; 
-            dst[strlen((char *)dst)-1] = '\0'; 
-        }
-        else dst[j] = '\0';
+        dst[j] = '\0';
 }
 #endif
 
@@ -155,29 +163,34 @@ void Base64Decode(char *src, u16 src_len, char *dst)
  *          pDst - encoded string
  *          nSrcLen -  data length
  *          MaxLine - maximum number of lines
+ *          dst_cap - size of the destination buffer
  *
  * @return  none
  */
 #ifdef send_mail
-void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine )
+void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine, u16 dst_cap )
 {
     u16 nDstLen  = 0;
     u16 nLineLen = 0;
     u16 i = 0;
+    u16 nNeed;
 
-    for(i = 0; i < nSrcLen; i++, pSrc++ ){        
-        if( (*pSrc >= '!') && (*pSrc <= '~') && (*pSrc != '=') ){
+    for(i = 0; i < nSrcLen; i++, pSrc++ ){
+        nNeed = ((*pSrc >= '!') && (*pSrc <= '~') && (*pSrc != '=')) ? 1 : 3;
+        if((nDstLen + nNeed + 1) > dst_cap) break;
+        if(nNeed == 1){
             *pDst++ = *pSrc;
             nDstLen++;
             nLineLen++;
         }
         else{
-            sprintf(pDst, "=%02x", *pSrc);
-            pDst += 3; 
+            sprintf(pDst, "=%02x", (unsigned char)*pSrc);
+            pDst += 3;
             nDstLen += 3;
             nLineLen += 3;
         }
-        if( nLineLen >= MaxLine - 3 ){    
+        if( nLineLen >= MaxLine - 3 ){
+            if((nDstLen + 3 + 1) > dst_cap) break;
             sprintf(pDst,"=\r\n");
             pDst += 3;
             nDstLen += 3;
@@ -196,32 +209,38 @@ void QuotedPrintableEncode( char *pSrc, char *pDst, u16 nSrcLen, u16 MaxLine )
  * @param   pSrc - String to decode.
  *          pDst - decoded string
  *          nSrcLen -  data length
+ *          dst_cap - size of the destination buffer
  *
  * @return  none
  */
 #ifdef receive_mail
-void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen )
+void QuotedPrintableDecode( char *pSrc, char *pDst, u16 nSrcLen, u16 dst_cap )
 {
     u16 i = 0;
     u16 nDstLen = 0;
+    unsigned int v;
 
     while( i < nSrcLen ){
-        if( strncmp( pSrc, "=\r\n", 3 ) == 0 ){
+        if(( i + 3 <= nSrcLen ) && ( strncmp( pSrc, "=\r\n", 3 ) == 0 )){
             pSrc += 3;
             i += 3;
         }
         else{
             if( *pSrc == '=' ){
-                sscanf( pSrc, "=%02x",pDst);
-                pDst++;
+                if(( i + 3 <= nSrcLen ) && ( sscanf( pSrc, "=%02x", &v ) == 1 )){
+                    if(( nDstLen + 1 ) >= dst_cap) break;
+                    *pDst++ = (char)v;
+                    nDstLen++;
+                }
                 pSrc += 3;
                 i += 3;
             }
             else{
+                if(( nDstLen + 1 ) >= dst_cap) break;
                 *pDst++ = *pSrc++;
                 i++;
+                nDstLen++;
             }
-            nDstLen++;
         }
     }
     *pDst = '\0';
@@ -268,6 +287,7 @@ void WCHNET_XToChar( char  *dat,char  *p,char len)
 void WCHNET_SMTPInit(void)
 {
     p_smtp = &m_smtp;
+    SmtpSocket = SOCKET_INVALID;                  /*no socket until WCHNET_CreateTcpSmtp()*/
     p_smtp->g_MIME = 0;
     memset( p_smtp, '\0', sizeof(SMTP) );
     strcpy( p_smtp->m_strSMTPServer, m_Server );
@@ -306,14 +326,15 @@ void WCHNET_SMTPIsMIME( void )
  *
  * @param   pFileName - Attachment name.
  *          pAttachHeader - Envelope Contents
+ *          dst_cap - size of the destination buffer
  *
  * @return  none
  */
-void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader )
+void WCHNET_SMTPAttachHeader(  char *pFileName, char *pAttachHeader, u16 dst_cap )
 {
     const char *strContentType = "application/octet-stream";
-    sprintf(pAttachHeader, "\r\n\r\n--%s\r\nContent-Type: %s;\r\n name=\"%s\"%sContent-Disposition: \
-    attachment;\r\n filename=\"%s\"\r\n\r\n", g_strBoundary, strContentType, pFileName,g_AttachHead, pFileName ); 
+    snprintf(pAttachHeader, dst_cap, "\r\n\r\n--%s\r\nContent-Type: %s;\r\n name=\"%s\"%sContent-Disposition: \
+    attachment;\r\n filename=\"%s\"\r\n\r\n", g_strBoundary, strContentType, pFileName,g_AttachHead, pFileName );
 }
 
 /*********************************************************************
@@ -363,11 +384,11 @@ void WCHNET_SMTPMailHeader( void )
     strcat( send_buff, "\r\n" );
     //"Date: " 
     strcat( send_buff, "Date: ");
-//    strcat( send_buff, "" );     /* ʱ��    */
+//    strcat( send_buff, "" );     /* time */
      strcat( send_buff, "\r\n" );
     /* "X-Mailer: " */
     strcat( send_buff, g_xMailer );
-    /* �и��� */
+    /* has attachment */
     if( p_smtp->g_MIME == 1 ){
         strcat( send_buff, "MIME-Version: 1.0\r\nContent-Type: " );
         strcat( send_buff, g_MailHedType );
@@ -388,7 +409,7 @@ void WCHNET_SMTPMailHeader( void )
 #if DIALOG
     printf("Mail Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,SmtpSocket);
 }
 
 /*********************************************************************
@@ -403,27 +424,27 @@ void WCHNET_SMTPSendAttachData( void )
     u16  EndSize;
 
     memset( send_buff, '\0', sizeof(send_buff) );
-    WCHNET_SMTPAttachHeader( p_smtp->m_strFile, send_buff);
+    WCHNET_SMTPAttachHeader( p_smtp->m_strFile, send_buff, sizeof(send_buff));
 #if DIALOG
     printf("Attach Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);   /* Send attached file header */
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,SmtpSocket);   /* Send attached file header */
 /*****************************************************************************
 *Attachment content
 *****************************************************************************/
 //    GetAttachedFileBody( &FileSize, m_smtp->m_strFile, pAttachedFileBody );
     memset( send_buff, '\0', sizeof(send_buff) );
-    QuotedPrintableEncode( AttachmentData, send_buff, strlen(AttachmentData),200 );
+    QuotedPrintableEncode( AttachmentData, send_buff, strlen(AttachmentData),200, sizeof(send_buff) );
 #if DIALOG
     printf("Attach Data send_buff:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,SmtpSocket);
     memset( send_buff, '\0', sizeof(send_buff) );
     WCHNET_SMTPAttachEnd( &EndSize, send_buff );
 #if DIALOG
     printf("Attach End :\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);   /* Send attached file end */
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,SmtpSocket);   /* Send attached file end */
 }
 
 /*********************************************************************
@@ -437,14 +458,14 @@ void WCHNET_SMTPSendAttachHeader( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, g_FormatMail );
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,SmtpSocket );
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "\r\n--%s\r\nContent-Type: %s;\r\n\tcharset=\"%s\"%s\r\n",
             g_strBoundary, g_AttachHedType, g_strcharset,g_AttachHead );
 #if DIALOG
     printf("MIME Header:\n%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK,SmtpSocket);
 }
 
 /*********************************************************************
@@ -457,13 +478,13 @@ void WCHNET_SMTPSendAttachHeader( void )
 void WCHNET_SMTPEhlo( void )
 {
     memset( EncodeHostName, '\0', sizeof(EncodeHostName) );
-    QuotedPrintableEncode( (char *)p_smtp->m_strSenderName, EncodeHostName, strlen(p_smtp->m_strSenderName),76 );
+    QuotedPrintableEncode( (char *)p_smtp->m_strSenderName, EncodeHostName, strlen(p_smtp->m_strSenderName),76, sizeof(EncodeHostName) );
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "%s %s\r\n", SMTP_CLIENT_CMD[0],EncodeHostName );
 #if DIALOG
     printf("EHLO :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_HELO ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_HELO ,SmtpSocket);
 }
 
 /*********************************************************************
@@ -481,7 +502,7 @@ void WCHNET_SMTPAuth( void )
     printf("AUTH :%s\n", send_buff);
 #endif
     /* send "AUTH LOGIN" command */
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_AUTH ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_AUTH ,SmtpSocket);
 }
 
 /*********************************************************************
@@ -495,11 +516,11 @@ void WCHNET_SMTPUser( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
     Base64Encode( (char *)p_smtp->m_strUSERID, strlen(p_smtp->m_strUSERID), send_buff );
-    sprintf( send_buff, "%s\r\n", send_buff);
+    strncat( send_buff, "\r\n", sizeof(send_buff) - strlen(send_buff) - 1 );
 #if DIALOG
     printf("USER :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_USER,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_USER,SmtpSocket );
 }
 
 /*********************************************************************
@@ -513,11 +534,11 @@ void WCHNET_SMTPPass( void )
 {
     memset( send_buff, '\0', sizeof(send_buff) );
     Base64Encode( (char *)p_smtp->m_strPASSWD, strlen(p_smtp->m_strPASSWD), send_buff);
-    sprintf( send_buff, "%s\r\n", send_buff);
+    strncat( send_buff, "\r\n", sizeof(send_buff) - strlen(send_buff) - 1 );
 #if DIALOG
     printf("PASS :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_PASS,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_PASS,SmtpSocket );
 }
 
 /*********************************************************************
@@ -534,7 +555,7 @@ void WCHNET_SMTPMail( void )
 #if DIALOG
     printf("MAIL :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_MAIL,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_MAIL,SmtpSocket );
 }
 
 /*********************************************************************
@@ -551,7 +572,7 @@ void WCHNET_SMTPRcpt( void )
 #if DIALOG
     printf("RCPT :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_RCPT,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_RCPT,SmtpSocket );
 }
 
 /*********************************************************************
@@ -568,7 +589,7 @@ void WCHNET_SMTPData( void )
 #if DIALOG
     printf("DATA :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_DATA,p_smtp->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_DATA,SmtpSocket );
 }
 
 /*********************************************************************
@@ -586,18 +607,18 @@ void WCHNET_SMTPSendMail( void )
         WCHNET_SMTPSendAttachHeader(  );                                      /* Send MIME Header */
     }
     else {
-        WCHNET_SendData("\r\n", strlen("\r\n"),UNCHECK,p_smtp->Socket);
+        WCHNET_SendData("\r\n", strlen("\r\n"),UNCHECK,SmtpSocket);
     }
     memset( send_buff, '\0', sizeof(send_buff) );
 #ifdef    receive_over_reply
     WCHNET_ReplyMailBody( );
 #else     // receive_over_reply 
-     QuotedPrintableEncode( (char *)MailBodyData, send_buff, strlen(MailBodyData),76 );
+     QuotedPrintableEncode( (char *)MailBodyData, send_buff, strlen(MailBodyData),76, sizeof(send_buff) );
 #endif    // receive_over_reply 
 #if DIALOG
     printf("text data:\n%s\n",send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),UNCHECK ,SmtpSocket);
     if( 1 == p_smtp->g_MIME ) WCHNET_SMTPSendAttachData( );                   /* Send Attached file */
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "\r\n.\r\n" );
@@ -605,7 +626,7 @@ void WCHNET_SMTPSendMail( void )
     printf("OVER :%s\n", send_buff);
 #endif
     /* Send end flag of Mail */
-    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_DATA_END ,p_smtp->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff),SMTP_CHECK_DATA_END ,SmtpSocket);
 }
 
 /******************************************************************************/
@@ -622,6 +643,7 @@ void WCHNET_SMTPSendMail( void )
 void WCHNET_POP3Init( void )
 {
     p_pop3 = &m_pop3;
+    Pop3Socket = SOCKET_INVALID;                  /*no socket until WCHNET_CreateTcpPop3()*/
     memset( p_pop3, '\0', sizeof(POP) );
     strcpy( p_pop3->pPop3Server,   p_Server );
     strcpy( p_pop3->pPop3UserName, p_UserName );
@@ -642,7 +664,7 @@ void WCHNET_POP3User( void )
 #if DIALOG
     printf("USER :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_USER ,p_pop3->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_USER ,Pop3Socket);
 }
 
 /*********************************************************************
@@ -659,7 +681,7 @@ void WCHNET_POP3Pass( void )
 #if DIALOG
     printf("PASS :%s\n", send_buff);
 #endif
-    WCHNET_SendData(  send_buff, strlen(send_buff), POP_CHECK_PASS,p_pop3->Socket );
+    WCHNET_SendData(  send_buff, strlen(send_buff), POP_CHECK_PASS,Pop3Socket );
 }
 
 /*********************************************************************
@@ -676,7 +698,7 @@ void WCHNET_POP3Stat( void )
 #if DIALOG
     printf("STAT :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_STAT,p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_STAT,Pop3Socket );
 }
 
 /*********************************************************************
@@ -688,9 +710,9 @@ void WCHNET_POP3Stat( void )
  */
 void WCHNET_POP3List( void )
 {
-#if    0            /* �����ָ��ĳ���ʼ�����1 */
+#if    0            /* set to 1 to address a specific mail */
     char num;
-    num = '1';    /* ������Ҫ�޸��ʼ��� */
+    num = '1';    /* change the mail number as needed */
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "%s %c\r\n", POP3_CLIENT_CMD[4],num );
 #else
@@ -700,13 +722,13 @@ void WCHNET_POP3List( void )
 #if DIALOG
     printf("LIST :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_LIST,p_pop3->Socket);
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_LIST,Pop3Socket);
 }
 
 /*********************************************************************
  * @fn      WCHNET_POP3Retr
  *
- * @brief   deal the full text of an email
+ * @brief   Deal with the full text of an email.
  *
  * @param   num - mail number.
  *
@@ -720,7 +742,7 @@ void WCHNET_POP3Retr( u8 num )
 #if DIALOG
     printf("RTER :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_RETR,p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_RETR,Pop3Socket );
 }
 #endif
 
@@ -742,7 +764,7 @@ void WCHNET_POP3Dele( u8 num )
 #if DIALOG
     printf("DELE :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_DELE,p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_DELE,Pop3Socket );
 }
 #endif
 
@@ -761,7 +783,7 @@ void WCHNET_POP3Rset( void )
 #if DIALOG
     printf("RSET :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_RSET,p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_RSET,Pop3Socket );
 }
 #endif
 
@@ -783,7 +805,7 @@ void WCHNET_POP3Top( char num ,char m  )
 #if DIALOG
     printf("TOP :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_TOP, p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_TOP, Pop3Socket );
 }
 #endif
 
@@ -804,7 +826,7 @@ void WCHNET_POP3Uidl( char num )
 #if DIALOG
     printf("UIDL :%s\n", send_buff);
 #endif
-    WCHNET_SendData( send_buff, sizeof(send_buff), POP_CHECK_UIDL, p_pop3->Socket );
+    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_UIDL, Pop3Socket );
 }
 #endif
 
@@ -827,8 +849,11 @@ void WCHNET_Quit( u8 id )
 #endif
     memset( send_buff, '\0', sizeof(send_buff) );
     sprintf( send_buff, "%s\r\n", POP3_CLIENT_CMD[0]);
-    if(id == p_smtp->Socket)    WCHNET_SendData( send_buff, strlen(send_buff), SMTP_CHECK_QUIT, id );
-    if(id == p_pop3->Socket)    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_QUIT, id );
+    /*Announce the logout to the protocol this socket really belongs to: a
+     *socket that has not been created answers to no id (SOCKET_INVALID), and
+     *p_smtp/p_pop3 are NULL in the work modes that do not use them.*/
+    if((p_smtp != NULL) && (id == SmtpSocket))    WCHNET_SendData( send_buff, strlen(send_buff), SMTP_CHECK_QUIT, id );
+    if((p_pop3 != NULL) && (id == Pop3Socket))    WCHNET_SendData( send_buff, strlen(send_buff), POP_CHECK_QUIT, id );
 }
 
 /*********************************************************************
@@ -871,17 +896,17 @@ void WCHNET_MailCmd( u8 choiceorder )
             WCHNET_SMTPSendMail( );
             break;
         case SMTP_ERR_CHECK:
-            WCHNET_Quit( p_smtp->Socket );
+            WCHNET_Quit( SmtpSocket );
             CheckType = UNCHECK;
-            i = WCHNET_SocketClose( p_smtp->Socket,TCP_CLOSE_NORMAL );
+            i = WCHNET_SocketClose( SmtpSocket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
             break;
         case SMTP_SEND_QUIT:
-            WCHNET_Quit( p_smtp->Socket );
+            WCHNET_Quit( SmtpSocket );
             break;
         case SMTP_CLOSE_SOCKET:
             CheckType = UNCHECK;
-            i = WCHNET_SocketClose( p_smtp->Socket,TCP_CLOSE_NORMAL );
+            i = WCHNET_SocketClose( SmtpSocket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
 #ifdef    receive_over_reply
             OrderType = POP_RECEIVE_DELE;
@@ -905,17 +930,17 @@ void WCHNET_MailCmd( u8 choiceorder )
             WCHNET_POP3List(  );
             break;
         case POP_ERR_CHECK:
-            WCHNET_Quit( p_pop3->Socket );
+            WCHNET_Quit( Pop3Socket );
             CheckType = UNCHECK;
-            i = WCHNET_SocketClose( p_pop3->Socket,TCP_CLOSE_NORMAL );
+            i = WCHNET_SocketClose( Pop3Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
             break;
         case POP_RECEIVE_QUIT:
-            WCHNET_Quit( p_pop3->Socket );
+            WCHNET_Quit( Pop3Socket );
             break;
         case POP_CLOSE_SOCKET:
             CheckType = UNCHECK;
-            i = WCHNET_SocketClose( p_pop3->Socket,TCP_CLOSE_NORMAL );
+            i = WCHNET_SocketClose( Pop3Socket,TCP_CLOSE_NORMAL );
             mStopIfError(i);
 #ifdef    send_over_receive
             OrderType = SMTP_SEND_QUIT;

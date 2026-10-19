@@ -356,7 +356,7 @@ uint8_t USBHSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint32_t timeout )
 
             if( USBHSH_CheckRootHubPortEnable( ) == 0x00 )
             {
-                return ERR_USB_CONNECT; // USB device connect
+                return ERR_USB_DISCON; // USB device disconnect
             }
             else
             {

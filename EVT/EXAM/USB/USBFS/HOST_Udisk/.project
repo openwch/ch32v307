@@ -24,32 +24,32 @@
     <link>
       <name>Core</name>
       <type>2</type>
-      <locationURI>PARENT-3-PROJECT_LOC/SRC/Core</locationURI>
+      <location>PARENT-3-PROJECT_LOC/SRC/Core</location>
     </link>
     <link>
       <name>Debug</name>
       <type>2</type>
-      <locationURI>PARENT-3-PROJECT_LOC/SRC/Debug</locationURI>
+      <location>PARENT-3-PROJECT_LOC/SRC/Debug</location>
     </link>
     <link>
       <name>Ld</name>
       <type>2</type>
-      <locationURI>PARENT-3-PROJECT_LOC/SRC/Ld</locationURI>
+      <location>PARENT-3-PROJECT_LOC/SRC/Ld</location>
     </link>
     <link>
       <name>Peripheral</name>
       <type>2</type>
-      <locationURI>PARENT-3-PROJECT_LOC/SRC/Peripheral</locationURI>
+      <location>PARENT-3-PROJECT_LOC/SRC/Peripheral</location>
     </link>
     <link>
       <name>Startup</name>
       <type>2</type>
-      <locationURI>PARENT-3-PROJECT_LOC/SRC/Startup</locationURI>
+      <location>PARENT-3-PROJECT_LOC/SRC/Startup</location>
     </link>
     <link>
       <name>Udisk_Lib</name>
       <type>2</type>
-      <locationURI>PARENT-1-PROJECT_LOC/Udisk_Lib</locationURI>
+      <location>PARENT-1-PROJECT_LOC/Udisk_Lib</location>
     </link>
   </linkedResources>
   <filteredResources>

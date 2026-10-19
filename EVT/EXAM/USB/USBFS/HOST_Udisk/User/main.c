@@ -32,7 +32,7 @@
 #include "debug.h"
 #include "stdio.h"
 #include "string.h"
-#include "Udisk_Operation.h"
+#include "UDisk_Operation.h"
 
 /* Switches for code demonstration, 1:Enable 0:Disable */
 #define  DEF_TEST_FUNC_NUM                DEF_TEST_FUNC_1

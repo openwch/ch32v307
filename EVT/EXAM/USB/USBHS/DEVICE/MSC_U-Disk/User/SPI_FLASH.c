@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : SPI_FLAH.c
+ * File Name          : SPI_FLASH.c
  * Author             : WCH
  * Version            : V1.0.0
  * Date               : 2022/08/08
- * Description        : SPI FLASH芯片操作相关文件
+ * Description        : SPI FLASHFiles related to chip operation
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -11,21 +11,21 @@
 *******************************************************************************/
 
 /******************************************************************************/
-/* 头文件包含 */
+/* Header file inclusions */
 #include <SPI_FLASH.h>
 #include <SW_UDISK.h>
 #include "ch32v30x_spi.h"
 
 /******************************************************************************/
-/* 常、变量定义 */
-volatile uint8_t   Flash_Type = 0x00;                                           /* FLASH芯片类型: 0: W25XXX系列 */
-volatile uint32_t  Flash_ID = 0x00;                                             /* FLASH芯片ID号 */
-volatile uint32_t  Flash_Sector_Count = 0x00;                                   /* FLASH芯片扇区数 */
-volatile uint16_t  Flash_Sector_Size = 0x00;                                    /* FLASH芯片扇区大小 */
+/* Constants and variable definitions */
+volatile uint8_t   Flash_Type = 0x00;                                           /* FLASHChip type: 0: W25XXX series */
+volatile uint32_t  Flash_ID = 0x00;                                             /* FLASHChip ID */
+volatile uint32_t  Flash_Sector_Count = 0x00;                                   /* FLASHNumber of chip sectors */
+volatile uint16_t  Flash_Sector_Size = 0x00;                                    /* FLASHChip sector size */
 
 /*******************************************************************************
 * Function Name  : FLASH_Port_Init
-* Description    : FLASH芯片操作相关引脚和硬件初始化
+* Description    : FLASHPins and hardware initialization related to chip operation
 * Input          : None
 * Output         : None
 * Return         : None
@@ -111,8 +111,8 @@ uint8_t SPI1_ReadWriteByte(uint8_t TxData)
 
 /*******************************************************************************
 * Function Name  : SPI_FLASH_SendByte
-* Description    : SPI发送一个字节数据
-* Input          : byte: 要发送的字节
+* Description    : SPISend one byte of data
+* Input          : byte: Byte to send
 * Output         : None
 * Return         : None
 *******************************************************************************/
@@ -123,10 +123,10 @@ uint8_t SPI_FLASH_SendByte( uint8_t byte )
 
 /*******************************************************************************
 * Function Name  : SPI_FLASH_ReadByte
-* Description    : SPI接收一个字节数据
+* Description    : SPIReceive one byte of data
 * Input          : None
 * Output         : None
-* Return         : 返回接收的字节数据
+* Return         : Return the received byte
 *******************************************************************************/
 uint8_t SPI_FLASH_ReadByte( void )
 {
@@ -135,15 +135,15 @@ uint8_t SPI_FLASH_ReadByte( void )
 
 /*******************************************************************************
 * Function Name  : FLASH_ReadID
-* Description    : 读取FLASH芯片ID
+* Description    : Read the FLASH chip ID
 * Input          : None
 * Output         : None
-* Return         : 返回4个字节,最高字节为0x00,
-*                  次高字节为Manufacturer ID(0xEF),
-*                  次低字节为Memory Type ID
-*                  最低字节为Capacity ID
-*                  W25X40BL返回: 0xEF、0x30、0x13
-*                  W25X10BL返回: 0xEF、0x30、0x11
+* Return         : Returns 4 bytes; the highest byte is 0x00,
+*                  The second-highest byte is the Manufacturer ID (0xEF),
+*                  The second-lowest byte is the Memory Type ID
+*                  The lowest byte is the Capacity ID
+*                  W25X40BLReturns: 0xEF, 0x30, 0x13
+*                  W25X10BLReturns: 0xEF, 0x30, 0x11
 *******************************************************************************/
 uint32_t FLASH_ReadID( void )
 {
@@ -159,7 +159,7 @@ uint32_t FLASH_ReadID( void )
 
 /*******************************************************************************
 * Function Name  : FLASH_WriteEnable
-* Description    : FLASH芯片允许写操作
+* Description    : FLASHThe chip allows write operations
 * Input          : None
 * Output         : None
 * Return         : None
@@ -173,7 +173,7 @@ void FLASH_WriteEnable( void )
 
 /*******************************************************************************
 * Function Name  : FLASH_WriteDisable
-* Description    : FLASH芯片禁止写操作
+* Description    : FLASHThe chip forbids write operations
 * Input          : None
 * Output         : None
 * Return         : None
@@ -187,10 +187,10 @@ void FLASH_WriteDisable( void )
 
 /*******************************************************************************
 * Function Name  : FLASH_ReadStatusReg
-* Description    : FLASH芯片读取状态寄存器 
+* Description    : FLASHThe chip reads the status register 
 * Input          : None
 * Output         : None
-* Return         : 返回寄存器值
+* Return         : Return the register value
 *******************************************************************************/
 uint8_t FLASH_ReadStatusReg( void )
 {
@@ -205,7 +205,7 @@ uint8_t FLASH_ReadStatusReg( void )
 
 /*******************************************************************************
 * Function Name  : FLASH_Erase_Sector
-* Description    : FLASH扇区数据擦除
+* Description    : FLASHSector data erase
 * Input          : None 
 * Output         : None
 * Return         : None
@@ -213,6 +213,7 @@ uint8_t FLASH_ReadStatusReg( void )
 void FLASH_Erase_Sector( uint32_t address )
 {
     uint8_t  temp;
+    uint32_t retry = 0;
     FLASH_WriteEnable( );
     PIN_FLASH_CS_LOW( );
     SPI_FLASH_SendByte( CMD_FLASH_SECTOR_ERASE );
@@ -223,12 +224,12 @@ void FLASH_Erase_Sector( uint32_t address )
     do
     {
         temp = FLASH_ReadStatusReg( );    
-    }while( temp & 0x01 );
+    }while( ( temp & 0x01 ) && ( ++retry < 0x10000 ) );
 }
 
 /*******************************************************************************
 * Function Name  : FLASH_RD_Block_Start
-* Description    : FLASH块数据读取开始
+* Description    : FLASHStart of block data read
 * Input          : None 
 * Output         : None
 * Return         : None
@@ -244,7 +245,7 @@ void FLASH_RD_Block_Start( uint32_t address )
 
 /*******************************************************************************
 * Function Name  : FLASH_RD_Block
-* Description    : FLASH块数据读取
+* Description    : FLASHBlock data read
 * Input          : None 
 * Output         : None
 * Return         : None
@@ -259,7 +260,7 @@ void FLASH_RD_Block( uint8_t *pbuf, uint32_t len )
 
 /*******************************************************************************
 * Function Name  : FLASH_RD_Block_End
-* Description    : FLASH块数据读取结束
+* Description    : FLASHEnd of block data read
 * Input          : None
 * Output         : None
 * Return         : None
@@ -271,17 +272,18 @@ void FLASH_RD_Block_End( void )
 
 /*******************************************************************************
 * Function Name  : W25XXX_WR_Page
-* Description    : 写入一块数据
-*                  注：当前程序不支持跨页写数据      
-* Input          : address----准备写的首地址
-*                  len--------准备写的数据长度
-*                  *pbuf------准备写入的缓冲区地址 
+* Description    : Write one block of data
+*                  Note: the current program does not support writing data across pages      
+* Input          : address----Start address to be written
+*                  len--------Length of the data to be written
+*                  *pbuf------Address of the buffer to be written 
 * Output         : None
 * Return         : None
 *******************************************************************************/
 void W25XXX_WR_Page( uint8_t *pbuf, uint32_t address, uint32_t len )
 {
     uint8_t  temp;
+    uint32_t retry = 0;
     FLASH_WriteEnable( );
     PIN_FLASH_CS_LOW( );
     SPI_FLASH_SendByte( CMD_FLASH_BYTE_PROG );
@@ -300,15 +302,15 @@ void W25XXX_WR_Page( uint8_t *pbuf, uint32_t address, uint32_t len )
     do
     {
         temp = FLASH_ReadStatusReg( );    
-    }while( temp & 0x01 );
+    }while( ( temp & 0x01 ) && ( ++retry < 0x10000 ) );
 }
 
 /*******************************************************************************
 * Function Name  : W25XXX_WR_Block
-* Description    : 写入一块数据
-* Input          : address----准备写的首地址
-*                  len--------准备写的数据长度
-*                  *pbuf------准备写入的缓冲区地址
+* Description    : Write one block of data
+* Input          : address----Start address to be written
+*                  len--------Length of the data to be written
+*                  *pbuf------Address of the buffer to be written
 * Output         : None
 * Return         : None
 *******************************************************************************/
@@ -381,7 +383,7 @@ void W25XXX_WR_Block( uint8_t *pbuf, uint32_t address, uint32_t len )
 
 /*******************************************************************************
 * Function Name  : FLASH_IC_Check
-* Description    : FLASH芯片检测
+* Description    : FLASHChip detection
 * Input          : None
 * Output         : None
 * Return         : None
@@ -390,18 +392,18 @@ void FLASH_IC_Check( void )
 {
     uint32_t count;
 
-    /* 读取FLASH芯片ID号 */    
+    /* Read the FLASH chip ID */    
     Flash_ID = FLASH_ReadID( );
     printf("Flash_ID: %08x\n",(uint32_t)Flash_ID);
 
-    /* 根据芯片型号,判断容量大小 */
+    /* Determine the capacity from the chip model */
     Flash_Type = 0x00;                                                                
     Flash_Sector_Count = 0x00;
     Flash_Sector_Size = 0x00;
 
     switch( Flash_ID )
     {
-        /* W25XXX系列芯片 */
+        /* W25XXXseries chips */
         case W25X10_FLASH_ID:                                                   /* 0xEF3011-----1M bit */
             count = 1;
             break;
@@ -443,7 +445,7 @@ void FLASH_IC_Check( void )
             count = 256;
             break;
          default:
-             if( ( Flash_ID != 0xFFFFFFFF ) || ( Flash_ID != 0x00000000 ) )
+             if( ( Flash_ID != 0xFFFFFFFF ) && ( Flash_ID != 0x00000000 ) )
              {
                 count = 16;
              }
@@ -455,7 +457,7 @@ void FLASH_IC_Check( void )
     }
     count = ( (uint32_t)count * 1024 ) * ( (uint32_t)1024 / 8 );
 
-    /* 保存FLASH芯片扇区数目,扇区大小等信息 */
+    /* Save information such as the number of sectors and the sector size of the FLASH chip */
     if( count )
     {
         Flash_Sector_Count = count / DEF_UDISK_SECTOR_SIZE;

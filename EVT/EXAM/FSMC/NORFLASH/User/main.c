@@ -2,7 +2,7 @@
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
-* Date               : 2024/03/13
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2024 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -14,7 +14,6 @@
  *@Note
    This example is used to demonstrate the FSMC interface operating NorFlash-MT28EW128ABA1LJS-0SIT.
   PIN:
-   (Latches)
     FSMC_NADV     -    PB7
     FSMC_NOE      -    PD4  (OE)
     FSMC_NWE      -    PD5  (WE)
@@ -71,9 +70,9 @@ int main(void)
     SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
-    printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf ("SystemCoreClk:%lu\r\n", (unsigned long)SystemCoreClock);
     printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-    printf("NorFlash TEST\n");
+    printf("PSRAM TEST\r\n");
 
     FSMC_NorFlash_Init();
     NOR_ReadID(&NOR_ID);

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2024/12/16
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,7 +24,7 @@
 #define Num    7
 
 /* Global Variable */
-u16 DAC_Value[Num] = {64, 128, 256, 512, 1024, 2048, 4095};
+static const u16 DAC_Value[Num] = {64, 128, 256, 512, 1024, 2048, 4095};
 
 /*********************************************************************
  * @fn      Dac_Init
@@ -68,7 +68,6 @@ void EXTI_Event_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOB, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource9);
@@ -105,10 +104,7 @@ int main(void)
     {
         DAC->R12BDHR1 = DAC_Value[i];
         i++;
-        if(i > Num)
-        {
-            i = 0;
-        }
+        i %= Num;
         Delay_Ms(1000);
 
         printf("run\r\n");

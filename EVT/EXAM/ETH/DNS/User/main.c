@@ -16,14 +16,19 @@ an IP address and then requests domain name resolution.
 For details on the selection of engineering chips,
 please refer to the "CH32V30x Evaluation Board Manual" under the CH32V307EVT\EVT\PUB folder.
 */
-#include "string.h"
+#include <string.h>
 #include "eth_driver.h"
+
+#define DHCP_OPT_IP_OFF      0
+#define DHCP_OPT_GW_OFF      4
+#define DHCP_OPT_MASK_OFF    8
+#define DHCP_OPT_DNS1_OFF    12
+#define DHCP_OPT_DNS2_OFF    16
 
 u8 MACAddr[6];                                      //MAC address
 u8 IPAddr[4]   = {0, 0, 0, 0};                      //IP address
 u8 GWIPAddr[4] = {0, 0, 0, 0};                      //Gateway IP address
 u8 IPMask[4]   = {0, 0, 0, 0};                      //subnet mask
-u8 DESIP[4]    = {255, 255, 255, 255};              //destination IP address
 u16 DnsPort = 53;
 __attribute__((__aligned__(4))) u8  RemoteIp[4];
 
@@ -137,7 +142,12 @@ void WCHNET_HandleGlobalInt(void)
 /*********************************************************************
  * @fn      WCHNET_DNSCallBack
  *
- * @brief   DNSCallBack
+ * @brief   DNSCallBack. Called by the resolver with the resolved address,
+ *          or with ipaddr == NULL when the lookup fails.
+ *
+ * @param   name - host name that was resolved (may be NULL)
+ *          ipaddr - resolved IPv4 address, NULL on failure
+ *          callback_arg - user argument passed to WCHNET_HostNameGetIp
  *
  * @return  none
  */
@@ -147,6 +157,10 @@ void WCHNET_DNSCallBack(const char *name, u8 *ipaddr, void *callback_arg)
     {
         printf("DNS Fail\r\n");
         return;
+    }
+    if(name == NULL)
+    {
+        name = "(null)";
     }
     printf("Host Name: %s\r\n", name);
     printf("IP: %d.%d.%d.%d\r\n", ipaddr[0], ipaddr[1], ipaddr[2], ipaddr[3]);
@@ -170,25 +184,41 @@ void WCHNET_DNSCallBack(const char *name, u8 *ipaddr, void *callback_arg)
 u8 WCHNET_DHCPCallBack(u8 status, void *arg)
 {
     u8 *p;
+    u8 i;
 
     if(!status)
     {
         p = arg;
+        if (p == NULL)
+        {
+            printf("DHCP Success but arg is NULL\r\n");
+            return NoREADY;
+        }
         printf("DHCP Success\r\n");
-        memcpy(IPAddr, p, 4);
-        memcpy(GWIPAddr, &p[4], 4);
-        memcpy(IPMask, &p[8], 4);
+        memcpy(IPAddr,   &p[DHCP_OPT_IP_OFF],   4);
+        memcpy(GWIPAddr, &p[DHCP_OPT_GW_OFF],   4);
+        memcpy(IPMask,   &p[DHCP_OPT_MASK_OFF], 4);
         printf("IPAddr: %d.%d.%d.%d \r\n", (u16)IPAddr[0], (u16)IPAddr[1],
                (u16)IPAddr[2], (u16)IPAddr[3]);
         printf("GWIPAddr: %d.%d.%d.%d \r\n", (u16)GWIPAddr[0], (u16)GWIPAddr[1],
                (u16)GWIPAddr[2], (u16)GWIPAddr[3]);
         printf("IPMask: %d.%d.%d.%d \r\n", (u16)IPMask[0], (u16)IPMask[1],
                (u16)IPMask[2], (u16)IPMask[3]);
-        printf("DNS1: %d.%d.%d.%d \r\n", p[12], p[13], p[14], p[15]);            //DNS server address provided by the router
-        printf("DNS2: %d.%d.%d.%d \r\n", p[16], p[17], p[18], p[19]);
+        printf("DNS1: %d.%d.%d.%d \r\n",
+               p[DHCP_OPT_DNS1_OFF], p[DHCP_OPT_DNS1_OFF + 1],
+               p[DHCP_OPT_DNS1_OFF + 2], p[DHCP_OPT_DNS1_OFF + 3]);   //DNS server provided by the router
+        printf("DNS2: %d.%d.%d.%d \r\n",
+               p[DHCP_OPT_DNS2_OFF], p[DHCP_OPT_DNS2_OFF + 1],
+               p[DHCP_OPT_DNS2_OFF + 2], p[DHCP_OPT_DNS2_OFF + 3]);   //0.0.0.0 if only one DNS was sent
 
-        WCHNET_InitDNS(&p[12], DnsPort);                                         //Set DNS server IP address, and DNS server port is 53
-        WCHNET_HostNameGetIp("www.wch.cn", RemoteIp, WCHNET_DNSCallBack, NULL);  //Start DNS
+        WCHNET_InitDNS(&p[DHCP_OPT_DNS1_OFF], DnsPort);                          //Set DNS server IP address, and DNS server port is 53
+        i = WCHNET_HostNameGetIp("www.wch.cn", RemoteIp, WCHNET_DNSCallBack, NULL);  //Start DNS
+        /*Only WCHNET_ERR_INPROGRESS makes the library call the callback later;
+         *any other value means no resolution is pending, so print it instead of
+         *waiting for a callback that will never come.*/
+        if(i != WCHNET_ERR_INPROGRESS) {
+            printf("DNS request not started: %02X\r\n", (u16) i);
+        }
         return READY;
     }
     else
@@ -212,24 +242,29 @@ int main(void)
     SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);                                          //USART initialize
-    printf("DNS Test\r\n");	
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n", WCHNET_GetVer());
+    printf("DNS Test\r\n");
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if( WCHNET_LIB_VER != WCHNET_GetVer()){
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                         //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     WCHNET_DHCPSetHostname("WCHNET");                                   //Configure DHCP host name
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                    //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS)
+    if(i == WCHNET_ERR_SUCCESS) {
         printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
     WCHNET_DHCPStart(WCHNET_DHCPCallBack);                              //Start DHCP
 
     while(1)

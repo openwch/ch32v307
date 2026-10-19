@@ -70,16 +70,16 @@
 #define DEF_ETH_USBPACK               1536
 
 /* Ringbuffer define  */
-#define DEF_U2E_REMINE                 (2)/* usb to eth 停止传输的剩余队列个数 */
-#define DEF_U2E_RESTART                (2)/* usb to eth 重新开始传输的队列个数 */
-#define DEF_U2E_MAXBLOCKS              (ETH_TXBUFNB)/* usb to eth 最大队列深度 */
-#define DEF_U2E_PACKHEADOFFSET         (4)/* usb to eth 头部包偏移，单位uint8_t */
-#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth 尾部偏移，单位uint8_t */
-#define DEF_E2U_REMINE                 (8)/* eth to usb 停止传输的剩余队列个数 */
-#define DEF_E2U_RESTART                (2)/* eth to usb 重新开始传输的队列个数 */
-#define DEF_E2U_MAXBLOCKS              (ETH_RXBUFNB)/* eth to usb 最大队列深度 */
-#define DEF_E2U_PACKLOADOFFSET         (4)/* usb to eth 头部包偏移，单位uint8_t */
-#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth 尾部偏移，单位uint8_t */
+#define DEF_U2E_REMINE                 (2)/* usb to eth Number of queue entries remaining when the transfer stops */
+#define DEF_U2E_RESTART                (2)/* usb to eth Number of queue entries when the transfer restarts */
+#define DEF_U2E_MAXBLOCKS              (ETH_TXBUFNB)/* usb to eth Maximum queue depth */
+#define DEF_U2E_PACKHEADOFFSET         (4)/* usb to eth Header packet offset, in uint8_t units */
+#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth Tail offset, in uint8_t units */
+#define DEF_E2U_REMINE                 (8)/* eth to usb Number of queue entries remaining when the transfer stops */
+#define DEF_E2U_RESTART                (2)/* eth to usb Number of queue entries when the transfer restarts */
+#define DEF_E2U_MAXBLOCKS              (ETH_RXBUFNB)/* eth to usb Maximum queue depth */
+#define DEF_E2U_PACKLOADOFFSET         (4)/* usb to eth Header packet offset, in uint8_t units */
+#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth Tail offset, in uint8_t units */
 
 /* Ring Buffer typedef */
 typedef struct __attribute__((packed)) _RING_BUFF_COMM
@@ -104,6 +104,7 @@ extern __attribute__((__aligned__(4))) uint8_t  MACTxBuf[ ];                    
 
 extern rndis_state_t rndis_state;
 extern uint8_t encapsulated_buffer[ ];
+extern const uint32_t RNDIS_Enc_Buf_Size;
 extern uint8_t RNDIS_RX_Buffer[ ];
 extern uint8_t RNDIS_TX_Buffer[ ];
 extern uint8_t RNDIS_EP1_Buffer[ ];

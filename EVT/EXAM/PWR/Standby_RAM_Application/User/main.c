@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/07/09
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,8 +13,8 @@
 /*
  *@Note
  * In STANDBY mode, 2K bytes RAM and 30K bytes RAM data holding routines:
- * Address range of  2K bytes RAM data holding: 0x20000000 ¡ª 0x20000000+2K .
- * Address range of 30K bytes RAM data holding: 0x20000000+2K ¡ª 0x20000000+2K+30K .
+ * Address range of  2K bytes RAM data holding: 0x20000000 -- 0x20000000+2K .
+ * Address range of 30K bytes RAM data holding: 0x20000000+2K -- 0x20000000+2K+30K .
  * This example demonstrates the RAM data holding in standby mode (chip VDD power supply or VBAT power
  * supply,and RAM work at different voltages). Write data to 2K RAM and 30K RAM respectively, then
  * execute WFI to enter STANDBY mode, exit STANDBY mode by inputting a high level to the PA0 (wake-up)
@@ -80,12 +80,12 @@ void TestDataRead(void)
     printf("Read data in 2K RAM:\r\n");
     for( i=0; i<256; i++ )
     {
-        printf("DataBuf0#%d = 0x%08lx\r\n",i,DataBuf0[i]);
+        printf("DataBuf0#%d = 0x%08x\r\n",i,DataBuf0[i]);
     }
     printf("Read data in 30K RAM:\r\n");
     for( i=0; i<1024; i++ )
     {
-        printf("DataBuf1#%d = 0x%08lx\r\n",i,DataBuf1[i]);
+        printf("DataBuf1#%d = 0x%08x\r\n",i,DataBuf1[i]);
     }
 
 }
@@ -101,6 +101,8 @@ int main(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure={0};
     SystemCoreClockUpdate();
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    Delay_Init();
 
     /* Configure unused GPIO as IPD to reduce power consumption */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC |
@@ -114,8 +116,6 @@ int main(void)
     GPIO_Init(GPIOD, &GPIO_InitStructure);
     GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    Delay_Init();
     USART_Printf_Init(115200);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
     /* Delay 1.5s to avoid entering low power mode immediately after reset*/

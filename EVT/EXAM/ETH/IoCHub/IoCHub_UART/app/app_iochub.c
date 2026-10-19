@@ -42,6 +42,7 @@ volatile uint8_t sendflg = 0;
 volatile uint8_t sessionopenflag = 0;
 extern lwrb_t pRbUartToIoCHub[COMNUM];
 void Uart1Write(char *fmt, ...);
+char *AT_GetParam(char *buf, char sep);
 
 void WCHIOCHUB_TimeIsr(void)
 {
@@ -80,6 +81,7 @@ void WCHIOCHUB_regCallback(u16 state)
 
       return;
 }
+
 uint8_t session_exit_flag = 0;
 void WCHIOCHUB_sessionStateCallBackP (IoCHubHANDLE pDev, u16 states) {
 
@@ -142,7 +144,7 @@ void IoCHub_Init (void) {
         uint8_t maxConnNum = MAX_CONNECT_NUM;    
 
 	if(maxConnNum >DEFAULT_MAX_CONNECT_NUM)
-    	maxConnNum = MAX_CONNECT_NUM;
+    	maxConnNum = DEFAULT_MAX_CONNECT_NUM;
     Cfg.maxConnNum = maxConnNum;
     Cfg.frameSize = IOCHUB_FRAME_SIZE;
     Cfg.poolBufSize = IOCHUB_POOL_BUF_SIZE;
@@ -189,6 +191,27 @@ u8 CmpMemory(u8 *ptr1, u8 *ptr2, u8 cmdlen)
         }
     }
     return 1; 
+}
+
+/*
+ * Return the parameter that follows the first `sep` in `buf`, or NULL when the
+ * separator is missing or nothing follows it. The AT port is an external
+ * interface, so a malformed frame must not be able to walk off the buffer.
+ */
+char *AT_GetParam(char *buf, char sep)
+{
+    char *p = strchr(buf, sep);
+
+    if (p == NULL)
+    {
+        return NULL;
+    }
+    p++;
+    if (*p == '\0')
+    {
+        return NULL;
+    }
+    return p;
 }
 
 void Uart1Action(u8 *buf, u8 len)
@@ -279,8 +302,13 @@ void Uart1Action(u8 *buf, u8 len)
 			break;
 		case 2: //IOCAT+TRANSTYPE=0
 		{
+			char* pDev = AT_GetParam((char*)buf, '=');
+			if (pDev == NULL)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
 			Uart1Write("IOCAT+TRANSTYPE_OK\r\n");
-			char* pDev = strchr((char*)buf, '=')+1;
 			 Uart1Write("sessionHdl:%c,TransferType: %u\r\n",*pDev, WCHIOCHUB_GetTransferType(*pDev-'0'));
 		}
 			break;
@@ -295,7 +323,7 @@ void Uart1Action(u8 *buf, u8 len)
 								logindeviceSecret,
 								0x00,
 								0x01,
-								WCHIOCHUB_regCallback); /*Æô¶¯·þÎñ*/
+								WCHIOCHUB_regCallback);
 		}
 			break;
 		case 4: //IOCAT+STOP
@@ -316,9 +344,14 @@ void Uart1Action(u8 *buf, u8 len)
 			break;
 		case 6: //IOCAT+ACCESSMODE=1,a2345678
 		{
+			char* accessMode = AT_GetParam((char*)buf, '=');
+			char* YzCode = AT_GetParam((char*)buf, ',');
+			if ((accessMode == NULL) || (YzCode == NULL))
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
 			Uart1Write("IOCAT+ACCESSMODE=_OK\r\n");
-			char* accessMode = strchr((char*)buf, '=')+1;
-			char* YzCode = strchr((char*)buf, ',')+1;
 			*accessMode-= '0';
 			WCHIOCHUB_SetAccessMode(*accessMode,(uint8_t*)YzCode);
 		}
@@ -336,10 +369,22 @@ void Uart1Action(u8 *buf, u8 len)
 		case 8://IOCAT+Open=72725dd1070ed332,12345678
 		{
 			uint8_t hNodeid[8] = {0};
-			Uart1Write("IOCAT+Open=OK\r\n");
 			IoCHubHANDLE pDev;
-			char* aNodeid = strchr((char*)buf, '=')+1;
-			char* YzCode = strchr((char*)buf, ',')+1;
+			char* aNodeid = AT_GetParam((char*)buf, '=');
+			char* YzCode = AT_GetParam((char*)buf, ',');
+			if ((aNodeid == NULL) || (YzCode == NULL))
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
+			/*iochub_ascii2Hex reads 16 characters, they all have to sit in
+			 * front of the comma so that the read stays inside the buffer.*/
+			if ((YzCode - aNodeid) < 17)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
+			Uart1Write("IOCAT+Open=OK\r\n");
 			iochub_ascii2Hex((uint8_t*)aNodeid, 16, hNodeid);
 			WCHIOCHUB_OpenSession(&pDev, hNodeid, (uint8_t*)YzCode);
 			Uart1Write("sessionHdl = %u\r\n",pDev);
@@ -347,8 +392,13 @@ void Uart1Action(u8 *buf, u8 len)
 			break;
 		case 9://IOCAT+Close=
 		{
+			char* pDev = AT_GetParam((char*)buf, '=');
+			if (pDev == NULL)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
 			Uart1Write("IOCAT+Close=OK\r\n");
-			char* pDev = strchr((char*)buf, '=')+1;
 			*pDev -= '0';
 			Uart1Write("pDev:%d\r\n",*pDev );
 			WCHIOCHUB_CloseSession(*pDev);
@@ -356,10 +406,16 @@ void Uart1Action(u8 *buf, u8 len)
 		break;
 		case 10://IOCAT+DATA=
 		{
+			char* pDev = AT_GetParam((char*)buf, '=');
+			char* sendData = AT_GetParam((char*)buf, ',');
+			uint16_t len;
+			if ((pDev == NULL) || (sendData == NULL))
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
+			len = strlen(sendData);
 			Uart1Write("IOCAT+DATA=_OK\r\n");
-			char* pDev = strchr((char*)buf, '=')+1;
-			char* sendData = strchr((char*)buf, ',')+1;
-			uint16_t len = strlen(sendData);
 			*pDev -= '0';
 			WCHIOCHUB_DataSend(*pDev,(uint8_t*)sendData, &len);
 		}
@@ -373,17 +429,27 @@ void Uart1Action(u8 *buf, u8 len)
 #if LAN_SCAN_FUNC_ENABLE
 		case 12://IOCAT+SETLANSCAN=1;
 		{
+			char* pValue = AT_GetParam((char*)buf, '=');
+			if (pValue == NULL)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
 			Uart1Write("IOCAT+SETLANSCAN=_OK\r\n");
-			char* pValue = strchr((char*)buf, '=')+1;
 			*pValue -= '0';
 			WCHIOCHUB_SetLanScan(WCHIOCHUB_lanScanCallBackP,lanDeviceInf,lanDeviceListMaxNum,*pValue);
 		}
 		break;
 		case 13://IOCAT+LANSCAN=10;
 		{
-			Uart1Write("IOCAT+LANSCAN=_OK\r\n");
 			char* scantime = strtok((char*)buf, "=");
 			scantime = strtok(NULL, "=");
+			if (scantime == NULL)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
+			Uart1Write("IOCAT+LANSCAN=_OK\r\n");
 			*scantime = (uint8_t)atoi(scantime);
 			WCHIOCHUB_LanScan((uint8_t)*scantime);
 		}
@@ -391,8 +457,13 @@ void Uart1Action(u8 *buf, u8 len)
 #endif
 		case 14://IOCAT+SENDT=;
 		{
+			char* pValue = AT_GetParam((char*)buf, '=');
+			if (pValue == NULL)
+			{
+				Uart1Write("IOCAT+PARAM_ERR\r\n");
+				break;
+			}
 			Uart1Write("IOCAT+SENDT=_OK\r\n");
-			char* pValue = strchr((char*)buf, '=')+1;
 			*pValue -= '0';
 			sendflg = *pValue;
 		}
@@ -417,9 +488,14 @@ void Uart1Write(char *fmt, ...)
     u16 i;
     va_list ap;
     va_start(ap, fmt);
-    vsprintf((char *)USART_TX_BUF, fmt, ap);
+    /*vsnprintf instead of vsprintf: an over long log line must be truncated,
+     *never allowed to run past USART_TX_BUF.*/
+    i = (u16)vsnprintf((char *)USART_TX_BUF, sizeof(USART_TX_BUF), fmt, ap);
     va_end(ap);
-    i = strlen((const char *)USART_TX_BUF); 
+    if (i > (sizeof(USART_TX_BUF) - 1))
+    {
+        i = sizeof(USART_TX_BUF) - 1;
+    }
 	
 
     for (u16 j = 0; j < i; j++)                 
@@ -452,15 +528,23 @@ u8 Uart1Read(u8 *buf, u8 len)
 
 void AT_Process(void)
 {
-	u8 buf[40] = {0};
+	u8 buf[41] = {0};                       /*one byte is kept for the terminator*/
 	u8 len = 0;
 
+	/*The RX interrupt is masked while the frame is taken over: USART1_IRQHandler
+	 * updates USART_RX_STA/USART_RX_BUF and must not clear them mid-frame.*/
+	USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 	if ((USART_RX_STA & 0x8000))
 	{
-		len = Uart1Read(buf, sizeof(buf));
-		Uart1Action(buf, len);
+		len = Uart1Read(buf, sizeof(buf) - 1);
 		ClearUSART_RX_BUF( );
-		USART_RX_STA = 0;  
+		USART_RX_STA = 0;
+	}
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+	if (len)
+	{
+		Uart1Action(buf, len);
 	}
 }
 

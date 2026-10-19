@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : ch32f20x_usbfs_host.c
+* File Name          : ch32v30x_usbfs_host.c
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/09/01

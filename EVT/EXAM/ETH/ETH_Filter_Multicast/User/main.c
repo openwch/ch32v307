@@ -31,7 +31,8 @@ u16 srcport = 1000;                                         //source port
 
 u8 SocketId;
 u8 ConFlag;
-extern uint8_t SendFlag;
+u32 SendErrCnt;                                             //multicast sending failure counter
+extern volatile uint8_t SendFlag;
 u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][UDP_RECE_BUF_LEN];  //socket receive buffer
 u8 MyBuf[UDP_RECE_BUF_LEN];
 
@@ -87,7 +88,8 @@ void TIM2_Init(void)
 /*********************************************************************
  * @fn      WCHNET_CreateUdpSocket
  *
- * @brief   Create UDP Socket
+ * @brief   Create one UDP socket. srcport is incremented on every call,
+ *          so consecutive sockets are bound to consecutive source ports.
  *
  * @return  none
  */
@@ -103,9 +105,12 @@ void WCHNET_CreateUdpSocket(void)
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
     TmpSocketInf.RecvBufLen = UDP_RECE_BUF_LEN;
     i = WCHNET_SocketCreat(&SocketId, &TmpSocketInf);
+    mStopIfError(i);
+    if (i != WCHNET_ERR_SUCCESS) {
+        return;
+    }
     printf("SocketId %d\r\n", SocketId);
     WCHNET_ModifyRecvBuf(SocketId, (u32) SocketRecvBuf[SocketId], UDP_RECE_BUF_LEN);
-    mStopIfError(i);
 }
 
 /*********************************************************************
@@ -227,6 +232,27 @@ void WCHNET_HandleGlobalInt(void)
 }
 
 /*********************************************************************
+ * @fn      PrintFilterRegIndex
+ *
+ * @brief   Report the result of adding an entry into the MAC address
+ *          filter registers.
+ *
+ * @param   RegIndex - the value returned by ETH_PerfectFilter or
+ *                     ETH_SrcAddrPerfectFilter, MAC_FILTER_REG_NUM
+ *                     means that no free register is available, in
+ *                     that case the entry is NOT added.
+ *
+ * @return  none
+ */
+void PrintFilterRegIndex(uint8_t RegIndex)
+{
+    if (RegIndex >= MAC_FILTER_REG_NUM)
+        printf("no free MAC filter register\r\n");
+    else
+        printf("MAC address register index: %d\r\n", RegIndex);
+}
+
+/*********************************************************************
  * @fn      WCHNET_FilterCfg
  *
  * @brief   Configure filtering
@@ -237,8 +263,6 @@ void WCHNET_HandleGlobalInt(void)
  */
 void WCHNET_FilterCfg( void )
 {
-    uint8_t RegIndex;
-
     /* clear filter configuration in eth_driver.c */
     ETH->MACA0LR = 0xffffffff;
 
@@ -246,8 +270,7 @@ void WCHNET_FilterCfg( void )
     /* The following are the configuration
      * options for destination MAC address filtering */
 #if UNICAST_PERFECT_FILTER          /* Unicast Perfect Filtering */
-    RegIndex = ETH_PerfectFilter(MACAddr);
-    printf("MAC address register index: %d\r\n", RegIndex);
+    PrintFilterRegIndex(ETH_PerfectFilter(MACAddr));
 #endif
 
 #if UNICAST_HASH_FILTER             /* Unicast hash list filtering */
@@ -255,15 +278,13 @@ void WCHNET_FilterCfg( void )
 #endif
 
 #if UNICAST_HASH_OR_PERFECT_FILTER  /* Unicast hash list or perfect filter*/
-    RegIndex = ETH_PerfectFilter(UnicastMac0);
-    printf("MAC address register index: %d\r\n", RegIndex);
+    PrintFilterRegIndex(ETH_PerfectFilter(UnicastMac0));
     ETH_HashFilter(UnicastMac1);
     ETH_HashOrPerfectFilter(UNICAST_HashOrPerfectFilter);
 #endif
 
 #if MULTICAST_PERFECT_FILTER        /* multicast Perfect Filtering */
-    RegIndex = ETH_PerfectFilter(MulticastMac0);
-    printf("MAC address register index: %d\r\n", RegIndex);
+    PrintFilterRegIndex(ETH_PerfectFilter(MulticastMac0));
 #endif
 
 #if MULTICAST_HASH_FILTER           /* multicast hash list filtering */
@@ -271,8 +292,7 @@ void WCHNET_FilterCfg( void )
 #endif
 
 #if MULTICAST_HASH_OR_PERFECT_FILTER    /* multicast hash list or perfect filter*/
-    RegIndex = ETH_PerfectFilter(MulticastMac0);
-    printf("MAC address register index: %d\r\n", RegIndex);
+    PrintFilterRegIndex(ETH_PerfectFilter(MulticastMac0));
     ETH_HashFilter(MulticastMac1);
     ETH_HashOrPerfectFilter(MULTICAST_HashOrPerfectFilter);
 #endif
@@ -281,10 +301,8 @@ void WCHNET_FilterCfg( void )
 #if SRC_ADDR_PERFECT_FILTER         /* source MAC address filtering */
     /* Source address filtering takes
      * effect on the basis of destination address filtering*/
-    RegIndex = ETH_PerfectFilter(UnicastMac0);
-    printf("MAC address register index: %d\r\n", RegIndex);
-    RegIndex = ETH_SrcAddrPerfectFilter(UnicastMac1);
-    printf("MAC address register index: %d\r\n", RegIndex);
+    PrintFilterRegIndex(ETH_PerfectFilter(UnicastMac0));
+    PrintFilterRegIndex(ETH_SrcAddrPerfectFilter(UnicastMac1));
 #endif
 
 #if BROADCAST_FILTER                /* broadcast MAC address filtering*/
@@ -309,8 +327,13 @@ void WCHNET_FilterCfg( void )
 void MulticastSend(void)
 {
     uint32_t DataLen = sizeof(MulticastData);
+    u8 i;
 
-    WCHNET_SocketUdpSendTo(SocketId, MulticastData, &DataLen, MulticastIPAddr, 1000);
+    i = WCHNET_SocketUdpSendTo(SocketId, MulticastData, &DataLen, MulticastIPAddr, 1000);
+    if (i != WCHNET_ERR_SUCCESS) {
+        SendErrCnt++;
+        printf("Multicast send error: %02X, failed count: %d\r\n", (u16) i, SendErrCnt);
+    }
 }
 
 /*********************************************************************
@@ -328,23 +351,28 @@ int main(void)
     Delay_Init();
     USART_Printf_Init(115200);                                 //USART initialize
     printf("Filter and Multicast Test\r\n");
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n", WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if (WCHNET_LIB_VER != WCHNET_GetVer()) {
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                                //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ",MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);        //Ethernet library initialize
     mStopIfError(i);
-    WCHNET_FilterCfg( );                                       //Configure filtering
-    if (i == WCHNET_ERR_SUCCESS)
+    if (i == WCHNET_ERR_SUCCESS) {
         printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
+    WCHNET_FilterCfg( );                                       //Configure filtering
     for (i = 0; i < WCHNET_MAX_SOCKET_NUM; i++)
         WCHNET_CreateUdpSocket();                              //Create UDP Socket
 

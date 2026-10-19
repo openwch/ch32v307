@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : ch32f20x_usbfs_host.c
+* File Name          : ch32v30x_usbfs_host.c
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2022/09/01
@@ -318,7 +318,7 @@ uint8_t USBFSH_Transact( uint8_t endp_pid, uint8_t endp_tog, uint16_t timeout )
                     }
                     break;
                 case USB_PID_IN:
-                    if( ( r == USB_PID_DATA0 ) && ( r == USB_PID_DATA1 ) )
+                    if( ( r == USB_PID_DATA0 ) || ( r == USB_PID_DATA1 ) )
                     {
                         ;
                     }

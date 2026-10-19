@@ -239,7 +239,6 @@ void WCHNET_CheckLinkValid(void)
             }
         }
         else {
-            LinkValidFlag = 1;
             LinkProcessingTime = 0;
         }
     }
@@ -340,6 +339,7 @@ void WCHNET_MainTask(void)
  */
 void ETH_SetClock(void)
 {
+    uint16_t timeout = 1000;
     /* Only support HSE_VALUE: 8MHz.
      * If you select other HSE value,you should
      * change the configuration below*/
@@ -347,7 +347,11 @@ void ETH_SetClock(void)
     RCC_PREDIV2Config(RCC_PREDIV2_Div1); // HSE = 8M
     RCC_PLL3Config(RCC_PLL3Mul_12_5); // 8M*12.5 = 100MHz
     RCC_PLL3Cmd(ENABLE);
-    while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));
+    do{
+        Delay_Us(10);
+        if( !--timeout )  break;
+    }while(RESET == RCC_GetFlagStatus(RCC_FLAG_PLL3RDY));  
+    if (timeout == 0) printf(" Failed to set PLL3 clock\r\n");
     Delay_Us(300);//Wait for the PHY clock to stabilize
 }
 

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/07/07
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -92,8 +92,10 @@
 
  int CAN2FilterStartBank = CANSOFTFILTER_MAX_GROUP_NUM;
  
- uint8_t interrupt_rx_flag = 0,interrupt_rx_flag2 = 0;
- volatile u8 canexbuf_interrupt[8],can2exbuf_interrupt[8];
+ volatile uint8_t interrupt_rx_flag = 0;
+ volatile uint8_t interrupt_rx_flag2 = 0;
+ volatile u8 canexbuf_interrupt[8];
+ volatile u8 can2exbuf_interrupt[8];
  uint8_t USESoftFilterFlag = 0;
  
  void CAN_SoftFilterInit(CAN_FilterInitTypeDef* CAN_FilterInitStruct);
@@ -102,6 +104,10 @@
  void CAN_ReceiveViaSoftFilter(CAN_TypeDef* CANx, uint8_t FIFONumber, CanRxMsg* RxMessage);
  u8 CAN_Send_Msg(u8 *msg, u8 len);
  u8 CAN_Receive_Msg(u8 *buf);
+#if defined  (CH32V30x_D8C)
+ u8 CAN2_Send_Msg(u8 *msg, u8 len);
+ u8 CAN2_Receive_Msg(u8 *buf);
+#endif
  
  void USB_LP_CAN1_RX0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  void USB_LP_CAN1_RX0_IRQHandler()
@@ -111,7 +117,11 @@
      if (CAN_GetITStatus(CAN1,CAN_IT_FMP0))
      {
          px = CAN_Receive_Msg(pbuf);
-         for ( i = 0; i < px; i++) 
+         if(px > 8)
+         {
+             px = 8;
+         }
+         for ( i = 0; i < px; i++)
          {
              canexbuf_interrupt[i] = pbuf[i];
          }
@@ -130,8 +140,12 @@
      uint8_t px,pbuf[8];
      if (CAN_GetITStatus(CAN2,CAN_IT_FMP0))
      {
-         px = CAN_Receive_Msg(pbuf);
-         for ( i = 0; i < px; i++) 
+         px = CAN2_Receive_Msg(pbuf);
+         if(px > 8)
+         {
+             px = 8;
+         }
+         for ( i = 0; i < px; i++)
          {
              can2exbuf_interrupt[i] = pbuf[i];
          }
@@ -156,7 +170,7 @@
   */
  void CAN_SoftFilterInit(CAN_FilterInitTypeDef* CAN_FilterInitStruct)
  {
-     if(CAN_FilterInitStruct->CAN_FilterNumber > CANSOFTFILTER_MAX_GROUP_NUM){
+     if(CAN_FilterInitStruct->CAN_FilterNumber >= CANSOFTFILTER_MAX_GROUP_NUM){
          return;
      }
      if(CAN_FilterInitStruct->CAN_FilterActivation)
@@ -333,7 +347,15 @@
      CAN_FilterInitSturcture.CAN_FilterMaskIdHigh =0; 
      CAN_FilterInitSturcture.CAN_FilterMaskIdLow = 0x0006;
      CAN_FilterInitSturcture.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0;
-     CAN_FilterInitSturcture.CAN_FilterActivation = ENABLE;		
+     CAN_FilterInitSturcture.CAN_FilterActivation = ENABLE;
+#ifdef USE_INTERRUPT
+     CAN_ITConfig( CAN1, CAN_IT_FMP0, ENABLE );
+     NVIC_EnableIRQ( USB_LP_CAN1_RX0_IRQn );
+#if defined  (CH32V30x_D8C)
+     CAN_ITConfig( CAN2, CAN_IT_FMP0, ENABLE );
+     NVIC_EnableIRQ( CAN2_RX0_IRQn );
+#endif
+#endif
  #ifdef USE_SOFT_FILTER
      CAN_SoftFilterInit( &CAN_FilterInitSturcture );
  #else
@@ -426,24 +448,40 @@
  u8 CAN_Receive_Msg( u8 *buf )
  {
      u8 i;
-     
+
      CanRxMsg CanRxStructure;
-     
-     if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)		
+
+     if( CAN_MessagePending( CAN1, CAN_FIFO0 ) == 0)
      {
          return 0;
      }
+     /* Initialize to avoid reading random values when the soft filter
+      * does not match (returns without filling the structure). */
+     CanRxStructure.DLC = 0;
+     CanRxStructure.StdId = 0;
+     CanRxStructure.ExtId = 0;
+     CanRxStructure.IDE = 0;
+     CanRxStructure.RTR = 0;
+     CanRxStructure.FMI = 0;
+     for( i=0; i<8; i++ )
+     {
+         CanRxStructure.Data[i] = 0;
+     }
  #ifdef USE_SOFT_FILTER
-     CAN_ReceiveViaSoftFilter( CAN1, CAN_FIFO0, &CanRxStructure );	
+     CAN_ReceiveViaSoftFilter( CAN1, CAN_FIFO0, &CanRxStructure );
  #else
-     CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );	
+     CAN_Receive( CAN1, CAN_FIFO0, &CanRxStructure );
  #endif
+     if( CanRxStructure.DLC > 8 )
+     {
+         return 0;
+     }
      for( i=0; i<8; i++ )
      {
          buf[i] = CanRxStructure.Data[i];
      }
-     
-     return CanRxStructure.DLC;	
+
+     return CanRxStructure.DLC;
  }
  
  #if defined  (CH32V30x_D8C)
@@ -507,25 +545,43 @@
  u8 CAN2_Receive_Msg( u8 *buf )
  {
      u8 i;
- 
+
      CanRxMsg CanRxStructure;
- 
+
      if( CAN_MessagePending( CAN2, CAN_FIFO0 ) == 0)
      {
          return 0;
      }
- 
+
+     /* Initialize to avoid reading random values when the soft filter
+      * does not match (returns without filling the structure). */
+     CanRxStructure.DLC = 0;
+     CanRxStructure.StdId = 0;
+     CanRxStructure.ExtId = 0;
+     CanRxStructure.IDE = 0;
+     CanRxStructure.RTR = 0;
+     CanRxStructure.FMI = 0;
+     for( i=0; i<8; i++ )
+     {
+         CanRxStructure.Data[i] = 0;
+     }
+
 #ifdef USE_SOFT_FILTER
-     CAN_ReceiveViaSoftFilter( CAN2, CAN_FIFO0, &CanRxStructure );	
+     CAN_ReceiveViaSoftFilter( CAN2, CAN_FIFO0, &CanRxStructure );
  #else
-     CAN_Receive( CAN2, CAN_FIFO0, &CanRxStructure );	
+     CAN_Receive( CAN2, CAN_FIFO0, &CanRxStructure );
  #endif
- 
+
+     if( CanRxStructure.DLC > 8 )
+     {
+         return 0;
+     }
+
      for( i=0; i<8; i++ )
      {
          buf[i] = CanRxStructure.Data[i];
      }
- 
+
      return CanRxStructure.DLC;
  }
  #endif

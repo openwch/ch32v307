@@ -237,7 +237,6 @@ void WCHNET_CheckLinkValid(void)
             }
         }
         else {
-            LinkValidFlag = 1;
             LinkProcessingTime = 0;
         }
     }

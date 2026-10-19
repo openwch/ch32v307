@@ -13,7 +13,7 @@
 #define __NET_FILTER_H__
 
 /*FILTER FUNC:
- * 1¡¢DES_ADDR_FILTER£º
+ * 1. DES_ADDR_FILTER:
  *  MULTICAST_PERFECT_FILTER
  *  MULTICAST_HASH_FILTER
  *  MULTICAST_HASH_OR_PERFECT_FILTER
@@ -22,9 +22,9 @@
  *  UNICAST_HASH_FILTER
  *  UNICAST_HASH_OR_PERFECT_FILTER
  *
- *  2¡¢SRC_ADDR_PERFECT_FILTER
+ *  2. SRC_ADDR_PERFECT_FILTER
  *
- *  3¡¢BROADCAST_FILTER
+ *  3. BROADCAST_FILTER
  * */
 
 /* NOTE:
@@ -54,6 +54,12 @@
 
 #define UNICAST_HashOrPerfectFilter                 1
 #define MULTICAST_HashOrPerfectFilter               2
+
+/* Number of the MAC address filter registers, MACA0 ~ MACA3.
+ * ETH_PerfectFilter and ETH_SrcAddrPerfectFilter return this value when no
+ * free register is available. Note that MACA0 does not support source address
+ * filtering, so ETH_SrcAddrPerfectFilter only uses MACA1 ~ MACA3. */
+#define MAC_FILTER_REG_NUM                          4
 
 #define CHECK_MAC_ISMULTICAST(addr)   ((*addr == 0x01) && \
                                         (*(addr + 1) == 0x00) && \

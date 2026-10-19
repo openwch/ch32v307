@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2026/05/22
+* Version            : V1.0.2
+* Date               : 2026/10/15
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -61,7 +61,7 @@ volatile TestStatus MemoryProgramStatus = PASSED;
 volatile TestStatus MemoryEraseStatus = PASSED;
 
 #define Fadr    (0x08020000)
-#define Fsize   ((((256*4))>>2))
+#define Fsize   (256)
 u32 buf[Fsize];
 
 /*********************************************************************

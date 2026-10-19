@@ -21,8 +21,8 @@ volatile UART_CTL Uart;
 
 __attribute__ ((aligned(4))) uint8_t  UART2_Tx_Buf[ DEF_UARTx_TX_BUF_LEN ];  /* Serial port 2 transmit data buffer */
 __attribute__ ((aligned(4))) uint8_t  UART2_Rx_Buf[ DEF_UARTx_RX_BUF_LEN ];  /* Serial port 2 receive data buffer */
-volatile uint32_t UARTx_Rx_DMACurCount;                       /* Serial port 1 receive dma current counter */
-volatile uint32_t UARTx_Rx_DMALastCount;                      /* Serial port 1 receive dma last value counter  */
+volatile uint32_t UARTx_Rx_DMACurCount;                       /* Serial port 2 receive dma current counter */
+volatile uint32_t UARTx_Rx_DMALastCount;                      /* Serial port 2 receive dma last value counter  */
 
 /*********************************************************************
  * @fn      RCC_Configuration
@@ -85,7 +85,6 @@ void UART2_CfgInit( uint32_t baudrate, uint8_t stopbits, uint8_t parity )
 {
     USART_InitTypeDef USART_InitStructure = {0};
     GPIO_InitTypeDef  GPIO_InitStructure = {0};
-    uint16_t dat = dat;
 
     /* delete contains in ( ... )  */
     /* First set the serial port introduction to output high then close the TE and RE of CTLR1 register (note that USARTx->CTLR1 register setting 9 bits has a limit) */
@@ -280,7 +279,7 @@ void UART2_DMAInit( uint8_t type, uint8_t *pbuf, uint32_t len )
  * @fn      UART2_Init
  *
  * @brief   Uart2 total initialization
- *          mode     : See the useage of UART2_ParaInit( mode )
+ *          mode     : See the usage of UART2_ParaInit( mode )
  *          baudrate : Serial port 2 default baud rate
  *          stopbits : Serial port 2 default stop bits
  *          parity   : Serial port 2 default parity
@@ -324,8 +323,8 @@ void UART2_USB_Init( void )
 
     /* restart usb receive  */
     USBHSD->UEP2_RX_DMA = (uint32_t)(uint8_t *)&UART2_Tx_Buf[ 0 ];
-    USBHSD->UEP2_RX_CTRL &= ~USBFS_UEP_R_RES_MASK;
-    USBHSD->UEP2_RX_CTRL |= USBFS_UEP_R_RES_ACK;
+    USBHSD->UEP2_RX_CTRL &= ~USBHS_UEP_R_RES_MASK;
+    USBHSD->UEP2_RX_CTRL |= USBHS_UEP_R_RES_ACK;
 }
 
 /*********************************************************************
@@ -371,8 +370,8 @@ void UART2_DataTx_Deal( void )
             /* If the current serial port has suspended the downlink, restart the driver downlink */
             if( ( Uart.USB_Down_StopFlag == 0x01 ) && ( Uart.Tx_RemainNum < 2 ) )
             {
-                USBHSD->UEP2_RX_CTRL &= ~USBFS_UEP_R_RES_MASK;
-                USBHSD->UEP2_RX_CTRL |= USBFS_UEP_R_RES_ACK;
+                USBHSD->UEP2_RX_CTRL &= ~USBHS_UEP_R_RES_MASK;
+                USBHSD->UEP2_RX_CTRL |= USBHS_UEP_R_RES_ACK;
                 Uart.USB_Down_StopFlag = 0x00;
             }
 
@@ -415,7 +414,7 @@ void UART2_DataRx_Deal( void )
     uint32_t remain_len;
     uint16_t packlen;
 
-    /* Serial port 1 data DMA receive processing */
+    /* Serial port 2 data DMA receive processing */
     NVIC_DisableIRQ( USBHS_IRQn );
     NVIC_DisableIRQ( USBHS_IRQn );
     UARTx_Rx_DMACurCount = DEF_UART2_RX_DMA_CH->CNTR;
@@ -448,7 +447,7 @@ void UART2_DataRx_Deal( void )
     NVIC_EnableIRQ( USBHS_IRQn );
 
     /*****************************************************************/
-    /* Serial port 1 data processing via USB upload and reception */
+    /* Serial port 2 data processing via USB upload and reception */
     if( Uart.Rx_RemainLen )
     {
         if( Uart.USB_Up_IngFlag == 0 )

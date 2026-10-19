@@ -67,28 +67,28 @@ typedef struct __attribute__((packed)) _ECM_LINK
 #define DEF_ECM_PACK_MULTICAST          0x10
 
 /******************************************************************************/
-/* CDC-ECM模式相关命令定义 */
-#define DEF_ECM_SENDENCAPCMD            0x00                                    /* Optional：用于发起一个控制协议所支持的命令 */
-#define DEF_ECM_GET_ENCAPRESPONSE       0x01                                    /* Optional：用于请求对控制协议所支持的回应 */
-#define DEF_ECM_SET_ETHMULFILTERS       0x40                                    /* Optional：用于设置组播 */
-#define DEF_ECM_SET_ETHPOWER            0x41                                    /* Optional：设置网络电源管理模式 */
-#define DEF_ECM_GET_ETHPOWER            0x42                                    /* Optional：获取网络电源管理模式 */
-#define DEF_ECM_SET_ETHPACKETFILTER     0x43                                    /* Required: 设置主机端接收以太网包的过滤器 */
-#define DEF_ECM_GET_ETHSTATISTIC        0x44                                    /* Optional：获取网络设备的统计信息，包括发送包个数、接收包个数、接收错误包个数等 */
+/* CDC-ECMDefinitions of mode-related commands */
+#define DEF_ECM_SENDENCAPCMD            0x00                                    /* Optional:Used to issue a command supported by the control protocol */
+#define DEF_ECM_GET_ENCAPRESPONSE       0x01                                    /* Optional:Used to request the response supported by the control protocol */
+#define DEF_ECM_SET_ETHMULFILTERS       0x40                                    /* Optional:Used to configure multicast */
+#define DEF_ECM_SET_ETHPOWER            0x41                                    /* Optional:Set the network power management mode */
+#define DEF_ECM_GET_ETHPOWER            0x42                                    /* Optional:Get the network power management mode */
+#define DEF_ECM_SET_ETHPACKETFILTER     0x43                                    /* Required: Set the filter for Ethernet packets received by the host */
+#define DEF_ECM_GET_ETHSTATISTIC        0x44                                    /* Optional:Get statistics of the network device, including the number of packets sent, received and received in error */
 
 /******************************************************************************/
-/* CDC-NCM模式相关命令定义 */
-/* 0x40---0x44命令同ECM模式 */
-#define DEF_NCM_GET_NTB_PARAMETERS      0x80                                    /* Required: 获取NTB包参数结构 */
-#define DEF_NCM_GET_NET_ADDRESS         0x81                                    /* Optional：获取MAC网络地址 */
-#define DEF_NCM_SET_NET_ADDRESS         0x82                                    /* Optional：设置MAC网络地址 */
-#define DEF_NCM_GET_NTB_FORMAT          0x83                                    /* Optional：获取NTB包格式 */
-#define DEF_NCM_SET_NTB_FORMAT          0x84                                    /* Optional：设置NTB包格式*/
-#define DEF_NCM_GET_NTB_INPUT_SIZE      0x85                                    /* Required: 获取NTB包输入大小 */
-#define DEF_NCM_SET_NTB_INPUT_SIZE      0x86                                    /* Required: 设置NTB包输入大小 */
-#define DEF_NCM_GET_MAX_DATAGRAM_SIZE   0x87                                    /* Optional：获取现有最大数据包大小 */
-#define DEF_NCM_SET_MAX_DATAGRAM_SIZE   0x88                                    /* Optional：设置现有最大数据包大小 */
-#define DEF_NCM_GET_CRC_MODE            0x89                                    /* Optional：获取现有CRC模式 */
+/* CDC-NCMDefinitions of mode-related commands */
+/* 0x40---0x44the commands are the same as in ECM mode */
+#define DEF_NCM_GET_NTB_PARAMETERS      0x80                                    /* Required: Get the NTB packet parameter structure */
+#define DEF_NCM_GET_NET_ADDRESS         0x81                                    /* Optional:Get the MAC network address */
+#define DEF_NCM_SET_NET_ADDRESS         0x82                                    /* Optional:Set the MAC network address */
+#define DEF_NCM_GET_NTB_FORMAT          0x83                                    /* Optional:Get the NTB packet format */
+#define DEF_NCM_SET_NTB_FORMAT          0x84                                    /* Optional:Set the NTB packet format */
+#define DEF_NCM_GET_NTB_INPUT_SIZE      0x85                                    /* Required: Get the NTB packet input size */
+#define DEF_NCM_SET_NTB_INPUT_SIZE      0x86                                    /* Required: Set the NTB packet input size */
+#define DEF_NCM_GET_MAX_DATAGRAM_SIZE   0x87                                    /* Optional:Get the current maximum data packet size */
+#define DEF_NCM_SET_MAX_DATAGRAM_SIZE   0x88                                    /* Optional:Set the current maximum data packet size */
+#define DEF_NCM_GET_CRC_MODE            0x89                                    /* Optional:Get the current CRC mode */
 #define DEF_NCM_SET_CRC_MODE            0x8A
 
 /******************************************************************************/
@@ -115,16 +115,16 @@ typedef struct __attribute__((packed)) _ECM_LINK
 #define DEF_ETH_USBPACK               1536
 
 /* Ringbuffer define  */
-#define DEF_U2E_REMINE                 (2)/* usb to eth 停止传输的剩余队列个数 */
-#define DEF_U2E_RESTART                (2)/* usb to eth 重新开始传输的队列个数 */
-#define DEF_U2E_MAXBLOCKS              (ETH_TXBUFNB)/* usb to eth 最大队列深度 */
-#define DEF_U2E_PACKHEADOFFSET         (4)/* usb to eth 头部包偏移，单位uint8_t */
-#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth 尾部偏移，单位uint8_t */
-#define DEF_E2U_REMINE                 (8)/* eth to usb 停止传输的剩余队列个数 */
-#define DEF_E2U_RESTART                (2)/* eth to usb 重新开始传输的队列个数 */
-#define DEF_E2U_MAXBLOCKS              (ETH_RXBUFNB)/* eth to usb 最大队列深度 */
-#define DEF_E2U_PACKLOADOFFSET         (4)/* usb to eth 头部包偏移，单位uint8_t */
-#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth 尾部偏移，单位uint8_t */
+#define DEF_U2E_REMINE                 (2)/* usb to eth Number of queue entries remaining when the transfer stops */
+#define DEF_U2E_RESTART                (2)/* usb to eth Number of queue entries when the transfer restarts */
+#define DEF_U2E_MAXBLOCKS              (ETH_TXBUFNB)/* usb to eth Maximum queue depth */
+#define DEF_U2E_PACKHEADOFFSET         (4)/* usb to eth Header packet offset, in uint8_t units */
+#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth Tail offset, in uint8_t units */
+#define DEF_E2U_REMINE                 (8)/* eth to usb Number of queue entries remaining when the transfer stops */
+#define DEF_E2U_RESTART                (2)/* eth to usb Number of queue entries when the transfer restarts */
+#define DEF_E2U_MAXBLOCKS              (ETH_RXBUFNB)/* eth to usb Maximum queue depth */
+#define DEF_E2U_PACKLOADOFFSET         (4)/* usb to eth Header packet offset, in uint8_t units */
+#define DEF_U2E_PACKTAILOFFSET         (1532)/* usb to eth Tail offset, in uint8_t units */
 
 /* Ring Buffer typedef */
 typedef struct __attribute__((packed)) _RING_BUFF_COMM

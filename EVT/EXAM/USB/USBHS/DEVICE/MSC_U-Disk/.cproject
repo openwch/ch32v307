@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074" moduleId="org.eclipse.cdt.core.settings" name="obj">
+		<cconfiguration id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741" moduleId="org.eclipse.cdt.core.settings" name="obj">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -14,9 +14,10 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074" name="obj" parent="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release">
-					<folderInfo id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074." name="/" resourcePath="">
-						<toolChain id="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.release.231146001" name="RISC-V Cross GCC" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.release">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741" name="obj" parent="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release">
+					<folderInfo id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741." name="/" resourcePath="">
+						<toolChain id="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.release.2606500741" name="RISC-V Cross GCC" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.release">
+							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.rvGcc.1171217701" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.rvGcc" value="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.rvGcc.15" valueType="enumerated"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash.1311852988" name="Create flash image" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createlisting.1983282875" name="Create extended listing" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createlisting" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.printsize.1000761142" name="Print size" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -32,7 +33,7 @@
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.isa.multiply.1509705449" name="Multiply extension (RVM)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.isa.multiply" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.isa.compressed.1038505275" name="Compressed extension (RVC)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.target.isa.compressed" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.toolchain.name.1218760634" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.toolchain.name" useByScannerDiscovery="false" value="GNU MCU RISC-V GCC" valueType="string"/>
-							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix.103341323" name="Prefix" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix" useByScannerDiscovery="false" value="riscv-none-embed-" valueType="string"/>
+							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix.103341323" name="Prefix" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix" useByScannerDiscovery="false" value="riscv32-wch-elf-" valueType="string"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.c.487601824" name="C compiler" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.c" useByScannerDiscovery="false" value="gcc" valueType="string"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.cpp.1062130429" name="C++ compiler" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.cpp" useByScannerDiscovery="false" value="g++" valueType="string"/>
 							<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.ar.1194282993" name="Archiver" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.ar" useByScannerDiscovery="false" value="ar" valueType="string"/>
@@ -96,7 +97,9 @@
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.cpp.linker.nostart.642896175" name="Do not use standard start files (-nostartfiles)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.cpp.linker.nostart" value="true" valueType="boolean"/>
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.cpp.linker.usenewlibnano.1540675679" name="Use newlib-nano (--specs=nano.specs)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.cpp.linker.usenewlibnano" value="true" valueType="boolean"/>
 							</tool>
-							<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.archiver.1292785366" name="GNU RISC-V Cross Archiver" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.archiver"/>
+							<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.archiver.1292785366" name="GNU RISC-V Cross Archiver" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.archiver">
+                <outputType id="cdt.managedbuild.tool.gnu.archiver.output.1527226663" superClass="cdt.managedbuild.tool.gnu.archiver.output" outputPrefix="lib"/>
+            </tool>
 							<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.createflash.1801165667" name="GNU RISC-V Cross Create Flash Image" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.createflash"/>
 							<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.createlisting.1356766765" name="GNU RISC-V Cross Create Listing" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.createlisting">
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.createlisting.source.2052761852" name="Display source (--source|-S)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.createlisting.source" useByScannerDiscovery="false" value="false" valueType="boolean"/>
@@ -133,7 +136,7 @@
 		<scannerConfigBuildInfo instanceId="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug.767917625;ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug.767917625.;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1375371130;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.input.1473381709">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074;ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074.;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.input.2036806839">
+		<scannerConfigBuildInfo instanceId="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741;ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.2606500741.;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187;ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.input.2036806839">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

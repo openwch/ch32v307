@@ -77,5 +77,29 @@
         <arguments>1.0-name-matches-false-false-fifo.h</arguments>
       </matcher>
     </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.7z</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.zip</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.tar</arguments>
+      </matcher>
+    </filter>
   </filteredResources>
 </projectDescription>

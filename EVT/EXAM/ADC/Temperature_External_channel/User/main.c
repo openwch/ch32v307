@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/06/06
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -19,7 +19,7 @@
 
 #include "debug.h"
 
-s16 Calibrattion_Val = 0;
+vs16 Calibrattion_Val = 0;
 
 /*********************************************************************
  * @fn      ADC_Function_Init
@@ -146,9 +146,9 @@ int main(void)
         ADC_TempSensorVrefintCmd(DISABLE);
 
         adc_val = Get_ConversionVal(Get_ADC_Val(ADC_Channel_3));
-        Delay_Us(80);
+		Delay_Ms(2);
         printf("ADC_val  %04d\r\n",adc_val);
-        Delay_Ms(2);
+
         ADC_TempSensorVrefintCmd(ENABLE);
         Delay_Ms(500);
     }

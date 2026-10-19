@@ -697,7 +697,7 @@ void USBHS_IRQHandler( void )
                     }
                     else if ( ( USBHS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )
                     {
-                        /* Set End-point Feature */
+                        /* Clear End-point Feature */
                         if( (uint8_t)(USBHS_SetupReqValue&0xFF) == USB_REQ_FEAT_ENDP_HALT )
                         {
                             /* Clear End-point Feature */
@@ -709,7 +709,7 @@ void USBHS_IRQHandler( void )
                                     break;
 
                                 case (DEF_UEP1 | DEF_UEP_IN):
-                                    /* Set End-point 2 IN NAK */
+                                    /* Set End-point 1 IN NAK */
                                     USBHSD->UEP1_TX_CTRL = USBHS_UEP_T_RES_NAK;
                                     break;
 
@@ -826,6 +826,10 @@ void USBHS_IRQHandler( void )
                                     errflag = 0xFF;
                                     break;
                             }
+                        }
+                        else
+                        {
+                            errflag = 0xFF;
                         }
                     }
                     break;

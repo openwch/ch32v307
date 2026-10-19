@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : lcd.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main Interrupt Service Routines.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.

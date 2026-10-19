@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/06/01
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -165,3 +165,35 @@ int main(void)
 #endif
 	}
 }
+
+
+void SPI1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+
+/*********************************************************************
+ * @fn      SPI1_IRQHandler
+ *
+ * @brief   This function handles SPI1 exception.
+ *
+ * @return  none
+ */
+void SPI1_IRQHandler(void)
+{
+#if (SPI_MODE == HOST_MODE)
+	if( SPI_I2S_GetITStatus( SPI1, SPI_I2S_IT_TXE ) != RESET )
+	{
+		SPI_I2S_SendData( SPI1, TxData[Txval++] );
+		if( Txval == 18 )
+		{
+			SPI_I2S_ITConfig( SPI1, SPI_I2S_IT_TXE , DISABLE );
+		}
+	}
+
+#elif (SPI_MODE == SLAVE_MODE)
+	if( Rxval < Size )
+	{
+		RxData[Rxval++] = SPI_I2S_ReceiveData( SPI1 );
+	}
+
+#endif
+}
+

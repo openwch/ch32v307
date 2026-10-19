@@ -7,7 +7,25 @@
 #include "MQTTPacket.h"
 #include <string.h>
 
-#define min(a, b) ((a < b) ? 1 : 0)
+/**
+  * Returns the number of bytes the "remaining length" field occupies, or -1
+  * if the field is malformed or does not fit into the supplied data.
+  * The field is at most 4 bytes long and its last byte has the top bit cleared.
+  * @param buf the buffer holding the "remaining length" field
+  * @param buflen the number of bytes available in buf
+  * @return the field length in bytes, or -1 on failure
+  */
+static int remainingLengthLen(const unsigned char* buf, int buflen)
+{
+	int i;
+
+	for (i = 0; (i < buflen) && (i < 4); i++)
+	{
+		if ((buf[i] & 0x80) == 0)
+			return i + 1;
+	}
+	return -1;
+}
 
 /**
   * Deserializes the supplied (wire) buffer into publish data
@@ -28,10 +46,14 @@ int MQTTDeserialize_publish(unsigned char* dup, int* qos, unsigned char* retaine
 	MQTTHeader header = {0};
 	unsigned char* curdata = buf;
 	unsigned char* enddata = NULL;
+	unsigned char* hardend = buf + buflen; /* first byte past the supplied data */
 	int rc = 0;
 	int mylen = 0;
+	int remlenbytes = 0;
 
 	FUNC_ENTRY;
+	if (buflen < 2) /* header byte plus at least one remaining length byte */
+		goto exit;
 	header.byte = readChar(&curdata);
 	if (header.bits.type != PUBLISH)
 		goto exit;
@@ -39,7 +61,19 @@ int MQTTDeserialize_publish(unsigned char* dup, int* qos, unsigned char* retaine
 	*qos = header.bits.qos;
 	*retained = header.bits.retain;
 
+	/* the remaining length field is read only after it has been shown to end
+	 * inside the supplied data, so that decoding it cannot run past hardend */
+	remlenbytes = remainingLengthLen(curdata, (int)(hardend - curdata));
+	if (remlenbytes < 0)
+		goto exit;
 	curdata += (rc = MQTTPacket_decodeBuf(curdata, &mylen)); /* read remaining length */
+	if ((rc != remlenbytes) || (mylen < 0))
+		goto exit;
+
+	/* mylen is chosen by the peer, so it must not be allowed to reach past the
+	 * bytes that were really received */
+	if (curdata + mylen > hardend)
+		goto exit;
 	enddata = curdata + mylen;
 
 	if (!readMQTTLenString(topicName, &curdata, enddata) ||
@@ -47,7 +81,11 @@ int MQTTDeserialize_publish(unsigned char* dup, int* qos, unsigned char* retaine
 		goto exit;
 
 	if (*qos > 0)
+	{
+		if (enddata - curdata < 2) /* enough data for the packet identifier? */
+			goto exit;
 		*packetid = readInt(&curdata);
+	}
 
 	*payloadlen = enddata - curdata;
 	*payload = curdata;

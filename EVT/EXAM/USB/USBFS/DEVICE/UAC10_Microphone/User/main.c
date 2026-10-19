@@ -19,9 +19,9 @@
     [Input Terminal ID4]  ->  [Feature Unit ID5]  ->  [Output Terminal ID6 ]
   
   The specific configuration is as follows:
-    ¡¤ Number of Channels: 2 Channels (Stereo)
-    ¡¤ Sampling Depth: 16-bit
-    ¡¤ Sampling Rate: 48000 Hz
+    Â· Number of Channels: 2 Channels (Stereo)
+    Â· Sampling Depth: 16-bit
+    Â· Sampling Rate: 48000 Hz
 
   This example can be used in conjunction with the UAC10_Headphone example, the 
   data transmitted from the host to the headset is transmitted via the microphone,

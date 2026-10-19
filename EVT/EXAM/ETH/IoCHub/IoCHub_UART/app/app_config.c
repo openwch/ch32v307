@@ -55,12 +55,14 @@ void IoCHubToComTransData (uint8_t pdev, uint8_t com) {
 }
 
 void ComToIoCHubTransData (uint8_t pdev, uint8_t com) {
-    lwrb_t *prbuf = s_uart_dev[0].rx_fifo;
+    lwrb_t *prbuf = s_uart_dev[com].rx_fifo;
     uint16_t peeklen = 0;
     uint8_t* buff=s_uart_tx_buf;
 
     peeklen = lwrb_peek (prbuf, 0, buff, UART_TX_BUF_SIZE);
     if (peeklen) {
+        /*WCHIOCHUB_DataSend writes back the length it really accepted, so only
+         *that part is skipped and nothing is dropped on a short send.*/
         WCHIOCHUB_DataSend (pdev, buff, &peeklen);
         lwrb_skip (prbuf, peeklen);
     }

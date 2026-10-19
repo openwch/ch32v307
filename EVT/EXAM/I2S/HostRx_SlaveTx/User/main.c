@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.1
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -39,8 +39,8 @@
 
 #define  Len    10
 
-u32 I2S3_Tx[Len];
-u32 I2S2_Rx[Len];
+u32 I2S3_Tx[Len+1];
+u32 I2S2_Rx[Len+1];
 
 
 /*********************************************************************

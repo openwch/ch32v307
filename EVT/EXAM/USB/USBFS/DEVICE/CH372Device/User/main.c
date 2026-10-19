@@ -16,7 +16,7 @@
   with endpoints 1/3/5 downlinking data and uploading it via endpoints 2/4/6 respectively
   where endpoint 1/2 is implemented via a ring buffer and data is not inverted,
   and endpoints 3/4 and 5/6 are directly copied and inverted for upload
-  The device can be operated using Bushund or other upper computer software.
+  The device can be operated using BusHound or other upper computer software.
 */
 
 #include "ch32v30x_usbfs_device.h"

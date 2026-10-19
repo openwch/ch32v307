@@ -10,7 +10,7 @@
 extern uint8_t localDeviceID[8];
 extern uint8_t logindeviceSecret[16];
 extern uint8_t wchIochubSerIp[4];//{58, 213, 74, 190};{192, 168, 1, 100};{192, 168, 1, 166};
-extern uint16_t wchIochubSerPort; //20001¡¢38089
+extern uint16_t wchIochubSerPort; //20001, 38089
 extern uint16_t wchIochubScrPort;//20000
 
 extern uint8_t IocHub_VER[3];
@@ -28,4 +28,5 @@ void WCHIOCHUB_regCallback(uint16_t state);
 void AT_Process(void);
 void WCHIOCHUB_TimeIsr(void);
 void IoCHub_Init (void);
+void WCHIOCHUB_StartEn (void);
 #endif

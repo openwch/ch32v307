@@ -45,6 +45,8 @@
 uint8_t SocketId[SOCKET_NUM];
 uint8_t SocketRecvBuf[WCHNET_NUM_TCP][RECE_BUF_LEN];
 
+uint32_t ethRxDropCnt = 0;                     //frames dropped because no TX buffer was free
+
 uint8_t MACAddr[6];
 uint8_t IPAddr[4]   = {192, 168, 1, 10};
 uint8_t GWIPAddr[4] = {192, 168, 1, 1};
@@ -52,7 +54,7 @@ uint8_t IPMask[4]   = {255, 255, 255, 0};
 uint8_t DESIP[4]    = {192, 168, 1, 100};
 uint16_t desport = 1000;
 uint16_t srcport = 1000;
-volatile uint8_t tcp_connect_num = 0;
+void uartTx(void);
 /*********************************************************************
  * @fn      mStopIfError
  *
@@ -94,15 +96,19 @@ void TIM2_Init( void )
 }
 
 /*********************************************************************
- * @fn      WCHNET_CreateTcpSocket
+ * @fn      WCHNET_CreateTcpSocketOne
  *
- * @brief   create TCP socket, and connect
+ * @brief   create and connect one TCP socket. Used both at startup and
+ *          to re-establish a connection after a disconnect or a timeout.
+ *
+ * @param   sockIndex - index of the socket, 0 ~ SOCKET_NUM - 1
+ *          socket_revbuf - the base address of the receive buffers
  *
  * @return  none
  */
-void WCHNET_CreateTcpSocket(uint8_t *socket_revbuf)
+void WCHNET_CreateTcpSocketOne(uint8_t sockIndex,uint8_t *socket_revbuf)
 {
-	uint8_t temp;
+	uint8_t ret;
 	SOCK_INF TmpSocketInf;
 
 	memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
@@ -110,13 +116,55 @@ void WCHNET_CreateTcpSocket(uint8_t *socket_revbuf)
 	TmpSocketInf.DesPort  = desport;                                             /* set the destination port */
 	TmpSocketInf.ProtoType = PROTO_TYPE_TCP;                                     /* set socket type */
 	TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;                                     /* set receive buff length */
-
-	for(uint8_t i=0;i<8;i++)
+	TmpSocketInf.SourPort = srcport++;                                           /* set source port */
+	TmpSocketInf.RecvStartPoint = (uint32_t)&socket_revbuf[sockIndex*RECE_BUF_LEN];  /* set receive buff address */
+	ret = WCHNET_SocketCreat(&SocketId[sockIndex],&TmpSocketInf);                /* create socket */
+	if(ret != WCHNET_ERR_SUCCESS)
 	{
-	    TmpSocketInf.SourPort = srcport++;                                       /* set source port */
-	    TmpSocketInf.RecvStartPoint = (uint32_t)&socket_revbuf[i*RECE_BUF_LEN];  /* set receive buff address */
-	    temp = WCHNET_SocketCreat(&SocketId[tcp_connect_num],&TmpSocketInf);     /* create socket */
-		WCHNET_SocketConnect(SocketId[tcp_connect_num]);                         /* TCP connect */
+	    PRINT("socket %d create fail: %02x\r\n", (int)sockIndex, (u16)ret);
+	    return;
+	}
+	WCHNET_SocketConnect(SocketId[sockIndex]);                                   /* TCP connect */
+}
+
+/*********************************************************************
+ * @fn      WCHNET_CreateTcpSocket
+ *
+ * @brief   create TCP socket, and connect
+ *
+ * @param   socket_revbuf - the base address of the receive buffers
+ *
+ * @return  none
+ */
+void WCHNET_CreateTcpSocket(uint8_t *socket_revbuf)
+{
+	for(uint8_t i=0;i<SOCKET_NUM;i++)
+	{
+	    WCHNET_CreateTcpSocketOne(i,socket_revbuf);
+	}
+}
+
+/*********************************************************************
+ * @fn      WCHNET_ReconnectSocket
+ *
+ * @brief   re-establish the connection of the socket reported by an
+ *          interrupt. The stack has already released the socket when a
+ *          disconnect or a timeout is reported, so the socket only has to
+ *          be created again, it must not be closed first.
+ *
+ * @param   socketid - socket id reported by the interrupt
+ *
+ * @return  none
+ */
+void WCHNET_ReconnectSocket(uint8_t socketid)
+{
+	for(uint8_t i=0;i<SOCKET_NUM;i++)
+	{
+	    if(SocketId[i] == socketid)
+	    {
+	        WCHNET_CreateTcpSocketOne(i,&SocketRecvBuf[0][0]);
+	        return;
+	    }
 	}
 }
 
@@ -152,6 +200,7 @@ void ETHRx(u8 socketid)
         receive_state = WCHNET_SocketRecv(socketid, uart_data_t[socketid].TX_buffer[uart_data_t[socketid].tx_write], &len);
         if(receive_state == WCHNET_ERR_SUCCESS)
         {
+			__disable_irq();
             uart_data_t[socketid].TX_data_length[uart_data_t[socketid].tx_write] = len;
 
             uart_data_t[socketid].tx_write++;
@@ -159,11 +208,14 @@ void ETHRx(u8 socketid)
             uart_data_t[socketid].tx_write = (uart_data_t[socketid].tx_write)%UART_TX_BUF_NUM;
 
             uart_data_t[socketid].tx_remainBuffNum--;
+			__enable_irq();
         }
     }
     else
     {
-        PRINT("eth receive buff busy\n");
+        WCHNET_SocketRecv(socketid, NULL, &len);
+        ethRxDropCnt++;
+        printf("eth receive buff busy, drop count: %u\r\n", (unsigned)ethRxDropCnt);
     }
     uartTx();
 }
@@ -180,10 +232,6 @@ void ETHRx(u8 socketid)
  */
 void WCHNET_HandleSockInt(uint8_t socketid,uint8_t intstat)
 {
-    uint32_t len;
-    uint8_t write_buf = 0;
-    int8_t receive_state = -1;
-
     if(intstat & SINT_STAT_RECV)                                               /* socket receive */
     {
         ETHRx(socketid);
@@ -196,10 +244,12 @@ void WCHNET_HandleSockInt(uint8_t socketid,uint8_t intstat)
     if(intstat & SINT_STAT_DISCONNECT)                      /* TCP disconnect  */
     {
 		PRINT("TCP Disconnect\r\n");
+		WCHNET_ReconnectSocket(socketid);
     }
     if(intstat & SINT_STAT_TIM_OUT)                         /* TCP time out */
     {
 		PRINT("TCP Timeout\r\n");
+		WCHNET_ReconnectSocket(socketid);
     }
 }
 
@@ -231,8 +281,8 @@ void WCHNET_HandleGlobalInt(void)
 	{
 		i = WCHNET_GetPHYStatus();                            /*get PHY state*/
 		if(i&PHY_Linked_Status)
-		PRINT("PHY_Linked_Status\r\n");
-		PRINT("GINT_STAT_PHY_CHANGE %x\n",i);
+			PRINT("PHY_Linked_Status\r\n");
+		PRINT("GINT_STAT_PHY_CHANGE %x\r\n",(unsigned)i);
 	}
 
 	if(intstat & GINT_STAT_SOCKET)                           /*Socket interrupt*/
@@ -259,10 +309,10 @@ void uartTx(void)
 {
 	uint16_t read_buf = 0;
 
-	for(uint8_t i=0;i<8;i++)
+	for(uint8_t i=0;i<SOCKET_NUM;i++)
 	{
-		/* uart tx dma is idel */
-		if(uart_data_t[i].uart_tx_dma_state == IDEL)
+		/* uart tx dma is idle */
+		if(uart_data_t[i].uart_tx_dma_state == IDLE)
 		{
 			/* eth has received data  */
 		    if(uart_data_t[i].tx_remainBuffNum < UART_TX_BUF_NUM)
@@ -362,10 +412,13 @@ void uartRxAndSendDataToETH(void)
     u8 *p;
     uint32_t temp = 0;
     uint32_t len = 0;
+    uint32_t sent = 0;
     uint32_t readindex = 0;
+    u8 ret;
 
-	for(uint8_t i = 0; i < 8; i++)
+	for(uint8_t i = 0; i < SOCKET_NUM; i++)
 	{
+	    temp = uart_data_t[i].last_RX_DMA_length;
 		switch(i)
 		{
 #ifndef CH32V307_DEBUG
@@ -424,7 +477,16 @@ void uartRxAndSendDataToETH(void)
 	        }
 	        readindex = UART_RX_DMA_SIZE - uart_data_t[i].last_RX_DMA_length;
 	        p = &uart_data_t[i].RX_buffer[readindex];
-	        WCHNET_SocketSend(i, p, &len);
+	        sent = len;
+	        ret = WCHNET_SocketSend(i, p, &sent);
+	        if(ret == WCHNET_ERR_SUCCESS)
+	        {
+	            len = sent;                    
+	        }
+	        if(len == 0)                        
+	        {
+	            continue;
+	        }
 	        uart_data_t[i].last_RX_DMA_length -= len;
 	        if(uart_data_t[i].last_RX_DMA_length == 0)
 	            uart_data_t[i].last_RX_DMA_length = UART_RX_DMA_SIZE;
@@ -441,36 +503,41 @@ void uartRxAndSendDataToETH(void)
  */
 int main(void)
 {
-	RCC_ClocksTypeDef RCC_ClocksStatus;
 	uint8_t i;
-	uint32_t len;
-	uint8_t *name = "WCHNET";
+	char *name = "WCHNET";
 
 	SystemCoreClockUpdate();
 	Delay_Init();
 #ifdef CH32V307_DEBUG
 	USART_Printf_Init(115200);
 #endif
-    RCC_GetClocksFreq(&RCC_ClocksStatus);
 	PRINT("8 UART Server Test\r\n");
-	PRINT("SystemClk:%d\r\n",SystemCoreClock);
-	PRINT("net version:%x\r\n",WCHNET_GetVer());
+	PRINT("SystemClk:%lu\r\n",(unsigned long)SystemCoreClock);
+	PRINT("net version:%x\r\n",(unsigned)WCHNET_GetVer());
     if(WCHNET_LIB_VER != WCHNET_GetVer())
     {
         PRINT("version error.\r\n");
     }
     WCHNET_GetMacAddr(MACAddr);                          //get the chip MAC address
     PRINT("mac addr:");
-    for(i = 0; i < 6; i++) 
-        PRINT("%x ", MACAddr[i]);
+    for(i = 0; i < 6; i++)
+        PRINT("%x ", (unsigned)MACAddr[i]);
     PRINT("\r\n");
     TIM2_Init();
     BSP_Uart_Init();                                     /*uart init*/
     WCHNET_DHCPSetHostname(name);                        //Configure DHCP host name
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);     //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS) PRINT("WCHNET_LibInit Success\r\n");
-	WCHNET_CreateTcpSocket(&SocketRecvBuf[0]);            //Create  TCP Socket
+    if(i == WCHNET_ERR_SUCCESS)
+    {
+        PRINT("WCHNET_LibInit Success\r\n");
+    }
+    else
+    {
+        PRINT("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
+	WCHNET_CreateTcpSocket(&SocketRecvBuf[0][0]);         //Create  TCP Socket
 
 	while(1)
 	{

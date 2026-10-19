@@ -30,7 +30,7 @@ __attribute__ ((aligned(4))) UINT8 EP2_DatabufHD[64 + 64]; //ep2_out(64)+ep2_in(
 PUINT8 pEP0_RAM_Addr;                       //ep0(64)
 PUINT8 pEP2_RAM_Addr;                       //ep2_out(64)+ep2_in(64)
 
-const UINT8 *pDescr;
+static const UINT8 *pDescr;
 volatile UINT16 USBFS_Dev_SetupReqLen = 0x00;
 volatile UINT8 USBFS_Dev_Config = 0x00;
 volatile UINT8 USBFS_Dev_Address = 0x00;

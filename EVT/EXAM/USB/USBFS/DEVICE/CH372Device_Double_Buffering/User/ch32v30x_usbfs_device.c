@@ -499,7 +499,7 @@ void USBFS_IRQHandler( void )
                 if ( ( USBFS_SetupReqType & USB_REQ_TYP_MASK ) != USB_REQ_TYP_STANDARD )
                 {
                     /* usb non-standard request processing */
-                    /* errflag = 0xFF; if this request or cmd dose not support */
+                    /* errflag = 0xFF; if this request or cmd does not support */
                     errflag = 0xFF;
                 }
                 else
@@ -601,6 +601,10 @@ void USBFS_IRQHandler( void )
                                 {
                                     /* clear usb sleep status, device not prepare to sleep */
                                     USBFS_DevSleepStatus &= ~0x01;
+                                }
+                                else
+                                {
+                                    errflag = 0xFF;
                                 }
                             }
                             else if( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )

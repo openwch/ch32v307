@@ -24,7 +24,7 @@ DSTATUS disk_status (
     BYTE pdrv       /* Physical drive nmuber to identify the drive */
 )
 {
-    DSTATUS stat= STA_NOINIT;;
+    DSTATUS stat= STA_NOINIT;
     u32 result;
 
     switch (pdrv) {

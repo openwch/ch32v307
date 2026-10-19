@@ -34,8 +34,10 @@ __attribute__((aligned(4))) u8 Default_cfg[MODULE_CFG_LEN]= {                   
 };
 
 u8 sockFlag;
-u8 Configbuf[MODULE_CFG_LEN];
+__attribute__((aligned(4))) u8 Configbuf[MODULE_CFG_LEN];
 pmodule_cfg CFG = (pmodule_cfg)Configbuf;
+
+volatile u8 CfgResetPending = 0;
 
 u8 MACAddr[6];                                                                  //MAC address
 u8 IPAddr[4];                                                                   //IP address
@@ -95,7 +97,9 @@ void TIM2_Init( void )
 /*********************************************************************
  * @fn      WCHNET_UdpServerRecv
  *
- * @brief   UDP Receive data function.
+ * @brief   UDP receive callback of the configuration socket: the datagram is
+ *          parsed as a configuration command and, when the command asks for
+ *          it, the reset of the module is requested.
  *
  * @param   socinf - socket information.
  *          ipaddr - IP address
@@ -109,16 +113,18 @@ void WCHNET_UdpServerRecv(struct _SOCK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u
 {
     u8 i;
 
-    i = ParseConfigbuf(buf) ;                                                               //Analytical data
+    i = ParseConfigbuf(buf, len, (u8)socinf->SockIndex);                     //Analytical data
     if(i){
-        NVIC_SystemReset();
+        CfgResetPending = 1;
     }
 }
 
 /*********************************************************************
  * @fn      WCHNET_UdpSRecv
  *
- * @brief   UDP data callback.
+ * @brief   UDP receive callback of the socket configured by the host
+ *          computer: the peer address is printed and the datagram is sent
+ *          back unchanged (echo).
  *
  * @param   socinf - socket information.
  *          ipaddr - IP address
@@ -139,8 +145,11 @@ void WCHNET_UdpSRecv(struct _SOCK_INF *socinf,u32 ipaddr,u16 port,u8 *buf,u32 le
         ipaddr = ipaddr>>8;
     }
 
-    printf("port=%-8d  len=%-8d  sockeid=%-4d\n",port,len,socinf->SockIndex);
-    WCHNET_SocketUdpSendTo(socinf->SockIndex,buf,&len,ip_addr,port);
+    printf("port=%-8d  len=%-8lu  sockeid=%-4lu\r\n",
+           (int)port, (unsigned long)len, (unsigned long)socinf->SockIndex);
+    if(WCHNET_SocketUdpSendTo(socinf->SockIndex,buf,&len,ip_addr,port) != WCHNET_ERR_SUCCESS){
+        printf("udp echo failed\r\n");         
+    }
 }
 
 /*********************************************************************
@@ -181,18 +190,23 @@ void WCHNET_Create_Communication_Socket(void)
         default:
             break;
     }
-    TmpSocketInf.RecvStartPoint = (u32)SocketRecvBuf[1];
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
     mStopIfError(i);
+    if((i != WCHNET_ERR_SUCCESS) || (SocketId >= WCHNET_MAX_SOCKET_NUM)){
+        printf("communication socket not created\r\n");
+        return;
+    }
+    printf("WCHNET_SocketCreat %d\r\n",SocketId);
+    WCHNET_ModifyRecvBuf(SocketId, (u32)SocketRecvBuf[SocketId], RECE_BUF_LEN);
     switch(CFG->type){
         case NET_MODULE_TYPE_TCP_S:
             WCHNET_SocketListen(SocketId);
-            printf("listening\n");
+            printf("listening\r\n");
             break;
         case NET_MODULE_TYPE_TCP_C:
             WCHNET_SocketConnect(SocketId);
-            printf("connecting\n");
+            printf("connecting\r\n");
             break;
         default:
             break;
@@ -214,12 +228,16 @@ void WCHNET_CreateUdpSocket(void)
     memset((void *)&TmpSocketInf,0,sizeof(SOCK_INF));
     TmpSocketInf.SourPort = localPort;
     TmpSocketInf.ProtoType = PROTO_TYPE_UDP;
-    TmpSocketInf.RecvStartPoint = (u32)SocketRecvBuf[0];
     TmpSocketInf.RecvBufLen = RECE_BUF_LEN ;
     TmpSocketInf.AppCallBack = WCHNET_UdpServerRecv;
     i = WCHNET_SocketCreat(&SocketId,&TmpSocketInf);
-    printf("WCHNET_SocketCreat %d\r\n",SocketId);
     mStopIfError(i);
+    if((i != WCHNET_ERR_SUCCESS) || (SocketId >= WCHNET_MAX_SOCKET_NUM)){
+        printf("config socket not created\r\n");
+        return;
+    }
+    printf("WCHNET_SocketCreat %d\r\n",SocketId);
+    WCHNET_ModifyRecvBuf(SocketId, (u32)SocketRecvBuf[SocketId], RECE_BUF_LEN);
 }
 
 /*********************************************************************
@@ -374,20 +392,25 @@ int main(void)
     USART_Printf_Init(115200);                                            //USART initialize
     GPIOInit();
     printf("ETH CFG Test\r\n");
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    printf("net version:%x\n", WCHNET_GetVer());
+    printf("SystemClk:%lu\r\n", (unsigned long)SystemCoreClock);
+    printf("ChipID:%08lx\r\n", (unsigned long)DBGMCU_GetCHIPID());
+    printf("net version:%x\r\n", (unsigned)WCHNET_GetVer());
     if(WCHNET_LIB_VER != WCHNET_GetVer()){
-        printf("version error.\n");
+        printf("version error.\r\n");
     }
     /*After the button(PB6) is pressed, initialize WCHNET
      *  and execute the default configuration*/
     if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) {
+       u16 hold = 0;
        Delay_Ms(100);
        if(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0){
-           while(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0);
+           while((GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) == 0) && (hold < 5000)) {
+               Delay_Ms(1);
+               hold++;
+           }
            CFG_ERASE(PAGE_WRITE_START_ADDR,FLASH_PAGE_SIZE);
-           CFG_WRITE( PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN );
+           if(CFG_WRITE( PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN ) != FLASH_COMPLETE)
+               printf("write default cfg failed\r\n");
            NVIC_SystemReset();
        }
     }
@@ -399,22 +422,29 @@ int main(void)
      * the default configuration*/
     if((CFG->cfg_flag[0]!=checkcode1)||(CFG->cfg_flag[1]!=checkcode2)){   //Check whether the information in the EEPROM is valid
         CFG_ERASE(PAGE_WRITE_START_ADDR,FLASH_PAGE_SIZE);
-        CFG_WRITE(PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN );
+        if(CFG_WRITE(PAGE_WRITE_START_ADDR,Default_cfg,MODULE_CFG_LEN ) != FLASH_COMPLETE)
+            printf("write default cfg failed\r\n");
         NVIC_SystemReset();
     }
 
     WCHNET_GetMacAddr(MACAddr);                                           //get the chip MAC address
     printf("mac addr:");
-    for(i = 0; i < 6; i++) 
-        printf("%x ", MACAddr[i]);
-    printf("\n");
+    for(i = 0; i < 6; i++)
+        printf("%x ", (unsigned)MACAddr[i]);
+    printf("\r\n");
     TIM2_Init();
     memcpy(IPAddr,CFG->src_ip,sizeof(CFG->src_ip));
     memcpy(GWIPAddr,CFG->getway,sizeof(CFG->getway));
     memcpy(IPMask,CFG->mask,sizeof(CFG->mask));
     i = ETH_LibInit(IPAddr,GWIPAddr,IPMask,MACAddr);                      //Ethernet library initialize
     mStopIfError(i);
-    if(i == WCHNET_ERR_SUCCESS) printf("WCHNET_LibInit Success\r\n");
+    if(i == WCHNET_ERR_SUCCESS) {
+        printf("WCHNET_LibInit Success\r\n");
+    }
+    else {
+        printf("WCHNET_LibInit failed, halted\r\n");
+        while(1);
+    }
     WCHNET_CreateUdpSocket();                                             //Create UDP Socket
     if(CFG->type != NET_MODULE_TYPE_NONE){                                //No mode is enabled by default
         WCHNET_Create_Communication_Socket();                             //Create a socket configured by the host computer
@@ -430,6 +460,12 @@ int main(void)
         if(WCHNET_QueryGlobalInt())
         {
             WCHNET_HandleGlobalInt();
+        }
+        if(CfgResetPending) {
+            CfgResetPending = 0;
+            printf("resetting with new configuration\r\n");
+            Delay_Ms(100);
+            NVIC_SystemReset();
         }
     }
 }

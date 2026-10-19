@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2025/01/09
+* Version            : V1.0.2
+* Date               : 2026/10/14
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,9 +13,9 @@
 #include "string.h"
 
 
-SDIO_InitTypeDef SDIO_InitStructure;
-SDIO_CmdInitTypeDef SDIO_CmdInitStructure;
-SDIO_DataInitTypeDef SDIO_DataInitStructure;
+SDIO_InitTypeDef SDIO_InitStructure={0};
+SDIO_CmdInitTypeDef SDIO_CmdInitStructure={0};
+SDIO_DataInitTypeDef SDIO_DataInitStructure={0};
 
 SD_Error CmdError( void );
 SD_Error CmdResp7Error( void );
@@ -29,10 +29,10 @@ SD_Error FindSCR( u16 rca, u32 *pscr );
 u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes );
 
 
-static u8 CardType = SDIO_STD_CAPACITY_SD_CARD_V1_1;
+static vu8 CardType = SDIO_STD_CAPACITY_SD_CARD_V1_1;
 static u32 CSD_Tab[4], CID_Tab[4], RCA = 0;
-static u8 DeviceMode = SD_POLLING_MODE;
-static u8 StopCondition = 0;
+static vu8 DeviceMode = SD_POLLING_MODE;
+static vu8 StopCondition = 0;
 volatile SD_Error TransferError = SD_OK;
 volatile u8 TransferEnd = 0;
 SD_CardInfo SDCardInfo;
@@ -48,8 +48,8 @@ __attribute__( ( aligned( 4 ) ) ) u8 SDIO_DATA_BUFFER[512];
  */
 SD_Error SD_Init( void )
 {
-    NVIC_InitTypeDef NVIC_InitStructure;
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure= {0};
+    GPIO_InitTypeDef  GPIO_InitStructure= {0};
 
     u8 clkdiv = 0;
     SD_Error errorstatus = SD_OK;
@@ -534,7 +534,6 @@ SD_Error SD_EnableWideBusOperation( u32 wmode )
             {
                 SDIO->CLKCR &= ~( 3 << 11 );
                 SDIO->CLKCR |= ( u16 )wmode << 11;
-                SDIO->CLKCR |= 0 << 14;
             }
         }
     }
@@ -1128,7 +1127,6 @@ SD_Error SD_WriteBlock( u8 *buf, long long addr,  u16 blksize )
         }
         if( timeout == 0 )
         {
-            SD_Init();
             return SD_DATA_TIMEOUT;
         }
         timeout = SDIO_DATATIMEOUT;
@@ -2000,7 +1998,7 @@ u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes )
  */
 void SD_DMA_Config( u32 *mbuf, u32 bufsize, u32 DMA_DIR )
 {
-    DMA_InitTypeDef DMA_InitStructure;
+    DMA_InitTypeDef DMA_InitStructure = {0};
 
     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_DMA2, ENABLE );
 
@@ -2019,8 +2017,6 @@ void SD_DMA_Config( u32 *mbuf, u32 bufsize, u32 DMA_DIR )
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init( DMA2_Channel4, &DMA_InitStructure );
-
-    DMA_Cmd( DMA2_Channel4, ENABLE);
 }
 
 /*********************************************************************

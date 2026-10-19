@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ch32v30x_it.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/06
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main Interrupt Service Routines.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -55,8 +55,7 @@ void EXTI0_IRQHandler(void)
 {
   if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
   {
-		SystemInit();
-    printf("EXTI0 Wake_up\r\n");
+    SystemInit();
     EXTI_ClearITPendingBit(EXTI_Line0);     /* Clear Flag */
   }
 }

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/02/21
+* Version            : V1.0.1
+* Date               : 2026/10/15
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -179,10 +179,24 @@ int main(void)
             while (!SampleFlag);
             Adjust_val = last_Adjust_val;
             Meas_Freq = last_Meas_Freq;
-            last_Adjust_val - Adjust_val < 0 ? (last_Adjust_val -= 1) : (last_Adjust_val += 1);
+            
+            if (HSI_VALUE > last_Meas_Freq)
+            {
+                last_Adjust_val++;   
+            } else 
+            {
+                last_Adjust_val--;   
+            }
+
+            if (last_Adjust_val < 0)  last_Adjust_val = 0;
+            if (last_Adjust_val > 31) last_Adjust_val = 31;
+
             RCC_AdjustHSICalibrationValue(last_Adjust_val);
-            Delay_Ms(100);
+
+            SampleFlag = 0;
+            while (!SampleFlag);
             last_Meas_Freq = (uint32_t)((float)HSI_VALUE * (float)(HSE_VALUE / 128 / 10) / (float)rtc_cnt);
+
         }
     }
 

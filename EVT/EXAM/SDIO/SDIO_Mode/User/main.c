@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/07/10
+* Version            : V1.0.1
+* Date               : 2026/10/14
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,7 +15,7 @@
  *
  *   This example provides a simple example of SDIO master and slave communication.
  *  
- * DVP--PIN:
+ *  PIN:
  *   SDCK--PC12
  *   CMD--PD2
  *   SD0--PC8
@@ -45,6 +45,7 @@ int main(void)
 {
     u32 Resdata;
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
     Delay_Init();
     USART_Printf_Init(115200);
     printf("SystemClk:%d\r\n", SystemCoreClock);
@@ -69,7 +70,6 @@ int main(void)
         Delay_Ms(5);
         Resdata=Slv_Rec_Data(4);
         printf("ResData=%x\r\n",Resdata);
-        Slv_Rec_CMD();
 #endif
         while(1);
 

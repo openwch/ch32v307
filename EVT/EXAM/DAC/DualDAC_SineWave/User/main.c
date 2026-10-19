@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.1
-* Date               : 2024/12/16
+* Version            : V1.0.2
+* Date               : 2026/10/16
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -23,12 +23,12 @@
 #define Num 64
 
 /* Global Variable */ 
-uint32_t DAC_Value[Num]={2048,2248,2447,2642,2831,3013,3185,3347,3496,3631,3750,3854,3940,4007,4056,4086,
+volatile  uint32_t DAC_Value[Num]={2048,2248,2447,2642,2831,3013,3185,3347,3496,3631,3750,3854,3940,4007,4056,4086,
                          4095,4086,4056,4007,3940,3854,3750,3631,3496,3347,3185,3013,2831,2642,2447,2248,
                          2048,1847,1648,1453,1264,1082,910 ,748 ,599 ,464 ,345 ,241 ,155 ,88  ,39  ,9   ,
                          0   ,9   ,39  ,88  ,155 ,241 ,345 ,464 ,599 ,748 ,910 ,1082,1264,1453,1648,1847};
 
-uint32_t Dual_DAC_Value[Num];
+volatile  uint32_t Dual_DAC_Value[Num];
 
 
 /*********************************************************************
@@ -107,7 +107,6 @@ void Timer4_Init(void)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure={0};
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
-    TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
     TIM_TimeBaseStructure.TIM_Period = 3600-1;
     TIM_TimeBaseStructure.TIM_Prescaler =0;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
